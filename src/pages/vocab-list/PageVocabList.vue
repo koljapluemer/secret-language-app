@@ -169,6 +169,7 @@ import type { LocalSetData } from '@/entities/local-sets/LocalSetData';
 import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
 import Pagination from '@/shared/ui/Pagination.vue';
 import { useRoute, useRouter, type LocationQueryValue } from 'vue-router';
+import { useToast } from '@/shared/toasts';
 
 const route = useRoute();
 const router = useRouter();
@@ -177,6 +178,7 @@ const vocabRepo = inject<VocabRepoContract>('vocabRepo')!;
 const languageRepo = inject<LanguageRepoContract>('languageRepo')!;
 const localSetRepo = inject<LocalSetRepoContract>('localSetRepo')!;
 const translationRepo = inject<TranslationRepoContract>('translationRepo')!;
+const toast = useToast();
 
 // Data
 const vocabItems = ref<VocabData[]>([]);
@@ -368,7 +370,7 @@ async function loadTranslationsForCurrentPage() {
     
     vocabTranslations.value = translationData;
   } catch (err) {
-    console.error('Failed to load translations:', err);
+    toast.error('Failed to load translations');
   }
 }
 
@@ -382,7 +384,7 @@ async function deleteVocab(uid: string) {
     await vocabRepo.deleteVocab(uid);
     await loadVocab(); // Reload to update pagination
   } catch (err) {
-    console.error('Failed to delete vocab:', err);
+    toast.error('Failed to delete vocabulary');
     error.value = 'Failed to delete vocabulary item';
   }
 }
@@ -400,7 +402,7 @@ async function loadFilterOptions() {
       selectedSets.value = ['user-added', ...availableSets.value.map(s => s.uid)];
     }
   } catch (err) {
-    console.error('Failed to load filter options:', err);
+    toast.error('Failed to load filter options');
   }
 }
 

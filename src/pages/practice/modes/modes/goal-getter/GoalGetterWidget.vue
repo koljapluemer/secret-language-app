@@ -6,10 +6,12 @@ import type { Task } from '@/pages/practice/Task';
 import TaskRenderer from '@/pages/practice/tasks/ui/TaskRenderer.vue';
 import { useQueueState } from '@/pages/practice/modes/utils/useQueueState';
 import { generateGoalTask } from './generateGoalGetterTasks';
+import { useToast } from '@/shared/toasts';
 
 // Inject repositories
 const goalRepo = inject<GoalRepoContract>('goalRepo');
 const languageRepo = inject<LanguageRepoContract>('languageRepo');
+const toast = useToast();
 
 if (!goalRepo || !languageRepo) {
   throw new Error('Required repositories not available');
@@ -42,7 +44,7 @@ async function generateNextTask(): Promise<Task | null> {
     
     return await generateGoalTask(goalRepo!, languageCodes);
   } catch (error) {
-    console.error('Error generating goal task:', error);
+    toast.error('Error generating goal task');
     return null;
   }
 }
@@ -64,7 +66,7 @@ async function tryTransitionToTask(): Promise<boolean> {
       return true;
     }
   } catch (error) {
-    console.error('Task generation failed:', error);
+    toast.error('Task generation failed');
   }
   
   clearDelayedLoading();
@@ -84,7 +86,7 @@ async function initializeQueue() {
       setEmpty('No goal tasks are currently available for practice.');
     }
   } catch (error) {
-    console.error('Initialization failed:', error);
+    toast.error('Initialization failed');
     clearDelayedLoading();
     setError('Failed to initialize goal task queue. Please try again.');
   }
@@ -115,7 +117,7 @@ async function completeCurrentTask() {
         state.value.nextTask = newNextTask;
       }
     } catch (error) {
-      console.error('Error generating next task:', error);
+      toast.error('Error generating next task');
     }
   } else {
     // No next task ready, need to generate one

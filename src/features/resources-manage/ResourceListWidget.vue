@@ -168,10 +168,12 @@ import type { LocalSetRepoContract } from '@/entities/local-sets/LocalSetRepoCon
 import type { LocalSetData } from '@/entities/local-sets/LocalSetData';
 import Pagination from '@/shared/ui/Pagination.vue';
 import LinkDisplayMini from '@/shared/links/LinkDisplayMini.vue';
+import { useToast } from '@/shared/toasts';
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
+const toast = useToast();
 
 const resourceRepo = inject<ResourceRepoContract>('resourceRepo')!;
 const languageRepo = inject<LanguageRepoContract>('languageRepo')!;
@@ -346,7 +348,7 @@ async function deleteResource(uid: string) {
     await resourceRepo.deleteResource(uid);
     await loadResources(); // Reload to update pagination
   } catch (err) {
-    console.error('Failed to delete resource:', err);
+    toast.error('Failed to delete resource');
     error.value = 'Failed to delete resource';
   }
 }
@@ -364,7 +366,7 @@ async function loadFilterOptions() {
       selectedSets.value = ['user-added', ...availableSets.value.map(s => s.uid)];
     }
   } catch (err) {
-    console.error('Failed to load filter options:', err);
+    toast.error('Failed to load filter options');
   }
 }
 

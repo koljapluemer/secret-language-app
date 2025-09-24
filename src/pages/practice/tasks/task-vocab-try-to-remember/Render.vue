@@ -5,6 +5,7 @@ import type { Task } from '@/pages/practice/Task';
 import type { VocabData } from '@/entities/vocab/VocabData';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
 import VocabWithTranslationsDisplay from '@/features/display-vocab-with-translations/VocabWithTranslationsDisplay.vue';
+import { useToast } from '@/shared/toasts';
 
 interface Props {
   task: Task;
@@ -16,6 +17,7 @@ const emit = defineEmits<{
   finished: [];
 }>();
 
+const toast = useToast();
 const vocabRepo = props.repositories.vocabRepo;
 const vocab = ref<VocabData | null>(null);
 
@@ -31,13 +33,9 @@ const loadVocab = async () => {
 const handleDone = async () => {
   if (!vocab.value) return;
 
-  console.log(`[TRY-TO-REMEMBER DEBUG] handleDone called for vocab ${vocab.value.uid} (${vocab.value.content})`);
-  console.log(`[TRY-TO-REMEMBER DEBUG] Current progress:`, vocab.value.progress);
-
   try {
     // Initialize learning card for unseen vocab
     const emptyCard = createEmptyCard();
-    console.log(`[TRY-TO-REMEMBER DEBUG] Empty card created:`, emptyCard);
 
     const updatedVocab = {
       ...vocab.value,
@@ -48,13 +46,10 @@ const handleDone = async () => {
       }
     };
 
-    console.log(`[TRY-TO-REMEMBER DEBUG] About to update vocab with progress:`, updatedVocab.progress);
     await vocabRepo.updateVocab(JSON.parse(JSON.stringify(updatedVocab)));
-
-    console.log(`[TRY-TO-REMEMBER DEBUG] Vocab updated, emitting finished`);
     emit('finished');
   } catch (error) {
-    console.error('Error initializing vocab:', error);
+    toast.error('Failed to initialize vocabulary');
     emit('finished');
   }
 };
@@ -72,7 +67,7 @@ const handleSkip = async () => {
     
     emit('finished');
   } catch (error) {
-    console.error('Error updating vocab:', error);
+    toast.error('Failed to update vocabulary');
     emit('finished');
   }
 };

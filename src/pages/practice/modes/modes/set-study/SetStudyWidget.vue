@@ -14,6 +14,7 @@ import TaskRenderer from '@/pages/practice/tasks/ui/TaskRenderer.vue';
 import { useQueueState } from '@/pages/practice/modes/utils/useQueueState';
 import { generateSetStudyTask, getSetStudyProgress, type SetStudyOptions } from './generateSetStudyTasks';
 import { BookOpen } from 'lucide-vue-next';
+import { useToast } from '@/shared/toasts';
 
 // Inject repositories
 const vocabRepo = inject<VocabRepoContract>('vocabRepo');
@@ -24,6 +25,7 @@ const resourceRepo = inject<ResourceRepoContract>('resourceRepo');
 const goalRepo = inject<GoalRepoContract>('goalRepo');
 const noteRepo = inject<NoteRepoContract>('noteRepo');
 const localSetRepo = inject<LocalSetRepoContract>('localSetRepo');
+const toast = useToast();
 
 if (!vocabRepo || !translationRepo || !factCardRepo || !languageRepo || !resourceRepo || !goalRepo || !noteRepo || !localSetRepo) {
   throw new Error('Required repositories not available');
@@ -79,7 +81,7 @@ async function loadAvailableSets() {
       selectedSetUid.value = latestSet.uid;
     }
   } catch (error) {
-    console.error('Failed to load available sets:', error);
+    toast.error('Failed to load available sets');
   } finally {
     loadingSets.value = false;
   }
@@ -106,7 +108,7 @@ async function generateNextTask(): Promise<Task | null> {
       blockList
     );
   } catch (error) {
-    console.error('Error generating set study task:', error);
+    toast.error('Error generating set study task');
     return null;
   }
 }
@@ -128,7 +130,7 @@ async function tryTransitionToTask(): Promise<boolean> {
       return true;
     }
   } catch (error) {
-    console.error('Task generation failed:', error);
+    toast.error('Task generation failed');
   }
 
   clearDelayedLoading();
@@ -169,7 +171,7 @@ async function initializeQueue() {
       }
     }
   } catch (error) {
-    console.error('Initialization failed:', error);
+    toast.error('Initialization failed');
     clearDelayedLoading();
     setError('Failed to initialize set study session. Please try again.');
   }
@@ -200,7 +202,7 @@ async function completeCurrentTask() {
         state.value.nextTask = newNextTask;
       }
     } catch (error) {
-      console.error('Error generating next task:', error);
+      toast.error('Error generating next task');
     }
   } else {
     // No next task ready, need to generate one
@@ -261,7 +263,7 @@ const handleTaskFinished = async () => {
           currentNewVocabCount.value++;
         }
       } catch (error) {
-        console.error('Error tracking new vocab count:', error);
+        toast.error('Error tracking new vocab count');
       }
     }
   }

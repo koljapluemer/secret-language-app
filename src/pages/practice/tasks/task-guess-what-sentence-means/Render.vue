@@ -7,6 +7,7 @@ import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesConte
 import type { NoteData } from '@/entities/notes/NoteData';
 import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
 import LinkDisplayMini from '@/shared/links/LinkDisplayMini.vue';
+import { useToast } from '@/shared/toasts';
 
 interface Props {
   task: Task;
@@ -17,6 +18,8 @@ const props = defineProps<Props>();
 const emit = defineEmits<{
   finished: [];
 }>();
+
+const toast = useToast();
 
 const vocabRepo = props.repositories.vocabRepo;
 const translationRepo = props.repositories.translationRepo;
@@ -93,7 +96,7 @@ const handleDone = async () => {
 
     emit('finished');
   } catch (error) {
-    console.error('Error initializing vocab:', error);
+    toast.error('Failed to save vocabulary progress');
     emit('finished');
   }
 };

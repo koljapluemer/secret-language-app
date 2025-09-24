@@ -27,6 +27,7 @@ import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract';
 import type { FactCardData } from '@/entities/fact-cards/FactCardData';
 import type { NoteData } from '@/entities/notes/NoteData';
 import type { Link } from '@/shared/links/Link';
+import { useToast } from '@/shared/toasts';
 
 interface FactCardFormData {
   id?: string;
@@ -93,6 +94,7 @@ const emit = defineEmits<{
 
 const factCardRepo = inject<FactCardRepoContract>('factCardRepo');
 const noteRepo = inject<NoteRepoContract>('noteRepo');
+const toast = useToast();
 if (!factCardRepo) {
   throw new Error('FactCardRepo not provided');
 }
@@ -145,7 +147,7 @@ async function loadFactCard() {
           const notes = await noteRepo.getNotesByUIDs(factCard.notes);
           loadedNotes.value = notes;
         } catch (error) {
-          console.error('Failed to load notes:', error);
+          toast.error('Failed to load notes');
           loadedNotes.value = [];
         }
       } else {

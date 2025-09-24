@@ -49,6 +49,7 @@ import { Rating } from 'ts-fsrs';
 import { shuffleArray, randomFromArray } from '@/shared/utils/arrayUtils';
 import { useButtonWithKeyboardArrowControl } from '@/shared/composables/useButtonWithKeyboardArrowControl';
 import { useReplaySoundWithSpacebar } from '@/shared/composables/useReplaySoundWithSpacebar';
+import { useToast } from '@/shared/toasts';
 
 interface Props {
   task: Task;
@@ -63,6 +64,7 @@ const emit = defineEmits<{
 }>();
 
 const props = defineProps<Props>();
+const toast = useToast();
 
 const vocabRepo = props.repositories.vocabRepo;
 
@@ -105,7 +107,7 @@ const vocabUid = computed(() => {
 
 async function loadVocabData() {
   if (!vocabUid.value) {
-    console.error('Choose from Sound: No vocab UID provided');
+    toast.error('No vocabulary provided for exercise');
     loading.value = false;
     return;
   }
@@ -113,7 +115,7 @@ async function loadVocabData() {
   try {
     const vocabData = await vocabRepo.getVocabByUID(vocabUid.value);
     if (!vocabData) {
-      console.error('Choose from Sound: Vocab not found for UID:', vocabUid.value);
+      toast.error('Vocabulary not found');
       loading.value = false;
       return;
     }
@@ -147,7 +149,7 @@ async function loadVocabData() {
     correctIndex.value = shuffledVocabs.value.findIndex(v => v.uid === vocab1.value!.uid);
 
   } catch (error) {
-    console.error('Choose from Sound: Failed to load vocab data for UID:', vocabUid.value, error);
+    toast.error('Failed to load vocabulary data');
   } finally {
     loading.value = false;
   }
@@ -236,7 +238,7 @@ const handleCompletion = async () => {
 
     setTimeout(() => emit('finished'), 750);
   } catch (error) {
-    console.error('Error scoring vocab:', error);
+    toast.error('Failed to save vocabulary progress');
     emit('finished');
   }
 };

@@ -52,6 +52,7 @@ import { renderLanguage } from '@/entities/languages/renderLanguage';
 import InlineInput from '@/shared/ui/InlineInput.vue';
 import InlineSelect from '@/shared/ui/InlineSelect.vue';
 import InlineCheckbox from '@/shared/ui/InlineCheckbox.vue';
+import { useToast } from '@/shared/toasts';
 const props = defineProps<{
   goal: GoalData;
 }>();
@@ -62,13 +63,14 @@ const emit = defineEmits<{
 
 const goalRepo = inject<GoalRepoContract>('goalRepo')!;
 const languageRepo = inject<LanguageRepoContract>('languageRepo')!;
+const toast = useToast();
 const availableLanguages = ref<LanguageData[]>([]);
 
 onMounted(async () => {
   try {
     availableLanguages.value = await languageRepo.getActiveTargetLanguages();
   } catch (error) {
-    console.error('Failed to load languages:', error);
+    toast.error('Failed to load languages');
   }
 });
 
@@ -86,7 +88,7 @@ async function updateField(field: keyof GoalData, value: string | number | boole
     });
     emit('goal-updated', updatedGoal);
   } catch (error) {
-    console.error(`Failed to update goal ${field}:`, error);
+    toast.error('Failed to update goal');
   }
 }
 </script>

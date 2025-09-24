@@ -11,6 +11,7 @@ import type { Task } from '@/pages/practice/Task';
 import TaskRenderer from '@/pages/practice/tasks/ui/TaskRenderer.vue';
 import { useQueueState } from '@/pages/practice/modes/utils/useQueueState';
 import { generateEyesAndEars, type EyesAndEarsOptions } from './generateEyesAndEarsTasks';
+import { useToast } from '@/shared/toasts';
 
 // Inject repositories
 const vocabRepo = inject<VocabRepoContract>('vocabRepo');
@@ -20,6 +21,7 @@ const languageRepo = inject<LanguageRepoContract>('languageRepo');
 const resourceRepo = inject<ResourceRepoContract>('resourceRepo');
 const goalRepo = inject<GoalRepoContract>('goalRepo');
 const noteRepo = inject<NoteRepoContract>('noteRepo');
+const toast = useToast();
 
 if (!vocabRepo || !translationRepo || !factCardRepo || !languageRepo || !resourceRepo || !goalRepo || !noteRepo) {
   throw new Error('Required repositories not available');
@@ -62,7 +64,7 @@ async function generateNextTask(): Promise<Task | null> {
     
     return await generateEyesAndEars(vocabRepo!, languageCodes, blockList, exerciseOptions.value);
   } catch (error) {
-    console.error('Error generating eyes and ears task:', error);
+    toast.error('Error generating eyes and ears task');
     return null;
   }
 }
@@ -84,7 +86,7 @@ async function tryTransitionToTask(): Promise<boolean> {
       return true;
     }
   } catch (error) {
-    console.error('Task generation failed:', error);
+    toast.error('Task generation failed');
   }
   
   clearDelayedLoading();
@@ -104,7 +106,7 @@ async function initializeQueue() {
       setEmpty('No vocabulary with both sound and images is currently available for practice.');
     }
   } catch (error) {
-    console.error('Initialization failed:', error);
+    toast.error('Initialization failed');
     clearDelayedLoading();
     setError('Failed to initialize Eyes and Ears queue. Please try again.');
   }
@@ -135,7 +137,7 @@ async function completeCurrentTask() {
         state.value.nextTask = newNextTask;
       }
     } catch (error) {
-      console.error('Error generating next task:', error);
+      toast.error('Error generating next task');
     }
   } else {
     // No next task ready, need to generate one

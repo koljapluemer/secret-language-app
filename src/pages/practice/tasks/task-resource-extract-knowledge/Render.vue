@@ -8,6 +8,7 @@ import type { RepositoriesContext } from '@/shared/types/RepositoriesContext';
 import LinkDisplayAsButton from '@/shared/links/LinkDisplayAsButton.vue';
 import TaskDecideWhetherToDoAgain from '@/pages/practice/tasks/ui/TaskDecideWhetherToDoAgain.vue';
 import TaskSkipDisableDone from '@/pages/practice/tasks/ui/TaskSkipDisableDone.vue';
+import { useToast } from '@/shared/toasts';
 
 interface Props {
   task: Task;
@@ -18,6 +19,8 @@ const props = defineProps<Props>();
 const emit = defineEmits<{
   finished: [];
 }>();
+
+const toast = useToast();
 
 // Get the resource ID from associated resources
 const resourceUid = computed(() => {
@@ -40,7 +43,7 @@ const loadResource = async () => {
     const resourceData = await resourceRepo.getResourceById(resourceUid.value);
     resource.value = resourceData || null;
   } catch (error) {
-    console.error('Failed to load resource:', error);
+    toast.error('Failed to load resource');
   }
 };
 
@@ -63,7 +66,7 @@ const handleSkip = async () => {
     
     emit('finished');
   } catch (error) {
-    console.error('Error skipping resource:', error);
+    toast.error('Failed to skip resource');
     emit('finished');
   }
 };
@@ -82,7 +85,7 @@ const handleSkipAndDisable = async () => {
     
     emit('finished');
   } catch (error) {
-    console.error('Error disabling resource:', error);
+    toast.error('Failed to disable resource');
     emit('finished');
   }
 };
@@ -104,7 +107,7 @@ const handleFinishDecision = async (wantToDoAgain: boolean) => {
     
     emit('finished');
   } catch (error) {
-    console.error('Error finishing resource:', error);
+    toast.error('Failed to complete resource');
     emit('finished');
   }
 };

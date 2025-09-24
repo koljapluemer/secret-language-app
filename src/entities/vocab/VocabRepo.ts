@@ -82,7 +82,7 @@ export class VocabRepo implements VocabRepoContract {
       .anyOf(languages)
       .filter(vocab =>
         vocab.progress.level >= 0 &&
-        vocab.progress.due <= new Date() &&
+        vocab.progress.due && new Date(vocab.progress.due) <= new Date() &&
         !vocab.doNotPractice &&
         (!vocabBlockList || !vocabBlockList.includes(vocab.uid))
       )
@@ -152,7 +152,7 @@ export class VocabRepo implements VocabRepoContract {
       const vocabIsUnseen = isUnseen(vocab);
 
       // Due: has been seen and is due now
-      const isDue = vocab.progress.level >= 0 && vocab.progress.due <= new Date();
+      const isDue = vocab.progress.level >= 0 && vocab.progress.due && new Date(vocab.progress.due) <= new Date();
 
       return vocabIsUnseen || isDue;
     });
@@ -216,10 +216,6 @@ export class VocabRepo implements VocabRepoContract {
       vocab.progress.due = new Date();
     }
 
-    console.log(`[VOCAB DEBUG] Scored vocab ${vocab.uid} (${vocab.content}) with rating ${fsrsRating}`);
-    console.log(`[VOCAB DEBUG] Level: ${vocab.progress.level}, Due: ${vocab.progress.due}, Now: ${new Date()}`);
-    console.log(`[VOCAB DEBUG] Scheduled days: ${updatedCard.scheduled_days}, Stability: ${updatedCard.stability}`);
-    console.log(`[VOCAB DEBUG] Time until due: ${Math.round((vocab.progress.due.getTime() - new Date().getTime()) / (1000 * 60))} minutes`);
 
     await vocabDb.vocab.put(vocab);
   }
@@ -450,7 +446,7 @@ export class VocabRepo implements VocabRepoContract {
       .equals(language)
       .filter(vocab =>
         vocab.progress.level >= 0 &&
-        vocab.progress.due <= new Date() &&
+        vocab.progress.due && new Date(vocab.progress.due) <= new Date() &&
         !vocab.doNotPractice &&
         (!vocabBlockList || !vocabBlockList.includes(vocab.uid))
       )
@@ -465,7 +461,7 @@ export class VocabRepo implements VocabRepoContract {
       .equals(language)
       .filter(vocab =>
         vocab.progress.level >= 0 &&
-        vocab.progress.due <= new Date() &&
+        vocab.progress.due && new Date(vocab.progress.due) <= new Date() &&
         !vocab.doNotPractice &&
         vocab.consideredSentence !== true && // Exclude sentence vocab
         (!vocabBlockList || !vocabBlockList.includes(vocab.uid))
@@ -489,7 +485,7 @@ export class VocabRepo implements VocabRepoContract {
       .anyOf(languages)
       .filter(vocab =>
         vocab.progress.level >= 0 &&
-        vocab.progress.due <= new Date() &&
+        vocab.progress.due && new Date(vocab.progress.due) <= new Date() &&
         !vocab.doNotPractice &&
         (!vocabBlockList || !vocabBlockList.includes(vocab.uid))
       );
@@ -1043,7 +1039,7 @@ export class VocabRepo implements VocabRepoContract {
         vocab.hasSound === true &&
         vocab.hasImage === true &&
         vocab.progress.level >= 0 &&
-        vocab.progress.due <= new Date() &&
+        vocab.progress.due && new Date(vocab.progress.due) <= new Date() &&
         !vocab.doNotPractice &&
         (!vocabBlockList || !vocabBlockList.includes(vocab.uid))
       )
@@ -1116,7 +1112,7 @@ export class VocabRepo implements VocabRepoContract {
         const vocabIsUnseen = vocab.progress.level === -1;
         
         // Due: has been seen and is due now
-        const isDue = vocab.progress.level >= 0 && vocab.progress.due <= new Date();
+        const isDue = vocab.progress.level >= 0 && vocab.progress.due && new Date(vocab.progress.due) <= new Date();
         
         return vocabIsUnseen || isDue;
       })
@@ -1147,14 +1143,6 @@ export class VocabRepo implements VocabRepoContract {
   // Set Study operations
   async getRandomDueVocabFromSet(setUid: string, count: number, vocabBlockList?: string[]): Promise<VocabData[]> {
     const now = new Date();
-    console.log(`[DUE VOCAB DEBUG] Looking for due vocab in set ${setUid} at ${now}`);
-
-    const allVocabInSet = await vocabDb.vocab
-      .where('origins')
-      .equals(setUid)
-      .toArray();
-
-    console.log(`[DUE VOCAB DEBUG] Found ${allVocabInSet.length} total vocab in set`);
 
     const vocab = await vocabDb.vocab
       .where('origins')
@@ -1166,23 +1154,7 @@ export class VocabRepo implements VocabRepoContract {
         const originOk = vocab.origins.includes(setUid);
         const notBlockedOk = !vocabBlockList || !vocabBlockList.includes(vocab.uid);
 
-        const passes = levelOk && dueOk && practiceOk && originOk && notBlockedOk;
-
-        if (!passes && vocab.progress.level >= 0) {
-          console.log(`[DUE VOCAB DEBUG] Vocab ${vocab.uid} (${vocab.content}) filtered out:`, {
-            level: vocab.progress.level,
-            levelOk,
-            due: vocab.progress.due,
-            dueType: typeof vocab.progress.due,
-            dueOk,
-            practiceOk,
-            originOk,
-            notBlockedOk,
-            timeDiff: vocab.progress.due ? new Date(vocab.progress.due).getTime() - now.getTime() : 'N/A (no due date)'
-          });
-        }
-
-        return passes;
+        return levelOk && dueOk && practiceOk && originOk && notBlockedOk;
       })
       .toArray();
 

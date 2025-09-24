@@ -134,6 +134,7 @@ import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract';
 import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoContract';
 import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract';
 import type { FactCardRepoContract } from '@/entities/fact-cards/FactCardRepoContract';
+import { useToast } from '@/shared/toasts';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -147,6 +148,7 @@ const noteRepo = inject<NoteRepoContract>('noteRepo')!;
 const resourceRepo = inject<ResourceRepoContract>('resourceRepo')!;
 const goalRepo = inject<GoalRepoContract>('goalRepo')!;
 const factCardRepo = inject<FactCardRepoContract>('factCardRepo')!;
+const toast = useToast();
 
 const remoteSetService = new UnifiedRemoteSetService(
   localSetRepo,
@@ -311,7 +313,7 @@ async function loadLanguagesAndSets() {
         );
         downloadedStatuses.push(...statuses);
       } catch (err) {
-        console.error(`Failed to load sets for ${language.code}:`, err);
+        toast.error(`Failed to load sets for ${language.code}`);
       }
     }
 

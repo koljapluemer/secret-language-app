@@ -10,6 +10,7 @@ import { Rating } from 'ts-fsrs';
 import { generateClozeFromText, isRTLText, type ClozeData } from '@/pages/practice/tasks/utils/clozeUtils';
 import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
 import LinkDisplayMini from '@/shared/links/LinkDisplayMini.vue';
+import { useToast } from '@/shared/toasts';
 
 interface AnswerOption {
   content: string;
@@ -27,6 +28,8 @@ interface Props {
 const emit = defineEmits<{
   finished: [];
 }>();
+
+const toast = useToast();
 
 const props = defineProps<Props>();
 
@@ -115,7 +118,7 @@ async function loadVocabData() {
 
     await generateClozeOptions();
   } catch (error) {
-    console.error('Failed to load vocab data:', error);
+    toast.error('Failed to load vocabulary data');
   } finally {
     loading.value = false;
   }
@@ -205,7 +208,7 @@ const handleCompletion = async () => {
     
     setTimeout(() => emit('finished'), 750);
   } catch (error) {
-    console.error('Error scoring vocab:', error);
+    toast.error('Failed to save vocabulary progress');
     emit('finished');
   }
 };

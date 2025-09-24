@@ -8,6 +8,7 @@ import type { RepositoriesContext } from '@/shared/types/RepositoriesContext';
 import LinkDisplayAsButton from '@/shared/links/LinkDisplayAsButton.vue';
 import TaskSkipDisableDone from '@/pages/practice/tasks/ui/TaskSkipDisableDone.vue';
 import type { NoteData } from '@/entities/notes/NoteData';
+import { useToast } from '@/shared/toasts';
 
 interface Props {
   task: Task;
@@ -18,6 +19,8 @@ const props = defineProps<Props>();
 const emit = defineEmits<{
   finished: [];
 }>();
+
+const toast = useToast();
 
 // Get the resource ID from associated resources
 const resourceUid = computed(() => {
@@ -41,7 +44,7 @@ const loadResource = async () => {
     const resourceData = await resourceRepo.getResourceById(resourceUid.value);
     resource.value = resourceData || null;
   } catch (error) {
-    console.error('Failed to load resource:', error);
+    toast.error('Failed to load resource');
   }
 };
 
@@ -63,7 +66,7 @@ const handleSkip = async () => {
     await resourceRepo.updateResource(updatedResource);
     emit('finished');
   } catch (error) {
-    console.error('Failed to update resource lastShownAt:', error);
+    toast.error('Failed to update resource');
     emit('finished');
   }
 };
@@ -101,7 +104,7 @@ const handleDone = async () => {
     
     emit('finished');
   } catch (error) {
-    console.error('Failed to save experience comment or update resource:', error);
+    toast.error('Failed to save experience data');
     emit('finished');
   }
 };

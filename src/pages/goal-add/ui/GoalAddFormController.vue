@@ -35,6 +35,7 @@
 import { ref, computed, inject } from 'vue';
 import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract';
 import GoalAddFormRenderer from './GoalAddFormRenderer.vue';
+import { useToast } from '@/shared/toasts';
 
 interface GoalFormData {
   language: string;
@@ -46,6 +47,7 @@ const emit = defineEmits<{
 }>();
 
 const goalRepo = inject<GoalRepoContract>('goalRepo')!;
+const toast = useToast();
 
 const formData = ref<GoalFormData>({
   language: '',
@@ -85,7 +87,7 @@ async function handleSave(action: 'edit' | 'add-another') {
     
     emit('goal-saved', newGoal.uid, action);
   } catch (error) {
-    console.error('Failed to save goal:', error);
+    toast.error('Failed to save goal');
     alert('Failed to save goal. Please try again.');
   } finally {
     isSaving.value = false;

@@ -9,6 +9,7 @@ import SpacedRepetitionRating from '@/pages/practice/tasks/ui/SpacedRepetitionRa
 import type { NoteData } from '@/entities/notes/NoteData';
 import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
 import LinkDisplayMini from '@/shared/links/LinkDisplayMini.vue';
+import { useToast } from '@/shared/toasts';
 
 interface Props {
   task: Task;
@@ -23,6 +24,7 @@ const emit = defineEmits<{
   finished: [];
 }>();
 
+const toast = useToast();
 const vocabRepo = props.repositories.vocabRepo;
 const translationRepo = props.repositories.translationRepo;
 const noteRepo = props.repositories.noteRepo;
@@ -88,20 +90,16 @@ const loadVocab = async () => {
 const handleRating = async (rating: Rating) => {
   if (!vocab.value) return;
 
-  console.log(`[TASK DEBUG] handleRating called with rating ${rating} for vocab ${vocab.value.uid} (${vocab.value.content})`);
-
   try {
     // Score vocab and update last review
     // In illegal immersion mode, use immediateDue for low ratings
     const immediateDue = props.modeContext?.setWrongVocabDueAgainImmediately || false;
-    console.log(`[TASK DEBUG] About to call scoreVocab with immediateDue: ${immediateDue}`);
     await vocabRepo.scoreVocab(vocab.value.uid, rating, immediateDue);
     await vocabRepo.updateLastReview(vocab.value.uid);
 
-    console.log(`[TASK DEBUG] Scoring completed, emitting finished`);
     emit('finished');
   } catch (error) {
-    console.error('Error scoring vocab:', error);
+    toast.error('Failed to save vocabulary progress');
     emit('finished');
   }
 };

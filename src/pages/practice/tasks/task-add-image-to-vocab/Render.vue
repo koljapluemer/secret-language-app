@@ -9,6 +9,7 @@ import TaskSkipDisableDone from '@/pages/practice/tasks/ui/TaskSkipDisableDone.v
 import type { NoteData } from '@/entities/notes/NoteData';
 import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
 import LinkDisplayMini from '@/shared/links/LinkDisplayMini.vue';
+import { useToast } from '@/shared/toasts';
 
 interface Props {
   task: Task;
@@ -19,6 +20,8 @@ const props = defineProps<Props>();
 const emit = defineEmits<{
   finished: [];
 }>();
+
+const toast = useToast();
 
 const vocabRepo = props.repositories.vocabRepo;
 const translationRepo = props.repositories.translationRepo;
@@ -78,7 +81,7 @@ const handleSkipAndDisable = async () => {
     await vocabRepo.markVocabNotPicturable(vocab.value.uid);
     emit('finished');
   } catch (err) {
-    console.error('Error marking vocab as not picturable:', err);
+    toast.error('Failed to update vocabulary settings');
     emit('finished');
   }
 };

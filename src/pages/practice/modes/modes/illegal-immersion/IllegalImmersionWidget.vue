@@ -11,6 +11,7 @@ import type { Task } from '@/pages/practice/Task';
 import TaskRenderer from '@/pages/practice/tasks/ui/TaskRenderer.vue';
 import { useQueueState } from '@/pages/practice/modes/utils/useQueueState';
 import { generateIllegalImmersionTask, getIllegalImmersionProgress } from './generateIllegalImmersionTasks';
+import { useToast } from '@/shared/toasts';
 
 // Inject repositories
 const vocabRepo = inject<VocabRepoContract>('vocabRepo');
@@ -20,6 +21,7 @@ const languageRepo = inject<LanguageRepoContract>('languageRepo');
 const resourceRepo = inject<ResourceRepoContract>('resourceRepo');
 const goalRepo = inject<GoalRepoContract>('goalRepo');
 const noteRepo = inject<NoteRepoContract>('noteRepo');
+const toast = useToast();
 
 if (!vocabRepo || !translationRepo || !factCardRepo || !languageRepo || !resourceRepo || !goalRepo || !noteRepo) {
   throw new Error('Required repositories not available');
@@ -77,7 +79,7 @@ async function generateNextTask(): Promise<Task | null> {
       blockList
     );
   } catch (error) {
-    console.error('Error generating illegal immersion task:', error);
+    toast.error('Error generating illegal immersion task');
     return null;
   }
 }
@@ -102,7 +104,7 @@ async function tryTransitionToTask(): Promise<boolean> {
       return true;
     }
   } catch (error) {
-    console.error('Task generation failed:', error);
+    toast.error('Task generation failed');
   }
   
   clearDelayedLoading();
@@ -125,7 +127,7 @@ async function initializeQueue() {
       updateProgress();
     }
   } catch (error) {
-    console.error('Initialization failed:', error);
+    toast.error('Initialization failed');
     clearDelayedLoading();
     setError('Failed to initialize illegal immersion session. Please try again.');
   }
@@ -159,7 +161,7 @@ async function completeCurrentTask() {
       // Update progress after task completion
       updateProgress();
     } catch (error) {
-      console.error('Error generating next task:', error);
+      toast.error('Error generating next task');
     }
   } else {
     // No next task ready, need to generate one

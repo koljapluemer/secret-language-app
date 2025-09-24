@@ -79,6 +79,7 @@ import SoundPlayer from '@/shared/ui/SoundPlayer.vue';
 import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
 import LinkDisplayMini from '@/shared/links/LinkDisplayMini.vue';
 import { Rating } from 'ts-fsrs';
+import { useToast } from '@/shared/toasts';
 
 interface ImageOption {
   image: VocabImage;
@@ -98,6 +99,7 @@ const emit = defineEmits<{
 }>();
 
 const props = defineProps<Props>();
+const toast = useToast();
 
 const vocabRepo = props.repositories.vocabRepo;
 const noteRepo = props.repositories.noteRepo;
@@ -121,7 +123,7 @@ const vocabUid = computed(() => {
 
 async function loadVocabData() {
   if (!vocabUid.value) {
-    console.error('Choose Image by Sound: No vocab UID provided');
+    toast.error('No vocabulary provided for exercise');
     loading.value = false;
     return;
   }
@@ -129,27 +131,19 @@ async function loadVocabData() {
   try {
     const vocabData = await vocabRepo.getVocabByUID(vocabUid.value);
     if (!vocabData) {
-      console.error('Choose Image by Sound: Vocab not found for UID:', vocabUid.value);
+      toast.error('Vocabulary not found');
       loading.value = false;
       return;
     }
 
     if (!vocabData.sounds?.length) {
-      console.error('Choose Image by Sound: Vocab has no sounds', {
-        uid: vocabData.uid,
-        content: vocabData.content,
-        hasSound: vocabData.hasSound
-      });
+      toast.error('This vocabulary has no audio');
       loading.value = false;
       return;
     }
 
     if (!vocabData.images?.length) {
-      console.error('Choose Image by Sound: Vocab has no images', {
-        uid: vocabData.uid,
-        content: vocabData.content,
-        hasImage: vocabData.hasImage
-      });
+      toast.error('This vocabulary has no images');
       loading.value = false;
       return;
     }
@@ -157,12 +151,7 @@ async function loadVocabData() {
     // Find a playable sound (not disableForPractice)
     const availableSound = vocabData.sounds.find(sound => !sound.disableForPractice);
     if (!availableSound) {
-      console.error('Choose Image by Sound: Vocab has no playable sounds', {
-        uid: vocabData.uid,
-        content: vocabData.content,
-        totalSounds: vocabData.sounds.length,
-        disabledSounds: vocabData.sounds.filter(s => s.disableForPractice).length
-      });
+      toast.error('This vocabulary has no playable audio');
       loading.value = false;
       return;
     }
@@ -180,7 +169,7 @@ async function loadVocabData() {
     await generateImageOptions();
 
   } catch (error) {
-    console.error('Choose Image by Sound: Failed to load vocab data for UID:', vocabUid.value, error);
+    toast.error('Failed to load vocabulary data');
   } finally {
     loading.value = false;
   }
@@ -207,7 +196,7 @@ async function generateImageOptions() {
       options.push({ image: distractorImage, isCorrect: false });
     }
   } catch (error) {
-    console.error('Failed to get distractor image:', error);
+    toast.error('Failed to load exercise options');
   }
 
   // Shuffle the options
@@ -268,7 +257,7 @@ const handleCompletion = async () => {
 
     setTimeout(() => emit('finished'), 750);
   } catch (error) {
-    console.error('Error scoring vocab:', error);
+    toast.error('Failed to save vocabulary progress');
     emit('finished');
   }
 };

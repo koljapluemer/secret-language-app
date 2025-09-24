@@ -43,9 +43,11 @@ import FactCardEditFormController from './ui/FactCardEditFormController.vue';
 import type { FactCardRepoContract } from '@/entities/fact-cards/FactCardRepoContract';
 import type { FactCardData } from '@/entities/fact-cards/FactCardData';
 import { calculateFactCardMastery } from '@/entities/fact-cards/factCardMastery';
+import { useToast } from '@/shared/toasts';
 
 const route = useRoute();
 const currentFactCard = ref<FactCardData | null>(null);
+const toast = useToast();
 
 const factCardRepo = inject<FactCardRepoContract>('factCardRepo');
 
@@ -65,7 +67,7 @@ watch(() => route.params.id, async (factCardId) => {
       const factCard = await factCardRepo.getFactCardByUID(factCardId as string);
       currentFactCard.value = factCard || null;
     } catch (error) {
-      console.error('Failed to load fact card data:', error);
+      toast.error('Failed to load fact card data');
       currentFactCard.value = null;
     }
   } else {
@@ -84,7 +86,7 @@ async function handleFactCardSaved(factCardId: string) {
     const factCard = await factCardRepo.getFactCardByUID(factCardId);
     currentFactCard.value = factCard || null;
   } catch (error) {
-    console.error('Failed to reload fact card data:', error);
+    toast.error('Failed to reload fact card data');
   }
 }
 </script>

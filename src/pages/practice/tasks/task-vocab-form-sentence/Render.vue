@@ -9,6 +9,7 @@ import VocabImageDisplay from '@/shared/ui/VocabImage.vue';
 import type { NoteData } from '@/entities/notes/NoteData';
 import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
 import LinkDisplayMini from '@/shared/links/LinkDisplayMini.vue';
+import { useToast } from '@/shared/toasts';
 
 interface Props {
   task: Task;
@@ -19,6 +20,8 @@ const props = defineProps<Props>();
 const emit = defineEmits<{
   finished: [];
 }>();
+
+const toast = useToast();
 
 const vocabRepo = props.repositories.vocabRepo;
 const translationRepo = props.repositories.translationRepo;
@@ -121,7 +124,7 @@ const playVocabSound = (vocabUid: string) => {
     audioElement.value.play();
     playingVocabUid.value = vocabUid;
   } catch (error) {
-    console.error('Failed to play audio:', error);
+    toast.error('Failed to play audio');
   }
 };
 
@@ -186,7 +189,7 @@ const handleDone = async () => {
     await handleTaskCompletion();
     emit('finished');
   } catch (error) {
-    console.error('Error saving sentence:', error);
+    toast.error('Failed to save sentence');
     await handleTaskCompletion();
     emit('finished');
   }

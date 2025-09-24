@@ -5,6 +5,7 @@ import type { Task } from '@/pages/practice/Task';
 import type { FactCardData } from '@/entities/fact-cards/FactCardData';
 import type { RepositoriesContext } from '@/shared/types/RepositoriesContext';
 import MarkdownRenderer from '@/shared/ui/MarkdownRenderer.vue';
+import { useToast } from '@/shared/toasts';
 
 interface Props {
   task: Task;
@@ -15,6 +16,8 @@ const props = defineProps<Props>();
 const emit = defineEmits<{
   finished: [];
 }>();
+
+const toast = useToast();
 
 const factCardRepo = props.repositories.factCardRepo!;
 const factCard = ref<FactCardData | null>(null);
@@ -46,7 +49,7 @@ const handleDone = async () => {
     
     emit('finished');
   } catch (error) {
-    console.error('Error initializing fact card:', error);
+    toast.error('Failed to initialize fact card');
     emit('finished');
   }
 };
@@ -64,7 +67,7 @@ const handleSkip = async () => {
     
     emit('finished');
   } catch (error) {
-    console.error('Error updating fact card:', error);
+    toast.error('Failed to update fact card');
     emit('finished');
   }
 };

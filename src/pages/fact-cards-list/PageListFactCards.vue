@@ -159,9 +159,11 @@ import type { LocalSetRepoContract } from '@/entities/local-sets/LocalSetRepoCon
 import type { LocalSetData } from '@/entities/local-sets/LocalSetData';
 import Pagination from '@/shared/ui/Pagination.vue';
 import { useRoute, useRouter, type LocationQueryValue } from 'vue-router';
+import { useToast } from '@/shared/toasts';
 
 const route = useRoute();
 const router = useRouter();
+const toast = useToast();
 
 const factCardRepo = inject<FactCardRepoContract>('factCardRepo')!;
 const languageRepo = inject<LanguageRepoContract>('languageRepo')!;
@@ -328,7 +330,7 @@ async function deleteFactCard(uid: string) {
     await factCardRepo.deleteFactCard(uid);
     await loadFactCards(); // Reload to update pagination
   } catch (err) {
-    console.error('Failed to delete fact card:', err);
+    toast.error('Failed to delete fact card');
     error.value = 'Failed to delete fact card';
   }
 }
@@ -346,7 +348,7 @@ async function loadFilterOptions() {
       selectedSets.value = ['user-added', ...availableSets.value.map(s => s.uid)];
     }
   } catch (err) {
-    console.error('Failed to load filter options:', err);
+    toast.error('Failed to load filter options');
   }
 }
 

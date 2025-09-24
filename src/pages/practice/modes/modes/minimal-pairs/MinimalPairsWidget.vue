@@ -11,6 +11,7 @@ import type { Task } from '@/pages/practice/Task';
 import TaskRenderer from '@/pages/practice/tasks/ui/TaskRenderer.vue';
 import { useQueueState } from '@/pages/practice/modes/utils/useQueueState';
 import { generateMinimalPairsTask } from './generateMinimalPairsTasks';
+import { useToast } from '@/shared/toasts';
 
 // Inject repositories
 const vocabRepo = inject<VocabRepoContract>('vocabRepo');
@@ -20,6 +21,7 @@ const languageRepo = inject<LanguageRepoContract>('languageRepo');
 const resourceRepo = inject<ResourceRepoContract>('resourceRepo');
 const goalRepo = inject<GoalRepoContract>('goalRepo');
 const noteRepo = inject<NoteRepoContract>('noteRepo');
+const toast = useToast();
 
 if (!vocabRepo || !translationRepo || !factCardRepo || !languageRepo || !resourceRepo || !goalRepo || !noteRepo) {
   throw new Error('Required repositories not available');
@@ -55,7 +57,7 @@ async function generateNextTask(): Promise<Task | null> {
     
     return await generateMinimalPairsTask(vocabRepo!, languageCodes, blockList);
   } catch (error) {
-    console.error('Error generating minimal pairs task:', error);
+    toast.error('Error generating minimal pairs task');
     return null;
   }
 }
@@ -77,7 +79,7 @@ async function tryTransitionToTask(): Promise<boolean> {
       return true;
     }
   } catch (error) {
-    console.error('Task generation failed:', error);
+    toast.error('Task generation failed');
   }
   
   clearDelayedLoading();
@@ -97,7 +99,7 @@ async function initializeQueue() {
       setEmpty('No character vocab with sound and related vocab is available for minimal pairs practice.');
     }
   } catch (error) {
-    console.error('Initialization failed:', error);
+    toast.error('Initialization failed');
     clearDelayedLoading();
     setError('Failed to initialize Minimal Pairs mode. Please try again.');
   }
@@ -128,7 +130,7 @@ async function completeCurrentTask() {
         state.value.nextTask = newNextTask;
       }
     } catch (error) {
-      console.error('Error generating next task:', error);
+      toast.error('Error generating next task');
     }
   } else {
     // No next task ready, need to generate one

@@ -36,6 +36,7 @@ import type { VocabData, VocabImage, VocabSound } from '@/entities/vocab/VocabDa
 import type { NoteData } from '@/entities/notes/NoteData';
 import type { TranslationData } from '@/entities/translations/TranslationData';
 import type { Link } from '@/shared/links/Link';
+import { useToast } from '@/shared/toasts';
 
 interface VocabFormData {
   id?: string;
@@ -123,6 +124,8 @@ const emit = defineEmits<{
   'vocab-saved': [vocabId: string];
 }>();
 
+const toast = useToast();
+
 const vocabRepo = inject<VocabRepoContract>('vocabRepo');
 const translationRepo = inject<TranslationRepoContract>('translationRepo');
 const noteRepo = inject<NoteRepoContract>('noteRepo');
@@ -186,7 +189,7 @@ async function loadVocab() {
           const notes = await noteRepo.getNotesByUIDs(vocab.notes);
           loadedNotes.value = notes;
         } catch (error) {
-          console.error('Failed to load notes:', error);
+          toast.error('Failed to load notes');
           loadedNotes.value = [];
         }
       } else {
@@ -198,7 +201,7 @@ async function loadVocab() {
           const translations = await translationRepo.getTranslationsByIds(vocab.translations);
           loadedTranslations.value = translations;
         } catch (error) {
-          console.error('Failed to load translations:', error);
+          toast.error('Failed to load translations');
           loadedTranslations.value = [];
         }
       } else {

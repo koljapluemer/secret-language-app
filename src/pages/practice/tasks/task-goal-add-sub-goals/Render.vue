@@ -33,6 +33,7 @@ import type { GoalData } from '@/entities/goals/GoalData';
 import ManageSubGoalsWidget from '@/features/goal-manage-its-sub-goals/ManageSubGoalsWidget.vue';
 import TaskDecideWhetherToDoAgain from '@/pages/practice/tasks/ui/TaskDecideWhetherToDoAgain.vue';
 import TaskSkipDisableDone from '@/pages/practice/tasks/ui/TaskSkipDisableDone.vue';
+import { useToast } from '@/shared/toasts';
 
 interface Props {
   task: Task;
@@ -43,6 +44,8 @@ const props = defineProps<Props>();
 const emit = defineEmits<{
   finished: [];
 }>();
+
+const toast = useToast();
 
 const goalRepo = props.repositories.goalRepo!;
 const goal = ref<GoalData | null>(null);
@@ -55,7 +58,7 @@ async function loadGoal() {
   
   const loadedGoal = await goalRepo.getById(goalUid);
   if (!loadedGoal) {
-    console.error(`Goal with id ${goalUid} not found`);
+    toast.error('Goal not found');
     return;
   }
   goal.value = loadedGoal;
@@ -77,7 +80,7 @@ const handleSkip = async () => {
     
     emit('finished');
   } catch (error) {
-    console.error('Error skipping goal:', error);
+    toast.error('Failed to skip goal');
     emit('finished');
   }
 };
@@ -96,7 +99,7 @@ const handleSkipAndDisable = async () => {
     
     emit('finished');
   } catch (error) {
-    console.error('Error disabling goal:', error);
+    toast.error('Failed to disable goal');
     emit('finished');
   }
 };
@@ -118,7 +121,7 @@ const handleFinishDecision = async (wantToDoAgain: boolean) => {
     
     emit('finished');
   } catch (error) {
-    console.error('Error finishing goal:', error);
+    toast.error('Failed to complete goal task');
     emit('finished');
   }
 };

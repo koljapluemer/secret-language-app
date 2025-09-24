@@ -93,6 +93,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
+import { useToast } from '@/shared/toasts';
 
 interface Props {
   vocabCount: number;
@@ -103,6 +104,8 @@ defineProps<Props>();
 const emit = defineEmits<{
   recordingReady: [blob: Blob, duration: number];
 }>();
+
+const toast = useToast();
 
 // Recording state
 const isRecording = ref(false);
@@ -135,7 +138,7 @@ onMounted(async () => {
     // Stop the stream for now, we'll restart when recording
     stream.getTracks().forEach(track => track.stop());
   } catch (error) {
-    console.error('Failed to get microphone access:', error);
+    toast.error('Failed to access microphone');
     canRecord.value = false;
   }
 });
@@ -206,7 +209,7 @@ async function startRecording() {
     }, 1000);
     
   } catch (error) {
-    console.error('Failed to start recording:', error);
+    toast.error('Failed to start recording');
   }
 }
 

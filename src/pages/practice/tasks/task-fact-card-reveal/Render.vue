@@ -6,6 +6,7 @@ import type { RepositoriesContext } from '@/shared/types/RepositoriesContext';
 import type { Rating } from 'ts-fsrs';
 import SpacedRepetitionRating from '@/pages/practice/tasks/ui/SpacedRepetitionRating.vue';
 import MarkdownRenderer from '@/shared/ui/MarkdownRenderer.vue';
+import { useToast } from '@/shared/toasts';
 
 interface Props {
   task: Task;
@@ -19,6 +20,8 @@ const props = defineProps<Props>();
 const emit = defineEmits<{
   finished: [];
 }>();
+
+const toast = useToast();
 
 const factCardRepo = props.repositories.factCardRepo!;
 const factCard = ref<FactCardData | null>(null);
@@ -45,7 +48,7 @@ const handleRating = async (rating: Rating) => {
     
     emit('finished');
   } catch (error) {
-    console.error('Error scoring fact card:', error);
+    toast.error('Failed to save fact card progress');
     emit('finished');
   }
 };

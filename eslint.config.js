@@ -59,6 +59,7 @@ export default defineConfig([
       '@intlify/vue-i18n/no-raw-text': 'error',
       '@intlify/vue-i18n/no-missing-keys': 'error',
       '@intlify/vue-i18n/no-unused-keys': 'warn',
+      'no-console': 'error',
     },
     settings: {
       ...importResolverSettings,
