@@ -216,6 +216,11 @@ export class VocabRepo implements VocabRepoContract {
       vocab.progress.due = new Date();
     }
 
+    console.log(`[VOCAB DEBUG] Scored vocab ${vocab.uid} (${vocab.content}) with rating ${fsrsRating}`);
+    console.log(`[VOCAB DEBUG] Level: ${vocab.progress.level}, Due: ${vocab.progress.due}, Now: ${new Date()}`);
+    console.log(`[VOCAB DEBUG] Scheduled days: ${updatedCard.scheduled_days}, Stability: ${updatedCard.stability}`);
+    console.log(`[VOCAB DEBUG] Time until due: ${Math.round((vocab.progress.due.getTime() - new Date().getTime()) / (1000 * 60))} minutes`);
+
     await vocabDb.vocab.put(vocab);
   }
 
@@ -1141,16 +1146,44 @@ export class VocabRepo implements VocabRepoContract {
 
   // Set Study operations
   async getRandomDueVocabFromSet(setUid: string, count: number, vocabBlockList?: string[]): Promise<VocabData[]> {
+    const now = new Date();
+    console.log(`[DUE VOCAB DEBUG] Looking for due vocab in set ${setUid} at ${now}`);
+
+    const allVocabInSet = await vocabDb.vocab
+      .where('origins')
+      .equals(setUid)
+      .toArray();
+
+    console.log(`[DUE VOCAB DEBUG] Found ${allVocabInSet.length} total vocab in set`);
+
     const vocab = await vocabDb.vocab
       .where('origins')
       .equals(setUid)
-      .filter(vocab =>
-        vocab.progress.level >= 0 &&
-        vocab.progress.due <= new Date() &&
-        !vocab.doNotPractice &&
-        vocab.origins.includes(setUid) &&
-        (!vocabBlockList || !vocabBlockList.includes(vocab.uid))
-      )
+      .filter(vocab => {
+        const levelOk = vocab.progress.level >= 0;
+        const dueOk = vocab.progress.due && new Date(vocab.progress.due) <= now;
+        const practiceOk = !vocab.doNotPractice;
+        const originOk = vocab.origins.includes(setUid);
+        const notBlockedOk = !vocabBlockList || !vocabBlockList.includes(vocab.uid);
+
+        const passes = levelOk && dueOk && practiceOk && originOk && notBlockedOk;
+
+        if (!passes && vocab.progress.level >= 0) {
+          console.log(`[DUE VOCAB DEBUG] Vocab ${vocab.uid} (${vocab.content}) filtered out:`, {
+            level: vocab.progress.level,
+            levelOk,
+            due: vocab.progress.due,
+            dueType: typeof vocab.progress.due,
+            dueOk,
+            practiceOk,
+            originOk,
+            notBlockedOk,
+            timeDiff: vocab.progress.due ? new Date(vocab.progress.due).getTime() - now.getTime() : 'N/A (no due date)'
+          });
+        }
+
+        return passes;
+      })
       .toArray();
 
     const ensuredVocab = vocab.map(v => this.ensureVocabFields(v));

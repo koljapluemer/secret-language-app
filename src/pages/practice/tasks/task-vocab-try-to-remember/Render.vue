@@ -30,19 +30,28 @@ const loadVocab = async () => {
 
 const handleDone = async () => {
   if (!vocab.value) return;
-  
+
+  console.log(`[TRY-TO-REMEMBER DEBUG] handleDone called for vocab ${vocab.value.uid} (${vocab.value.content})`);
+  console.log(`[TRY-TO-REMEMBER DEBUG] Current progress:`, vocab.value.progress);
+
   try {
     // Initialize learning card for unseen vocab
+    const emptyCard = createEmptyCard();
+    console.log(`[TRY-TO-REMEMBER DEBUG] Empty card created:`, emptyCard);
+
     const updatedVocab = {
       ...vocab.value,
       progress: {
         ...vocab.value.progress,
         level: 0,
-        card: createEmptyCard()
+        ...emptyCard
       }
     };
+
+    console.log(`[TRY-TO-REMEMBER DEBUG] About to update vocab with progress:`, updatedVocab.progress);
     await vocabRepo.updateVocab(JSON.parse(JSON.stringify(updatedVocab)));
-    
+
+    console.log(`[TRY-TO-REMEMBER DEBUG] Vocab updated, emitting finished`);
     emit('finished');
   } catch (error) {
     console.error('Error initializing vocab:', error);

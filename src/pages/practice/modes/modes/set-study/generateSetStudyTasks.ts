@@ -21,6 +21,17 @@ export async function generateSetStudyTask(
 
     // First, try to get due vocab from the set
     const dueVocab = await vocabRepo.getRandomDueVocabFromSet(setUid, 10, vocabBlockList);
+    console.log(`[SET-STUDY DEBUG] Found ${dueVocab.length} due vocab items for set ${setUid}`);
+    if (dueVocab.length > 0) {
+      console.log('[SET-STUDY DEBUG] Due vocab details:', dueVocab.map(v => ({
+        uid: v.uid,
+        content: v.content,
+        level: v.progress.level,
+        due: v.progress.due,
+        now: new Date(),
+        isDue: v.progress.due <= new Date()
+      })));
+    }
 
     if (dueVocab.length > 0) {
       // Select random due vocab
@@ -63,6 +74,8 @@ export async function getSetStudyProgress(
     // Get due vocab count by fetching and counting
     const dueVocab = await vocabRepo.getRandomDueVocabFromSet(setUid, 1000); // Large number to get all
     const totalDue = dueVocab.length;
+
+    console.log(`[SET-STUDY DEBUG] Progress for set ${setUid}: ${totalUnseen} unseen, ${totalDue} due`);
 
     return { totalUnseen, totalDue };
   } catch (error) {
