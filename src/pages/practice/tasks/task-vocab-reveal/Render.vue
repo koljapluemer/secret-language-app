@@ -21,7 +21,7 @@ interface Props {
 
 const props = defineProps<Props>();
 const emit = defineEmits<{
-  finished: [];
+  finished: [correctness?: 'correct' | 'incorrect' | 'neutral'];
 }>();
 
 const toast = useToast();
@@ -97,10 +97,12 @@ const handleRating = async (rating: Rating) => {
     await vocabRepo.scoreVocab(vocab.value.uid, rating, immediateDue);
     await vocabRepo.updateLastReview(vocab.value.uid);
 
-    emit('finished');
+    // Map rating to correctness
+    const correctness = (rating === 1 || rating === 2) ? 'incorrect' : 'correct'; // Rating.Again=1, Hard=2 are incorrect
+    emit('finished', correctness);
   } catch (error) {
     toast.error('Failed to save vocabulary progress');
-    emit('finished');
+    emit('finished', 'neutral');
   }
 };
 

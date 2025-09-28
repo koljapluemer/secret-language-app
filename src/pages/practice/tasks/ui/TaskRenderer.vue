@@ -19,7 +19,7 @@
 <script setup lang="ts">
 import { taskRegistry } from './taskRegistry';
 import type { Task } from '@/pages/practice/Task';
-import { inject, onMounted, ref } from 'vue';
+import { inject, onMounted, onUnmounted, ref } from 'vue';
 import type { LanguageData } from '@/entities/languages/LanguageData';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
@@ -30,10 +30,12 @@ import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoCont
 import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract';
 import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract';
 import LanguageDisplay from '@/entities/languages/LanguageDisplay.vue';
-import { useTimeTracking } from '@/shared/useTimeTracking';
+import { useDetailedPracticeTracking } from '@/app/tracking/useDetailedPracticeTracking';
+import type { PracticeContext, TaskCorrectness } from '@/app/tracking/types';
 
 interface Props {
   task: Task;
+  practiceContext: PracticeContext;
   modeContext?: {
     setWrongVocabDueAgainImmediately?: boolean;
   };
@@ -65,16 +67,23 @@ const repositories: RepositoriesContextStrict = {
   noteRepo
 };
 
-// Time tracking
-useTimeTracking();
+// Practice tracking
+const tracking = useDetailedPracticeTracking();
 
 onMounted(async () => {
   const lang = await languageRepo.getByCode(props.task.language);
   if (lang) languageData.value = lang;
+
+  // Start timing this task
+  tracking.startTaskTiming();
+});
+
+onUnmounted(() => {
+  // Clean up if component unmounts without completion
 });
 
 const emit = defineEmits<{
-  finished: [];
+  finished: [correctness?: TaskCorrectness];
 }>();
 
 function getTaskComponent(taskType: string) {
@@ -82,7 +91,30 @@ function getTaskComponent(taskType: string) {
   return taskInfo?.component;
 }
 
-function handleTaskFinished() {
-  emit('finished');
+async function handleTaskFinished(correctness: TaskCorrectness = 'neutral') {
+  // Determine set_uid from task context or vocab origins
+  let setUid: string | null = props.practiceContext.setUid || null;
+
+  if (!setUid && props.task.associatedVocab?.length) {
+    try {
+      const vocab = await vocabRepo?.getVocabByUID(props.task.associatedVocab[0]);
+      if (vocab?.origins.length && vocab.origins[0] !== 'user-added') {
+        setUid = vocab.origins[0];
+      }
+    } catch {
+      // Ignore error, setUid remains null
+    }
+  }
+
+  // Record task completion
+  tracking.recordTaskCompletion(
+    setUid,
+    props.task.language,
+    props.practiceContext.practiceMode,
+    props.task.taskType,
+    correctness
+  );
+
+  emit('finished', correctness);
 }
 </script>

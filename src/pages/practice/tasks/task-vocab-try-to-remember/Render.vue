@@ -14,7 +14,7 @@ interface Props {
 
 const props = defineProps<Props>();
 const emit = defineEmits<{
-  finished: [];
+  finished: [correctness?: 'correct' | 'incorrect' | 'neutral'];
 }>();
 
 const toast = useToast();
@@ -47,10 +47,10 @@ const handleDone = async () => {
     };
 
     await vocabRepo.updateVocab(JSON.parse(JSON.stringify(updatedVocab)));
-    emit('finished');
+    emit('finished', 'neutral');
   } catch (error) {
     toast.error('Failed to initialize vocabulary');
-    emit('finished');
+    emit('finished', 'neutral');
   }
 };
 
@@ -65,10 +65,10 @@ const handleSkip = async () => {
     };
     await vocabRepo.updateVocab(JSON.parse(JSON.stringify(updatedVocab)));
     
-    emit('finished');
+    emit('finished', 'neutral');
   } catch (error) {
     toast.error('Failed to update vocabulary');
-    emit('finished');
+    emit('finished', 'neutral');
   }
 };
 

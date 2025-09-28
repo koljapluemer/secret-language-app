@@ -14,7 +14,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const emit = defineEmits<{ finished: [] }>();
+const emit = defineEmits<{ finished: [correctness?: 'correct' | 'incorrect' | 'neutral'] }>();
 
 const vocabRepo = props.repositories.vocabRepo;
 const translationRepo = props.repositories.translationRepo;
@@ -95,7 +95,7 @@ async function handleDone() {
     translations: [...vocab.value.translations, ...savedUids]
   };
   await vocabRepo.updateVocab(updatedVocab);
-  emit('finished');
+  emit('finished', 'neutral');
 }
 
 onMounted(loadVocab);

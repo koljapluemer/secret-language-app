@@ -18,7 +18,7 @@ interface Props {
 
 const props = defineProps<Props>();
 const emit = defineEmits<{
-  finished: [];
+  finished: [correctness?: 'correct' | 'incorrect' | 'neutral'];
 }>();
 
 const toast = useToast();
@@ -82,7 +82,7 @@ const loadVocab = async () => {
 
 const handleSkip = async () => {
   await handleTaskCompletion();
-  emit('finished');
+  emit('finished', 'neutral');
 };
 
 const handleRecordingReady = (blob: Blob, duration: number) => {
@@ -187,11 +187,11 @@ const handleDone = async () => {
     }
 
     await handleTaskCompletion();
-    emit('finished');
+    emit('finished', 'neutral');
   } catch (error) {
     toast.error('Failed to save sentence');
     await handleTaskCompletion();
-    emit('finished');
+    emit('finished', 'neutral');
   }
 };
 

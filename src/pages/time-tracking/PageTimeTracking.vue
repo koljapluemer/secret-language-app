@@ -1,8 +1,25 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useTimeTracking } from '@/shared/useTimeTracking';
+import { useDetailedPracticeTracking } from '@/app/tracking/useDetailedPracticeTracking';
 
-const { getTodayMinutes, getThisWeekMinutes, getTotalMinutes, getAllTimeData } = useTimeTracking();
+const tracking = useDetailedPracticeTracking();
+const getTodayMinutes = tracking.getTodayMinutes;
+const getThisWeekMinutes = tracking.getThisWeekMinutes;
+const getTotalMinutes = tracking.getTotalMinutes;
+
+// Convert events to daily data for compatibility
+const getAllTimeData = () => {
+  const events = tracking.getAllCompletionEvents();
+  const dailyData: { [date: string]: number } = {};
+
+  events.forEach(event => {
+    const date = new Date(event.timestamp).toISOString().split('T')[0];
+    const minutes = event.activeDuration / (1000 * 60);
+    dailyData[date] = (dailyData[date] || 0) + minutes;
+  });
+
+  return dailyData;
+};
 
 const todayMinutes = computed(() => getTodayMinutes());
 const weekMinutes = computed(() => getThisWeekMinutes());

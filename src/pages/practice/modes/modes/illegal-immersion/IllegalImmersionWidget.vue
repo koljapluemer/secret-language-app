@@ -279,9 +279,10 @@ const handleTaskFinished = async () => {
     <Transition mode="out-in" enter-active-class="transition-opacity duration-[50ms] ease-out"
       leave-active-class="transition-opacity duration-[50ms] ease-in" enter-from-class="opacity-0"
       enter-to-class="opacity-100" leave-from-class="opacity-100" leave-to-class="opacity-0">
-      <TaskRenderer 
-        :key="state.currentTask.uid" 
-        :task="state.currentTask" 
+      <TaskRenderer
+        :key="state.currentTask.uid"
+        :task="state.currentTask"
+        :practice-context="{ practiceMode: 'illegal-immersion' }"
         :mode-context="{ setWrongVocabDueAgainImmediately: true }"
         @finished="handleTaskFinished" 
       />

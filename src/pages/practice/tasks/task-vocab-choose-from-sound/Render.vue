@@ -60,7 +60,7 @@ interface Props {
 }
 
 const emit = defineEmits<{
-  finished: [];
+  finished: [correctness?: 'correct' | 'incorrect' | 'neutral'];
 }>();
 
 const props = defineProps<Props>();
@@ -236,10 +236,11 @@ const handleCompletion = async () => {
     await vocabRepo.scoreVocab(vocab1.value.uid, rating, immediateDue);
     await vocabRepo.updateLastReview(vocab1.value.uid);
 
-    setTimeout(() => emit('finished'), 750);
+    const correctness = firstAttemptWrong.value ? 'incorrect' : 'correct';
+    setTimeout(() => emit('finished', correctness), 750);
   } catch (error) {
     toast.error('Failed to save vocabulary progress');
-    emit('finished');
+    emit('finished', 'neutral');
   }
 };
 
