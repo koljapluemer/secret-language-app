@@ -37,8 +37,8 @@ const isOnSettingsPage = computed(() => {
   return route.path.startsWith('/settings') || route.name === 'settings';
 });
 
-const isOnTimeTrackingPage = computed(() => {
-  return route.path.startsWith('/time-tracking') || route.name === 'time-tracking';
+const isOnStatsPage = computed(() => {
+  return route.path.startsWith('/stats') || route.name === 'stats';
 });
 
 const isOnDownloadsPage = computed(() => {
@@ -103,14 +103,14 @@ const toggleMaterialSubmenu = () => {
           <span class="hidden md:inline ml-2">{{ t('navigation.settings') }}</span>
         </router-link>
         
-        <!-- Time -->
-        <router-link 
-          :to="{ name: 'time-tracking' }" 
+        <!-- Stats -->
+        <router-link
+          :to="{ name: 'stats' }"
           class="btn btn-ghost btn-sm"
-          :class="{ 'btn-active': isOnTimeTrackingPage }"
+          :class="{ 'btn-active': isOnStatsPage }"
         >
           <Clock :size="16" />
-          <span class="hidden md:inline ml-2">{{ t('navigation.timeTracking') }}</span>
+          <span class="hidden md:inline ml-2">Stats</span>
         </router-link>
         
         <!-- Downloads -->

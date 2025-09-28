@@ -26,7 +26,7 @@ import PageGoalAdd from '@/pages/goal-add/PageGoalAdd.vue';
 import PageGoalEdit from '@/pages/goal-edit/PageGoalEdit.vue';
 import PageDownloads from '@/pages/downloads/PageDownloads.vue';
 import DownloadsHome from '@/pages/downloads/DownloadsHome.vue';
-import PageTimeTracking from '@/pages/time-tracking/PageTimeTracking.vue';
+import PageStats from '@/pages/time-tracking/PageTimeTracking.vue';
 import PageMyMaterial from '@/pages/my-material/PageMyMaterial.vue';
 import PageSettings from '@/pages/settings/PageSettings.vue';
 
@@ -190,9 +190,13 @@ const router = createRouter({
       component: PageSettings
     },
     {
+      path: '/stats',
+      name: 'stats',
+      component: PageStats
+    },
+    {
       path: '/time-tracking',
-      name: 'time-tracking',
-      component: PageTimeTracking
+      redirect: '/stats'
     }
   ]
 });
