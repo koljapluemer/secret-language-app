@@ -1,13 +1,15 @@
 import type { RepositoriesContext } from '@/shared/types/RepositoriesContext';
 import type { Task } from '@/pages/practice/Task';
 import { generateFactCardTryToRemember } from '@/pages/practice/tasks/task-fact-card-try-to-remember/generate';
+import { useToast } from '@/shared/toasts';
 
 export async function getRandomFactCardTryToRememberTask({
   factCardRepo,
   languageCodes
 }: RepositoriesContext & { languageCodes: string[] }): Promise<Task | null> {
+  const toast = useToast();
   if (!factCardRepo) return null;
-  
+
   try {
     // Get unseen fact cards
     const unseenFactCards = await factCardRepo.getRandomUnseenFactCards(10, languageCodes);
@@ -21,7 +23,7 @@ export async function getRandomFactCardTryToRememberTask({
     
     return null;
   } catch (error) {
-    toast.error('Error generating fact card try to remember task:', error);
+    toast.error(`Error generating fact card try to remember task: ${String(error)}`);
     return null;
   }
 }

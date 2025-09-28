@@ -155,7 +155,7 @@ async function handleVocabDisconnected(vocabId: string) {
 
     emit('update:needed-vocab-ids', vocabIds.value);
   } catch (error) {
-    toast.error('Failed to disconnect needed vocab:', error);
+    toast.error(`Failed to disconnect needed vocab: ${String(error)}`);
   }
 }
 

@@ -386,7 +386,7 @@ async function loadVocabStatsForCurrentPage() {
     
     vocabStats.value = stats;
   } catch (err) {
-    toast.error('Failed to load vocab stats:', err);
+    toast.error(`Failed to load vocab stats: ${String(err)}`);
   }
 }
 
@@ -400,7 +400,7 @@ async function deleteGoal(uid: string) {
     await goalRepo.delete(uid);
     await loadGoals(); // Reload to update pagination
   } catch (err) {
-    toast.error('Failed to delete goal:', err);
+    toast.error(`Failed to delete goal: ${String(err)}`);
     error.value = 'Failed to delete goal';
   }
 }
@@ -418,7 +418,7 @@ async function loadFilterOptions() {
       selectedSets.value = ['user-added', ...availableSets.value.map(s => s.uid)];
     }
   } catch (err) {
-    toast.error('Failed to load filter options:', err);
+    toast.error(`Failed to load filter options: ${String(err)}`);
   }
 }
 

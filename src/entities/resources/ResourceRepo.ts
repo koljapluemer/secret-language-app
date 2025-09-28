@@ -100,7 +100,7 @@ export class ResourceRepo implements ResourceRepoContract {
       await this.db.resources.add(resourceData);
       return resourceData;
     } catch (error) {
-      this.toast.error('ResourceRepo: Failed to save resource:', error);
+      this.toast.error(`ResourceRepo: Failed to save resource: ${String(error)}`);
       throw error;
     }
   }

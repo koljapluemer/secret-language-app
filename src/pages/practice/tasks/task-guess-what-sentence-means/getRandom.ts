@@ -1,11 +1,13 @@
 import type { RepositoriesContext } from '@/shared/types/RepositoriesContext';
 import type { Task } from '@/pages/practice/Task';
 import { generateGuessWhatSentenceMeans } from '@/pages/practice/tasks/task-guess-what-sentence-means/generate';
+import { useToast } from '@/shared/toasts';
 
 export async function getRandomGuessWhatSentenceMeansTask({
   vocabRepo,
   languageCodes
 }: RepositoriesContext & { languageCodes: string[] }): Promise<Task | null> {
+  const toast = useToast();
   if (!vocabRepo) return null;
   try {
     // Get unseen sentence vocab
@@ -20,7 +22,7 @@ export async function getRandomGuessWhatSentenceMeansTask({
     
     return null;
   } catch (error) {
-    toast.error('Error generating guess what sentence means task:', error);
+    toast.error(`Error generating guess what sentence means task: ${String(error)}`);
     return null;
   }
 }

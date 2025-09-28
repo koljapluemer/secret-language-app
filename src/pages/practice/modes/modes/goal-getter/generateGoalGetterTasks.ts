@@ -46,7 +46,7 @@ export async function generateGoalTask(
           }
         }
       } catch (error) {
-        toast.error(`Error generating ${taskType.name} task:`, error);
+        toast.error(`Error generating ${taskType.name} task: ${String(error)}`);
         // Continue to next task type
       }
     }
@@ -54,7 +54,7 @@ export async function generateGoalTask(
     // If we get here, no task types worked
     return null;
   } catch (error) {
-    toast.error('Error generating goal task:', error);
+    toast.error(`Error generating goal task: ${String(error)}`);
     return null;
   }
 }

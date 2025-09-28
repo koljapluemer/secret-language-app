@@ -7,6 +7,7 @@ import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract';
 import type { Task } from '@/pages/practice/Task';
 import type { RepositoriesContext } from '@/shared/types/RepositoriesContext';
 import { shuffleArray } from '@/shared/utils/arrayUtils';
+import { useToast } from '@/shared/toasts';
 
 // Import all task generators
 import { getRandomVocabTryToRememberTask } from '@/pages/practice/tasks/task-vocab-try-to-remember/getRandom';
@@ -54,6 +55,7 @@ export async function generateUltraRandomTask(
   languageCodes: string[],
   lastUsedTaskType?: string | null
 ): Promise<Task | null> {
+  const toast = useToast();
   try {
     // Create unified context for all generators
     const context: RepositoriesContext & { languageCodes: string[] } = {
@@ -98,7 +100,7 @@ export async function generateUltraRandomTask(
     // If no task could be generated, return null
     return null;
   } catch (error) {
-    toast.error('Error generating ultra random task:', error);
+    toast.error(`Error generating ultra random task: ${String(error)}`);
     return null;
   }
 }

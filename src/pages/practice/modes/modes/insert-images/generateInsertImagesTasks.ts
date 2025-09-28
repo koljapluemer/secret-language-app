@@ -24,7 +24,7 @@ export async function generateInsertImagesTask(
     return generateAddImageToVocab(vocab);
     
   } catch (error) {
-    toast.error('Error generating insert images task:', error);
+    toast.error(`Error generating insert images task: ${String(error)}`);
     return null;
   }
 }

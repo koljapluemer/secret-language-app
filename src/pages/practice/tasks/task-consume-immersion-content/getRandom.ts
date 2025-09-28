@@ -1,11 +1,13 @@
 import type { RepositoriesContext } from '@/shared/types/RepositoriesContext';
 import type { Task } from '@/pages/practice/Task';
 import { generateConsumeImmersionContent } from '@/pages/practice/tasks/task-consume-immersion-content/generate';
+import { useToast } from '@/shared/toasts';
 
 export async function getRandomConsumeImmersionContentTask({
   resourceRepo,
   languageCodes
 }: RepositoriesContext & { languageCodes: string[] }): Promise<Task | null> {
+  const toast = useToast();
   if (!resourceRepo) return null;
   try {
     // Get a valid immersion resource for consumption
@@ -19,7 +21,7 @@ export async function getRandomConsumeImmersionContentTask({
     
     return null;
   } catch (error) {
-    toast.error('Error generating consume immersion content task:', error);
+    toast.error(`Error generating consume immersion content task: ${String(error)}`);
     return null;
   }
 }

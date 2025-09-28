@@ -3,6 +3,7 @@ import type { VocabData } from '@/entities/vocab/VocabData';
 import type { Task } from '@/pages/practice/Task';
 import { generateClozeReveal } from '@/pages/practice/tasks/task-cloze-reveal/generate';
 import { getRandomDueVocabFromRandomValidImmersionResource } from '../../modes/utils/getRandomDueVocabFromRandomValidImmersionResource';
+import { useToast } from '@/shared/toasts';
 
 async function tryGenerateFromVocab(vocab: VocabData) {
   // Filter to only sentence vocab (cloze tasks are now sentence-only)
@@ -18,6 +19,7 @@ export async function getRandomClozeRevealTask({
   resourceRepo,
   languageCodes
 }: RepositoriesContext & { languageCodes: string[] }): Promise<Task | null> {
+  const toast = useToast();
   if (!vocabRepo || !resourceRepo) return null;
   try {
     // 25% chance to try immersion resource first
@@ -56,7 +58,7 @@ export async function getRandomClozeRevealTask({
     
     return null;
   } catch (error) {
-    toast.error('Error generating cloze reveal task:', error);
+    toast.error(`Error generating cloze reveal task: ${String(error)}`);
     return null;
   }
 }

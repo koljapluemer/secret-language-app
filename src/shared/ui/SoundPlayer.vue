@@ -79,7 +79,7 @@ function onAudioEnded() {
 }
 
 function onAudioError(error: Event) {
-  toast.error('Audio error:', error);
+  toast.error(`Audio error: ${error.type}`);
   isPlaying.value = false;
 }
 

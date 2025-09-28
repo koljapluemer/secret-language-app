@@ -3,6 +3,7 @@ import type { VocabData } from '@/entities/vocab/VocabData';
 import type { Task } from '@/pages/practice/Task';
 import { generateVocabRevealNativeToTarget, generateVocabRevealTargetToNative } from '@/pages/practice/tasks/task-vocab-reveal/generate';
 import { getRandomDueVocabFromRandomValidImmersionResource } from '../../modes/utils/getRandomDueVocabFromRandomValidImmersionResource';
+import { useToast } from '@/shared/toasts';
 
 
 async function tryGenerateFromVocab(vocab: VocabData) {
@@ -17,6 +18,7 @@ export async function getRandomVocabRevealTask({
   resourceRepo,
   languageCodes
 }: RepositoriesContext & { languageCodes: string[] }): Promise<Task | null> {
+  const toast = useToast();
   if (!vocabRepo || !resourceRepo) return null;
   try {
     // 25% chance to try immersion resource first
@@ -56,7 +58,7 @@ export async function getRandomVocabRevealTask({
     
     return null;
   } catch (error) {
-    toast.error('Error generating vocab reveal task:', error);
+    toast.error(`Error generating vocab reveal task: ${String(error)}`);
     return null;
   }
 }

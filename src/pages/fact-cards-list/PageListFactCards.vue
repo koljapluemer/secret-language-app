@@ -329,7 +329,7 @@ async function deleteFactCard(uid: string) {
   try {
     await factCardRepo.deleteFactCard(uid);
     await loadFactCards(); // Reload to update pagination
-  } catch (err) {
+  } catch {
     toast.error('Failed to delete fact card');
     error.value = 'Failed to delete fact card';
   }
@@ -347,7 +347,7 @@ async function loadFilterOptions() {
       selectedLanguages.value = availableLanguages.value.map(l => l.code);
       selectedSets.value = ['user-added', ...availableSets.value.map(s => s.uid)];
     }
-  } catch (err) {
+  } catch {
     toast.error('Failed to load filter options');
   }
 }

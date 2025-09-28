@@ -7,6 +7,7 @@ import type { Task } from '@/pages/practice/Task';
 import { getRandomGeneratedTaskForVocab } from '@/pages/practice/modes/utils/getRandomGeneratedTaskForVocab';
 import { getRandomGeneratedTaskForFactCard } from '@/pages/practice/modes/utils/getRandomGeneratedTaskForFactCard';
 import { randomFromArray } from '@/shared/utils/arrayUtils';
+import { useToast } from '@/shared/toasts';
 
 export async function generateSisyphosTask(
   vocabRepo: VocabRepoContract,
@@ -56,7 +57,8 @@ export async function generateSisyphosTask(
       return await getRandomGeneratedTaskForFactCard(factCard);
     }
   } catch (error) {
-    toast.error('Error generating Sisyphos task:', error);
+    const toast = useToast();
+    toast.error(`Error generating Sisyphos task: ${String(error)}`);
     return null;
   }
 }

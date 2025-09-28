@@ -4,6 +4,7 @@ import type { VocabData } from '@/entities/vocab/VocabData';
 import type { Task } from '@/pages/practice/Task';
 import { getRandomGeneratedTaskForVocab } from '@/pages/practice/modes/utils/getRandomGeneratedTaskForVocab';
 import { generateGuessWhatSentenceMeans } from '@/pages/practice/tasks/task-guess-what-sentence-means/generate';
+import { useToast } from '@/shared/toasts';
 
 interface SentenceSlideState {
   currentSentence: VocabData | null;
@@ -91,7 +92,8 @@ export async function generateSentenceSlideTask(
     return null;
     
   } catch (error) {
-    toast.error('Error generating sentence slide task:', error);
+    const toast = useToast();
+    toast.error(`Error generating sentence slide task: ${String(error)}`);
     resetSlideState();
     return null;
   }
@@ -106,7 +108,8 @@ async function getRandomUnseenSentenceWithRelatedVocab(
     // Use the new repo method that does DB-level filtering
     return await vocabRepo.getRandomUnseenSentenceVocabWithRelatedVocab(languageCodes, blockList);
   } catch (error) {
-    toast.error('Error getting random unseen sentence:', error);
+    const toast = useToast();
+    toast.error(`Error getting random unseen sentence: ${String(error)}`);
     return null;
   }
 }
@@ -124,7 +127,8 @@ async function initializeConnectedVocabQueue(
     slideState.connectedVocabQueue = [...connectedVocab];
     slideState.initialConnectedVocabCount = connectedVocab.length;
   } catch (error) {
-    toast.error('Error initializing connected vocab queue:', error);
+    const toast = useToast();
+    toast.error(`Error initializing connected vocab queue: ${String(error)}`);
     slideState.connectedVocabQueue = [];
     slideState.initialConnectedVocabCount = 0;
   }
@@ -159,7 +163,8 @@ async function getNextVocabTask(
     
     return task;
   } catch (error) {
-    toast.error('Error getting next vocab task:', error);
+    const toast = useToast();
+    toast.error(`Error getting next vocab task: ${String(error)}`);
     return null;
   }
 }
@@ -183,7 +188,8 @@ export async function removeVocabIfNotDue(
       slideState.connectedVocabQueue = slideState.connectedVocabQueue.filter(v => v.uid !== vocabId);
     }
   } catch (error) {
-    toast.error('Error checking vocab due status:', error);
+    const toast = useToast();
+    toast.error(`Error checking vocab due status: ${String(error)}`);
   }
 }
 

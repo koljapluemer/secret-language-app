@@ -825,8 +825,7 @@ export class VocabRepo implements VocabRepoContract {
       vocab.hasImage = true;
 
       await vocabDb.vocab.put(toRaw(vocab));
-    } catch (error) {
-      
+    } catch {
       // Don't throw - gracefully handle missing/invalid images
     }
   }
@@ -861,7 +860,7 @@ export class VocabRepo implements VocabRepoContract {
 
       await vocabDb.vocab.put(toRaw(vocab));
     } catch (error) {
-      this.toast.error('Failed to add image from file:', error);
+      this.toast.error(`Failed to add image from file: ${String(error)}`);
       throw error;
     }
   }
@@ -962,8 +961,7 @@ export class VocabRepo implements VocabRepoContract {
       vocab.sounds.push(vocabSound);
       vocab.hasSound = vocab.sounds.some(sound => !sound.disableForPractice);
       await vocabDb.vocab.put(toRaw(vocab));
-    } catch (error) {
-      
+    } catch {
       // Don't throw - gracefully handle missing/invalid sounds
     }
   }
@@ -1001,7 +999,7 @@ export class VocabRepo implements VocabRepoContract {
       vocab.hasSound = vocab.sounds.some(sound => !sound.disableForPractice);
       await vocabDb.vocab.put(toRaw(vocab));
     } catch (error) {
-      this.toast.error('Failed to add sound from URL:', error);
+      this.toast.error(`Failed to add sound from URL: ${String(error)}`);
       throw error;
     }
   }

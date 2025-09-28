@@ -312,7 +312,7 @@ async function loadLanguagesAndSets() {
           }))
         );
         downloadedStatuses.push(...statuses);
-      } catch (err) {
+      } catch {
         toast.error(`Failed to load sets for ${language.code}`);
       }
     }

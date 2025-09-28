@@ -3,6 +3,7 @@ import type { TranslationData } from '@/entities/translations/TranslationData';
 import type { Task } from '@/pages/practice/Task';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import { randomFromArray } from '@/shared/utils/arrayUtils';
+import { useToast } from '@/shared/toasts';
 
 // Import all task generators
 import { generateAddTranslation } from '@/pages/practice/tasks/task-vocab-add-translation/generate';
@@ -27,6 +28,7 @@ export async function getRandomGeneratedTaskForVocab(
   translations: TranslationData[] = [],
   vocabRepo?: VocabRepoContract
 ): Promise<Task | null> {
+  const toast = useToast();
   const level = vocab.progress.level;
   const isSentenceVocab = vocab.consideredSentence === true;
   const hasTranslations = translations.length > 0;
@@ -93,7 +95,7 @@ export async function getRandomGeneratedTaskForVocab(
         // Fallback to single vocab if no other vocab found
         return generateFormSentenceTaskFromSingleVocab(vocab);
       } catch (error) {
-        toast.error('Error finding second vocab for form sentence task:', error);
+        toast.error(`Error finding second vocab for form sentence task: ${String(error)}`);
         return generateFormSentenceTaskFromSingleVocab(vocab);
       }
     });

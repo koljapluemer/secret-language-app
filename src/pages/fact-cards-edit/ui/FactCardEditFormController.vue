@@ -146,7 +146,7 @@ async function loadFactCard() {
         try {
           const notes = await noteRepo.getNotesByUIDs(factCard.notes);
           loadedNotes.value = notes;
-        } catch (error) {
+        } catch {
           toast.error('Failed to load notes');
           loadedNotes.value = [];
         }

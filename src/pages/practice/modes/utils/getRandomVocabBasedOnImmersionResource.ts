@@ -2,6 +2,7 @@ import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoContract';
 import type { VocabData } from '@/entities/vocab/VocabData';
 import { randomFromArray } from '@/shared/utils/arrayUtils';
+import { useToast } from '@/shared/toasts';
 
 async function getVocabFromImmersionResource(
   resourceRepo: ResourceRepoContract,
@@ -30,6 +31,7 @@ export async function getRandomVocabBasedOnImmersionResource(
   resourceUid: string,
   vocabBlockList?: string[]
 ): Promise<VocabData | null> {
+  const toast = useToast();
   try {
     const vocabItems = await getVocabFromImmersionResource(resourceRepo, vocabRepo, resourceUid, vocabBlockList);
     if (!vocabItems) return null;
@@ -46,7 +48,7 @@ export async function getRandomVocabBasedOnImmersionResource(
 
     return Math.random() < 0.3 ? randomFromArray(availableNew) : randomFromArray(seenVocab);
   } catch (error) {
-    toast.error('Error getting random vocab from immersion resource:', error);
+    toast.error(`Error getting random vocab from immersion resource: ${String(error)}`);
     return null;
   }
 }
@@ -57,6 +59,7 @@ export async function getRandomNewVocabFromImmersionResource(
   resourceUid: string,
   vocabBlockList?: string[]
 ): Promise<VocabData | null> {
+  const toast = useToast();
   try {
     const vocabItems = await getVocabFromImmersionResource(resourceRepo, vocabRepo, resourceUid, vocabBlockList);
     if (!vocabItems) return null;
@@ -64,7 +67,7 @@ export async function getRandomNewVocabFromImmersionResource(
     const newVocab = vocabItems.filter(v => v.progress.level === -1);
     return randomFromArray(newVocab);
   } catch (error) {
-    toast.error('Error getting random new vocab from immersion resource:', error);
+    toast.error(`Error getting random new vocab from immersion resource: ${String(error)}`);
     return null;
   }
 }
@@ -75,6 +78,7 @@ export async function getRandomSeenVocabFromImmersionResource(
   resourceUid: string,
   vocabBlockList?: string[]
 ): Promise<VocabData | null> {
+  const toast = useToast();
   try {
     const vocabItems = await getVocabFromImmersionResource(resourceRepo, vocabRepo, resourceUid, vocabBlockList);
     if (!vocabItems) return null;
@@ -82,7 +86,7 @@ export async function getRandomSeenVocabFromImmersionResource(
     const seenVocab = vocabItems.filter(v => v.progress.level >= 0);
     return randomFromArray(seenVocab);
   } catch (error) {
-    toast.error('Error getting random seen vocab from immersion resource:', error);
+    toast.error(`Error getting random seen vocab from immersion resource: ${String(error)}`);
     return null;
   }
 }

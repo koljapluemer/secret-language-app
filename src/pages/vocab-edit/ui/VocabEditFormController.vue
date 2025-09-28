@@ -239,10 +239,6 @@ async function saveInternal(): Promise<void> {
   serializedFormData.images = originalImages;
   serializedFormData.sounds = originalSounds;
   
-  console.log('🔧 EDIT: serializedFormData after Blob restoration:', {
-    images: serializedFormData.images?.map(img => ({ uid: img.uid, hasBlob: !!img.blob, blobType: img.blob?.type, blobSize: img.blob?.size })),
-    sounds: serializedFormData.sounds?.map(sound => ({ uid: sound.uid, hasBlob: !!sound.blob, blobType: sound.blob?.type, blobSize: sound.blob?.size }))
-  });
 
   for (const note of serializedFormData.notes) {
     if (note.uid && loadedNotes.value.find(n => n.uid === note.uid)) {
@@ -295,11 +291,6 @@ async function saveInternal(): Promise<void> {
       ...formDataConverted
     };
     
-    console.log('🔧 EDIT: Final updatedVocab being passed to updateVocab:', {
-      uid: updatedVocab.uid,
-      images: updatedVocab.images?.map(img => ({ uid: img.uid, hasBlob: !!img.blob, blobType: img.blob?.type, blobSize: img.blob?.size })),
-      sounds: updatedVocab.sounds?.map(sound => ({ uid: sound.uid, hasBlob: !!sound.blob, blobType: sound.blob?.type, blobSize: sound.blob?.size }))
-    });
     
     await vocabRepo.updateVocab(toRaw(updatedVocab));
     finalVocabId = updatedVocab.uid;

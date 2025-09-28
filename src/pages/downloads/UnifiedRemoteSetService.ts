@@ -73,7 +73,7 @@ export class UnifiedRemoteSetService {
       if (!response.ok) return [];
       return await response.json();
     } catch (error) {
-      this.toast.error('Failed to fetch available languages:', error);
+      this.toast.error(`Failed to fetch available languages: ${String(error)}`);
       return [];
     }
   }
@@ -97,7 +97,7 @@ export class UnifiedRemoteSetService {
       
       return setsWithMetadata;
     } catch (error) {
-      this.toast.error(`Failed to fetch sets for ${languageCode}:`, error);
+      this.toast.error(`Failed to fetch sets for ${languageCode}: ${String(error)}`);
       return [];
     }
   }
@@ -117,7 +117,7 @@ export class UnifiedRemoteSetService {
         return null;
       }
     } catch (error) {
-      this.toast.error(`Failed to fetch metadata for ${languageCode}/${setName}:`, error);
+      this.toast.error(`Failed to fetch metadata for ${languageCode}/${setName}: ${String(error)}`);
       return null;
     }
   }
@@ -604,7 +604,7 @@ export class UnifiedRemoteSetService {
           setFiles[fileName as keyof RemoteSetFiles] = data as any;
         }
       } catch (error) {
-        this.toast.error(`Failed to load ${fileName}.jsonl:`, error);
+        this.toast.error(`Failed to load ${fileName}.jsonl: ${String(error)}`);
         return null;
       }
     }
@@ -631,8 +631,6 @@ export class UnifiedRemoteSetService {
       const localUid = referenceMap.get(remoteId);
       if (localUid) {
         resolvedUids.push(localUid);
-      } else {
-        
       }
     }
     return [...new Set(resolvedUids)]; // Remove duplicates
@@ -644,8 +642,6 @@ export class UnifiedRemoteSetService {
       const link = linkMap.get(remoteId);
       if (link) {
         resolvedLinks.push(link);
-      } else {
-        
       }
     }
     return resolvedLinks;
@@ -707,8 +703,8 @@ export class UnifiedRemoteSetService {
         for (const imageData of vocab.images) {
           try {
             await this.downloadAndAddImage(languageCode, setName, localVocabUid, imageData);
-          } catch (error) {
-            
+          } catch {
+            // Silently ignore image download errors
           }
         }
       }
@@ -718,8 +714,8 @@ export class UnifiedRemoteSetService {
         for (const soundData of vocab.sounds) {
           try {
             await this.downloadAndAddSound(languageCode, setName, localVocabUid, soundData);
-          } catch (error) {
-            
+          } catch {
+            // Silently ignore sound download errors
           }
         }
       }
@@ -753,8 +749,7 @@ export class UnifiedRemoteSetService {
 
       // Use addImageFromUrl instead of addImageFromFile to avoid compression issues
       await this.vocabRepo.addImageFromUrl(vocabUid, imageUrl, imageData.alt);
-    } catch (error) {
-      
+    } catch {
       // Don't rethrow - continue processing other images
     }
   }
@@ -786,8 +781,7 @@ export class UnifiedRemoteSetService {
       const file = new File([blob], soundData.filename, { type: blob.type });
       
       await this.vocabRepo.addSoundFromFile(vocabUid, file);
-    } catch (error) {
-      
+    } catch {
       // Don't rethrow - continue processing other sounds
     }
   }

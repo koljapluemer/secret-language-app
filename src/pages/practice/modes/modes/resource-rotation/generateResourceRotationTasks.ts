@@ -1,6 +1,7 @@
 import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoContract';
 import type { Task } from '@/pages/practice/Task';
 import { getRandomExtractKnowledgeTask } from '@/pages/practice/tasks/task-resource-extract-knowledge/getRandom';
+import { useToast } from '@/shared/toasts';
 
 export async function generateResourceRotationTask(
   resourceRepo: ResourceRepoContract,
@@ -12,7 +13,8 @@ export async function generateResourceRotationTask(
       languageCodes
     });
   } catch (error) {
-    toast.error('Error generating resource rotation task:', error);
+    const toast = useToast();
+    toast.error(`Error generating resource rotation task: ${String(error)}`);
     return null;
   }
 }

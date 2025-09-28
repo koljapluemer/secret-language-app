@@ -74,7 +74,7 @@ watch(() => route.params.id, async (vocabId) => {
       const vocab = await vocabRepo.getVocabByUID(vocabId as string);
       currentVocab.value = vocab || null;
     } catch (error) {
-      toast.error('Failed to load vocab data:', error);
+      toast.error(`Failed to load vocab data: ${String(error)}`);
       currentVocab.value = null;
     }
   } else {
@@ -93,7 +93,7 @@ async function handleVocabSaved(vocabId: string) {
     const vocab = await vocabRepo.getVocabByUID(vocabId);
     currentVocab.value = vocab || null;
   } catch (error) {
-    toast.error('Failed to reload vocab data:', error);
+    toast.error(`Failed to reload vocab data: ${String(error)}`);
   }
 }
 </script>

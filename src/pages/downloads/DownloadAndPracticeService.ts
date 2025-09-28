@@ -82,7 +82,7 @@ export class DownloadAndPracticeService {
       const data = await response.json();
       return remoteSetMetaDataSchema.parse(data);
     } catch (error) {
-      this.toast.error('Failed to load set metadata:', error);
+      this.toast.error(`Failed to load set metadata: ${String(error)}`);
       return null;
     }
   }

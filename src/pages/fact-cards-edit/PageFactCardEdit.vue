@@ -66,7 +66,7 @@ watch(() => route.params.id, async (factCardId) => {
     try {
       const factCard = await factCardRepo.getFactCardByUID(factCardId as string);
       currentFactCard.value = factCard || null;
-    } catch (error) {
+    } catch {
       toast.error('Failed to load fact card data');
       currentFactCard.value = null;
     }
@@ -85,7 +85,7 @@ async function handleFactCardSaved(factCardId: string) {
     // Reload fact card data
     const factCard = await factCardRepo.getFactCardByUID(factCardId);
     currentFactCard.value = factCard || null;
-  } catch (error) {
+  } catch {
     toast.error('Failed to reload fact card data');
   }
 }

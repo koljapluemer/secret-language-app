@@ -11,6 +11,7 @@ import type { Task } from '@/pages/practice/Task';
 import TaskRenderer from '@/pages/practice/tasks/ui/TaskRenderer.vue';
 import { useQueueState } from '@/pages/practice/modes/utils/useQueueState';
 import { generateSisyphosTask } from './generateSisyphosTasks';
+import { useToast } from '@/shared/toasts';
 
 // Inject repositories
 const vocabRepo = inject<VocabRepoContract>('vocabRepo');
@@ -24,6 +25,8 @@ const noteRepo = inject<NoteRepoContract>('noteRepo');
 if (!vocabRepo || !translationRepo || !factCardRepo || !languageRepo || !resourceRepo || !goalRepo || !noteRepo) {
   throw new Error('Required repositories not available');
 }
+
+const toast = useToast();
 
 
 // Queue state
@@ -62,7 +65,7 @@ async function generateNextTask(): Promise<Task | null> {
       blockList
     );
   } catch (error) {
-    toast.error('Error generating Sisyphos task:', error);
+    toast.error(`Error generating Sisyphos task: ${String(error)}`);
     return null;
   }
 }
@@ -84,7 +87,7 @@ async function tryTransitionToTask(): Promise<boolean> {
       return true;
     }
   } catch (error) {
-    toast.error('Task generation failed:', error);
+    toast.error(`Task generation failed: ${String(error)}`);
   }
   
   clearDelayedLoading();
@@ -104,7 +107,7 @@ async function initializeQueue() {
       setEmpty('No reviews are currently due.');
     }
   } catch (error) {
-    toast.error('Initialization failed:', error);
+    toast.error(`Initialization failed: ${String(error)}`);
     clearDelayedLoading();
     setError('Failed to initialize review session. Please try again.');
   }
@@ -135,7 +138,7 @@ async function completeCurrentTask() {
         state.value.nextTask = newNextTask;
       }
     } catch (error) {
-      toast.error('Error generating next task:', error);
+      toast.error(`Error generating next task: ${String(error)}`);
     }
   } else {
     // No next task ready, need to generate one

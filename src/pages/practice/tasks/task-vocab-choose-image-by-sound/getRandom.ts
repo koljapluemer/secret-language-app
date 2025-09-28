@@ -1,13 +1,15 @@
 import type { RepositoriesContext } from '@/shared/types/RepositoriesContext';
 import type { Task } from '@/pages/practice/Task';
 import { generateVocabChooseImageBySound } from '@/pages/practice/tasks/task-vocab-choose-image-by-sound/generate';
+import { useToast } from '@/shared/toasts';
 
 export async function getRandomVocabChooseImageBySoundTask({
   vocabRepo,
   languageCodes
 }: RepositoriesContext & { languageCodes: string[] }): Promise<Task | null> {
+  const toast = useToast();
   if (!vocabRepo) return null;
-  
+
   try {
     // 70% chance to prefer due vocab (if available), 30% chance for unseen vocab
     const preferDueVocab = Math.random() < 0.7;
@@ -37,7 +39,7 @@ export async function getRandomVocabChooseImageBySoundTask({
     // No vocab available with both sound and images
     return null;
   } catch (error) {
-    toast.error('Error generating vocab choose image by sound task:', error);
+    toast.error(`Error generating vocab choose image by sound task: ${String(error)}`);
     return null;
   }
 }

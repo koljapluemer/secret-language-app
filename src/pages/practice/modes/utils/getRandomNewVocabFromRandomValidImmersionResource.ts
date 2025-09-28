@@ -3,6 +3,7 @@ import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { VocabData } from '@/entities/vocab/VocabData';
 import { randomFromArray } from '@/shared/utils/arrayUtils';
 import { getRandomNewVocabFromImmersionResource } from './getRandomVocabBasedOnImmersionResource';
+import { useToast } from '@/shared/toasts';
 
 export async function getRandomNewVocabFromRandomValidImmersionResource(
   resourceRepo: ResourceRepoContract,
@@ -10,6 +11,7 @@ export async function getRandomNewVocabFromRandomValidImmersionResource(
   languageCodes: string[],
   vocabBlockList?: string[]
 ): Promise<VocabData | null> {
+  const toast = useToast();
   try {
     const resources = await resourceRepo.getValidImmersionResources(languageCodes);
     if (resources.length === 0) return null;
@@ -19,7 +21,7 @@ export async function getRandomNewVocabFromRandomValidImmersionResource(
 
     return await getRandomNewVocabFromImmersionResource(resourceRepo, vocabRepo, resource.uid, vocabBlockList);
   } catch (error) {
-    toast.error('Error getting random new vocab from random valid immersion resource:', error);
+    toast.error(`Error getting random new vocab from random valid immersion resource: ${String(error)}`);
     return null;
   }
 }

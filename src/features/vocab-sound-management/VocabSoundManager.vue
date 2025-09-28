@@ -189,8 +189,8 @@ function getAudioUrl(sound: VocabSound): string {
     const url = URL.createObjectURL(sound.blob);
     createdUrl.value = url;
     return url;
-  } catch (error) {
-    
+  } catch {
+    // Failed to create object URL
     return '';
   }
 }

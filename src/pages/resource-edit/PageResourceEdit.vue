@@ -80,7 +80,7 @@ async function loadVocabItems() {
   try {
     vocabItems.value = await vocabRepo.getVocabByUIDs(resource.value.vocab);
   } catch (error) {
-    toast.error('Error loading vocab items:', error);
+    toast.error(`Error loading vocab items: ${String(error)}`);
     vocabItems.value = [];
   }
 }

@@ -1,12 +1,13 @@
 import type { RepositoriesContext } from '@/shared/types/RepositoriesContext';
 import type { VocabData } from '@/entities/vocab/VocabData';
 import type { Task } from '@/pages/practice/Task';
-import { 
+import {
   generateVocabChoiceFromTwoTargetToNative,
   generateVocabChoiceFromTwoNativeToTarget,
   generateVocabChoiceFromFourTargetToNative,
   generateVocabChoiceFromFourNativeToTarget
 } from '@/pages/practice/tasks/task-vocab-single-choice/generate';
+import { useToast } from '@/shared/toasts';
 
 async function tryGenerateFromVocab(vocab: VocabData) {
   // Randomly pick between the four generators
@@ -25,6 +26,7 @@ export async function getRandomVocabChoiceTask({
   vocabRepo,
   languageCodes
 }: RepositoriesContext & { languageCodes: string[] }): Promise<Task | null> {
+  const toast = useToast();
   if (!vocabRepo) return null;
   try {
     // 25% chance to try immersion resource first
@@ -53,7 +55,7 @@ export async function getRandomVocabChoiceTask({
     
     return null;
   } catch (error) {
-    toast.error('Error generating vocab choice task:', error);
+    toast.error(`Error generating vocab choice task: ${String(error)}`);
     return null;
   }
 }

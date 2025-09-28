@@ -73,7 +73,7 @@ async function deduplicateNotesAndTranslations() {
     deduplicationResults.value = { vocabProcessed, translationsProcessed, duplicatesRemoved };
     
   } catch (error) {
-    toast.error('Error during deduplication:', error);
+    toast.error(`Error during deduplication: ${String(error)}`);
     alert('An error occurred during deduplication. Check console for details.');
   } finally {
     isDeduplicating.value = false;

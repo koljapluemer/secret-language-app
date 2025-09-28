@@ -48,7 +48,7 @@ export class LocalSetRepo implements LocalSetRepoContract {
       await this.db.localSets.add(localSetData);
       return localSetData;
     } catch (error) {
-      this.toast.error('LocalSetRepo: Failed to save local set:', error);
+      this.toast.error(`LocalSetRepo: Failed to save local set: ${String(error)}`);
       throw error;
     }
   }

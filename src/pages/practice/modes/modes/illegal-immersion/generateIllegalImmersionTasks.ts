@@ -119,7 +119,7 @@ export async function generateIllegalImmersionTask(
     return null;
     
   } catch (error) {
-    toast.error('Error generating illegal immersion task:', error);
+    toast.error(`Error generating illegal immersion task: ${String(error)}`);
     resetImmersionState();
     return null;
   }

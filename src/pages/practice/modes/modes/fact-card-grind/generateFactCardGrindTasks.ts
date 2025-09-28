@@ -41,7 +41,7 @@ export async function generateFactCard(
     // No fact cards available
     return null;
   } catch (error) {
-    toast.error('Error generating fact card task:', error);
+    toast.error(`Error generating fact card task: ${String(error)}`);
     return null;
   }
 }

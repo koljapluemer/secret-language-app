@@ -170,8 +170,8 @@ function getImageUrl(image: VocabImage): string {
       const url = URL.createObjectURL(image.blob);
       createdUrls.add(url);
       return url;
-    } catch (error) {
-      
+    } catch {
+      // Failed to create object URL, fall back to original URL
       return image.url || '';
     }
   }

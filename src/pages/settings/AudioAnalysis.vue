@@ -123,9 +123,6 @@ async function detectEmptySoundFiles() {
     }
 
     ;
-    if (results.length > 0) {
-      console.table(results);
-    }
 
     // Store results for display
     emptyAudioResults.value = results;
@@ -140,7 +137,7 @@ async function detectEmptySoundFiles() {
     }
 
   } catch (error) {
-    toast.error('Error detecting empty sound files:', error);
+    toast.error(`Error detecting empty sound files: ${String(error)}`);
     toast.error('Error analyzing sound files.');
   } finally {
     detectingSounds.value = false;
@@ -168,7 +165,7 @@ async function deleteEmptyAudio() {
     analysisCompleted.value = false;
 
   } catch (error) {
-    toast.error('Error deleting empty sound files:', error);
+    toast.error(`Error deleting empty sound files: ${String(error)}`);
     toast.error('Error deleting empty sound files.');
   } finally {
     deletingEmptyAudio.value = false;

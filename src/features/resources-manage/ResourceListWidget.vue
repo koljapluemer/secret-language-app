@@ -347,7 +347,7 @@ async function deleteResource(uid: string) {
   try {
     await resourceRepo.deleteResource(uid);
     await loadResources(); // Reload to update pagination
-  } catch (err) {
+  } catch {
     toast.error('Failed to delete resource');
     error.value = 'Failed to delete resource';
   }
@@ -365,7 +365,7 @@ async function loadFilterOptions() {
       selectedLanguages.value = availableLanguages.value.map(l => l.code);
       selectedSets.value = ['user-added', ...availableSets.value.map(s => s.uid)];
     }
-  } catch (err) {
+  } catch {
     toast.error('Failed to load filter options');
   }
 }

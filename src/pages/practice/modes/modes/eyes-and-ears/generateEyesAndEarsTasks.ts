@@ -153,7 +153,7 @@ export async function generateEyesAndEars(
     
     return null;
   } catch (error) {
-    toast.error('Error generating eyes and ears task:', error);
+    toast.error(`Error generating eyes and ears task: ${String(error)}`);
     return null;
   }
 }

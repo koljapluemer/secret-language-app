@@ -2,11 +2,13 @@ import type { RepositoriesContext } from '@/shared/types/RepositoriesContext';
 import type { Task } from '@/pages/practice/Task';
 import { generateTaskFormSentenceFromTwoVocab } from '@/pages/practice/tasks/task-vocab-form-sentence/generate';
 import { randomFromArray, pickRandom } from '@/shared/utils/arrayUtils';
+import { useToast } from '@/shared/toasts';
 
 export async function getRandomVocabFormSentenceTask({
   vocabRepo,
   languageCodes
 }: RepositoriesContext & { languageCodes: string[] }): Promise<Task | null> {
+  const toast = useToast();
   if (!vocabRepo) return null;
   try {
     // Randomly select a single language to focus on
@@ -32,7 +34,7 @@ export async function getRandomVocabFormSentenceTask({
     
     return null;
   } catch (error) {
-    toast.error('Error generating vocab form sentence task:', error);
+    toast.error(`Error generating vocab form sentence task: ${String(error)}`);
     return null;
   }
 }
