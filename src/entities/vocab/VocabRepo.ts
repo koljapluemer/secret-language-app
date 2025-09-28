@@ -6,6 +6,7 @@ import { pickRandom, shuffleArray } from '@/shared/utils/arrayUtils';
 import { levenshteinDistance, isLengthWithinRange } from '@/shared/utils/stringUtils';
 import { compressImage, compressImageFromUrl } from '@/shared/utils/imageUtils';
 import { validateAudioFile, getAudioDuration, fetchAudioAsBlob } from '@/shared/utils/audioUtils';
+import { useToast } from '@/shared/toasts';
 import { toRaw } from 'vue';
 
 // Utility functions
@@ -34,6 +35,7 @@ class VocabDatabase extends Dexie {
 const vocabDb = new VocabDatabase();
 
 export class VocabRepo implements VocabRepoContract {
+  private toast = useToast();
 
   private ensureVocabFields(vocab: VocabData): VocabData {
     return {
@@ -47,6 +49,7 @@ export class VocabRepo implements VocabRepoContract {
       translations: vocab.translations || [],
       relatedVocab: vocab.relatedVocab || [],
       notRelatedVocab: vocab.notRelatedVocab || [],
+      similarSoundingButNotTheSame: vocab.similarSoundingButNotTheSame || [],
       images: vocab.images || [],
       sounds: vocab.sounds || []
     };
@@ -97,7 +100,7 @@ export class VocabRepo implements VocabRepoContract {
       .anyOf(languages)
       .filter(vocab => {
         if (!vocab.progress) {
-          console.warn('Found vocab with null/undefined progress:', vocab.uid);
+          
           return !vocab.doNotPractice && (!vocabBlockList || !vocabBlockList.includes(vocab.uid));
         }
         return isUnseen(vocab) && !vocab.doNotPractice && (!vocabBlockList || !vocabBlockList.includes(vocab.uid));
@@ -123,7 +126,7 @@ export class VocabRepo implements VocabRepoContract {
         }
 
         if (!vocab.progress) {
-          console.warn('Found vocab with null/undefined progress:', vocab.uid);
+          
           return !vocab.doNotPractice && (!vocabBlockList || !vocabBlockList.includes(vocab.uid));
         }
         return isUnseen(vocab) && !vocab.doNotPractice && (!vocabBlockList || !vocabBlockList.includes(vocab.uid));
@@ -144,7 +147,7 @@ export class VocabRepo implements VocabRepoContract {
 
       // Check for null/undefined progress (shouldn't happen but handle gracefully)
       if (!vocab.progress) {
-        console.warn('Found vocab with null/undefined progress:', vocab.uid);
+        
         return true; // Consider unseen if no progress
       }
 
@@ -803,7 +806,7 @@ export class VocabRepo implements VocabRepoContract {
       );
 
       if (isDuplicate) {
-        console.warn(`Image already exists, skipping: ${imageUrl}`);
+        
         return;
       }
 
@@ -823,7 +826,7 @@ export class VocabRepo implements VocabRepoContract {
 
       await vocabDb.vocab.put(toRaw(vocab));
     } catch (error) {
-      console.warn('Failed to add image from URL:', error);
+      
       // Don't throw - gracefully handle missing/invalid images
     }
   }
@@ -858,7 +861,7 @@ export class VocabRepo implements VocabRepoContract {
 
       await vocabDb.vocab.put(toRaw(vocab));
     } catch (error) {
-      console.error('Failed to add image from file:', error);
+      this.toast.error('Failed to add image from file:', error);
       throw error;
     }
   }
@@ -939,7 +942,7 @@ export class VocabRepo implements VocabRepoContract {
       );
 
       if (isDuplicate) {
-        console.warn(`Sound already exists, skipping: ${file.name}`);
+        
         return;
       }
 
@@ -960,7 +963,7 @@ export class VocabRepo implements VocabRepoContract {
       vocab.hasSound = vocab.sounds.some(sound => !sound.disableForPractice);
       await vocabDb.vocab.put(toRaw(vocab));
     } catch (error) {
-      console.warn('Failed to add sound from file:', error);
+      
       // Don't throw - gracefully handle missing/invalid sounds
     }
   }
@@ -998,7 +1001,7 @@ export class VocabRepo implements VocabRepoContract {
       vocab.hasSound = vocab.sounds.some(sound => !sound.disableForPractice);
       await vocabDb.vocab.put(toRaw(vocab));
     } catch (error) {
-      console.error('Failed to add sound from URL:', error);
+      this.toast.error('Failed to add sound from URL:', error);
       throw error;
     }
   }
@@ -1102,8 +1105,8 @@ export class VocabRepo implements VocabRepoContract {
         if (!vocab.sounds || vocab.sounds.length === 0) return false;
         if (!vocab.sounds.some(sound => !sound.disableForPractice)) return false;
         
-        // Must have relatedVocab length > 0
-        if (!vocab.relatedVocab || vocab.relatedVocab.length === 0) return false;
+        // Must have similarSoundingButNotTheSame length > 0
+        if (!vocab.similarSoundingButNotTheSame || vocab.similarSoundingButNotTheSame.length === 0) return false;
         
         // Must be either due or unseen
         if (!vocab.progress) return true; // Consider unseen if no progress
@@ -1125,8 +1128,8 @@ export class VocabRepo implements VocabRepoContract {
     for (const candidate of vocab) {
       const ensuredCandidate = this.ensureVocabFields(candidate);
       
-      // Get related vocab and check if at least one meets criteria
-      const relatedVocabList = await vocabDb.vocab.where('uid').anyOf(ensuredCandidate.relatedVocab).toArray();
+      // Get similar sounding vocab and check if at least one meets criteria
+      const relatedVocabList = await vocabDb.vocab.where('uid').anyOf(ensuredCandidate.similarSoundingButNotTheSame!).toArray();
       const validRelatedVocab = relatedVocabList.filter(v =>
         v.content &&
         v.sounds && v.sounds.some(s => !s.disableForPractice)
@@ -1168,7 +1171,7 @@ export class VocabRepo implements VocabRepoContract {
       .equals(setUid)
       .filter(vocab => {
         if (!vocab.progress) {
-          console.warn('Found vocab with null/undefined progress:', vocab.uid);
+          
           return !vocab.doNotPractice &&
                  vocab.origins.includes(setUid) &&
                  (!vocabBlockList || !vocabBlockList.includes(vocab.uid));

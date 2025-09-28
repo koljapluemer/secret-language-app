@@ -89,7 +89,7 @@ export async function generateUltraRandomTask(
           return task;
         }
       } catch (error) {
-        console.warn(`Failed to generate ${taskType} task:`, error);
+        
         // Continue to next task type
         continue;
       }
@@ -98,7 +98,7 @@ export async function generateUltraRandomTask(
     // If no task could be generated, return null
     return null;
   } catch (error) {
-    console.error('Error generating ultra random task:', error);
+    toast.error('Error generating ultra random task:', error);
     return null;
   }
 }

@@ -48,6 +48,18 @@
       }" @update:vocab-ids="updateRelatedVocab" @vocab-added="handleRelatedVocabAdded"
         @vocab-updated="handleRelatedVocabUpdated" @vocab-disconnected="handleRelatedVocabDisconnected" />
     </div>
+
+    <div class="space-y-4">
+      <h3>{{ $t('vocabulary.form.similarSounding') }}</h3>
+      <ManageVocabList :vocab-ids="formData.similarSoundingButNotTheSame || []" :language="formData.language" :config="{
+        allowAdd: true,
+        allowEdit: true,
+        allowDisconnect: true,
+        allowNavigate: true,
+        allowDelete: false
+      }" @update:vocab-ids="updateSimilarSoundingVocab" @vocab-added="handleSimilarSoundingVocabAdded"
+        @vocab-updated="handleSimilarSoundingVocabUpdated" @vocab-disconnected="handleSimilarSoundingVocabDisconnected" />
+    </div>
   </div>
 </template>
 
@@ -77,6 +89,7 @@ interface VocabFormData {
   notes: NoteData[];
   links: Link[];
   relatedVocab?: string[];
+  similarSoundingButNotTheSame?: string[];
   isPicturable?: boolean;
   images?: VocabImage[];
   sounds?: VocabSound[];
@@ -95,6 +108,7 @@ const emit = defineEmits<{
   'update-link': [index: number, link: Link];
   'remove-link': [index: number];
   'update-related-vocab': [vocabIds: string[]];
+  'update-similar-sounding-vocab': [vocabIds: string[]];
   'update-images': [images: VocabImage[]];
   'update-sounds': [sounds: VocabSound[]];
 }>();
@@ -115,6 +129,24 @@ function handleRelatedVocabUpdated() {
 }
 
 function handleRelatedVocabDisconnected() {
+  emit('field-change');
+}
+
+// Similar sounding vocabulary event handlers
+function updateSimilarSoundingVocab(vocabIds: string[]) {
+  emit('update-similar-sounding-vocab', vocabIds);
+  emit('field-change');
+}
+
+function handleSimilarSoundingVocabAdded() {
+  emit('field-change');
+}
+
+function handleSimilarSoundingVocabUpdated() {
+  emit('field-change');
+}
+
+function handleSimilarSoundingVocabDisconnected() {
   emit('field-change');
 }
 </script>

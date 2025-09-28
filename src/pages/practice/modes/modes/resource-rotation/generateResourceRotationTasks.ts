@@ -12,7 +12,7 @@ export async function generateResourceRotationTask(
       languageCodes
     });
   } catch (error) {
-    console.error('Error generating resource rotation task:', error);
+    toast.error('Error generating resource rotation task:', error);
     return null;
   }
 }

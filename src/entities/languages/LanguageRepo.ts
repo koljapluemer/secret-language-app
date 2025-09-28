@@ -1,6 +1,7 @@
 import Dexie, { type Table } from 'dexie';
 import type { LanguageRepoContract } from './LanguageRepoContract';
 import type { LanguageData } from './LanguageData';
+import { useToast } from '@/shared/toasts';
 import isoLangs from './isoLangs.json';
 
 class LanguageDatabase extends Dexie {
@@ -16,6 +17,7 @@ class LanguageDatabase extends Dexie {
 
 export class LanguageRepo implements LanguageRepoContract {
   private db = new LanguageDatabase();
+  private toast = useToast();
 
   async getAll(): Promise<LanguageData[]> {
     return await this.db.languages.toArray();
@@ -73,7 +75,7 @@ export class LanguageRepo implements LanguageRepoContract {
       .find(l => l.code === code);
     
     if (!isoLang) {
-      console.error(`Language code '${code}' not found in ISO language data`);
+      this.toast.error(`Language code '${code}' not found in ISO language data`);
       throw new Error(`Unknown language code: ${code}`);
     }
     

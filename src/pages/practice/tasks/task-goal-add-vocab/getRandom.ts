@@ -17,7 +17,7 @@ export async function getRandomAddVocabToGoalTask({
     const shuffled = [...goals].sort(() => Math.random() - 0.5);
     return generateAddVocabToGoal(shuffled[0]);
   } catch (error) {
-    console.error('Error generating add vocab to goal task:', error);
+    toast.error('Error generating add vocab to goal task:', error);
     return null;
   }
 }

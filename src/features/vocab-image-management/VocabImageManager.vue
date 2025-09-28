@@ -171,7 +171,7 @@ function getImageUrl(image: VocabImage): string {
       createdUrls.add(url);
       return url;
     } catch (error) {
-      console.warn('Failed to create object URL for image blob:', error);
+      
       return image.url || '';
     }
   }

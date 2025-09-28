@@ -63,7 +63,7 @@ export async function getRandomClozeChoiceTask({
     
     return null;
   } catch (error) {
-    console.error('Error generating cloze choice task:', error);
+    toast.error('Error generating cloze choice task:', error);
     return null;
   }
 }

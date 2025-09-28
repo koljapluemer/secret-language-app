@@ -17,7 +17,7 @@ export async function getRandomExtractKnowledgeTask({
     
     return null;
   } catch (error) {
-    console.error('Error generating extract knowledge task:', error);
+    toast.error('Error generating extract knowledge task:', error);
     return null;
   }
 }

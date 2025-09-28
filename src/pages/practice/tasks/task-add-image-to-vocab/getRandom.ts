@@ -17,7 +17,7 @@ export async function getRandomAddImageToVocabTask({
     // Return task for first vocab item
     return generateAddImageToVocab(vocabWithoutImages[0]);
   } catch (error) {
-    console.error('Error generating add image to vocab task:', error);
+    toast.error('Error generating add image to vocab task:', error);
     return null;
   }
 }

@@ -48,12 +48,14 @@ import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { ResourceData } from '@/entities/resources/ResourceData';
 import type { VocabData } from '@/entities/vocab/VocabData';
 import { calculateVocabMastery } from '@/entities/vocab/vocabMastery';
+import { useToast } from '@/shared/toasts';
 import ResourceEditForm from './ui/ResourceEditForm.vue';
 import ManageResourceVocab from '@/widgets/manage-resource-vocab/ManageResourceVocab.vue';
 import ManageResourceFactCards from '@/widgets/manage-resource-fact-cards/ManageResourceFactCards.vue';
 
 const route = useRoute();
 const router = useRouter();
+const toast = useToast();
 const resourceRepo = inject<ResourceRepoContract>('resourceRepo')!;
 const vocabRepo = inject<VocabRepoContract>('vocabRepo')!;
 
@@ -78,7 +80,7 @@ async function loadVocabItems() {
   try {
     vocabItems.value = await vocabRepo.getVocabByUIDs(resource.value.vocab);
   } catch (error) {
-    console.error('Error loading vocab items:', error);
+    toast.error('Error loading vocab items:', error);
     vocabItems.value = [];
   }
 }

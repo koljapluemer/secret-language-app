@@ -21,7 +21,7 @@ export async function getRandomFactCardTryToRememberTask({
     
     return null;
   } catch (error) {
-    console.error('Error generating fact card try to remember task:', error);
+    toast.error('Error generating fact card try to remember task:', error);
     return null;
   }
 }

@@ -19,7 +19,7 @@ export async function getRandomDueVocabFromRandomValidImmersionResource(
 
     return await getRandomSeenVocabFromImmersionResource(resourceRepo, vocabRepo, resource.uid, vocabBlockList);
   } catch (error) {
-    console.error('Error getting random due vocab from random valid immersion resource:', error);
+    toast.error('Error getting random due vocab from random valid immersion resource:', error);
     return null;
   }
 }

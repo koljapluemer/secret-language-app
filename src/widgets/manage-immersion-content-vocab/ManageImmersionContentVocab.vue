@@ -30,6 +30,7 @@ import ManageVocabList from '@/features/manage-vocab-list/ManageVocabList.vue';
 import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoContract';
 import type { ResourceData } from '@/entities/resources/ResourceData';
 import type { VocabData } from '@/entities/vocab/VocabData';
+import { useToast } from '@/shared/toasts';
 
 const props = defineProps<{
   resourceUid: string;
@@ -46,6 +47,7 @@ const emit = defineEmits<{
   'update:needed-vocab-ids': [string[]];
 }>();
 
+const toast = useToast();
 const resourceRepo = inject<ResourceRepoContract>('resourceRepo');
 if (!resourceRepo) {
   throw new Error('ResourceRepo not provided');
@@ -153,7 +155,7 @@ async function handleVocabDisconnected(vocabId: string) {
 
     emit('update:needed-vocab-ids', vocabIds.value);
   } catch (error) {
-    console.error('Failed to disconnect needed vocab:', error);
+    toast.error('Failed to disconnect needed vocab:', error);
   }
 }
 

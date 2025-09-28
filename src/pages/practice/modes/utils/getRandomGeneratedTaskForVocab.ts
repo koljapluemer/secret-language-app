@@ -93,7 +93,7 @@ export async function getRandomGeneratedTaskForVocab(
         // Fallback to single vocab if no other vocab found
         return generateFormSentenceTaskFromSingleVocab(vocab);
       } catch (error) {
-        console.error('Error finding second vocab for form sentence task:', error);
+        toast.error('Error finding second vocab for form sentence task:', error);
         return generateFormSentenceTaskFromSingleVocab(vocab);
       }
     });

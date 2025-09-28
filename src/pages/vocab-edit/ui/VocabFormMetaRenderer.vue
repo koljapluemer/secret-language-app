@@ -74,6 +74,7 @@ interface VocabFormData {
   notes: NoteData[];
   links: Link[];
   relatedVocab?: string[];
+  similarSoundingButNotTheSame?: string[];
   isPicturable?: boolean;
   images?: VocabImage[];
   sounds?: VocabSound[];

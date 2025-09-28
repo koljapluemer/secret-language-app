@@ -21,6 +21,7 @@
 import { ref, onUnmounted, watch } from 'vue';
 import { Play } from 'lucide-vue-next';
 import type { VocabSound } from '@/entities/vocab/VocabData';
+import { useToast } from '@/shared/toasts';
 
 interface Props {
   sound: VocabSound | null;
@@ -30,6 +31,8 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   autoPlay: false
 });
+
+const toast = useToast();
 
 // Audio state
 const audioElement = ref<HTMLAudioElement>();
@@ -56,7 +59,7 @@ function playSound() {
   audioElement.value.volume = volume.value;
   isPlaying.value = true;
   audioElement.value.play().catch(error => {
-    console.error('Failed to play audio:', error);
+    toast.error('Failed to play audio:', error);
     isPlaying.value = false;
   });
 }
@@ -76,7 +79,7 @@ function onAudioEnded() {
 }
 
 function onAudioError(error: Event) {
-  console.error('Audio error:', error);
+  toast.error('Audio error:', error);
   isPlaying.value = false;
 }
 

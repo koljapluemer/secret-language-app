@@ -1,6 +1,7 @@
 import Dexie, { type Table } from 'dexie';
 import type { LocalSetRepoContract } from './LocalSetRepoContract';
 import type { LocalSetData } from './LocalSetData';
+import { useToast } from '@/shared/toasts';
 
 class LocalSetDatabase extends Dexie {
   localSets!: Table<LocalSetData>;
@@ -15,6 +16,7 @@ class LocalSetDatabase extends Dexie {
 
 export class LocalSetRepo implements LocalSetRepoContract {
   private db = new LocalSetDatabase();
+  private toast = useToast();
 
   async getAllLocalSets(): Promise<LocalSetData[]> {
     return await this.db.localSets.toArray();
@@ -46,7 +48,7 @@ export class LocalSetRepo implements LocalSetRepoContract {
       await this.db.localSets.add(localSetData);
       return localSetData;
     } catch (error) {
-      console.error('LocalSetRepo: Failed to save local set:', error);
+      this.toast.error('LocalSetRepo: Failed to save local set:', error);
       throw error;
     }
   }

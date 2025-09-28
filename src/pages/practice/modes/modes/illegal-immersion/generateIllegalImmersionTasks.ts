@@ -1,4 +1,5 @@
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
+import { useToast } from '@/shared/toasts';
 import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
 import type { FactCardRepoContract } from '@/entities/fact-cards/FactCardRepoContract';
 import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoContract';
@@ -46,6 +47,7 @@ export async function generateIllegalImmersionTask(
   languageCodes: string[],
   blockList?: string[]
 ): Promise<Task | null> {
+  const toast = useToast();
   try {
     // If we don't have a current resource or need to pick a new one
     if (!immersionState.currentResource) {
@@ -117,7 +119,7 @@ export async function generateIllegalImmersionTask(
     return null;
     
   } catch (error) {
-    console.error('Error generating illegal immersion task:', error);
+    toast.error('Error generating illegal immersion task:', error);
     resetImmersionState();
     return null;
   }

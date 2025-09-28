@@ -159,7 +159,7 @@ def create_mandarin_character_deck():
             "priority": 1,
             "notes": [main_pinyin_note_id],
             "translations": translation_ids,
-            "relatedVocab": [],  # Will be filled later
+            "similarSoundingButNotTheSame": [],  # Will be filled later
             "sounds": sounds_data if sounds_data else None
         }
         
@@ -253,7 +253,8 @@ def create_mandarin_character_deck():
                     "priority": 1,
                     "notes": [match_pinyin_note_id],
                     "translations": match_translation_ids,
-                    "relatedVocab": [],  # Will be filled later
+                    "relatedVocab": [],  # Not used for minimal pairs
+            "similarSoundingButNotTheSame": [],  # Will be filled later
                     "sounds": match_sounds_data if match_sounds_data else None
                 }
                 
@@ -270,7 +271,7 @@ def create_mandarin_character_deck():
             # Find the main vocab item and update it
             for vocab_item in vocab_items:
                 if vocab_item["id"] == main_vocab_id:
-                    vocab_item["relatedVocab"] = related_vocab_ids
+                    vocab_item["similarSoundingButNotTheSame"] = related_vocab_ids
                     break
     
     # Create metadata

@@ -20,7 +20,7 @@ export async function getRandomGuessWhatSentenceMeansTask({
     
     return null;
   } catch (error) {
-    console.error('Error generating guess what sentence means task:', error);
+    toast.error('Error generating guess what sentence means task:', error);
     return null;
   }
 }

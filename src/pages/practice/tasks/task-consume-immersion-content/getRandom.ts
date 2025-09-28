@@ -19,7 +19,7 @@ export async function getRandomConsumeImmersionContentTask({
     
     return null;
   } catch (error) {
-    console.error('Error generating consume immersion content task:', error);
+    toast.error('Error generating consume immersion content task:', error);
     return null;
   }
 }

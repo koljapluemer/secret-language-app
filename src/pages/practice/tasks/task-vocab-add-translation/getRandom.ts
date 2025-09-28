@@ -13,7 +13,7 @@ export async function getRandomAddTranslationTask({
     if (!vocab) return null;
     return generateAddTranslation(vocab);
   } catch (error) {
-    console.error('Error generating add translation task:', error);
+    toast.error('Error generating add translation task:', error);
     return null;
   }
 }

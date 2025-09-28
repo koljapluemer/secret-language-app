@@ -1,6 +1,7 @@
 import type { Router } from 'vue-router';
 import { UnifiedRemoteSetService, type DownloadProgress } from './UnifiedRemoteSetService';
 import { remoteSetMetaDataSchema } from '@/entities/remote-sets/remoteSetMetaData';
+import { useToast } from '@/shared/toasts';
 import { z } from 'zod';
 
 export interface DownloadAndPracticeOptions {
@@ -13,6 +14,8 @@ export interface DownloadAndPracticeOptions {
 }
 
 export class DownloadAndPracticeService {
+  private toast = useToast();
+
   constructor(
     private remoteSetService: UnifiedRemoteSetService,
     private router: Router
@@ -79,7 +82,7 @@ export class DownloadAndPracticeService {
       const data = await response.json();
       return remoteSetMetaDataSchema.parse(data);
     } catch (error) {
-      console.error('Failed to load set metadata:', error);
+      this.toast.error('Failed to load set metadata:', error);
       return null;
     }
   }

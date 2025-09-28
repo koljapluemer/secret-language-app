@@ -2,12 +2,14 @@ import type { FactCardRepoContract } from '@/entities/fact-cards/FactCardRepoCon
 import type { Task } from '@/pages/practice/Task';
 import { generateFactCardTryToRemember } from '@/pages/practice/tasks/task-fact-card-try-to-remember/generate';
 import { generateFactCardReveal } from '@/pages/practice/tasks/task-fact-card-reveal/generate';
+import { useToast } from '@/shared/toasts';
 
 export async function generateFactCard(
   factCardRepo: FactCardRepoContract,
   languageCodes: string[],
   factCardBlockList?: string[]
 ): Promise<Task | null> {
+  const toast = useToast();
   try {
     // Get both types of fact cards
     const [dueFactCards, unseenFactCards] = await Promise.all([
@@ -39,7 +41,7 @@ export async function generateFactCard(
     // No fact cards available
     return null;
   } catch (error) {
-    console.error('Error generating fact card task:', error);
+    toast.error('Error generating fact card task:', error);
     return null;
   }
 }

@@ -109,7 +109,7 @@ async function initializeQueue() {
 // Complete current task
 async function completeCurrentTask() {
   if (state.value.status !== 'task') {
-    console.warn('completeCurrentTask called but not in task state');
+    
     return;
   }
 

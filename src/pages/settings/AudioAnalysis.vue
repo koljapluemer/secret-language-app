@@ -58,7 +58,7 @@ async function isAudioSilent(audioBlob: Blob, threshold = 0.001): Promise<boolea
     const rms = Math.sqrt(rmsSum / sampleCount);
     return rms < threshold;
   } catch (error) {
-    console.warn('Audio analysis failed:', error);
+    
     return false;
   }
 }
@@ -140,7 +140,7 @@ async function detectEmptySoundFiles() {
     }
 
   } catch (error) {
-    console.error('Error detecting empty sound files:', error);
+    toast.error('Error detecting empty sound files:', error);
     toast.error('Error analyzing sound files.');
   } finally {
     detectingSounds.value = false;
@@ -168,7 +168,7 @@ async function deleteEmptyAudio() {
     analysisCompleted.value = false;
 
   } catch (error) {
-    console.error('Error deleting empty sound files:', error);
+    toast.error('Error deleting empty sound files:', error);
     toast.error('Error deleting empty sound files.');
   } finally {
     deletingEmptyAudio.value = false;

@@ -1,6 +1,7 @@
 import Dexie, { type Table } from 'dexie';
 import type { ResourceRepoContract, ResourceListFilters } from './ResourceRepoContract';
 import type { ResourceData } from './ResourceData';
+import { useToast } from '@/shared/toasts';
 
 class ResourceDatabase extends Dexie {
   resources!: Table<ResourceData>;
@@ -15,6 +16,7 @@ class ResourceDatabase extends Dexie {
 
 export class ResourceRepo implements ResourceRepoContract {
   private db = new ResourceDatabase();
+  private toast = useToast();
 
   async getAllResources(): Promise<ResourceData[]> {
     return await this.db.resources.toArray();
@@ -98,7 +100,7 @@ export class ResourceRepo implements ResourceRepoContract {
       await this.db.resources.add(resourceData);
       return resourceData;
     } catch (error) {
-      console.error('ResourceRepo: Failed to save resource:', error);
+      this.toast.error('ResourceRepo: Failed to save resource:', error);
       throw error;
     }
   }

@@ -72,6 +72,7 @@ function formDataToVocabData(formData: VocabFormData): Omit<VocabData, 'progress
     origins: ['user-added'],
     relatedVocab: [],
     notRelatedVocab: [],
+    similarSoundingButNotTheSame: [],
     isPicturable: formData.isPicturable,
     images: formData.images || [],
     sounds: formData.sounds || []

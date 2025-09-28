@@ -18,7 +18,7 @@ export async function getRandomVocabTryToRememberTask({
     // Return the first valid vocab item
     return generateVocabTryToRemember(vocabItems[0]);
   } catch (error) {
-    console.error('Error generating vocab try to remember task:', error);
+    toast.error('Error generating vocab try to remember task:', error);
     return null;
   }
 }

@@ -56,7 +56,7 @@ export async function getRandomVocabRevealTask({
     
     return null;
   } catch (error) {
-    console.error('Error generating vocab reveal task:', error);
+    toast.error('Error generating vocab reveal task:', error);
     return null;
   }
 }

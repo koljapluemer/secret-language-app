@@ -56,7 +56,7 @@ export async function generateSisyphosTask(
       return await getRandomGeneratedTaskForFactCard(factCard);
     }
   } catch (error) {
-    console.error('Error generating Sisyphos task:', error);
+    toast.error('Error generating Sisyphos task:', error);
     return null;
   }
 }

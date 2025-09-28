@@ -190,7 +190,7 @@ function getAudioUrl(sound: VocabSound): string {
     createdUrl.value = url;
     return url;
   } catch (error) {
-    console.warn('Failed to create object URL for audio blob:', error);
+    
     return '';
   }
 }

@@ -6,6 +6,7 @@ import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract';
 import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
 import type { NoteData } from '@/entities/notes/NoteData';
+import { useToast } from '@/shared/toasts';
 import LanguageSettings from './LanguageSettings.vue';
 import AudioAnalysis from './AudioAnalysis.vue';
 
@@ -13,6 +14,7 @@ const languageRepo = inject<LanguageRepoContract>('languageRepo')!;
 const vocabRepo = inject<VocabRepoContract>('vocabRepo')!;
 const noteRepo = inject<NoteRepoContract>('noteRepo')!;
 const translationRepo = inject<TranslationRepoContract>('translationRepo')!;
+const toast = useToast();
 
 const isDeduplicating = ref(false);
 const deduplicationResults = ref<{ vocabProcessed: number; translationsProcessed: number; duplicatesRemoved: number } | null>(null);
@@ -71,7 +73,7 @@ async function deduplicateNotesAndTranslations() {
     deduplicationResults.value = { vocabProcessed, translationsProcessed, duplicatesRemoved };
     
   } catch (error) {
-    console.error('Error during deduplication:', error);
+    toast.error('Error during deduplication:', error);
     alert('An error occurred during deduplication. Check console for details.');
   } finally {
     isDeduplicating.value = false;

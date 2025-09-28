@@ -91,7 +91,7 @@ export async function generateSentenceSlideTask(
     return null;
     
   } catch (error) {
-    console.error('Error generating sentence slide task:', error);
+    toast.error('Error generating sentence slide task:', error);
     resetSlideState();
     return null;
   }
@@ -106,7 +106,7 @@ async function getRandomUnseenSentenceWithRelatedVocab(
     // Use the new repo method that does DB-level filtering
     return await vocabRepo.getRandomUnseenSentenceVocabWithRelatedVocab(languageCodes, blockList);
   } catch (error) {
-    console.error('Error getting random unseen sentence:', error);
+    toast.error('Error getting random unseen sentence:', error);
     return null;
   }
 }
@@ -124,7 +124,7 @@ async function initializeConnectedVocabQueue(
     slideState.connectedVocabQueue = [...connectedVocab];
     slideState.initialConnectedVocabCount = connectedVocab.length;
   } catch (error) {
-    console.error('Error initializing connected vocab queue:', error);
+    toast.error('Error initializing connected vocab queue:', error);
     slideState.connectedVocabQueue = [];
     slideState.initialConnectedVocabCount = 0;
   }
@@ -159,7 +159,7 @@ async function getNextVocabTask(
     
     return task;
   } catch (error) {
-    console.error('Error getting next vocab task:', error);
+    toast.error('Error getting next vocab task:', error);
     return null;
   }
 }
@@ -183,7 +183,7 @@ export async function removeVocabIfNotDue(
       slideState.connectedVocabQueue = slideState.connectedVocabQueue.filter(v => v.uid !== vocabId);
     }
   } catch (error) {
-    console.error('Error checking vocab due status:', error);
+    toast.error('Error checking vocab due status:', error);
   }
 }
 

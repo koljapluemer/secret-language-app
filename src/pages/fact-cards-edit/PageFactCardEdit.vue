@@ -77,7 +77,7 @@ watch(() => route.params.id, async (factCardId) => {
 
 async function handleFactCardSaved(factCardId: string) {
   if (!factCardRepo) {
-    console.warn('FactCardRepo not available');
+    
     return;
   }
 

@@ -62,7 +62,7 @@ async function generateNextTask(): Promise<Task | null> {
       blockList
     );
   } catch (error) {
-    console.error('Error generating Sisyphos task:', error);
+    toast.error('Error generating Sisyphos task:', error);
     return null;
   }
 }
@@ -84,7 +84,7 @@ async function tryTransitionToTask(): Promise<boolean> {
       return true;
     }
   } catch (error) {
-    console.error('Task generation failed:', error);
+    toast.error('Task generation failed:', error);
   }
   
   clearDelayedLoading();
@@ -104,7 +104,7 @@ async function initializeQueue() {
       setEmpty('No reviews are currently due.');
     }
   } catch (error) {
-    console.error('Initialization failed:', error);
+    toast.error('Initialization failed:', error);
     clearDelayedLoading();
     setError('Failed to initialize review session. Please try again.');
   }
@@ -113,7 +113,7 @@ async function initializeQueue() {
 // Complete current task
 async function completeCurrentTask() {
   if (state.value.status !== 'task') {
-    console.warn('completeCurrentTask called but not in task state');
+    
     return;
   }
 
@@ -135,7 +135,7 @@ async function completeCurrentTask() {
         state.value.nextTask = newNextTask;
       }
     } catch (error) {
-      console.error('Error generating next task:', error);
+      toast.error('Error generating next task:', error);
     }
   } else {
     // No next task ready, need to generate one

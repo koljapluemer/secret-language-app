@@ -56,7 +56,7 @@ export async function getRandomClozeRevealTask({
     
     return null;
   } catch (error) {
-    console.error('Error generating cloze reveal task:', error);
+    toast.error('Error generating cloze reveal task:', error);
     return null;
   }
 }

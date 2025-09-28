@@ -18,6 +18,7 @@
       @update-translation="updateTranslation"
       @remove-translation="removeTranslation"
       @update-related-vocab="updateRelatedVocab"
+      @update-similar-sounding-vocab="updateSimilarSoundingVocab"
       @update-picturable="updatePicturable"
       @update-images="updateImages"
       @update-sounds="updateSounds"
@@ -51,6 +52,7 @@ interface VocabFormData {
   notes: NoteData[];
   links: Link[];
   relatedVocab?: string[];
+  similarSoundingButNotTheSame?: string[];
   isPicturable?: boolean;
   images?: VocabImage[];
   sounds?: VocabSound[];
@@ -78,6 +80,7 @@ function vocabDataToFormData(vocab: VocabData, notes: NoteData[] = [], translati
     notes: notes,
     links: vocab.links ? [...vocab.links] : [],
     relatedVocab: vocab.relatedVocab ? [...vocab.relatedVocab] : [],
+    similarSoundingButNotTheSame: vocab.similarSoundingButNotTheSame ? [...vocab.similarSoundingButNotTheSame] : [],
     isPicturable: vocab.isPicturable,
     images: vocab.images ? [...vocab.images] : [],
     sounds: vocab.sounds ? [...vocab.sounds] : []
@@ -100,6 +103,7 @@ function formDataToVocabData(formData: VocabFormData, existingVocab?: VocabData)
     origins: existingVocab?.origins || ['user-added'],
     relatedVocab: formData.relatedVocab || [],
     notRelatedVocab: existingVocab?.notRelatedVocab || [],
+    similarSoundingButNotTheSame: formData.similarSoundingButNotTheSame || [],
     isPicturable: formData.isPicturable,
     images: formData.images || [],
     sounds: formData.sounds || []
@@ -151,7 +155,8 @@ const state = ref<VocabFormState>({
     doNotPractice: undefined,
     notes: [],
     links: [],
-    relatedVocab: []
+    relatedVocab: [],
+    similarSoundingButNotTheSame: []
   },
   loading: false,
   saving: false,
@@ -396,6 +401,11 @@ async function removeTranslation(uid: string) {
 
 async function updateRelatedVocab(vocabIds: string[]) {
   state.value.formData.relatedVocab = vocabIds;
+  await handleFieldChange();
+}
+
+async function updateSimilarSoundingVocab(vocabIds: string[]) {
+  state.value.formData.similarSoundingButNotTheSame = vocabIds;
   await handleFieldChange();
 }
 

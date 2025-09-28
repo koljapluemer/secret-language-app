@@ -50,9 +50,11 @@ import DebugVocabProgress from '@/shared/ui/DebugVocabProgress.vue';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { VocabData } from '@/entities/vocab/VocabData';
 import { calculateVocabMastery } from '@/entities/vocab/vocabMastery';
+import { useToast } from '@/shared/toasts';
 
 const route = useRoute();
 const currentVocab = ref<VocabData | null>(null);
+const toast = useToast();
 
 const vocabRepo = inject<VocabRepoContract>('vocabRepo');
 
@@ -72,7 +74,7 @@ watch(() => route.params.id, async (vocabId) => {
       const vocab = await vocabRepo.getVocabByUID(vocabId as string);
       currentVocab.value = vocab || null;
     } catch (error) {
-      console.error('Failed to load vocab data:', error);
+      toast.error('Failed to load vocab data:', error);
       currentVocab.value = null;
     }
   } else {
@@ -82,7 +84,7 @@ watch(() => route.params.id, async (vocabId) => {
 
 async function handleVocabSaved(vocabId: string) {
   if (!vocabRepo) {
-    console.warn('VocabRepo not available');
+    
     return;
   }
 
@@ -91,7 +93,7 @@ async function handleVocabSaved(vocabId: string) {
     const vocab = await vocabRepo.getVocabByUID(vocabId);
     currentVocab.value = vocab || null;
   } catch (error) {
-    console.error('Failed to reload vocab data:', error);
+    toast.error('Failed to reload vocab data:', error);
   }
 }
 </script>

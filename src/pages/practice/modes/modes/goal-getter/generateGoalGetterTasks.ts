@@ -4,6 +4,7 @@ import type { Task } from '@/pages/practice/Task';
 import { generateAddVocabToGoal } from '@/pages/practice/tasks/task-goal-add-vocab/generate';
 import { generateAddSubGoals } from '@/pages/practice/tasks/task-goal-add-sub-goals/generate';
 import { randomFromArray } from '@/shared/utils/arrayUtils';
+import { useToast } from '@/shared/toasts';
 
 // Define goal task generators using repo-level filtering
 const goalTaskGenerators = [
@@ -25,6 +26,7 @@ export async function generateGoalTask(
   goalRepo: GoalRepoContract,
   languageCodes: string[]
 ): Promise<Task | null> {
+  const toast = useToast();
   try {
     // Shuffle the goal task generators for random cycling
     const shuffledGenerators = [...goalTaskGenerators].sort(() => Math.random() - 0.5);
@@ -44,7 +46,7 @@ export async function generateGoalTask(
           }
         }
       } catch (error) {
-        console.error(`Error generating ${taskType.name} task:`, error);
+        toast.error(`Error generating ${taskType.name} task:`, error);
         // Continue to next task type
       }
     }
@@ -52,7 +54,7 @@ export async function generateGoalTask(
     // If we get here, no task types worked
     return null;
   } catch (error) {
-    console.error('Error generating goal task:', error);
+    toast.error('Error generating goal task:', error);
     return null;
   }
 }

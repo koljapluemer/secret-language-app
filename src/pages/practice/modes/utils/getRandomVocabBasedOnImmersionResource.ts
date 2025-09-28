@@ -46,7 +46,7 @@ export async function getRandomVocabBasedOnImmersionResource(
 
     return Math.random() < 0.3 ? randomFromArray(availableNew) : randomFromArray(seenVocab);
   } catch (error) {
-    console.error('Error getting random vocab from immersion resource:', error);
+    toast.error('Error getting random vocab from immersion resource:', error);
     return null;
   }
 }
@@ -64,7 +64,7 @@ export async function getRandomNewVocabFromImmersionResource(
     const newVocab = vocabItems.filter(v => v.progress.level === -1);
     return randomFromArray(newVocab);
   } catch (error) {
-    console.error('Error getting random new vocab from immersion resource:', error);
+    toast.error('Error getting random new vocab from immersion resource:', error);
     return null;
   }
 }
@@ -82,7 +82,7 @@ export async function getRandomSeenVocabFromImmersionResource(
     const seenVocab = vocabItems.filter(v => v.progress.level >= 0);
     return randomFromArray(seenVocab);
   } catch (error) {
-    console.error('Error getting random seen vocab from immersion resource:', error);
+    toast.error('Error getting random seen vocab from immersion resource:', error);
     return null;
   }
 }

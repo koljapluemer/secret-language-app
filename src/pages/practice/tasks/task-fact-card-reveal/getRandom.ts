@@ -22,7 +22,7 @@ export async function getRandomFactCardRevealTask({
     
     return null;
   } catch (error) {
-    console.error('Error generating fact card reveal task:', error);
+    toast.error('Error generating fact card reveal task:', error);
     return null;
   }
 }

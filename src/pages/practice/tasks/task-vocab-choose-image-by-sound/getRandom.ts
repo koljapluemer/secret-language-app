@@ -37,7 +37,7 @@ export async function getRandomVocabChooseImageBySoundTask({
     // No vocab available with both sound and images
     return null;
   } catch (error) {
-    console.error('Error generating vocab choose image by sound task:', error);
+    toast.error('Error generating vocab choose image by sound task:', error);
     return null;
   }
 }

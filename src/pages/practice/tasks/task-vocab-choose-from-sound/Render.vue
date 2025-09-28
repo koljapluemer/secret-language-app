@@ -124,7 +124,7 @@ async function loadVocabData() {
     // - consideredCharacter = true
     // - has content
     // - has playable sounds (not disableForPractice)
-    // - has relatedVocab with at least one valid character with sound and content
+    // - has similarSoundingButNotTheSame with at least one valid character with sound and content
 
     vocab1.value = vocabData;
 
@@ -132,8 +132,8 @@ async function loadVocabData() {
     const playableSounds = vocabData.sounds!.filter(s => !s.disableForPractice);
     playableSound.value = randomFromArray(playableSounds);
 
-    // Find valid related vocab (guaranteed to have at least one)
-    const relatedVocabList = await vocabRepo.getVocabByUIDs(vocabData.relatedVocab!);
+    // Find valid similar sounding vocab (guaranteed to have at least one)
+    const relatedVocabList = await vocabRepo.getVocabByUIDs(vocabData.similarSoundingButNotTheSame!);
     const validRelatedVocab = relatedVocabList.filter(v =>
       v.consideredCharacter === true &&
       v.sounds && v.sounds.some(s => !s.disableForPractice) &&

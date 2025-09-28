@@ -32,7 +32,7 @@ export async function getRandomVocabFormSentenceTask({
     
     return null;
   } catch (error) {
-    console.error('Error generating vocab form sentence task:', error);
+    toast.error('Error generating vocab form sentence task:', error);
     return null;
   }
 }

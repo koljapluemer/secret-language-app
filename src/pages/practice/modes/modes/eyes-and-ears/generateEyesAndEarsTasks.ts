@@ -4,6 +4,7 @@ import type { VocabData } from '@/entities/vocab/VocabData';
 import { generateVocabChooseImageBySound } from '@/pages/practice/tasks/task-vocab-choose-image-by-sound/generate';
 import { generateRecordSentenceTaskFromTwoVocab, generateRecordSentenceTaskFromSingleVocab } from '@/pages/practice/tasks/task-vocab-form-sentence/generate';
 import { randomFromArray, pickRandom } from '@/shared/utils/arrayUtils';
+import { useToast } from '@/shared/toasts';
 
 // Helper function to check if vocab has both sound and images
 function hasValidSoundAndImages(vocab: VocabData): boolean {
@@ -56,6 +57,7 @@ export async function generateEyesAndEars(
   vocabBlockList?: string[],
   options: EyesAndEarsOptions = {}
 ): Promise<Task | null> {
+  const toast = useToast();
   try {
     // Choose task type based on user preferences
     let taskType: 'choose-image' | 'form-sentence';
@@ -148,10 +150,10 @@ export async function generateEyesAndEars(
     }
 
     // No suitable vocab available
-    console.warn('Eyes and Ears: No tasks could be generated - no suitable vocab available');
+    
     return null;
   } catch (error) {
-    console.error('Error generating eyes and ears task:', error);
+    toast.error('Error generating eyes and ears task:', error);
     return null;
   }
 }

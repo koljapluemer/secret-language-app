@@ -184,11 +184,13 @@ import type { LanguageData } from '@/entities/languages/LanguageData';
 import type { LocalSetRepoContract } from '@/entities/local-sets/LocalSetRepoContract';
 import type { LocalSetData } from '@/entities/local-sets/LocalSetData';
 import { isCurrentlyTopOfMind } from '@/entities/vocab/isCurrentlyTopOfMind';
+import { useToast } from '@/shared/toasts';
 import Pagination from '@/shared/ui/Pagination.vue';
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
+const toast = useToast();
 
 const goalRepo = inject<GoalRepoContract>('goalRepo')!;
 const vocabRepo = inject<VocabRepoContract>('vocabRepo')!;
@@ -384,7 +386,7 @@ async function loadVocabStatsForCurrentPage() {
     
     vocabStats.value = stats;
   } catch (err) {
-    console.error('Failed to load vocab stats:', err);
+    toast.error('Failed to load vocab stats:', err);
   }
 }
 
@@ -398,7 +400,7 @@ async function deleteGoal(uid: string) {
     await goalRepo.delete(uid);
     await loadGoals(); // Reload to update pagination
   } catch (err) {
-    console.error('Failed to delete goal:', err);
+    toast.error('Failed to delete goal:', err);
     error.value = 'Failed to delete goal';
   }
 }
@@ -416,7 +418,7 @@ async function loadFilterOptions() {
       selectedSets.value = ['user-added', ...availableSets.value.map(s => s.uid)];
     }
   } catch (err) {
-    console.error('Failed to load filter options:', err);
+    toast.error('Failed to load filter options:', err);
   }
 }
 

@@ -1,4 +1,5 @@
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
+import { useToast } from '@/shared/toasts';
 import type { Task } from '@/pages/practice/Task';
 import { generateAddImageToVocab } from '@/pages/practice/tasks/task-add-image-to-vocab/generate';
 
@@ -7,6 +8,7 @@ export async function generateInsertImagesTask(
   languageCodes: string[],
   blockList?: string[]
 ): Promise<Task | null> {
+  const toast = useToast();
   try {
     // Get vocab that needs images
     const vocabList = await vocabRepo.getVocabNeedingImages(languageCodes, blockList);
@@ -22,7 +24,7 @@ export async function generateInsertImagesTask(
     return generateAddImageToVocab(vocab);
     
   } catch (error) {
-    console.error('Error generating insert images task:', error);
+    toast.error('Error generating insert images task:', error);
     return null;
   }
 }

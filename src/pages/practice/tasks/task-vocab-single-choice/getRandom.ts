@@ -53,7 +53,7 @@ export async function getRandomVocabChoiceTask({
     
     return null;
   } catch (error) {
-    console.error('Error generating vocab choice task:', error);
+    toast.error('Error generating vocab choice task:', error);
     return null;
   }
 }

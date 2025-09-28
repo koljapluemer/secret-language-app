@@ -29,7 +29,7 @@ export async function generateMinimalPairsTask(
     return generateVocabChooseFromSound(vocab);
     
   } catch (error) {
-    console.error('Error generating Minimal Pairs task:', error);
+    toast.error('Error generating Minimal Pairs task:', error);
     return null;
   }
 }

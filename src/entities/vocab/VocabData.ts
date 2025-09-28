@@ -47,6 +47,7 @@ export interface VocabData {
 
   relatedVocab: string[]; // uids of other vocab
   notRelatedVocab: string[]; // uids of other vocab
+  similarSoundingButNotTheSame?: string[]; // uids of other vocab that sound similar for minimal pairs
   notInterestedInPronunciationOrAlreadyAdded?: boolean
 
   isPicturable?: boolean; // can this vocab be visualized with images?

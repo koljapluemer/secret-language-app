@@ -30,7 +30,7 @@ const imageUrl = computed(() => {
       createdUrl.value = url;
       return url;
     } catch (error) {
-      console.warn('Failed to create object URL for image blob:', error);
+      
       return props.image.url || '';
     }
   }
