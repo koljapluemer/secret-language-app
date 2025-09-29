@@ -110,7 +110,7 @@ const toggleMaterialSubmenu = () => {
           :class="{ 'btn-active': isOnStatsPage }"
         >
           <Clock :size="16" />
-          <span class="hidden md:inline ml-2">Stats</span>
+          <span class="hidden md:inline ml-2">{{ t('navigation.stats') }}</span>
         </router-link>
         
         <!-- Downloads -->

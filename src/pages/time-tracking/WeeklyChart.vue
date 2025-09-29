@@ -1,0 +1,76 @@
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useDetailedPracticeTracking } from '@/app/tracking/useDetailedPracticeTracking';
+import { formatTime } from '@/shared/utils/formatTime';
+
+const tracking = useDetailedPracticeTracking();
+
+// Convert events to daily data for compatibility
+const getAllTimeData = () => {
+  const events = tracking.getAllCompletionEvents();
+  const dailyData: { [date: string]: number } = {};
+
+  events.forEach(event => {
+    const date = new Date(event.timestamp).toISOString().split('T')[0];
+    const minutes = event.activeDuration / (1000 * 60);
+    dailyData[date] = (dailyData[date] || 0) + minutes;
+  });
+
+  return dailyData;
+};
+
+const chartData = computed(() => {
+  const allData = getAllTimeData();
+  const today = new Date();
+  const last7Days = [];
+
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(today.getDate() - i);
+    const dateKey = date.toISOString().split('T')[0];
+    const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+
+    last7Days.push({
+      date: dateKey,
+      day: dayName,
+      minutes: allData[dateKey] || 0
+    });
+  }
+
+  return last7Days;
+});
+
+const maxMinutes = computed(() => {
+  return Math.max(...chartData.value.map(d => d.minutes), 1);
+});
+</script>
+
+<template>
+  <div class="bg-base-100 rounded-lg shadow p-6">
+    <h2>Last 7 Days</h2>
+
+    <div class="space-y-3">
+      <div v-for="day in chartData" :key="day.date" class="flex items-center gap-4">
+        <div class="w-12  font-medium text-right">
+          {{ day.day }}
+        </div>
+
+        <div class="flex-1 relative">
+          <div class="w-full bg-base-200 rounded h-8 relative overflow-hidden">
+            <div class="h-full bg-primary transition-all duration-300 rounded flex items-center justify-end pr-2"
+              :style="{ width: `${(day.minutes / maxMinutes) * 100}%` }">
+              <span v-if="day.minutes > 0" class="text-primary-content text-xs font-medium">
+                {{ formatTime(day.minutes) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="maxMinutes <= 1" class="text-center mt-6 text-base-content/60">
+      <p>No learning time recorded yet</p>
+      <p class="mt-1">Visit the practice modes to start learning!</p>
+    </div>
+  </div>
+</template>
