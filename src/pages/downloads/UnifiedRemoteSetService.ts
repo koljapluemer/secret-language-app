@@ -7,7 +7,6 @@ import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoCont
 import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract';
 import type { FactCardRepoContract } from '@/entities/fact-cards/FactCardRepoContract';
 import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
-import { MergeQueueRepo } from '@/app/merge/MergeQueueRepo';
 import { useToast } from '@/shared/toasts';
 
 import { vocabSchema } from '@/entities/remote-sets/validation/vocabSchema';
@@ -56,7 +55,6 @@ interface RemoteSetFiles {
 
 export class UnifiedRemoteSetService {
   private toast = useToast();
-  private mergeQueueRepo = new MergeQueueRepo();
 
   constructor(
     private localSetRepo: LocalSetRepoContract,
@@ -421,25 +419,6 @@ export class UnifiedRemoteSetService {
       }
 
       reportProgress('Processing goals', setFiles.goals.length, setFiles.goals.length);
-    }
-
-    // Enqueue merge work for background processing
-    reportProgress('Scheduling background merge', 0, 100);
-
-    if (setFiles.translations && setFiles.translations.length > 0) {
-      await this.mergeQueueRepo.enqueue(localSet.uid, 'translations', 5);
-    }
-    if (setFiles.vocab && setFiles.vocab.length > 0) {
-      await this.mergeQueueRepo.enqueue(localSet.uid, 'vocab', 10);
-    }
-    if (setFiles.factCards && setFiles.factCards.length > 0) {
-      await this.mergeQueueRepo.enqueue(localSet.uid, 'factCards', 15);
-    }
-    if (setFiles.resources && setFiles.resources.length > 0) {
-      await this.mergeQueueRepo.enqueue(localSet.uid, 'resources', 20);
-    }
-    if (setFiles.notes && setFiles.notes.length > 0) {
-      await this.mergeQueueRepo.enqueue(localSet.uid, 'notes', 25);
     }
 
     reportProgress('Download complete', 100, 100);
