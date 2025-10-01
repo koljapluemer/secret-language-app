@@ -426,7 +426,6 @@
 {"id": "426", "language": "cmn", "content": "告诫", "consideredWord": true, "translations": ["665", "666"], "notes": ["1935"]}
 {"id": "427", "language": "cmn", "content": "背诵", "consideredWord": true, "translations": ["667"], "notes": ["1936"]}
 {"id": "428", "language": "cmn", "content": "呀", "consideredWord": true, "translations": ["756", "181", "2305", "1229", "3124", "668"], "notes": ["448", "1330", "897", "224", "256", "1937"]}
-{"id": "429", "language": "cmn", "content": "Well", "consideredWord": true, "translations": ["18", "669"], "notes": ["225", "1938"]}
 {"id": "430", "language": "cmn", "content": "妇德", "consideredWord": true, "translations": ["670"], "notes": ["226", "1939"]}
 {"id": "431", "language": "cmn", "content": "指导", "consideredWord": true, "translations": ["671", "672"], "notes": ["227", "1940"]}
 {"id": "432", "language": "cmn", "content": "谦虚", "consideredWord": true, "translations": ["673", "674"], "notes": ["228", "1941"]}
@@ -601,7 +600,6 @@
 {"id": "601", "language": "cmn", "content": "的份", "consideredWord": true, "translations": ["923", "924"], "notes": ["323", "2110"]}
 {"id": "602", "language": "cmn", "content": "丢尽", "consideredWord": true, "translations": ["925", "926"], "notes": ["2111"]}
 {"id": "603", "language": "cmn", "content": "颜面", "consideredWord": true, "translations": ["927", "408", "928"], "notes": ["324", "2112"]}
-{"id": "604", "language": "cmn", "content": " dishonor", "consideredWord": true, "translations": ["929", "930", "931"], "notes": ["2113"]}
 {"id": "605", "language": "cmn", "content": "爹", "consideredWord": true, "translations": ["217", "218"], "notes": ["325", "1427", "2114"]}
 {"id": "606", "language": "cmn", "content": "明日", "consideredWord": true, "translations": ["932"], "notes": ["2115"]}
 {"id": "607", "language": "cmn", "content": "午时", "consideredWord": true, "translations": ["933"], "notes": ["2116"]}
@@ -836,7 +834,6 @@
 {"id": "836", "language": "cmn", "content": "比较", "consideredWord": true, "translations": ["1322", "1323"], "notes": ["2345"]}
 {"id": "837", "language": "cmn", "content": "衰", "consideredWord": true, "translations": ["1305", "1324"], "notes": ["493", "2346"]}
 {"id": "838", "language": "cmn", "content": "探子", "consideredWord": true, "translations": ["1325", "1326"], "notes": ["494", "2347"]}
-{"id": "839", "language": "cmn", "content": "lmperial", "consideredWord": true, "translations": ["1327"], "notes": ["495", "2348"]}
 {"id": "840", "language": "cmn", "content": "干得好", "consideredWord": true, "translations": ["1330", "3276", "1329"], "notes": ["1504", "2349"]}
 {"id": "841", "language": "cmn", "content": "两位", "consideredWord": true, "translations": ["1332", "1333"], "notes": ["497", "2350"]}
 {"id": "842", "language": "cmn", "content": "阻止", "consideredWord": true, "translations": ["1334", "1335", "1336", "101"], "notes": ["2351"]}
@@ -921,7 +918,6 @@
 {"id": "921", "language": "cmn", "content": "烧", "consideredWord": true, "translations": ["1455", "1456"], "notes": ["2429"]}
 {"id": "922", "language": "cmn", "content": "完", "consideredWord": true, "translations": ["1722", "1412", "1413"], "notes": ["2430"]}
 {"id": "923", "language": "cmn", "content": "啦", "consideredWord": true, "translations": ["756", "2285", "2744", "1956", "1457"], "notes": ["1186", "440", "1152", "555", "2431"]}
-{"id": "924", "language": "cmn", "content": "Pretty hot", "consideredWord": true, "translations": ["1458"], "notes": ["556", "2432"]}
 {"id": "925", "language": "cmn", "content": "哈", "consideredWord": true, "translations": ["1459"], "notes": ["558", "2433"]}
 {"id": "926", "language": "cmn", "content": "蜥蜴", "consideredWord": true, "translations": ["1461"], "notes": ["2434"]}
 {"id": "927", "language": "cmn", "content": "来帮我", "consideredWord": true, "translations": ["1463"], "notes": ["560", "2435"]}
@@ -953,7 +949,6 @@
 {"id": "953", "language": "cmn", "content": "盔甲", "consideredWord": true, "translations": ["2690", "1498"], "notes": ["569", "2461"]}
 {"id": "954", "language": "cmn", "content": "好了", "consideredWord": true, "translations": ["526", "1862", "1154", "1499", "1155"], "notes": ["714", "2462"]}
 {"id": "955", "language": "cmn", "content": "够了", "consideredWord": true, "translations": ["2240", "1501", "1500", "944"], "notes": ["891", "2463"]}
-{"id": "956", "language": "cmn", "content": "dishonor", "consideredWord": true, "translations": ["1502", "1503"], "notes": ["571", "2464"]}
 {"id": "957", "language": "cmn", "content": "害", "consideredWord": true, "translations": ["1025", "1177"], "notes": ["2465"]}
 {"id": "958", "language": "cmn", "content": "没面子", "consideredWord": true, "translations": ["1517", "1505", "1504"], "notes": ["572", "576", "2466"]}
 {"id": "959", "language": "cmn", "content": "你会", "consideredWord": true, "translations": ["1506", "1507"], "notes": ["2467"]}
@@ -1438,7 +1433,6 @@
 {"id": "1438", "language": "cmn", "content": "受不了", "consideredWord": true, "translations": ["2261", "2262"], "notes": ["900", "2946"]}
 {"id": "1439", "language": "cmn", "content": "卫生", "consideredWord": true, "translations": ["2263", "2264"], "notes": ["901", "2947"]}
 {"id": "1440", "language": "cmn", "content": "受", "consideredWord": true, "translations": ["890", "2265"], "notes": ["902", "2948"]}
-{"id": "1441", "language": "cmn", "content": "Pfft!", "consideredWord": true, "translations": ["2266"], "notes": ["903", "2949"]}
 {"id": "1442", "language": "cmn", "content": "完蛋了", "consideredWord": true, "translations": ["2267", "2268"], "notes": ["904", "2950"]}
 {"id": "1443", "language": "cmn", "content": "完蛋", "consideredWord": true, "translations": ["2269", "2270"], "notes": ["905", "2951"]}
 {"id": "1444", "language": "cmn", "content": "发现", "consideredWord": true, "translations": ["2272", "2273"], "notes": ["2952"]}
@@ -1644,12 +1638,9 @@
 {"id": "1644", "language": "cmn", "content": "牛肉", "consideredWord": true, "translations": ["2586"], "notes": ["3152"]}
 {"id": "1645", "language": "cmn", "content": "猪肉", "consideredWord": true, "translations": ["2587"], "notes": ["3153"]}
 {"id": "1646", "language": "cmn", "content": "鸡肉", "consideredWord": true, "translations": ["196"], "notes": ["3154"]}
-{"id": "1647", "language": "cmn", "content": "mmm", "consideredWord": true, "translations": ["2588"], "notes": ["1076", "3155"]}
 {"id": "1648", "language": "cmn", "content": "大帅哥", "consideredWord": true, "translations": ["2589", "2590"], "notes": ["1077", "3156"]}
 {"id": "1649", "language": "cmn", "content": "这里的", "consideredWord": true, "translations": ["2591", "2592"], "notes": ["1078", "3157"]}
 {"id": "1650", "language": "cmn", "content": "以为你是", "consideredWord": true, "translations": ["2593"], "notes": ["3158"]}
-{"id": "1651", "language": "cmn", "content": "quite the", "consideredWord": true, "translations": ["2594", "733"], "notes": ["1079", "3159"]}
-{"id": "1652", "language": "cmn", "content": "charmer", "consideredWord": true, "translations": ["2595", "2596"], "notes": ["3160"]}
 {"id": "1653", "language": "cmn", "content": "美女", "consideredWord": true, "translations": ["2547", "443"], "notes": ["3161"]}
 {"id": "1654", "language": "cmn", "content": "迷恋", "consideredWord": true, "translations": ["2597", "2598"], "notes": ["3162"]}
 {"id": "1655", "language": "cmn", "content": "戎装", "consideredWord": true, "translations": ["2599"], "notes": ["3163"]}
@@ -1680,7 +1671,6 @@
 {"id": "1680", "language": "cmn", "content": "她乐", "consideredWord": true, "translations": ["2638", "2639"], "notes": ["1094", "3188"]}
 {"id": "1681", "language": "cmn", "content": "痴心妄想", "consideredWord": true, "translations": ["2640", "2641"], "notes": ["1095", "3189"]}
 {"id": "1682", "language": "cmn", "content": "自得其乐", "consideredWord": true, "translations": ["2642", "2643"], "notes": ["1096", "3190"]}
-{"id": "1683", "language": "cmn", "content": " lady-killer", "consideredWord": true, "translations": ["2644", "2645"], "notes": ["1097", "3191"]}
 {"id": "1684", "language": "cmn", "content": "故乡", "consideredWord": true, "translations": ["2646"], "notes": ["1451", "3192"]}
 {"id": "1685", "language": "cmn", "content": "爱人", "consideredWord": true, "translations": ["2647", "2648"], "notes": ["3193"]}
 {"id": "1686", "language": "cmn", "content": "魂萦梦系", "consideredWord": true, "translations": ["2649", "2650"], "notes": ["1098", "3194"]}
@@ -1757,7 +1747,6 @@
 {"id": "1757", "language": "cmn", "content": "看到了", "consideredWord": true, "translations": ["2769", "2770"], "notes": ["1171", "3265"]}
 {"id": "1758", "language": "cmn", "content": "太好了", "consideredWord": true, "translations": ["2771", "2772"], "notes": ["3266"]}
 {"id": "1759", "language": "cmn", "content": "拉上来", "consideredWord": true, "translations": ["2774", "2775"], "notes": ["1172", "3267"]}
-{"id": "1760", "language": "cmn", "content": "Hey", "consideredWord": true, "translations": ["2279"], "notes": ["1173", "3268"]}
 {"id": "1761", "language": "cmn", "content": "正", "consideredWord": true, "translations": ["716", "1292"], "notes": ["3269"]}
 {"id": "1762", "language": "cmn", "content": "正点", "consideredWord": true, "translations": ["163", "158"], "notes": ["1175", "3270"]}
 {"id": "1763", "language": "cmn", "content": "坐", "consideredWord": true, "translations": ["2778"], "notes": ["3271"]}
@@ -1817,10 +1806,8 @@
 {"id": "1817", "language": "cmn", "content": "抓住", "consideredWord": true, "translations": ["2857", "2858"], "notes": ["3325"]}
 {"id": "1818", "language": "cmn", "content": "抓", "consideredWord": true, "translations": ["1539", "2857"], "notes": ["3326"]}
 {"id": "1819", "language": "cmn", "content": "住", "consideredWord": true, "translations": ["3252", "2859", "992", "1335"], "notes": ["1219", "3327"]}
-{"id": "1820", "language": "cmn", "content": "Restrain him!", "consideredWord": true, "translations": ["2860"], "notes": ["1220", "3328"]}
 {"id": "1821", "language": "cmn", "content": "法", "consideredWord": true, "translations": ["2861", "2862"], "notes": ["3329"]}
 {"id": "1822", "language": "cmn", "content": "国法", "consideredWord": true, "translations": ["2863"], "notes": ["1221", "3330"]}
-{"id": "1823", "language": "cmn", "content": "A命换B命", "consideredWord": true, "translations": ["2864"], "notes": ["1222", "3331"]}
 {"id": "1824", "language": "cmn", "content": "扯平", "consideredWord": true, "translations": ["2865", "2866"], "notes": ["1223", "3332"]}
 {"id": "1825", "language": "cmn", "content": "差一点", "consideredWord": true, "translations": ["2445", "2870"], "notes": ["1226", "3333"]}
 {"id": "1826", "language": "cmn", "content": "就差", "consideredWord": true, "translations": ["2871", "2872"], "notes": ["3334"]}
@@ -1845,7 +1832,6 @@
 {"id": "1845", "language": "cmn", "content": "揽镜自照", "consideredWord": true, "translations": ["2901"], "notes": ["1243", "3353"]}
 {"id": "1846", "language": "cmn", "content": "对得起", "consideredWord": true, "translations": ["2902", "2903"], "notes": ["3354"]}
 {"id": "1847", "language": "cmn", "content": "就会", "consideredWord": true, "translations": ["44", "2904"], "notes": ["3355"]}
-{"id": "1848", "language": "cmn", "content": " worthwhile", "consideredWord": true, "translations": ["2905", "2906"], "notes": ["1245", "3356"]}
 {"id": "1849", "language": "cmn", "content": "看不到", "consideredWord": true, "translations": ["2907", "2908"], "notes": ["1248", "3357"]}
 {"id": "1850", "language": "cmn", "content": "脏", "consideredWord": true, "translations": ["2909"], "notes": ["3358"]}
 {"id": "1851", "language": "cmn", "content": "洗洗", "consideredWord": true, "translations": ["2221", "382"], "notes": ["1249", "3359"]}
@@ -1923,7 +1909,6 @@
 {"id": "1923", "language": "cmn", "content": "样", "consideredWord": true, "translations": ["3031", "482"], "notes": ["3431"]}
 {"id": "1924", "language": "cmn", "content": "会不会", "consideredWord": true, "translations": ["3032", "3033"], "notes": ["3432"]}
 {"id": "1925", "language": "cmn", "content": "胖", "consideredWord": true, "translations": ["3034", "3035"], "notes": ["3433"]}
-{"id": "1926", "language": "cmn", "content": " dress", "consideredWord": true, "translations": ["3036"], "notes": ["1358", "3434"]}
 {"id": "1927", "language": "cmn", "content": "嫔妃", "consideredWord": true, "translations": ["3038", "3039"], "notes": ["3435"]}
 {"id": "1928", "language": "cmn", "content": "好丑", "consideredWord": true, "translations": ["3040", "3041"], "notes": ["3436"]}
 {"id": "1929", "language": "cmn", "content": "宫里", "consideredWord": true, "translations": ["3042"], "notes": ["1360", "3437"]}
