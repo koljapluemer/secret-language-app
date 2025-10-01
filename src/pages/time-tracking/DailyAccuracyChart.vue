@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import { useDetailedPracticeTracking } from '@/app/tracking/useDetailedPracticeTracking';
 import { ChevronDown, ChevronUp } from 'lucide-vue-next';
+import WhiskersChart from './WhiskersChart.vue';
 
 const tracking = useDetailedPracticeTracking();
 
@@ -62,7 +63,15 @@ const filteredEvents = computed(() => {
   );
 });
 
-// Calculate daily accuracy data
+// Calculate standard deviation for binary results
+const calculateStdDev = (dayEvents: any[]) => {
+  const correctResults = dayEvents.map(e => e.correctness === 'correct' ? 1 : 0);
+  const mean = correctResults.reduce((sum: number, val) => sum + val, 0) / correctResults.length;
+  const variance = correctResults.reduce((sum: number, val) => sum + Math.pow(val - mean, 2), 0) / correctResults.length;
+  return Math.sqrt(variance) * 100; // Convert to percentage
+};
+
+// Calculate daily accuracy data with standard deviation
 const dailyAccuracyData = computed(() => {
   const events = filteredEvents.value;
   if (events.length === 0) return [];
@@ -81,10 +90,12 @@ const dailyAccuracyData = computed(() => {
   const dailyData = Object.entries(eventsByDate).map(([date, dayEvents]) => {
     const correct = dayEvents.filter(e => e.correctness === 'correct').length;
     const accuracy = (correct / dayEvents.length) * 100;
+    const stdDev = calculateStdDev(dayEvents);
 
     return {
       date,
       accuracy: Math.round(accuracy * 10) / 10,
+      stdDev: Math.round(stdDev * 10) / 10,
       taskCount: dayEvents.length,
       timestamp: new Date(date + 'T00:00:00').getTime()
     };
@@ -113,6 +124,117 @@ const totalDaysWithData = computed(() => {
 const maxPossibleDaysToShow = computed(() => {
   return Math.max(7, totalDaysWithData.value);
 });
+
+// Chart.js data configuration with whiskers
+const chartData = computed(() => {
+  if (dailyAccuracyData.value.length === 0) {
+    return {
+      labels: [],
+      datasets: []
+    };
+  }
+
+  const labels = dailyAccuracyData.value.map(point =>
+    new Date(point.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  );
+
+  return {
+    labels,
+    datasets: [
+      {
+        type: 'line',
+        label: 'Daily Average Accuracy',
+        data: dailyAccuracyData.value.map(point => point.accuracy),
+        borderColor: '#10B981',
+        backgroundColor: '#10B981',
+        borderWidth: 3,
+        pointRadius: 6,
+        pointHoverRadius: 9,
+        pointBackgroundColor: '#10B981',
+        pointBorderColor: '#059669',
+        pointBorderWidth: 2,
+        pointHoverBackgroundColor: '#34D399',
+        pointHoverBorderColor: '#10B981',
+        fill: false,
+        tension: 0.2,
+      },
+      {
+        type: 'boxplot',
+        label: 'Daily Variance (±1σ)',
+        data: dailyAccuracyData.value.map(point => ({
+          min: Math.max(0, point.accuracy - point.stdDev),
+          q1: Math.max(0, point.accuracy - point.stdDev * 0.5),
+          median: point.accuracy,
+          q3: Math.min(100, point.accuracy + point.stdDev * 0.5),
+          max: Math.min(100, point.accuracy + point.stdDev),
+          outliers: []
+        })),
+        borderColor: '#6B7280',
+        backgroundColor: 'rgba(107, 114, 128, 0.2)',
+        borderWidth: 2,
+        itemRadius: 2,
+        itemBackgroundColor: 'rgba(107, 114, 128, 0.3)',
+        itemBorderColor: '#6B7280',
+        itemBorderWidth: 1,
+      }
+    ]
+  };
+});
+
+// Chart options
+const chartOptions = computed(() => ({
+  scales: {
+    x: {
+      title: {
+        display: true,
+        text: 'Date'
+      },
+    },
+    y: {
+      title: {
+        display: true,
+        text: 'Accuracy (%)'
+      },
+      min: 0,
+      max: 100,
+      ticks: {
+        callback: function(value: any) {
+          return value + '%';
+        }
+      }
+    }
+  },
+  plugins: {
+    tooltip: {
+      callbacks: {
+        title: function(context: any) {
+          const point = dailyAccuracyData.value[context[0].dataIndex];
+          return point.date;
+        },
+        label: function(context: any) {
+          const point = dailyAccuracyData.value[context.dataIndex];
+          if (context.datasetIndex === 0) {
+            return `Average: ${point.accuracy}% ± ${point.stdDev}%`;
+          } else {
+            return `Standard Deviation: ±${point.stdDev}%`;
+          }
+        },
+        afterLabel: function(context: any) {
+          const point = dailyAccuracyData.value[context.dataIndex];
+          return `Tasks completed: ${point.taskCount}`;
+        }
+      }
+    },
+    legend: {
+      display: true,
+      position: 'top' as const,
+    }
+  },
+  interaction: {
+    intersect: false,
+    mode: 'index' as const,
+  },
+}));
 </script>
 
 <template>
@@ -228,69 +350,18 @@ const maxPossibleDaysToShow = computed(() => {
     <!-- Daily Accuracy Chart -->
     <div v-if="dailyAccuracyData.length > 0" class="space-y-4">
       <!-- Chart container -->
-      <div class="relative h-64 bg-base-200 rounded p-4">
-        <!-- Y-axis labels -->
-        <div class="absolute left-0 top-4 bottom-8 flex flex-col justify-between text-xs text-base-content/60">
-          <span>100%</span>
-          <span>80%</span>
-          <span>60%</span>
-          <span>40%</span>
-          <span>20%</span>
-          <span>0%</span>
-        </div>
-
-        <!-- Chart area -->
-        <div class="ml-10 mr-4 h-full pb-8 relative">
-          <!-- Horizontal grid lines -->
-          <div class="absolute inset-0 flex flex-col justify-between">
-            <div v-for="i in 6" :key="i" class="border-t border-base-300 w-full"></div>
-          </div>
-
-          <!-- Chart with canvas-like positioning -->
-          <div class="absolute inset-0">
-            <div
-              v-for="(point, index) in dailyAccuracyData"
-              :key="point.date"
-              class="absolute w-3 h-3 bg-secondary rounded-full cursor-pointer hover:scale-150 transition-transform"
-              :style="{
-                left: `${(index / Math.max(dailyAccuracyData.length - 1, 1)) * 100}%`,
-                bottom: `${point.accuracy}%`,
-                transform: 'translate(-50%, 50%)'
-              }"
-              :title="`${point.date}: ${point.accuracy}% (${point.taskCount} tasks)`"
-            ></div>
-
-            <!-- Line connecting points -->
-            <svg class="absolute inset-0 w-full h-full pointer-events-none">
-              <polyline
-                v-if="dailyAccuracyData.length > 1"
-                :points="dailyAccuracyData.map((point, index) => {
-                  const x = (index / Math.max(dailyAccuracyData.length - 1, 1)) * 100;
-                  const y = 100 - point.accuracy;
-                  return `${x}% ${y}%`;
-                }).join(', ')"
-                fill="none"
-                stroke="hsl(var(--s))"
-                stroke-width="2"
-                vector-effect="non-scaling-stroke"
-              />
-            </svg>
-          </div>
-        </div>
-
-        <!-- X-axis labels -->
-        <div class="absolute bottom-0 left-10 right-4 flex justify-between text-xs text-base-content/60">
-          <span>{{ new Date(dailyAccuracyData[0]?.date || '').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) }}</span>
-          <span v-if="dailyAccuracyData.length > 2">
-            {{ new Date(dailyAccuracyData[Math.floor(dailyAccuracyData.length / 2)]?.date || '').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) }}
-          </span>
-          <span>{{ new Date(dailyAccuracyData[dailyAccuracyData.length - 1]?.date || '').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) }}</span>
-        </div>
+      <div class="rounded p-4">
+        <WhiskersChart
+          :data="chartData"
+          :options="chartOptions"
+          :height="320"
+        />
       </div>
 
       <!-- Chart info -->
       <div class="text-sm text-base-content/60 text-center">
-        Each point shows the average accuracy for all tasks completed on that day
+        Each point shows the average accuracy for all tasks completed on that day.
+        Whiskers show ±1 standard deviation indicating daily performance consistency.
       </div>
     </div>
 

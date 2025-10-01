@@ -150,4 +150,16 @@ export class TranslationRepo implements TranslationRepoContract {
       }
     });
   }
+
+  async getUncheckedTranslations(limit: number): Promise<TranslationData[]> {
+    const all = await this.getAllTranslations();
+    return all
+      .filter(t => !t._mergeChecked)
+      .slice(0, limit);
+  }
+
+  async getTranslationsByOrigins(setUids: string[]): Promise<TranslationData[]> {
+    const all = await this.getAllTranslations();
+    return all.filter(t => t.origins.some(origin => setUids.includes(origin)));
+  }
 }

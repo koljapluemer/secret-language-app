@@ -232,4 +232,22 @@ export class FactCardRepo implements FactCardRepoContract {
     const query = this.buildFilteredQuery(filters);
     return await query.count();
   }
+
+  async getUncheckedFactCards(limit: number): Promise<FactCardData[]> {
+    const factCards = await this.db.factCards
+      .filter((fc: FactCardData) => !fc._mergeChecked)
+      .limit(limit)
+      .toArray();
+
+    return factCards.map((fc: FactCardData) => this.ensureFactCardFields(fc));
+  }
+
+  async getFactCardsByOrigins(setUids: string[]): Promise<FactCardData[]> {
+    const factCards = await this.db.factCards
+      .where('origins')
+      .anyOf(setUids)
+      .toArray();
+
+    return factCards.map((fc: FactCardData) => this.ensureFactCardFields(fc));
+  }
 }

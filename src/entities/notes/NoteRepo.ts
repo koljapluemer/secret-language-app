@@ -114,4 +114,24 @@ export class NoteRepo implements NoteRepoContract {
     onProgress?.(remoteNotes.length, remoteNotes.length);
     return remoteIdToLocalUid;
   }
+
+  async bulkMarkNotesAsChecked(uids: string[]): Promise<void> {
+    await this.db.transaction('rw', this.db.notes, async () => {
+      const notes = await this.db.notes.bulkGet(uids);
+      const updates = notes
+        .filter((n): n is NoteData => n !== undefined)
+        .map(n => ({ ...n, _mergeChecked: true }));
+
+      if (updates.length > 0) {
+        await this.db.notes.bulkPut(updates);
+      }
+    });
+  }
+
+  async getUncheckedNotes(limit: number): Promise<NoteData[]> {
+    const all = await this.getNotesByUIDs([]);
+    return all
+      .filter(n => !n._mergeChecked)
+      .slice(0, limit);
+  }
 }

@@ -14,4 +14,8 @@ export interface NoteRepoContract {
 
   // Batch operations for performance
   createNotesFromRemoteBatch(remoteNotes: { id?: string; content: string; showBeforeExercice?: boolean; noteType?: string }[], onProgress?: (current: number, total: number) => void): Promise<Map<string, string>>;
+
+  // Merge operations (notes don't deduplicate, but need to track as checked)
+  getUncheckedNotes(limit: number): Promise<NoteData[]>;
+  bulkMarkNotesAsChecked(uids: string[]): Promise<void>;
 }

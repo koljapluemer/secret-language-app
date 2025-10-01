@@ -1,0 +1,51 @@
+/**
+ * Start Merge Service
+ *
+ * Initializes and starts the background merge service.
+ * Should be called once during app initialization.
+ */
+
+import { EntityMergeService } from './EntityMergeService'
+import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract'
+import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract'
+import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract'
+import type { FactCardRepoContract } from '@/entities/fact-cards/FactCardRepoContract'
+import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoContract'
+
+let mergeServiceInstance: EntityMergeService | null = null
+
+export function startMergeService(
+  vocabRepo: VocabRepoContract,
+  translationRepo: TranslationRepoContract,
+  noteRepo: NoteRepoContract,
+  factCardRepo: FactCardRepoContract,
+  resourceRepo: ResourceRepoContract
+): EntityMergeService {
+  if (mergeServiceInstance) {
+    console.warn('Merge service already started')
+    return mergeServiceInstance
+  }
+
+  mergeServiceInstance = new EntityMergeService(
+    vocabRepo,
+    translationRepo,
+    noteRepo,
+    factCardRepo,
+    resourceRepo
+  )
+
+  mergeServiceInstance.start()
+
+  return mergeServiceInstance
+}
+
+export function getMergeService(): EntityMergeService | null {
+  return mergeServiceInstance
+}
+
+export function stopMergeService(): void {
+  if (mergeServiceInstance) {
+    mergeServiceInstance.stop()
+    mergeServiceInstance = null
+  }
+}

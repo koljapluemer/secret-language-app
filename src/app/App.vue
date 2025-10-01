@@ -1,14 +1,29 @@
 <script setup lang="ts">
-import { getCurrentInstance } from 'vue';
+import { getCurrentInstance, onMounted } from 'vue';
 import { provideRepositories } from './injectRepositories';
+import { startMergeService } from './merge/startMergeService';
 import AppHeader from './AppHeader.vue';
 import ToastContainer from '@/shared/toasts/ToastContainer.vue';
 
 // Setup and provide repositories
 const app = getCurrentInstance()?.appContext.app;
+let repos: ReturnType<typeof provideRepositories> | undefined;
 if (app) {
-  provideRepositories(app);
+  repos = provideRepositories(app);
 }
+
+// Start background merge service on mount
+onMounted(() => {
+  if (repos) {
+    startMergeService(
+      repos.vocabRepo,
+      repos.translationRepo,
+      repos.noteRepo,
+      repos.factCardRepo,
+      repos.resourceRepo
+    );
+  }
+});
 </script>
 
 <template>

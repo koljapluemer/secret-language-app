@@ -17,4 +17,8 @@ export interface TranslationRepoContract {
 
   // Bulk operations for performance
   bulkProcessTranslations(toUpdate: TranslationData[], toCreate: TranslationData[]): Promise<void>;
+
+  // Merge operations
+  getUncheckedTranslations(limit: number): Promise<TranslationData[]>;
+  getTranslationsByOrigins(setUids: string[]): Promise<TranslationData[]>;
 }

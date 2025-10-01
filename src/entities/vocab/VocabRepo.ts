@@ -1233,4 +1233,22 @@ export class VocabRepo implements VocabRepoContract {
 
     return createdVocab;
   }
+
+  async getUncheckedVocab(limit: number): Promise<VocabData[]> {
+    const vocab = await vocabDb.vocab
+      .filter(v => !v._mergeChecked)
+      .limit(limit)
+      .toArray();
+
+    return vocab.map(v => this.ensureVocabFields(v));
+  }
+
+  async getVocabByOrigins(setUids: string[]): Promise<VocabData[]> {
+    const vocab = await vocabDb.vocab
+      .where('origins')
+      .anyOf(setUids)
+      .toArray();
+
+    return vocab.map(v => this.ensureVocabFields(v));
+  }
 }

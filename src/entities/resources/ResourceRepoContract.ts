@@ -18,4 +18,8 @@ export interface ResourceRepoContract {
   updateResource(resource: ResourceData): Promise<ResourceData>;
   deleteResource(uid: string): Promise<void>;
   disconnectVocabFromResource(resourceUid: string, vocabUid: string): Promise<void>;
+
+  // Merge operations
+  getUncheckedResources(limit: number): Promise<ResourceData[]>;
+  getResourcesByOrigins(setUids: string[]): Promise<ResourceData[]>;
 }

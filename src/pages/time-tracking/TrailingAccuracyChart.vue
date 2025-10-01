@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import { useDetailedPracticeTracking } from '@/app/tracking/useDetailedPracticeTracking';
 import { ChevronDown, ChevronUp } from 'lucide-vue-next';
+import SimpleLineChart from './SimpleLineChart.vue';
 
 const tracking = useDetailedPracticeTracking();
 
@@ -105,19 +106,6 @@ const currentAccuracy = computed(() => {
   return accuracyData.value[accuracyData.value.length - 1].accuracy;
 });
 
-// Chart dimensions and scaling
-const chartMinTask = computed(() => {
-  if (accuracyData.value.length === 0) return 1;
-  return accuracyData.value[0].taskNumber;
-});
-
-const chartMaxTask = computed(() => {
-  if (accuracyData.value.length === 0) return 1;
-  return accuracyData.value[accuracyData.value.length - 1].taskNumber;
-});
-
-const chartTaskRange = computed(() => chartMaxTask.value - chartMinTask.value || 1);
-
 const totalFilteredTasks = computed(() => filteredEvents.value.length);
 
 // Dynamic max for chart range slider
@@ -125,6 +113,83 @@ const maxPossibleTasksToShow = computed(() => {
   const totalTasks = filteredEvents.value.length;
   return Math.max(10, totalTasks); // At least 10, but use actual task count if higher
 });
+
+// Chart.js data configuration
+const chartData = computed(() => {
+  if (accuracyData.value.length === 0) {
+    return {
+      labels: [],
+      datasets: []
+    };
+  }
+
+  const labels = accuracyData.value.map(point => `Task #${point.taskNumber}`);
+
+  return {
+    labels,
+    datasets: [
+      {
+        label: 'Trailing Accuracy',
+        data: accuracyData.value.map(point => point.accuracy),
+        borderColor: '#3B82F6',
+        backgroundColor: '#3B82F6',
+        borderWidth: 3,
+        pointRadius: 5,
+        pointHoverRadius: 8,
+        pointBackgroundColor: '#3B82F6',
+        pointBorderColor: '#1E40AF',
+        pointBorderWidth: 2,
+        pointHoverBackgroundColor: '#10B981',
+        pointHoverBorderColor: '#059669',
+        fill: false,
+        tension: 0.1,
+      }
+    ]
+  };
+});
+
+// Chart options
+const chartOptions = computed(() => ({
+  scales: {
+    x: {
+      title: {
+        display: true,
+        text: 'Task Number'
+      },
+    },
+    y: {
+      title: {
+        display: true,
+        text: 'Accuracy (%)'
+      },
+      min: 0,
+      max: 100,
+      ticks: {
+        callback: function(value: any) {
+          return value + '%';
+        }
+      }
+    }
+  },
+  plugins: {
+    tooltip: {
+      callbacks: {
+        title: function(context: any) {
+          const point = accuracyData.value[context[0].dataIndex];
+          return `Task #${point.taskNumber}`;
+        },
+        label: function(context: any) {
+          const point = accuracyData.value[context.dataIndex];
+          return `Accuracy: ${point.accuracy}%`;
+        },
+        afterLabel: function(context: any) {
+          const point = accuracyData.value[context.dataIndex];
+          return `Window size: ${point.actualWindowSize} tasks`;
+        }
+      }
+    }
+  },
+}));
 </script>
 
 <template>
@@ -276,67 +341,17 @@ const maxPossibleTasksToShow = computed(() => {
     <!-- Accuracy Chart -->
     <div v-if="accuracyData.length > 0" class="space-y-4">
       <!-- Chart container -->
-      <div class="relative h-64 bg-base-200 rounded p-4">
-        <!-- Y-axis labels -->
-        <div class="absolute left-0 top-4 bottom-8 flex flex-col justify-between text-xs text-base-content/60">
-          <span>100%</span>
-          <span>80%</span>
-          <span>60%</span>
-          <span>40%</span>
-          <span>20%</span>
-          <span>0%</span>
-        </div>
-
-        <!-- Chart area -->
-        <div class="ml-10 mr-4 h-full pb-8 relative">
-          <!-- Horizontal grid lines -->
-          <div class="absolute inset-0 flex flex-col justify-between">
-            <div v-for="i in 6" :key="i" class="border-t border-base-300 w-full"></div>
-          </div>
-
-          <!-- Chart with canvas-like positioning -->
-          <div class="absolute inset-0">
-            <div
-              v-for="(point, index) in accuracyData"
-              :key="point.taskNumber"
-              class="absolute w-2 h-2 bg-primary rounded-full cursor-pointer hover:scale-150 transition-transform"
-              :style="{
-                left: `${(index / Math.max(accuracyData.length - 1, 1)) * 100}%`,
-                bottom: `${point.accuracy}%`,
-                transform: 'translate(-50%, 50%)'
-              }"
-              :title="`Task #${point.taskNumber}: ${point.accuracy}% (${point.actualWindowSize} task window)`"
-            ></div>
-
-            <!-- Line connecting points -->
-            <svg class="absolute inset-0 w-full h-full pointer-events-none">
-              <polyline
-                v-if="accuracyData.length > 1"
-                :points="accuracyData.map((point, index) => {
-                  const x = (index / Math.max(accuracyData.length - 1, 1)) * 100;
-                  const y = 100 - point.accuracy;
-                  return `${x}% ${y}%`;
-                }).join(', ')"
-                fill="none"
-                stroke="hsl(var(--p))"
-                stroke-width="2"
-                vector-effect="non-scaling-stroke"
-              />
-            </svg>
-          </div>
-        </div>
-
-        <!-- X-axis labels -->
-        <div class="absolute bottom-0 left-10 right-4 flex justify-between text-xs text-base-content/60">
-          <span>Task #{{ chartMinTask }}</span>
-          <span v-if="chartTaskRange > 20">Task #{{ Math.round((chartMinTask + chartMaxTask) / 2) }}</span>
-          <span>Task #{{ chartMaxTask }}</span>
-        </div>
+      <div class="rounded p-4">
+        <SimpleLineChart
+          :data="chartData"
+          :options="chartOptions"
+          :height="320"
+        />
       </div>
 
       <!-- Chart info -->
       <div class="text-sm text-base-content/60 text-center">
-        Each point shows trailing accuracy over {{ trailingCount }} tasks ending at that task number
+        Each point shows trailing accuracy over {{ trailingCount }} tasks ending at that task number.
       </div>
     </div>
 

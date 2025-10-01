@@ -30,4 +30,8 @@ export interface FactCardRepoContract {
   // List and pagination operations
   getFactCardsPaginated(offset: number, limit: number, filters?: FactCardListFilters): Promise<FactCardData[]>;
   getTotalFactCardsCount(filters?: FactCardListFilters): Promise<number>;
+
+  // Merge operations
+  getUncheckedFactCards(limit: number): Promise<FactCardData[]>;
+  getFactCardsByOrigins(setUids: string[]): Promise<FactCardData[]>;
 }

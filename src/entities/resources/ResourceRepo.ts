@@ -201,4 +201,22 @@ export class ResourceRepo implements ResourceRepoContract {
     const filtered = this.applyFilters(allResources, filters);
     return filtered.length;
   }
+
+  async getUncheckedResources(limit: number): Promise<ResourceData[]> {
+    const resources = await this.db.resources
+      .filter(r => !r._mergeChecked)
+      .limit(limit)
+      .toArray();
+
+    return resources;
+  }
+
+  async getResourcesByOrigins(setUids: string[]): Promise<ResourceData[]> {
+    const resources = await this.db.resources
+      .where('origins')
+      .anyOf(setUids)
+      .toArray();
+
+    return resources;
+  }
 }

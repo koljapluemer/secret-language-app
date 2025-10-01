@@ -57,5 +57,8 @@ export interface VocabData {
   sounds?: VocabSound[]; // associated audio for this vocab
   hasSound?: boolean
 
+  // Internal merge tracking
+  _mergeChecked?: boolean // Has background merge service processed this item?
+
 }
 

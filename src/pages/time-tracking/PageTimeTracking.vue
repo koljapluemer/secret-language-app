@@ -3,6 +3,7 @@ import StatsCards from './StatsCards.vue';
 import WeeklyChart from './WeeklyChart.vue';
 import TrailingAccuracyChart from './TrailingAccuracyChart.vue';
 import DailyAccuracyChart from './DailyAccuracyChart.vue';
+import DailyLanguageChart from './DailyLanguageChart.vue';
 </script>
 
 <template>
@@ -29,5 +30,10 @@ import DailyAccuracyChart from './DailyAccuracyChart.vue';
   <!-- Daily Accuracy Chart -->
   <div class="mb-8">
     <DailyAccuracyChart />
+  </div>
+
+  <!-- Daily Language Chart -->
+  <div class="mb-8">
+    <DailyLanguageChart />
   </div>
 </template>

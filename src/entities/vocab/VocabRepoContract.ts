@@ -101,4 +101,8 @@ export interface VocabRepoContract {
 
   // Bulk operations for performance
   bulkProcessVocab(toUpdate: VocabData[], toCreate: Omit<VocabData, 'uid' | 'progress'>[]): Promise<VocabData[]>;
+
+  // Merge operations
+  getUncheckedVocab(limit: number): Promise<VocabData[]>;
+  getVocabByOrigins(setUids: string[]): Promise<VocabData[]>;
 }
