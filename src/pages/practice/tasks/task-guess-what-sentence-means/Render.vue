@@ -95,7 +95,7 @@ const handleDone = async () => {
     }
 
     emit('finished');
-  } catch (error) {
+  } catch {
     toast.error('Failed to save vocabulary progress');
     emit('finished');
   }

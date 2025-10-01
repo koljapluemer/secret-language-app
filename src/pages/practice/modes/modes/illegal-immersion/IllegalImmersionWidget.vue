@@ -78,7 +78,7 @@ async function generateNextTask(): Promise<Task | null> {
       languageCodes,
       blockList
     );
-  } catch (error) {
+  } catch {
     toast.error('Error generating illegal immersion task');
     return null;
   }
@@ -103,7 +103,7 @@ async function tryTransitionToTask(): Promise<boolean> {
       setTask(currentTask, nextTask);
       return true;
     }
-  } catch (error) {
+  } catch {
     toast.error('Task generation failed');
   }
   
@@ -126,7 +126,7 @@ async function initializeQueue() {
       // Initialize progress tracking
       updateProgress();
     }
-  } catch (error) {
+  } catch {
     toast.error('Initialization failed');
     clearDelayedLoading();
     setError('Failed to initialize illegal immersion session. Please try again.');
@@ -157,10 +157,10 @@ async function completeCurrentTask() {
       if (newNextTask && state.value.status === 'task') {
         state.value.nextTask = newNextTask;
       }
-      
+
       // Update progress after task completion
       updateProgress();
-    } catch (error) {
+    } catch {
       toast.error('Error generating next task');
     }
   } else {

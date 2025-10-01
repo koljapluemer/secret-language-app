@@ -41,9 +41,9 @@ async function generateNextTask(): Promise<Task | null> {
     if (languageCodes.length === 0) {
       return null;
     }
-    
+
     return await generateGoalTask(goalRepo!, languageCodes);
-  } catch (error) {
+  } catch {
     toast.error('Error generating goal task');
     return null;
   }
@@ -65,7 +65,7 @@ async function tryTransitionToTask(): Promise<boolean> {
       setTask(currentTask, nextTask);
       return true;
     }
-  } catch (error) {
+  } catch {
     toast.error('Task generation failed');
   }
   
@@ -85,7 +85,7 @@ async function initializeQueue() {
       clearDelayedLoading();
       setEmpty('No goal tasks are currently available for practice.');
     }
-  } catch (error) {
+  } catch {
     toast.error('Initialization failed');
     clearDelayedLoading();
     setError('Failed to initialize goal task queue. Please try again.');
@@ -116,7 +116,7 @@ async function completeCurrentTask() {
       if (newNextTask && state.value.status === 'task') {
         state.value.nextTask = newNextTask;
       }
-    } catch (error) {
+    } catch {
       toast.error('Error generating next task');
     }
   } else {

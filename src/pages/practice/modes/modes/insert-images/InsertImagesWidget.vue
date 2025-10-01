@@ -55,9 +55,9 @@ async function generateNextTask(): Promise<Task | null> {
     
     // Create block list with last used vocab
     const blockList = lastUsedVocabUid.value ? [lastUsedVocabUid.value] : undefined;
-    
+
     return await generateInsertImagesTask(vocabRepo!, languageCodes, blockList);
-  } catch (error) {
+  } catch {
     toast.error('Error generating next task');
     return null;
   }
@@ -79,7 +79,7 @@ async function tryTransitionToTask(): Promise<boolean> {
       setTask(currentTask, nextTask);
       return true;
     }
-  } catch (error) {
+  } catch {
     toast.error('Task generation failed');
   }
   
@@ -99,7 +99,7 @@ async function initializeQueue() {
       clearDelayedLoading();
       setEmpty('No vocabulary needs images right now. Check back later!');
     }
-  } catch (error) {
+  } catch {
     toast.error('Initialization failed');
     clearDelayedLoading();
     setError('Failed to initialize image insertion session. Please try again.');
@@ -136,7 +136,7 @@ async function completeCurrentTask() {
       if (newNextTask && state.value.status === 'task') {
         state.value.nextTask = newNextTask;
       }
-    } catch (error) {
+    } catch {
       toast.error('Error generating next task');
     }
   } else {

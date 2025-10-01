@@ -54,9 +54,9 @@ async function generateNextTask(): Promise<Task | null> {
     
     // Create block list with last used vocab
     const blockList = lastUsedVocabUid.value ? [lastUsedVocabUid.value] : undefined;
-    
+
     return await generateMinimalPairsTask(vocabRepo!, languageCodes, blockList);
-  } catch (error) {
+  } catch {
     toast.error('Error generating minimal pairs task');
     return null;
   }
@@ -78,7 +78,7 @@ async function tryTransitionToTask(): Promise<boolean> {
       setTask(currentTask, nextTask);
       return true;
     }
-  } catch (error) {
+  } catch {
     toast.error('Task generation failed');
   }
   
@@ -98,7 +98,7 @@ async function initializeQueue() {
       clearDelayedLoading();
       setEmpty('No character vocab with sound and related vocab is available for minimal pairs practice.');
     }
-  } catch (error) {
+  } catch {
     toast.error('Initialization failed');
     clearDelayedLoading();
     setError('Failed to initialize Minimal Pairs mode. Please try again.');
@@ -129,7 +129,7 @@ async function completeCurrentTask() {
       if (newNextTask && state.value.status === 'task') {
         state.value.nextTask = newNextTask;
       }
-    } catch (error) {
+    } catch {
       toast.error('Error generating next task');
     }
   } else {

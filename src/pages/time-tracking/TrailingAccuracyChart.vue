@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useDetailedPracticeTracking } from '@/app/tracking/useDetailedPracticeTracking';
 import { ChevronDown, ChevronUp } from 'lucide-vue-next';
 import SimpleLineChart from './SimpleLineChart.vue';
+
+const { t } = useI18n();
 
 const tracking = useDetailedPracticeTracking();
 
@@ -123,13 +126,13 @@ const chartData = computed(() => {
     };
   }
 
-  const labels = accuracyData.value.map(point => `Task #${point.taskNumber}`);
+  const labels = accuracyData.value.map(point => `${t('stats.task')} #${point.taskNumber}`);
 
   return {
     labels,
     datasets: [
       {
-        label: 'Trailing Accuracy',
+        label: t('stats.trailingAccuracy'),
         data: accuracyData.value.map(point => point.accuracy),
         borderColor: '#3B82F6',
         backgroundColor: '#3B82F6',
@@ -154,18 +157,18 @@ const chartOptions = computed(() => ({
     x: {
       title: {
         display: true,
-        text: 'Task Number'
+        text: t('stats.taskNumber')
       },
     },
     y: {
       title: {
         display: true,
-        text: 'Accuracy (%)'
+        text: t('stats.accuracy')
       },
       min: 0,
       max: 100,
       ticks: {
-        callback: function(value: any) {
+        callback: function(value: number | string) {
           return value + '%';
         }
       }
@@ -174,17 +177,17 @@ const chartOptions = computed(() => ({
   plugins: {
     tooltip: {
       callbacks: {
-        title: function(context: any) {
+        title: function(context: Array<{ dataIndex: number }>) {
           const point = accuracyData.value[context[0].dataIndex];
-          return `Task #${point.taskNumber}`;
+          return `${t('stats.task')} #${point.taskNumber}`;
         },
-        label: function(context: any) {
+        label: function(context: { dataIndex: number }) {
           const point = accuracyData.value[context.dataIndex];
-          return `Accuracy: ${point.accuracy}%`;
+          return `${t('stats.accuracyPercent')} ${point.accuracy}%`;
         },
-        afterLabel: function(context: any) {
+        afterLabel: function(context: { dataIndex: number }) {
           const point = accuracyData.value[context.dataIndex];
-          return `Window size: ${point.actualWindowSize} tasks`;
+          return `${t('stats.windowSize')} ${point.actualWindowSize} ${t('stats.tasks')}`;
         }
       }
     }
@@ -197,16 +200,16 @@ const chartOptions = computed(() => ({
   <div class="bg-base-100 rounded-lg shadow p-6">
     <div class="flex justify-between items-center mb-4">
       <div>
-        <h2>Trailing Accuracy</h2>
+        <h2>{{ t('stats.trailingAccuracy') }}</h2>
         <div v-if="totalFilteredTasks > 0" class="text-sm text-base-content/60">
-          Current: {{ currentAccuracy }}% • {{ totalFilteredTasks }} tasks filtered
+          {{ `${t('stats.current')}: ${currentAccuracy}% • ${totalFilteredTasks} ${t('stats.tasksFiltered')}` }}
         </div>
       </div>
       <button
         @click="showFilters = !showFilters; if (showFilters) initializeFilters()"
         class="btn btn-ghost btn-sm"
       >
-        <span>Filters</span>
+        <span>{{ t('stats.filters') }}</span>
         <ChevronDown v-if="!showFilters" :size="16" />
         <ChevronUp v-if="showFilters" :size="16" />
       </button>
@@ -219,8 +222,8 @@ const chartOptions = computed(() => ({
         <!-- X-Axis Range (How many recent tasks to show) -->
         <div class="w-full space-y-4">
           <div class="flex justify-between items-center">
-            <span class="font-semibold">Chart Range</span>
-            <span class="text-sm opacity-70">{{ maxTasksToShow }} recent tasks</span>
+            <span class="font-semibold">{{ t('stats.chartRange') }}</span>
+            <span class="text-sm opacity-70">{{ maxTasksToShow }} {{ t('stats.recentTasks') }}</span>
           </div>
           <div>
             <input
@@ -232,28 +235,28 @@ const chartOptions = computed(() => ({
               class="range range-primary w-full"
             />
             <div class="flex justify-between text-xs mt-2">
-              <span>|</span>
-              <span>|</span>
-              <span>|</span>
-              <span>|</span>
-              <span>|</span>
+              <span v-text="'|'" />
+              <span v-text="'|'" />
+              <span v-text="'|'" />
+              <span v-text="'|'" />
+              <span v-text="'|'" />
             </div>
             <div class="flex justify-between text-xs">
-              <span>10</span>
+              <span v-text="'10'" />
               <span>{{ Math.floor(maxPossibleTasksToShow * 0.25) }}</span>
               <span>{{ Math.floor(maxPossibleTasksToShow * 0.5) }}</span>
               <span>{{ Math.floor(maxPossibleTasksToShow * 0.75) }}</span>
               <span>{{ maxPossibleTasksToShow }}</span>
             </div>
           </div>
-          <p class="text-sm opacity-70">How far back in time to look</p>
+          <p class="text-sm opacity-70">{{ t('stats.howFarBack') }}</p>
         </div>
 
         <!-- Trailing Window Size -->
         <div class="w-full space-y-4">
           <div class="flex justify-between items-center">
-            <span class="font-semibold">Accuracy Window</span>
-            <span class="text-sm opacity-70">{{ trailingCount }} task average</span>
+            <span class="font-semibold">{{ t('stats.accuracyWindow') }}</span>
+            <span class="text-sm opacity-70">{{ trailingCount }} {{ t('stats.taskAverage') }}</span>
           </div>
           <div>
             <input
@@ -265,28 +268,28 @@ const chartOptions = computed(() => ({
               class="range range-secondary w-full"
             />
             <div class="flex justify-between text-xs mt-2">
-              <span>|</span>
-              <span>|</span>
-              <span>|</span>
-              <span>|</span>
-              <span>|</span>
+              <span v-text="'|'" />
+              <span v-text="'|'" />
+              <span v-text="'|'" />
+              <span v-text="'|'" />
+              <span v-text="'|'" />
             </div>
             <div class="flex justify-between text-xs">
-              <span>3</span>
-              <span>25</span>
-              <span>50</span>
-              <span>75</span>
-              <span>100</span>
+              <span v-text="'3'" />
+              <span v-text="'25'" />
+              <span v-text="'50'" />
+              <span v-text="'75'" />
+              <span v-text="'100'" />
             </div>
           </div>
-          <p class="text-sm opacity-70">Tasks per accuracy calculation</p>
+          <p class="text-sm opacity-70">{{ t('stats.tasksPerCalculation') }}</p>
         </div>
       </div>
 
       <!-- Language Filter -->
       <div v-if="availableLanguages.length > 0">
         <label class="label">
-          <span class="label-text font-medium">Languages:</span>
+          <span class="label-text font-medium">{{ t('stats.languages') }}</span>
         </label>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
           <label v-for="language in availableLanguages" :key="language" class="cursor-pointer label">
@@ -304,7 +307,7 @@ const chartOptions = computed(() => ({
       <!-- Practice Mode Filter -->
       <div v-if="availableModes.length > 0">
         <label class="label">
-          <span class="label-text font-medium">Practice Modes:</span>
+          <span class="label-text font-medium">{{ t('stats.practiceModes') }}</span>
         </label>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
           <label v-for="mode in availableModes" :key="mode" class="cursor-pointer label">
@@ -322,7 +325,7 @@ const chartOptions = computed(() => ({
       <!-- Task Type Filter -->
       <div v-if="availableTaskTypes.length > 0">
         <label class="label">
-          <span class="label-text font-medium">Task Types:</span>
+          <span class="label-text font-medium">{{ t('stats.taskTypes') }}</span>
         </label>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
           <label v-for="taskType in availableTaskTypes" :key="taskType" class="cursor-pointer label">
@@ -351,14 +354,14 @@ const chartOptions = computed(() => ({
 
       <!-- Chart info -->
       <div class="text-sm text-base-content/60 text-center">
-        Each point shows trailing accuracy over {{ trailingCount }} tasks ending at that task number.
+        {{ t('stats.trailingAccuracyDescription', { window: trailingCount }) }}
       </div>
     </div>
 
     <!-- Empty state -->
     <div v-else class="text-center mt-6 text-base-content/60">
-      <p>No accuracy data available</p>
-      <p class="mt-1">Complete some practice tasks to see your accuracy trends!</p>
+      <p>{{ t('stats.noAccuracyData') }}</p>
+      <p class="mt-1">{{ t('stats.completeTasksPrompt') }}</p>
     </div>
   </div>
 </template>

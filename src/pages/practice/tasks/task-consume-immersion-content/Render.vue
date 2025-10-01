@@ -43,7 +43,7 @@ const loadResource = async () => {
   try {
     const resourceData = await resourceRepo.getResourceById(resourceUid.value);
     resource.value = resourceData || null;
-  } catch (error) {
+  } catch {
     toast.error('Failed to load resource');
   }
 };
@@ -65,7 +65,7 @@ const handleSkip = async () => {
   try {
     await resourceRepo.updateResource(updatedResource);
     emit('finished');
-  } catch (error) {
+  } catch {
     toast.error('Failed to update resource');
     emit('finished');
   }
@@ -101,9 +101,9 @@ const handleDone = async () => {
       
       await resourceRepo.updateResource(updatedResource);
     }
-    
+
     emit('finished');
-  } catch (error) {
+  } catch {
     toast.error('Failed to save experience data');
     emit('finished');
   }

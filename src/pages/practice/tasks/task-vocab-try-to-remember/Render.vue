@@ -48,7 +48,7 @@ const handleDone = async () => {
 
     await vocabRepo.updateVocab(JSON.parse(JSON.stringify(updatedVocab)));
     emit('finished', 'neutral');
-  } catch (error) {
+  } catch {
     toast.error('Failed to initialize vocabulary');
     emit('finished', 'neutral');
   }
@@ -64,9 +64,9 @@ const handleSkip = async () => {
       doNotPractice: true
     };
     await vocabRepo.updateVocab(JSON.parse(JSON.stringify(updatedVocab)));
-    
+
     emit('finished', 'neutral');
-  } catch (error) {
+  } catch {
     toast.error('Failed to update vocabulary');
     emit('finished', 'neutral');
   }

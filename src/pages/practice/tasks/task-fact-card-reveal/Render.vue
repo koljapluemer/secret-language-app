@@ -45,9 +45,9 @@ const handleRating = async (rating: Rating) => {
     const immediateDue = props.modeContext?.setWrongVocabDueAgainImmediately || false;
     await factCardRepo.scoreFactCard(factCard.value.uid, rating, immediateDue);
     await factCardRepo.updateLastReview(factCard.value.uid);
-    
+
     emit('finished');
-  } catch (error) {
+  } catch {
     toast.error('Failed to save fact card progress');
     emit('finished');
   }

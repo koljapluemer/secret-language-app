@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useDetailedPracticeTracking } from '@/app/tracking/useDetailedPracticeTracking';
 import { ChevronDown, ChevronUp } from 'lucide-vue-next';
 import WhiskersChart from './WhiskersChart.vue';
+
+const { t } = useI18n();
 
 const tracking = useDetailedPracticeTracking();
 
@@ -64,7 +67,7 @@ const filteredEvents = computed(() => {
 });
 
 // Calculate standard deviation for binary results
-const calculateStdDev = (dayEvents: any[]) => {
+const calculateStdDev = (dayEvents: Array<{ correctness: string }>) => {
   const correctResults = dayEvents.map(e => e.correctness === 'correct' ? 1 : 0);
   const mean = correctResults.reduce((sum: number, val) => sum + val, 0) / correctResults.length;
   const variance = correctResults.reduce((sum: number, val) => sum + Math.pow(val - mean, 2), 0) / correctResults.length;
@@ -198,7 +201,7 @@ const chartOptions = computed(() => ({
       min: 0,
       max: 100,
       ticks: {
-        callback: function(value: any) {
+        callback: function(value: number | string) {
           return value + '%';
         }
       }
@@ -207,11 +210,11 @@ const chartOptions = computed(() => ({
   plugins: {
     tooltip: {
       callbacks: {
-        title: function(context: any) {
+        title: function(context: Array<{ dataIndex: number }>) {
           const point = dailyAccuracyData.value[context[0].dataIndex];
           return point.date;
         },
-        label: function(context: any) {
+        label: function(context: { dataIndex: number; datasetIndex: number }) {
           const point = dailyAccuracyData.value[context.dataIndex];
           if (context.datasetIndex === 0) {
             return `Average: ${point.accuracy}% ± ${point.stdDev}%`;
@@ -219,7 +222,7 @@ const chartOptions = computed(() => ({
             return `Standard Deviation: ±${point.stdDev}%`;
           }
         },
-        afterLabel: function(context: any) {
+        afterLabel: function(context: { dataIndex: number }) {
           const point = dailyAccuracyData.value[context.dataIndex];
           return `Tasks completed: ${point.taskCount}`;
         }
@@ -242,16 +245,16 @@ const chartOptions = computed(() => ({
   <div class="bg-base-100 rounded-lg shadow p-6">
     <div class="flex justify-between items-center mb-4">
       <div>
-        <h2>Daily Average Accuracy</h2>
+        <h2>{{ t('stats.dailyAverageAccuracy') }}</h2>
         <div v-if="dailyAccuracyData.length > 0" class="text-sm text-base-content/60">
-          Average: {{ averageAccuracy }}% • {{ dailyAccuracyData.length }} days shown
+          {{ `${t('stats.average')} ${averageAccuracy}% • ${dailyAccuracyData.length} ${t('stats.daysShown')}` }}
         </div>
       </div>
       <button
         @click="showFilters = !showFilters; if (showFilters) initializeFilters()"
         class="btn btn-ghost btn-sm"
       >
-        <span>Filters</span>
+        <span>{{ t('stats.filters') }}</span>
         <ChevronDown v-if="!showFilters" :size="16" />
         <ChevronUp v-if="showFilters" :size="16" />
       </button>
@@ -262,8 +265,8 @@ const chartOptions = computed(() => ({
       <!-- Days Range Control -->
       <div class="w-full space-y-4">
         <div class="flex justify-between items-center">
-          <span class="font-semibold">Days to Show</span>
-          <span class="text-sm opacity-70">{{ daysToShow }} recent days</span>
+          <span class="font-semibold">{{ t('stats.daysToShow') }}</span>
+          <span class="text-sm opacity-70">{{ daysToShow }} {{ t('stats.recentDays') }}</span>
         </div>
         <div>
           <input
@@ -275,27 +278,27 @@ const chartOptions = computed(() => ({
             class="range range-primary w-full"
           />
           <div class="flex justify-between text-xs mt-2">
-            <span>|</span>
-            <span>|</span>
-            <span>|</span>
-            <span>|</span>
-            <span>|</span>
+            <span v-text="'|'" />
+            <span v-text="'|'" />
+            <span v-text="'|'" />
+            <span v-text="'|'" />
+            <span v-text="'|'" />
           </div>
           <div class="flex justify-between text-xs">
-            <span>7</span>
+            <span v-text="'7'" />
             <span>{{ Math.floor(maxPossibleDaysToShow * 0.25) }}</span>
             <span>{{ Math.floor(maxPossibleDaysToShow * 0.5) }}</span>
             <span>{{ Math.floor(maxPossibleDaysToShow * 0.75) }}</span>
             <span>{{ maxPossibleDaysToShow }}</span>
           </div>
         </div>
-        <p class="text-sm opacity-70">How many recent days to display</p>
+        <p class="text-sm opacity-70">{{ t('stats.howManyRecentDays') }}</p>
       </div>
 
       <!-- Language Filter -->
       <div v-if="availableLanguages.length > 0">
         <label class="label">
-          <span class="label-text font-medium">Languages:</span>
+          <span class="label-text font-medium">{{ t('stats.languages') }}</span>
         </label>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
           <label v-for="language in availableLanguages" :key="language" class="cursor-pointer label">
@@ -313,7 +316,7 @@ const chartOptions = computed(() => ({
       <!-- Practice Mode Filter -->
       <div v-if="availableModes.length > 0">
         <label class="label">
-          <span class="label-text font-medium">Practice Modes:</span>
+          <span class="label-text font-medium">{{ t('stats.practiceModes') }}</span>
         </label>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
           <label v-for="mode in availableModes" :key="mode" class="cursor-pointer label">
@@ -331,7 +334,7 @@ const chartOptions = computed(() => ({
       <!-- Task Type Filter -->
       <div v-if="availableTaskTypes.length > 0">
         <label class="label">
-          <span class="label-text font-medium">Task Types:</span>
+          <span class="label-text font-medium">{{ t('stats.taskTypes') }}</span>
         </label>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
           <label v-for="taskType in availableTaskTypes" :key="taskType" class="cursor-pointer label">
@@ -360,15 +363,14 @@ const chartOptions = computed(() => ({
 
       <!-- Chart info -->
       <div class="text-sm text-base-content/60 text-center">
-        Each point shows the average accuracy for all tasks completed on that day.
-        Whiskers show ±1 standard deviation indicating daily performance consistency.
+        {{ t('stats.dailyAccuracyDescription') }}
       </div>
     </div>
 
     <!-- Empty state -->
     <div v-else class="text-center mt-6 text-base-content/60">
-      <p>No daily accuracy data available</p>
-      <p class="mt-1">Complete practice tasks across multiple days to see your daily trends!</p>
+      <p>{{ t('stats.noDailyAccuracyData') }}</p>
+      <p class="mt-1">{{ t('stats.completeDailyTasks') }}</p>
     </div>
   </div>
 </template>

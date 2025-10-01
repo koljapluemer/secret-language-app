@@ -148,7 +148,7 @@ async function loadVocabData() {
     shuffledVocabs.value = shuffleArray(vocabArray);
     correctIndex.value = shuffledVocabs.value.findIndex(v => v.uid === vocab1.value!.uid);
 
-  } catch (error) {
+  } catch {
     toast.error('Failed to load vocabulary data');
   } finally {
     loading.value = false;
@@ -238,7 +238,7 @@ const handleCompletion = async () => {
 
     const correctness = firstAttemptWrong.value ? 'incorrect' : 'correct';
     setTimeout(() => emit('finished', correctness), 750);
-  } catch (error) {
+  } catch {
     toast.error('Failed to save vocabulary progress');
     emit('finished', 'neutral');
   }

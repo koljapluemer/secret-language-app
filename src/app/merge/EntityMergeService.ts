@@ -218,7 +218,7 @@ export class EntityMergeService {
       return false
     }
 
-    const uids = unchecked.map((n: any) => n.uid)
+    const uids = unchecked.map(n => n.uid)
     await this.noteRepo.bulkMarkNotesAsChecked(uids)
 
     return true // Processed something

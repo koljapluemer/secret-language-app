@@ -123,7 +123,7 @@ const playVocabSound = (vocabUid: string) => {
     audioElement.value.src = url;
     audioElement.value.play();
     playingVocabUid.value = vocabUid;
-  } catch (error) {
+  } catch {
     toast.error('Failed to play audio');
   }
 };
@@ -188,7 +188,7 @@ const handleDone = async () => {
 
     await handleTaskCompletion();
     emit('finished', 'neutral');
-  } catch (error) {
+  } catch {
     toast.error('Failed to save sentence');
     await handleTaskCompletion();
     emit('finished', 'neutral');

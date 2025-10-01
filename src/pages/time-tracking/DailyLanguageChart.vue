@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useDetailedPracticeTracking } from '@/app/tracking/useDetailedPracticeTracking';
 import { ChevronDown, ChevronUp } from 'lucide-vue-next';
 import { renderLanguage } from '@/entities/languages/renderLanguage';
@@ -16,6 +17,8 @@ import {
   Legend,
 } from 'chart.js';
 import { Bar } from 'vue-chartjs';
+
+const { t } = useI18n();
 
 // Register Chart.js components
 ChartJS.register(
@@ -194,8 +197,8 @@ const chartOptions = computed(() => ({
       cornerRadius: 8,
       displayColors: true,
       callbacks: {
-        footer: function(context: any) {
-          const total = context.reduce((sum: number, item: any) => sum + item.parsed.y, 0);
+        footer: function(context: Array<{ parsed: { y: number } }>) {
+          const total = context.reduce((sum: number, item: { parsed: { y: number } }) => sum + item.parsed.y, 0);
           return `Total: ${total} exercises`;
         }
       }
@@ -218,16 +221,16 @@ const chartOptions = computed(() => ({
   <div class="bg-base-100 rounded-lg shadow p-6">
     <div class="flex justify-between items-center mb-4">
       <div>
-        <h2>Daily Exercises by Language</h2>
+        <h2>{{ t('stats.dailyLanguageExercises') }}</h2>
         <div v-if="dailyLanguageData.dates.length > 0" class="text-sm text-base-content/60">
-          {{ dailyLanguageData.dates.length }} days shown
+          {{ dailyLanguageData.dates.length }} {{ t('stats.daysShown') }}
         </div>
       </div>
       <button
         @click="showFilters = !showFilters"
         class="btn btn-ghost btn-sm"
       >
-        <span>Filters</span>
+        <span>{{ t('stats.filters') }}</span>
         <ChevronDown v-if="!showFilters" :size="16" />
         <ChevronUp v-if="showFilters" :size="16" />
       </button>
@@ -238,8 +241,8 @@ const chartOptions = computed(() => ({
       <!-- Days Range Control -->
       <div class="w-full space-y-4">
         <div class="flex justify-between items-center">
-          <span class="font-semibold">Days to Show</span>
-          <span class="text-sm opacity-70">{{ daysToShow }} recent days</span>
+          <span class="font-semibold">{{ t('stats.daysToShow') }}</span>
+          <span class="text-sm opacity-70">{{ daysToShow }} {{ t('stats.recentDays') }}</span>
         </div>
         <div>
           <input
@@ -251,21 +254,21 @@ const chartOptions = computed(() => ({
             class="range range-primary w-full"
           />
           <div class="flex justify-between text-xs mt-2">
-            <span>|</span>
-            <span>|</span>
-            <span>|</span>
-            <span>|</span>
-            <span>|</span>
+            <span v-text="'|'" />
+            <span v-text="'|'" />
+            <span v-text="'|'" />
+            <span v-text="'|'" />
+            <span v-text="'|'" />
           </div>
           <div class="flex justify-between text-xs">
-            <span>7</span>
+            <span v-text="'7'" />
             <span>{{ Math.floor(maxPossibleDaysToShow * 0.25) }}</span>
             <span>{{ Math.floor(maxPossibleDaysToShow * 0.5) }}</span>
             <span>{{ Math.floor(maxPossibleDaysToShow * 0.75) }}</span>
             <span>{{ maxPossibleDaysToShow }}</span>
           </div>
         </div>
-        <p class="text-sm opacity-70">How many recent days to display</p>
+        <p class="text-sm opacity-70">{{ t('stats.howManyRecentDays') }}</p>
       </div>
     </div>
 
@@ -283,14 +286,14 @@ const chartOptions = computed(() => ({
 
       <!-- Chart info -->
       <div class="text-sm text-base-content/60 text-center">
-        Stacked bars show the number of exercises completed per language each day.
+        {{ t('stats.stackedBarsDescription') }}
       </div>
     </div>
 
     <!-- Empty state -->
     <div v-else class="text-center mt-6 text-base-content/60">
-      <p>No exercise data available</p>
-      <p class="mt-1">Complete practice tasks to see your daily language activity!</p>
+      <p>{{ t('stats.noExerciseData') }}</p>
+      <p class="mt-1">{{ t('stats.completeLanguageTasks') }}</p>
     </div>
   </div>
 </template>

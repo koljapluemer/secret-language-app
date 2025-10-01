@@ -100,7 +100,7 @@ const handleRating = async (rating: Rating) => {
     // Map rating to correctness
     const correctness = (rating === 1 || rating === 2) ? 'incorrect' : 'correct'; // Rating.Again=1, Hard=2 are incorrect
     emit('finished', correctness);
-  } catch (error) {
+  } catch {
     toast.error('Failed to save vocabulary progress');
     emit('finished', 'neutral');
   }

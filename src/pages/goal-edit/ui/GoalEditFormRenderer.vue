@@ -69,7 +69,7 @@ const availableLanguages = ref<LanguageData[]>([]);
 onMounted(async () => {
   try {
     availableLanguages.value = await languageRepo.getActiveTargetLanguages();
-  } catch (error) {
+  } catch {
     toast.error('Failed to load languages');
   }
 });
@@ -87,7 +87,7 @@ async function updateField(field: keyof GoalData, value: string | number | boole
       [field]: value
     });
     emit('goal-updated', updatedGoal);
-  } catch (error) {
+  } catch {
     toast.error('Failed to update goal');
   }
 }

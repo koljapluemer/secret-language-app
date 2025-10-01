@@ -46,9 +46,9 @@ const handleDone = async () => {
       }
     };
     await factCardRepo.updateFactCard(JSON.parse(JSON.stringify(updatedFactCard)));
-    
+
     emit('finished');
-  } catch (error) {
+  } catch {
     toast.error('Failed to initialize fact card');
     emit('finished');
   }
@@ -64,9 +64,9 @@ const handleSkip = async () => {
       doNotPractice: true
     };
     await factCardRepo.updateFactCard(JSON.parse(JSON.stringify(updatedFactCard)));
-    
+
     emit('finished');
-  } catch (error) {
+  } catch {
     toast.error('Failed to update fact card');
     emit('finished');
   }

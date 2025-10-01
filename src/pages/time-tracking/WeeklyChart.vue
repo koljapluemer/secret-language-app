@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useDetailedPracticeTracking } from '@/app/tracking/useDetailedPracticeTracking';
 import { formatTime } from '@/shared/utils/formatTime';
+
+const { t } = useI18n();
 
 const tracking = useDetailedPracticeTracking();
 
@@ -47,7 +50,7 @@ const maxMinutes = computed(() => {
 
 <template>
   <div class="bg-base-100 rounded-lg shadow p-6">
-    <h2>Last 7 Days</h2>
+    <h2>{{ t('stats.last7Days') }}</h2>
 
     <div class="space-y-3">
       <div v-for="day in chartData" :key="day.date" class="flex items-center gap-4">
@@ -69,8 +72,8 @@ const maxMinutes = computed(() => {
     </div>
 
     <div v-if="maxMinutes <= 1" class="text-center mt-6 text-base-content/60">
-      <p>No learning time recorded yet</p>
-      <p class="mt-1">Visit the practice modes to start learning!</p>
+      <p>{{ t('stats.noDataYet') }}</p>
+      <p class="mt-1">{{ t('stats.startLearning') }}</p>
     </div>
   </div>
 </template>

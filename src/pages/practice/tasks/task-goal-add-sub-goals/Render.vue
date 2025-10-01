@@ -77,9 +77,9 @@ const handleSkip = async () => {
     await goalRepo.update(goal.value.uid, {
       lastShownAt: new Date()
     });
-    
+
     emit('finished');
-  } catch (error) {
+  } catch {
     toast.error('Failed to skip goal');
     emit('finished');
   }
@@ -96,9 +96,9 @@ const handleSkipAndDisable = async () => {
       lastShownAt: new Date()
     };
     await goalRepo.update(goal.value.uid, updatedGoal);
-    
+
     emit('finished');
-  } catch (error) {
+  } catch {
     toast.error('Failed to disable goal');
     emit('finished');
   }
@@ -118,9 +118,9 @@ const handleFinishDecision = async (wantToDoAgain: boolean) => {
       lastShownAt: new Date()
     };
     await goalRepo.update(goal.value.uid, updatedGoal);
-    
+
     emit('finished');
-  } catch (error) {
+  } catch {
     toast.error('Failed to complete goal task');
     emit('finished');
   }

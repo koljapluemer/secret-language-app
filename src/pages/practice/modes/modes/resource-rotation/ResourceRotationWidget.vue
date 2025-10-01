@@ -55,7 +55,7 @@ async function generateNextTask(): Promise<Task | null> {
       resourceRepo: resourceRepo!,
       languageCodes
     });
-  } catch (error) {
+  } catch {
     toast.error('Error generating resource rotation task');
     return null;
   }
@@ -77,7 +77,7 @@ async function tryTransitionToTask(): Promise<boolean> {
       setTask(currentTask, nextTask);
       return true;
     }
-  } catch (error) {
+  } catch {
     toast.error('Task generation failed');
   }
   
@@ -97,7 +97,7 @@ async function initializeQueue() {
       clearDelayedLoading();
       setEmpty('No resources are available for knowledge extraction. Add some resources to get started!');
     }
-  } catch (error) {
+  } catch {
     toast.error('Initialization failed');
     clearDelayedLoading();
     setError('Failed to initialize resource rotation. Please try again.');
@@ -128,7 +128,7 @@ async function completeCurrentTask() {
       if (newNextTask && state.value.status === 'task') {
         state.value.nextTask = newNextTask;
       }
-    } catch (error) {
+    } catch {
       toast.error('Error generating next task');
     }
   } else {

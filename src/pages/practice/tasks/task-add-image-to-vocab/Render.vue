@@ -80,7 +80,7 @@ const handleSkipAndDisable = async () => {
   try {
     await vocabRepo.markVocabNotPicturable(vocab.value.uid);
     emit('finished');
-  } catch (err) {
+  } catch {
     toast.error('Failed to update vocabulary settings');
     emit('finished');
   }

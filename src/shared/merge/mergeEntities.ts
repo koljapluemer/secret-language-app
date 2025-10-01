@@ -70,17 +70,15 @@ export function executeMergeStrategy<T>(
       }
       return (targetValue > sourceValue ? targetValue : sourceValue) as T
 
-    case 'boolean-true-wins':
+    case 'boolean-true-wins': {
       // Handle optional booleans - treat undefined as false
-      const targetBool = targetValue === true
-      const sourceBool = sourceValue === true
-      return (targetBool || sourceBool) as T
+      return ((targetValue === true) || (sourceValue === true)) as T
+    }
 
-    case 'boolean-false-wins':
+    case 'boolean-false-wins': {
       // Handle optional booleans - treat undefined as false
-      const targetBoolFalse = targetValue === true
-      const sourceBoolFalse = sourceValue === true
-      return (targetBoolFalse && sourceBoolFalse) as T
+      return ((targetValue === true) && (sourceValue === true)) as T
+    }
 
     case 'custom':
       if (!strategy.customMerge) {

@@ -80,7 +80,7 @@ async function loadAvailableSets() {
       });
       selectedSetUid.value = latestSet.uid;
     }
-  } catch (error) {
+  } catch {
     toast.error('Failed to load available sets');
   } finally {
     loadingSets.value = false;
@@ -107,7 +107,7 @@ async function generateNextTask(): Promise<Task | null> {
       options,
       blockList
     );
-  } catch (error) {
+  } catch {
     toast.error('Error generating set study task');
     return null;
   }
@@ -129,7 +129,7 @@ async function tryTransitionToTask(): Promise<boolean> {
       setTask(currentTask, nextTask);
       return true;
     }
-  } catch (error) {
+  } catch {
     toast.error('Task generation failed');
   }
 
@@ -170,7 +170,7 @@ async function initializeQueue() {
         setEmpty('No set selected for study.');
       }
     }
-  } catch (error) {
+  } catch {
     toast.error('Initialization failed');
     clearDelayedLoading();
     setError('Failed to initialize set study session. Please try again.');
@@ -201,7 +201,7 @@ async function completeCurrentTask() {
       if (newNextTask && state.value.status === 'task') {
         state.value.nextTask = newNextTask;
       }
-    } catch (error) {
+    } catch {
       toast.error('Error generating next task');
     }
   } else {
@@ -262,7 +262,7 @@ const handleTaskFinished = async () => {
         if (vocab && vocab.progress.level === 0) { // Just became seen (was level -1, now level 0 after first completion)
           currentNewVocabCount.value++;
         }
-      } catch (error) {
+      } catch {
         toast.error('Error tracking new vocab count');
       }
     }

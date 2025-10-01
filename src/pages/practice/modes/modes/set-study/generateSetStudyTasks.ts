@@ -47,7 +47,7 @@ export async function generateSetStudyTask(
 
     // No suitable vocab available
     return null;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -64,7 +64,7 @@ export async function getSetStudyProgress(
     const totalDue = dueVocab.length;
 
     return { totalUnseen, totalDue };
-  } catch (error) {
+  } catch {
     return { totalUnseen: 0, totalDue: 0 };
   }
 }

@@ -168,7 +168,7 @@ async function loadVocabData() {
 
     await generateImageOptions();
 
-  } catch (error) {
+  } catch {
     toast.error('Failed to load vocabulary data');
   } finally {
     loading.value = false;
@@ -195,7 +195,7 @@ async function generateImageOptions() {
       const distractorImage = distractorVocab.images[Math.floor(Math.random() * distractorVocab.images.length)];
       options.push({ image: distractorImage, isCorrect: false });
     }
-  } catch (error) {
+  } catch {
     toast.error('Failed to load exercise options');
   }
 
@@ -257,7 +257,7 @@ const handleCompletion = async () => {
 
     const correctness = firstAttemptWrong.value ? 'incorrect' : 'correct';
     setTimeout(() => emit('finished', correctness), 750);
-  } catch (error) {
+  } catch {
     toast.error('Failed to save vocabulary progress');
     emit('finished', 'neutral');
   }

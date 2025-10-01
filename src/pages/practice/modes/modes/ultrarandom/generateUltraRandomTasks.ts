@@ -90,8 +90,8 @@ export async function generateUltraRandomTask(
         if (task) {
           return task;
         }
-      } catch (error) {
-        
+      } catch {
+
         // Continue to next task type
         continue;
       }

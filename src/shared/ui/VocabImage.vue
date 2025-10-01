@@ -29,8 +29,7 @@ const imageUrl = computed(() => {
       const url = URL.createObjectURL(props.image.blob);
       createdUrl.value = url;
       return url;
-    } catch (error) {
-      
+    } catch {
       return props.image.url || '';
     }
   }

@@ -42,7 +42,7 @@ const loadResource = async () => {
   try {
     const resourceData = await resourceRepo.getResourceById(resourceUid.value);
     resource.value = resourceData || null;
-  } catch (error) {
+  } catch {
     toast.error('Failed to load resource');
   }
 };
@@ -63,9 +63,9 @@ const handleSkip = async () => {
       lastShownAt: new Date()
     };
     await resourceRepo.updateResource(JSON.parse(JSON.stringify(updatedResource)));
-    
+
     emit('finished');
-  } catch (error) {
+  } catch {
     toast.error('Failed to skip resource');
     emit('finished');
   }
@@ -82,9 +82,9 @@ const handleSkipAndDisable = async () => {
       lastShownAt: new Date()
     };
     await resourceRepo.updateResource(JSON.parse(JSON.stringify(updatedResource)));
-    
+
     emit('finished');
-  } catch (error) {
+  } catch {
     toast.error('Failed to disable resource');
     emit('finished');
   }
@@ -104,9 +104,9 @@ const handleFinishDecision = async (wantToDoAgain: boolean) => {
       lastShownAt: new Date()
     };
     await resourceRepo.updateResource(JSON.parse(JSON.stringify(updatedResource)));
-    
+
     emit('finished');
-  } catch (error) {
+  } catch {
     toast.error('Failed to complete resource');
     emit('finished');
   }

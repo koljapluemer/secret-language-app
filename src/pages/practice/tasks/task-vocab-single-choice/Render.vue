@@ -113,7 +113,7 @@ async function loadVocabData() {
     }
 
     await generateOptions();
-  } catch (error) {
+  } catch {
     toast.error('Failed to load vocabulary data');
   } finally {
     loading.value = false;
@@ -218,10 +218,10 @@ const handleCompletion = async () => {
     const immediateDue = props.modeContext?.setWrongVocabDueAgainImmediately || false;
     await vocabRepo.scoreVocab(vocab.value.uid, rating, immediateDue);
     await vocabRepo.updateLastReview(vocab.value.uid);
-    
+
     const correctness = firstAttemptWrong.value ? 'incorrect' : 'correct';
     setTimeout(() => emit('finished', correctness), 750);
-  } catch (error) {
+  } catch {
     toast.error('Failed to save vocabulary progress');
     emit('finished', 'neutral');
   }

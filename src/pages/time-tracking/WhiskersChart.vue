@@ -27,8 +27,16 @@ ChartJS.register(
 );
 
 interface Props {
-  data: any;
-  options?: any;
+  data: {
+    labels: string[];
+    datasets: Array<{
+      label: string;
+      data: number[][];
+      backgroundColor?: string;
+      borderColor?: string;
+    }>;
+  };
+  options?: Record<string, unknown>;
   height?: number;
 }
 

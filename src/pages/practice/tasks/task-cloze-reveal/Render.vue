@@ -104,7 +104,7 @@ async function loadVocabData() {
     }
 
     generateCloze();
-  } catch (error) {
+  } catch {
     toast.error('Failed to load vocabulary data');
   } finally {
     loading.value = false;
@@ -128,9 +128,9 @@ const handleRating = async (rating: Rating) => {
     const immediateDue = props.modeContext?.setWrongVocabDueAgainImmediately || false;
     await vocabRepo.scoreVocab(vocab.value.uid, rating, immediateDue);
     await vocabRepo.updateLastReview(vocab.value.uid);
-    
+
     emit('finished');
-  } catch (error) {
+  } catch {
     toast.error('Failed to save vocabulary progress');
     emit('finished');
   }

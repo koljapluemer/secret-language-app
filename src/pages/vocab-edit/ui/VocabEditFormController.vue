@@ -193,7 +193,7 @@ async function loadVocab() {
         try {
           const notes = await noteRepo.getNotesByUIDs(vocab.notes);
           loadedNotes.value = notes;
-        } catch (error) {
+        } catch {
           toast.error('Failed to load notes');
           loadedNotes.value = [];
         }
@@ -205,7 +205,7 @@ async function loadVocab() {
         try {
           const translations = await translationRepo.getTranslationsByIds(vocab.translations);
           loadedTranslations.value = translations;
-        } catch (error) {
+        } catch {
           toast.error('Failed to load translations');
           loadedTranslations.value = [];
         }

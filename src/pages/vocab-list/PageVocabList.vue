@@ -369,7 +369,7 @@ async function loadTranslationsForCurrentPage() {
     }
     
     vocabTranslations.value = translationData;
-  } catch (err) {
+  } catch {
     toast.error('Failed to load translations');
   }
 }
@@ -383,7 +383,7 @@ async function deleteVocab(uid: string) {
   try {
     await vocabRepo.deleteVocab(uid);
     await loadVocab(); // Reload to update pagination
-  } catch (err) {
+  } catch {
     toast.error('Failed to delete vocabulary');
     error.value = 'Failed to delete vocabulary item';
   }
@@ -401,7 +401,7 @@ async function loadFilterOptions() {
       selectedLanguages.value = availableLanguages.value.map(l => l.code);
       selectedSets.value = ['user-added', ...availableSets.value.map(s => s.uid)];
     }
-  } catch (err) {
+  } catch {
     toast.error('Failed to load filter options');
   }
 }

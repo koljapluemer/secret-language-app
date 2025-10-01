@@ -137,7 +137,7 @@ onMounted(async () => {
     
     // Stop the stream for now, we'll restart when recording
     stream.getTracks().forEach(track => track.stop());
-  } catch (error) {
+  } catch {
     toast.error('Failed to access microphone');
     canRecord.value = false;
   }
@@ -207,8 +207,8 @@ async function startRecording() {
         stopRecording();
       }
     }, 1000);
-    
-  } catch (error) {
+
+  } catch {
     toast.error('Failed to start recording');
   }
 }

@@ -117,7 +117,7 @@ async function loadVocabData() {
     }
 
     await generateClozeOptions();
-  } catch (error) {
+  } catch {
     toast.error('Failed to load vocabulary data');
   } finally {
     loading.value = false;
@@ -208,7 +208,7 @@ const handleCompletion = async () => {
     
     const correctness = firstAttemptWrong.value ? 'incorrect' : 'correct';
     setTimeout(() => emit('finished', correctness), 750);
-  } catch (error) {
+  } catch {
     toast.error('Failed to save vocabulary progress');
     emit('finished', 'neutral');
   }
