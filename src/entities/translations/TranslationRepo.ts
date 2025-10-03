@@ -58,6 +58,32 @@ export class TranslationRepo implements TranslationRepoContract {
     await db.translations.where('id').anyOf(ids).delete();
   }
 
+  async bulkCreateTranslations(translations: Omit<TranslationData, 'id' | 'origins'>[]): Promise<TranslationData[]> {
+    if (translations.length === 0) {
+      return [];
+    }
+
+    // Prepare translations with origins field
+    const translationsWithOrigins: Omit<TranslationData, 'id'>[] = translations.map(t => ({
+      content: t.content,
+      priority: t.priority,
+      notes: t.notes,
+      origins: []
+    }));
+
+    // Bulk insert and get generated IDs
+    const generatedIds = await db.translations.bulkAdd(
+      translationsWithOrigins as TranslationData[],
+      { allKeys: true }
+    );
+
+    // Map generated IDs to translations
+    return translationsWithOrigins.map((t, index) => ({
+      ...t,
+      id: String(generatedIds[index])
+    }));
+  }
+
   async searchTranslationsByContent(content: string): Promise<TranslationData[]> {
     const allTranslations = await db.translations.toArray();
     return allTranslations.filter(translation => 

@@ -19,6 +19,7 @@ import { goalSchema } from '@/entities/remote-sets/validation/goalSchema';
 import { factCardSchema } from '@/entities/remote-sets/validation/factCardSchema';
 
 import type { VocabData, VocabImage, VocabSound } from '@/entities/vocab/VocabData';
+import type { TranslationData } from '@/entities/translations/TranslationData';
 import type { ResourceData } from '@/entities/resources/ResourceData';
 import type { GoalData } from '@/entities/goals/GoalData';
 import type { FactCardData } from '@/entities/fact-cards/FactCardData';
@@ -274,11 +275,15 @@ export class UnifiedRemoteSetService {
         vocabToCreate.push(localVocab);
       }
 
-      // Create all vocab
+      // Create all vocab in batches
       const createdVocab: VocabData[] = [];
-      for (const vocab of vocabToCreate) {
-        const created = await this.vocabRepo.saveVocab(vocab);
-        createdVocab.push(created);
+      const BATCH_SIZE = 100;
+
+      for (let i = 0; i < vocabToCreate.length; i += BATCH_SIZE) {
+        const batch = vocabToCreate.slice(i, i + BATCH_SIZE);
+        const savedBatch = await this.vocabRepo.bulkCreateVocab(batch);
+        createdVocab.push(...savedBatch);
+        reportProgress('Processing vocabulary', i + batch.length, vocabToCreate.length);
       }
 
       // Build ID mapping for cross-references
@@ -711,27 +716,29 @@ export class UnifiedRemoteSetService {
     for (let i = 0; i < remoteTranslations.length; i += BATCH_SIZE) {
       const batch = remoteTranslations.slice(i, i + BATCH_SIZE);
 
-      await Promise.all(batch.map(async (remoteTranslation) => {
-        if (!remoteTranslation.content) {
-          completed++;
-          return;
-        }
+      // Filter out translations without content
+      const validTranslations = batch.filter(t => t.content);
 
-        const noteIds = this.resolveReferences(remoteTranslation.notes || [], noteMap);
-
-        const savedTranslation = await this.translationRepo.saveTranslation({
-          content: remoteTranslation.content,
-          priority: remoteTranslation.priority || 1,
-          notes: noteIds
-        });
-
-        if (remoteTranslation.id) {
-          remoteIdToLocalId.set(remoteTranslation.id, savedTranslation.id);
-        }
-
-        completed++;
-        onProgress?.(completed, total);
+      // Prepare translations for bulk insert
+      const translationsToCreate: Omit<TranslationData, 'id' | 'origins'>[] = validTranslations.map(t => ({
+        content: t.content,
+        priority: t.priority || 1,
+        notes: this.resolveReferences(t.notes || [], noteMap)
       }));
+
+      // Bulk insert all translations in this batch
+      const savedTranslations = await this.translationRepo.bulkCreateTranslations(translationsToCreate);
+
+      // Map remote IDs to saved IDs
+      for (let j = 0; j < validTranslations.length; j++) {
+        if (validTranslations[j].id && savedTranslations[j]) {
+          remoteIdToLocalId.set(validTranslations[j].id!, savedTranslations[j].id);
+        }
+      }
+
+      // Update progress
+      completed += batch.length;
+      onProgress?.(completed, total);
     }
 
     return remoteIdToLocalId;

@@ -34,6 +34,9 @@ export interface VocabRepoContract {
   saveVocab(vocab: Omit<VocabData, "id" | 'progress' | 'tasks'>): Promise<VocabData>;
   updateVocab(vocab: VocabData): Promise<void>;
   deleteVocab(id: string): Promise<void>;
+
+  // Batch operations
+  bulkCreateVocab(vocab: Omit<VocabData, 'id' | 'progress'>[]): Promise<VocabData[]>;
   
   // Progress operations
   scoreVocab(vocabId: string, rating: Rating, setWrongVocabDueAgainImmediately?: boolean): Promise<void>;

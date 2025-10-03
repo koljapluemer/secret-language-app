@@ -422,6 +422,52 @@ export class VocabRepo implements VocabRepoContract {
     await db.vocab.delete(id);
   }
 
+  async bulkCreateVocab(vocab: Omit<VocabData, 'id' | 'progress'>[]): Promise<VocabData[]> {
+    if (vocab.length === 0) {
+      return [];
+    }
+
+    // Prepare vocab with progress field
+    const vocabWithProgress: Omit<VocabData, 'id'>[] = vocab.map(v => ({
+      language: v.language,
+      content: v.content,
+      consideredCharacter: v.consideredCharacter,
+      consideredSentence: v.consideredSentence,
+      consideredWord: v.consideredWord,
+      priority: v.priority,
+      doNotPractice: v.doNotPractice,
+      notes: v.notes,
+      translations: v.translations,
+      links: v.links,
+      origins: v.origins,
+      relatedVocab: v.relatedVocab || [],
+      notRelatedVocab: v.notRelatedVocab || [],
+      isPicturable: v.isPicturable,
+      images: v.images || [],
+      hasImage: (v.images && v.images.length > 0) || false,
+      sounds: v.sounds || [],
+      hasSound: (v.sounds && v.sounds.some(sound => !sound.disableForPractice)) || false,
+      similarSoundingButNotTheSame: v.similarSoundingButNotTheSame,
+      progress: {
+        ...createEmptyCard(),
+        streak: 0,
+        level: -1
+      }
+    }));
+
+    // Bulk insert and get generated IDs
+    const generatedIds = await db.vocab.bulkAdd(
+      vocabWithProgress as VocabData[],
+      { allKeys: true }
+    );
+
+    // Map generated IDs to vocab
+    return vocabWithProgress.map((v, index) => ({
+      ...v,
+      id: String(generatedIds[index])
+    }));
+  }
+
   async getDueVocabInLanguage(language: string, vocabBlockList?: string[]): Promise<VocabData[]> {
     const vocab = await db.vocab
       .where('language')

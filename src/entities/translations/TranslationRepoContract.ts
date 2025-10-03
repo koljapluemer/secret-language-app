@@ -9,6 +9,9 @@ export interface TranslationRepoContract {
   saveOrGetExistingTranslation(translation: Omit<TranslationData, 'id' | 'origins'>): Promise<TranslationData>;
   updateTranslation(translation: TranslationData): Promise<void>;
   deleteTranslations(ids: string[]): Promise<void>;
+
+  // Batch operations
+  bulkCreateTranslations(translations: Omit<TranslationData, 'id' | 'origins'>[]): Promise<TranslationData[]>;
   
   // Query operations
   searchTranslationsByContent(content: string): Promise<TranslationData[]>;
