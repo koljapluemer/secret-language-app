@@ -319,9 +319,13 @@ export class UnifiedRemoteSetService {
 
     // Process media files for vocab that was just created
     if (setFiles.vocab) {
-      reportProgress('Processing media files', 0, 100);
-      await this.processVocabMedia(languageCode, setName, setFiles.vocab, vocabMap);
-      reportProgress('Processing media files', 100, 100);
+      await this.processVocabMedia(
+        languageCode,
+        setName,
+        setFiles.vocab,
+        vocabMap,
+        (current, total) => reportProgress('Processing media files', current, total)
+      );
     }
 
     // Task generation is now handled ad-hoc during lessons
@@ -437,6 +441,8 @@ export class UnifiedRemoteSetService {
     }
 
     reportProgress('Download complete', 100, 100);
+
+    this.toast.success(`Successfully downloaded ${setName}`);
 
     // Task generation is now handled ad-hoc during lessons
   }
@@ -567,38 +573,53 @@ export class UnifiedRemoteSetService {
   }
 
   private async processVocabMedia(
-    languageCode: string, 
-    setName: string, 
-    vocabData: z.infer<typeof vocabSchema>[], 
-    vocabMap: Map<string, string>
+    languageCode: string,
+    setName: string,
+    vocabData: z.infer<typeof vocabSchema>[],
+    vocabMap: Map<string, string>,
+    onProgress?: (current: number, total: number) => void
   ): Promise<void> {
+    const BATCH_SIZE = 10; // Download 10 files at a time
+    const downloads: Array<() => Promise<void>> = [];
+
+    // Collect all download tasks
     for (const vocab of vocabData) {
       if (!vocab.id) continue;
-      
       const localVocabId = vocabMap.get(vocab.id);
       if (!localVocabId) continue;
 
-      // Process images
+      // Queue image downloads
       if (vocab.images && vocab.images.length > 0) {
         for (const imageData of vocab.images) {
-          try {
-            await this.downloadAndAddImage(languageCode, setName, localVocabId, imageData);
-          } catch {
-            // Silently ignore image download errors
-          }
+          downloads.push(() =>
+            this.downloadAndAddImage(languageCode, setName, localVocabId, imageData).catch(() => {})
+          );
         }
       }
 
-      // Process sounds
+      // Queue sound downloads
       if (vocab.sounds && vocab.sounds.length > 0) {
         for (const soundData of vocab.sounds) {
-          try {
-            await this.downloadAndAddSound(languageCode, setName, localVocabId, soundData);
-          } catch {
-            // Silently ignore sound download errors
-          }
+          downloads.push(() =>
+            this.downloadAndAddSound(languageCode, setName, localVocabId, soundData).catch(() => {})
+          );
         }
       }
+    }
+
+    const total = downloads.length;
+    let completed = 0;
+
+    onProgress?.(0, total);
+
+    // Process downloads in batches
+    for (let i = 0; i < downloads.length; i += BATCH_SIZE) {
+      const batch = downloads.slice(i, i + BATCH_SIZE);
+      await Promise.all(batch.map(async (download) => {
+        await download();
+        completed++;
+        onProgress?.(completed, total);
+      }));
     }
   }
 
