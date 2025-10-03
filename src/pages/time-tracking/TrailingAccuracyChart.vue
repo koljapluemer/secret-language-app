@@ -1,13 +1,19 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useDetailedPracticeTracking } from '@/app/tracking/useDetailedPracticeTracking';
+import type { TaskCompletionData } from '@/entities/practice-tracking/TaskCompletionData';
 import { ChevronDown, ChevronUp } from 'lucide-vue-next';
 import SimpleLineChart from './SimpleLineChart.vue';
 
 const { t } = useI18n();
 
 const tracking = useDetailedPracticeTracking();
+const allEventsRaw = ref<TaskCompletionData[]>([]);
+
+onMounted(async () => {
+  allEventsRaw.value = await tracking.getAllCompletionEvents();
+});
 
 // Filters and controls
 const showFilters = ref(false);
@@ -19,7 +25,7 @@ const maxTasksToShow = ref(50); // How many recent tasks to show on X-axis
 
 // Accuracy data processing
 const allCompletionEvents = computed(() => {
-  return tracking.getAllCompletionEvents()
+  return allEventsRaw.value
     .filter(event => event.correctness !== 'neutral')
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 });

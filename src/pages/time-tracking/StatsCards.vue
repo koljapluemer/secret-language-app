@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useDetailedPracticeTracking } from '@/app/tracking/useDetailedPracticeTracking';
 import { formatTime } from '@/shared/utils/formatTime';
@@ -7,9 +7,15 @@ import { formatTime } from '@/shared/utils/formatTime';
 const { t } = useI18n();
 const tracking = useDetailedPracticeTracking();
 
-const todayMinutes = computed(() => formatTime(tracking.getTodayMinutes()));
-const weekMinutes = computed(() => formatTime(tracking.getThisWeekMinutes()));
-const totalMinutes = computed(() => formatTime(tracking.getTotalMinutes()));
+const todayMinutes = ref('0m');
+const weekMinutes = ref('0m');
+const totalMinutes = ref('0m');
+
+onMounted(async () => {
+  todayMinutes.value = formatTime(await tracking.getTodayMinutes());
+  weekMinutes.value = formatTime(await tracking.getThisWeekMinutes());
+  totalMinutes.value = formatTime(await tracking.getTotalMinutes());
+});
 </script>
 
 <template>

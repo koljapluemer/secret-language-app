@@ -7,6 +7,7 @@ import { ResourceRepo } from '@/entities/resources/ResourceRepo';
 import { LanguageRepo } from '@/entities/languages/LanguageRepo';
 import { LocalSetRepo } from '@/entities/local-sets/LocalSetRepo';
 import { MergeQueueRepo } from '@/app/merge/MergeQueueRepo';
+import { PracticeTrackingRepo } from '@/entities/practice-tracking/PracticeTrackingRepo';
 
 export function setupRepositories() {
   // Create repository instances
@@ -19,6 +20,7 @@ export function setupRepositories() {
   const languageRepo = new LanguageRepo();
   const localSetRepo = new LocalSetRepo();
   const mergeQueueRepo = new MergeQueueRepo();
+  const practiceTrackingRepo = new PracticeTrackingRepo();
 
   return {
     vocabRepo,
@@ -29,12 +31,13 @@ export function setupRepositories() {
     resourceRepo,
     languageRepo,
     localSetRepo,
-    mergeQueueRepo
+    mergeQueueRepo,
+    practiceTrackingRepo
   };
 }
 
 export function provideRepositories(app: { provide: (key: string | symbol, value: unknown) => void }) {
-  const { vocabRepo, translationRepo, goalRepo, noteRepo, factCardRepo, resourceRepo, languageRepo, localSetRepo, mergeQueueRepo } = setupRepositories();
+  const { vocabRepo, translationRepo, goalRepo, noteRepo, factCardRepo, resourceRepo, languageRepo, localSetRepo, mergeQueueRepo, practiceTrackingRepo } = setupRepositories();
 
   app.provide('vocabRepo', vocabRepo);
   app.provide('translationRepo', translationRepo);
@@ -45,6 +48,7 @@ export function provideRepositories(app: { provide: (key: string | symbol, value
   app.provide('languageRepo', languageRepo);
   app.provide('localSetRepo', localSetRepo);
   app.provide('mergeQueueRepo', mergeQueueRepo);
+  app.provide('practiceTrackingRepo', practiceTrackingRepo);
 
-  return { vocabRepo, translationRepo, goalRepo, noteRepo, factCardRepo, resourceRepo, languageRepo, localSetRepo, mergeQueueRepo };
+  return { vocabRepo, translationRepo, goalRepo, noteRepo, factCardRepo, resourceRepo, languageRepo, localSetRepo, mergeQueueRepo, practiceTrackingRepo };
 }

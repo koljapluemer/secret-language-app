@@ -1,30 +1,25 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { CheckCircle2 } from 'lucide-vue-next';
 import { useDetailedPracticeTracking } from '@/app/tracking/useDetailedPracticeTracking';
-import type { TaskCompletionEvent } from '@/app/tracking/types';
+import type { TaskCompletionData } from '@/entities/practice-tracking/TaskCompletionData';
+import type { PracticeTrackingRepoContract } from '@/entities/practice-tracking/PracticeTrackingRepoContract';
 
 const { t } = useI18n();
 const tracking = useDetailedPracticeTracking();
-
-const SETTINGS_KEY = 'linguanodon-motivation-settings';
-
-interface MotivationSettings {
-  dailyGoalMinutes: number;
-  weeklyGoalMinutes: number;
+const repo = inject<PracticeTrackingRepoContract>('practiceTrackingRepo');
+if (!repo) {
+  throw new Error('PracticeTrackingRepo not provided');
 }
 
-const settings = ref<MotivationSettings>({
-  dailyGoalMinutes: 30,
-  weeklyGoalMinutes: 180
-});
+const dailyGoalMinutes = ref(30);
+const weeklyGoalMinutes = ref(180);
 
-onMounted(() => {
-  const stored = localStorage.getItem(SETTINGS_KEY);
-  if (stored) {
-    settings.value = JSON.parse(stored);
-  }
+onMounted(async () => {
+  const settings = await repo.getSettings();
+  dailyGoalMinutes.value = settings.dailyGoalMinutes;
+  weeklyGoalMinutes.value = settings.weeklyGoalMinutes;
 });
 
 // Helper functions to get data by day
@@ -34,7 +29,7 @@ function getStartOfDay(date: Date): Date {
   return d;
 }
 
-function getEventsForDay(events: TaskCompletionEvent[], daysAgo: number): TaskCompletionEvent[] {
+function getEventsForDay(events: TaskCompletionData[], daysAgo: number): TaskCompletionData[] {
   const today = getStartOfDay(new Date());
   const targetDay = new Date(today);
   targetDay.setDate(today.getDate() - daysAgo);
@@ -47,17 +42,17 @@ function getEventsForDay(events: TaskCompletionEvent[], daysAgo: number): TaskCo
   });
 }
 
-function getMinutesForDay(events: TaskCompletionEvent[], daysAgo: number): number {
+function getMinutesForDay(events: TaskCompletionData[], daysAgo: number): number {
   const dayEvents = getEventsForDay(events, daysAgo);
   const totalMs = dayEvents.reduce((sum, event) => sum + event.activeDuration, 0);
   return totalMs / (1000 * 60);
 }
 
-function getTaskCountForDay(events: TaskCompletionEvent[], daysAgo: number): number {
+function getTaskCountForDay(events: TaskCompletionData[], daysAgo: number): number {
   return getEventsForDay(events, daysAgo).length;
 }
 
-function getWeekMinutes(events: TaskCompletionEvent[], weeksAgo: number): number {
+function getWeekMinutes(events: TaskCompletionData[], weeksAgo: number): number {
   const today = getStartOfDay(new Date());
   const startOfWeek = new Date(today);
   startOfWeek.setDate(today.getDate() - today.getDay() - (weeksAgo * 7));
@@ -73,7 +68,7 @@ function getWeekMinutes(events: TaskCompletionEvent[], weeksAgo: number): number
   return totalMs / (1000 * 60);
 }
 
-function getAverageMinutes(events: TaskCompletionEvent[], days: number): number {
+function getAverageMinutes(events: TaskCompletionData[], days: number): number {
   const today = getStartOfDay(new Date());
   const startDate = new Date(today);
   startDate.setDate(today.getDate() - days);
@@ -88,7 +83,14 @@ function getAverageMinutes(events: TaskCompletionEvent[], days: number): number 
 }
 
 // Grid item computations
-const allEvents = computed(() => tracking.getAllCompletionEvents());
+const allEvents = ref<TaskCompletionData[]>([]);
+
+onMounted(async () => {
+  const settings = await repo.getSettings();
+  dailyGoalMinutes.value = settings.dailyGoalMinutes;
+  weeklyGoalMinutes.value = settings.weeklyGoalMinutes;
+  allEvents.value = await tracking.getAllCompletionEvents();
+});
 
 // 1. Practiced longer than yesterday
 const longerThanYesterday = computed(() => {
@@ -145,7 +147,7 @@ const moreTasksThanDayBeforeYesterday = computed(() => {
 // 5. Daily goal reached
 const dailyGoalReached = computed(() => {
   const today = getMinutesForDay(allEvents.value, 0);
-  const goal = settings.value.dailyGoalMinutes;
+  const goal = dailyGoalMinutes.value;
   return {
     achieved: today >= goal && goal > 0,
     current: Math.round(today),
@@ -157,7 +159,7 @@ const dailyGoalReached = computed(() => {
 // 6. Weekly goal reached
 const weeklyGoalReached = computed(() => {
   const thisWeek = getWeekMinutes(allEvents.value, 0);
-  const goal = settings.value.weeklyGoalMinutes;
+  const goal = weeklyGoalMinutes.value;
   return {
     achieved: thisWeek >= goal && goal > 0,
     current: Math.round(thisWeek),

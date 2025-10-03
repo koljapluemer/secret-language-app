@@ -1,16 +1,21 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useDetailedPracticeTracking } from '@/app/tracking/useDetailedPracticeTracking';
 import { formatTime } from '@/shared/utils/formatTime';
+import type { TaskCompletionData } from '@/entities/practice-tracking/TaskCompletionData';
 
 const { t } = useI18n();
 
 const tracking = useDetailedPracticeTracking();
+const allEvents = ref<TaskCompletionData[]>([]);
+
+onMounted(async () => {
+  allEvents.value = await tracking.getAllCompletionEvents();
+});
 
 // Convert events to daily data for compatibility
-const getAllTimeData = () => {
-  const events = tracking.getAllCompletionEvents();
+const getAllTimeData = (events: TaskCompletionData[]) => {
   const dailyData: { [date: string]: number } = {};
 
   events.forEach(event => {
@@ -23,7 +28,7 @@ const getAllTimeData = () => {
 };
 
 const chartData = computed(() => {
-  const allData = getAllTimeData();
+  const allData = getAllTimeData(allEvents.value);
   const today = new Date();
   const last7Days = [];
 

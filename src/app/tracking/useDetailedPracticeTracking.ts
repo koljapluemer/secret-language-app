@@ -1,10 +1,17 @@
-import { ref, onMounted, onUnmounted } from 'vue'
-import type { TaskCompletionEvent, PracticeTrackingData, TaskCorrectness } from './types'
+import { ref, onMounted, onUnmounted, inject } from 'vue'
+import type { TaskCorrectness } from './types'
+import type { TaskCompletionData } from '@/entities/practice-tracking/TaskCompletionData'
+import type { PracticeTrackingRepoContract } from '@/entities/practice-tracking/PracticeTrackingRepoContract'
 import { TRACKING_CONFIG } from './trackingConfig'
 import { createActivityTracker } from '@/shared/utils/activityDetection'
 import { createTimer } from '@/shared/utils/timerUtils'
 
 export function useDetailedPracticeTracking() {
+  const repo = inject<PracticeTrackingRepoContract>('practiceTrackingRepo')!
+  if (!repo) {
+    throw new Error('PracticeTrackingRepo not provided')
+  }
+
   // Current session state
   const sessionId = ref<string>(generateSessionId())
   const currentTimer = ref(createTimer())
@@ -54,7 +61,7 @@ export function useDetailedPracticeTracking() {
     return Math.min(activeTime, TRACKING_CONFIG.MAX_TASK_DURATION)
   }
 
-  function recordTaskCompletion(
+  async function recordTaskCompletion(
     setId: string | null,
     languageCode: string,
     practiceMode: string,
@@ -63,7 +70,7 @@ export function useDetailedPracticeTracking() {
   ) {
     const activeDuration = stopTaskTiming()
 
-    const event: TaskCompletionEvent = {
+    const event: Omit<TaskCompletionData, 'id'> = {
       timestamp: new Date(),
       activeDuration,
       set_Id: setId,
@@ -74,36 +81,11 @@ export function useDetailedPracticeTracking() {
       session_id: sessionId.value
     }
 
-    saveCompletionEvent(event)
+    await repo.saveCompletionEvent(event)
   }
 
   function generateSessionId(): string {
     return `session_${Date.now()}_${Math.random().toString(36).substring(2)}`
-  }
-
-  function getTrackingData(): PracticeTrackingData {
-    const stored = localStorage.getItem(TRACKING_CONFIG.STORAGE_KEY)
-    return stored ? JSON.parse(stored) : {
-      completionEvents: [],
-      currentSessionId: null
-    }
-  }
-
-  function saveTrackingData(data: PracticeTrackingData) {
-    localStorage.setItem(TRACKING_CONFIG.STORAGE_KEY, JSON.stringify(data))
-  }
-
-  function saveCompletionEvent(event: TaskCompletionEvent) {
-    const data = getTrackingData()
-    data.completionEvents.push(event)
-    data.currentSessionId = sessionId.value
-
-    // Cleanup old events if needed
-    if (data.completionEvents.length > TRACKING_CONFIG.MAX_EVENTS_TO_STORE) {
-      data.completionEvents = data.completionEvents.slice(-TRACKING_CONFIG.MAX_EVENTS_TO_STORE)
-    }
-
-    saveTrackingData(data)
   }
 
   function onVisibilityChange() {
@@ -120,49 +102,33 @@ export function useDetailedPracticeTracking() {
   }
 
   // Analytics functions
-  function getTodayMinutes(): number {
-    const data = getTrackingData()
-    const today = new Date().toISOString().split('T')[0]
-
-    return data.completionEvents
-      .filter(event => event.timestamp.toString().startsWith(today))
-      .reduce((total, event) => total + event.activeDuration, 0) / (1000 * 60)
+  async function getTodayMinutes(): Promise<number> {
+    const events = await repo.getTodayEvents()
+    return events.reduce((total, event) => total + event.activeDuration, 0) / (1000 * 60)
   }
 
-  function getThisWeekMinutes(): number {
-    const data = getTrackingData()
-    const now = new Date()
-    const startOfWeek = new Date(now)
-    startOfWeek.setDate(now.getDate() - now.getDay())
-    startOfWeek.setHours(0, 0, 0, 0)
-
-    return data.completionEvents
-      .filter(event => new Date(event.timestamp) >= startOfWeek)
-      .reduce((total, event) => total + event.activeDuration, 0) / (1000 * 60)
+  async function getThisWeekMinutes(): Promise<number> {
+    const events = await repo.getThisWeekEvents()
+    return events.reduce((total, event) => total + event.activeDuration, 0) / (1000 * 60)
   }
 
-  function getTotalMinutes(): number {
-    const data = getTrackingData()
-    return data.completionEvents
-      .reduce((total, event) => total + event.activeDuration, 0) / (1000 * 60)
+  async function getTotalMinutes(): Promise<number> {
+    const events = await repo.getAllCompletionEvents()
+    return events.reduce((total, event) => total + event.activeDuration, 0) / (1000 * 60)
   }
 
-  function getTimeByLanguage(languageCode: string): number {
-    const data = getTrackingData()
-    return data.completionEvents
-      .filter(event => event.language_code === languageCode)
-      .reduce((total, event) => total + event.activeDuration, 0) / (1000 * 60)
+  async function getTimeByLanguage(languageCode: string): Promise<number> {
+    const events = await repo.getEventsByLanguage(languageCode)
+    return events.reduce((total, event) => total + event.activeDuration, 0) / (1000 * 60)
   }
 
-  function getTimeByPracticeMode(practiceMode: string): number {
-    const data = getTrackingData()
-    return data.completionEvents
-      .filter(event => event.practice_mode === practiceMode)
-      .reduce((total, event) => total + event.activeDuration, 0) / (1000 * 60)
+  async function getTimeByPracticeMode(practiceMode: string): Promise<number> {
+    const events = await repo.getEventsByPracticeMode(practiceMode)
+    return events.reduce((total, event) => total + event.activeDuration, 0) / (1000 * 60)
   }
 
-  function getAllCompletionEvents(): TaskCompletionEvent[] {
-    return getTrackingData().completionEvents
+  function getAllCompletionEvents(): Promise<TaskCompletionData[]> {
+    return repo.getAllCompletionEvents()
   }
 
   onMounted(() => {

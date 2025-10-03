@@ -9,6 +9,8 @@ import type { ResourceData } from '@/entities/resources/ResourceData';
 import type { LanguageData } from '@/entities/languages/LanguageData';
 import type { LocalSetData } from '@/entities/local-sets/LocalSetData';
 import type { MergeQueueItem } from '@/app/merge/MergeQueueData';
+import type { TaskCompletionData } from '@/entities/practice-tracking/TaskCompletionData';
+import type { MotivationSettingsData } from '@/entities/practice-tracking/MotivationSettingsData';
 
 class LinguanodonDatabase extends Dexie {
   vocab!: Table<VocabData>;
@@ -20,6 +22,8 @@ class LinguanodonDatabase extends Dexie {
   languages!: Table<LanguageData>;
   localSets!: Table<LocalSetData>;
   mergeQueue!: Table<MergeQueueItem>;
+  taskCompletions!: Table<TaskCompletionData>;
+  motivationSettings!: Table<MotivationSettingsData>;
 
   constructor() {
     super('LinguanodonDB', { addons: [dexieCloud] });
@@ -34,6 +38,20 @@ class LinguanodonDatabase extends Dexie {
       languages: '@id, code',
       localSets: '@id, name, language',
       mergeQueue: '@id'
+    });
+
+    this.version(2).stores({
+      vocab: '@id, language, content, *origins, [language+content], progress.due, hasImage, hasSound',
+      translations: '@id, content, *origins',
+      goals: '@id, taskType, title, isActive, parentGoal, lastShownAt, *subGoals, *vocab, *examples, *factCards, *notes',
+      notes: '@id',
+      factCards: '@id, language',
+      resources: '@id, language',
+      languages: '@id, code',
+      localSets: '@id, name, language',
+      mergeQueue: '@id',
+      taskCompletions: '@id, timestamp, language_code, practice_mode, session_id',
+      motivationSettings: '@id'
     });
   }
 }

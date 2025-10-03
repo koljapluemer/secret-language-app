@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, onMounted, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useDetailedPracticeTracking } from '@/app/tracking/useDetailedPracticeTracking';
+import type { TaskCompletionData } from '@/entities/practice-tracking/TaskCompletionData';
 import { ChevronDown, ChevronUp } from 'lucide-vue-next';
 import { renderLanguage } from '@/entities/languages/renderLanguage';
 import type { LanguageData } from '@/entities/languages/LanguageData';
-import { inject } from 'vue';
 import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
 import {
   Chart as ChartJS,
@@ -35,12 +35,14 @@ const languageRepo = inject<LanguageRepoContract>('languageRepo')!;
 
 // Store language data
 const languagesMap = ref<Map<string, LanguageData>>(new Map());
+const allEventsRaw = ref<TaskCompletionData[]>([]);
 
 onMounted(async () => {
   const languages = await languageRepo.getAll();
   languages.forEach(lang => {
     languagesMap.value.set(lang.code, lang);
   });
+  allEventsRaw.value = await tracking.getAllCompletionEvents();
 });
 
 // Filters and controls
@@ -49,7 +51,7 @@ const daysToShow = ref(30);
 
 // Get all completion events
 const allCompletionEvents = computed(() => {
-  return tracking.getAllCompletionEvents()
+  return allEventsRaw.value
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 });
 
