@@ -10,11 +10,11 @@ export interface FactCardListFilters {
 export interface FactCardRepoContract {
   // Basic CRUD operations
   getAllFactCards(): Promise<FactCardData[]>;
-  getFactCardByUID(uid: string): Promise<FactCardData | undefined>;
-  getFactCardsByUIDs(uids: string[]): Promise<FactCardData[]>;
+  getFactCardByUID(id: string): Promise<FactCardData | undefined>;
+  getFactCardsByUIDs(Ids: string[]): Promise<FactCardData[]>;
   saveFactCard(factCard: Omit<FactCardData, "id" | 'progress'>): Promise<FactCardData>;
   updateFactCard(factCard: FactCardData): Promise<void>;
-  deleteFactCard(uid: string): Promise<void>;
+  deleteFactCard(id: string): Promise<void>;
 
   // Existence check operations
   getFactCardByFrontBackLanguage(front: string, back: string, language: string): Promise<FactCardData | undefined>;
@@ -33,5 +33,5 @@ export interface FactCardRepoContract {
 
   // Merge operations
   getUncheckedFactCards(limit: number): Promise<FactCardData[]>;
-  getFactCardsByOrigins(setUids: string[]): Promise<FactCardData[]>;
+  getFactCardsByOrigins(setIds: string[]): Promise<FactCardData[]>;
 }

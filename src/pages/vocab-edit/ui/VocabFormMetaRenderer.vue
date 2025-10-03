@@ -95,13 +95,13 @@ defineEmits<{
   'field-change': [];
   'add-note': [note: NoteData];
   'update-note': [note: NoteData];
-  'remove-note': [uid: string];
+  'remove-note': [id: string];
   'add-link': [link: Link];
   'update-link': [index: number, link: Link];
   'remove-link': [index: number];
   'add-translation': [translation: TranslationData];
   'update-translation': [translation: TranslationData];
-  'remove-translation': [uid: string];
+  'remove-translation': [id: string];
   'update-related-vocab': [vocabIds: string[]];
   'update-images': [images: VocabImage[]];
   'update-sounds': [sounds: VocabSound[]];

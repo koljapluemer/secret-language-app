@@ -41,7 +41,7 @@ const {
   cleanup
 } = useQueueState();
 
-const lastUsedVocabUid = ref<string | null>(null);
+const lastUsedVocabId = ref<string | null>(null);
 
 // Generate next task
 async function generateNextTask(): Promise<Task | null> {
@@ -54,7 +54,7 @@ async function generateNextTask(): Promise<Task | null> {
     }
     
     // Create block list with last used vocab
-    const blockList = lastUsedVocabUid.value ? [lastUsedVocabUid.value] : undefined;
+    const blockList = lastUsedVocabId.value ? [lastUsedVocabId.value] : undefined;
 
     return await generateInsertImagesTask(vocabRepo!, languageCodes, blockList);
   } catch {
@@ -116,9 +116,9 @@ async function completeCurrentTask() {
   const currentState = state.value;
   
   // Track the completed task's vocab UID
-  const vocabUid = currentState.currentTask.associatedVocab?.[0];
-  if (vocabUid) {
-    lastUsedVocabUid.value = vocabUid;
+  const vocabId = currentState.currentTask.associatedVocab?.[0];
+  if (vocabId) {
+    lastUsedVocabId.value = vocabId;
   }
   
   // If we have a next task ready, use it

@@ -23,10 +23,10 @@ const factCardRepo = props.repositories.factCardRepo!;
 const factCard = ref<FactCardData | null>(null);
 
 const loadFactCard = async () => {
-  const factCardUid = props.task.associatedFactCards?.[0];
-  if (!factCardUid) return;
+  const factCardId = props.task.associatedFactCards?.[0];
+  if (!factCardId) return;
 
-  const factCardData = await factCardRepo.getFactCardByUID(factCardUid);
+  const factCardData = await factCardRepo.getFactCardByUID(factCardId);
   if (factCardData) {
     factCard.value = factCardData;
   }

@@ -11,7 +11,7 @@ export type MergeQueueStatus = 'pending' | 'processing' | 'completed' | 'failed'
 
 export interface MergeQueueItem {
   id: string
-  setUid: string                    // The set UID (or "user-added")
+  setId: string                    // The set UID (or "user-added")
   entityType: EntityType            // Which entity type to process
   status: MergeQueueStatus          // Current processing status
   createdAt: Date                   // When this work item was created

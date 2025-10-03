@@ -37,7 +37,7 @@ export interface PropertyMergeStrategy<T = unknown> {
  * Type-safe merge strategy map
  *
  * Ensures every property of T is handled with a merge strategy.
- * Excludes 'uid' which should never be merged.
+ * Excludes 'id' which should never be merged.
  */
 export type MergeStrategyMap<T> = {
   [K in keyof Omit<T, "id">]-?: PropertyMergeStrategy<T[K]>

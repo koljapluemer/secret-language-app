@@ -43,11 +43,11 @@ export interface VocabData {
   links: Link[]
   progress: LearningProgress // warning: this contain a Date. Make sure to hydrate correctly when persisting. warning: ts-fsrs Card must be created with createEmptyCard()
 
-  origins: string[] // uid of set, or the string "user-added"
+  origins: string[] // id of set, or the string "user-added"
 
-  relatedVocab: string[]; // uids of other vocab
-  notRelatedVocab: string[]; // uids of other vocab
-  similarSoundingButNotTheSame?: string[]; // uids of other vocab that sound similar for minimal pairs
+  relatedVocab: string[]; // Ids of other vocab
+  notRelatedVocab: string[]; // Ids of other vocab
+  similarSoundingButNotTheSame?: string[]; // Ids of other vocab that sound similar for minimal pairs
   notInterestedInPronunciationOrAlreadyAdded?: boolean
 
   isPicturable?: boolean; // can this vocab be visualized with images?

@@ -19,7 +19,6 @@ import { goalSchema } from '@/entities/remote-sets/validation/goalSchema';
 import { factCardSchema } from '@/entities/remote-sets/validation/factCardSchema';
 
 import type { VocabData, VocabImage, VocabSound } from '@/entities/vocab/VocabData';
-import type { TranslationData } from '@/entities/translations/TranslationData';
 import type { ResourceData } from '@/entities/resources/ResourceData';
 import type { GoalData } from '@/entities/goals/GoalData';
 import type { FactCardData } from '@/entities/fact-cards/FactCardData';
@@ -159,20 +158,29 @@ export class UnifiedRemoteSetService {
 
     reportProgress('Setting up language and local set', 100, 100);
 
-    reportProgress('Processing notes', 0, 100);
-
-    // Process all notes in one batch to avoid O(n²) operations
+    // Process notes
     const noteMap = new Map<string, string>();
     if (setFiles.notes) {
-      const remoteIdToLocalUid = await this.noteRepo.createNotesFromRemoteBatch(
-        setFiles.notes,
-        (current, total) => reportProgress('Processing notes', current, total)
-      );
-      remoteIdToLocalUid.forEach((localUid, remoteId) => {
-        noteMap.set(remoteId, localUid);
-      });
+      reportProgress('Processing notes', 0, setFiles.notes.length);
+
+      for (let i = 0; i < setFiles.notes.length; i++) {
+        const remoteNote = setFiles.notes[i];
+        reportProgress('Processing notes', i, setFiles.notes.length);
+
+        const savedNote = await this.noteRepo.saveNote({
+          content: remoteNote.content,
+          showBeforeExercise: remoteNote.showBeforeExercice ?? false,
+          noteType: remoteNote.noteType
+        });
+
+        if (remoteNote.id) {
+          noteMap.set(remoteNote.id, savedNote.id);
+        }
+      }
+
+      reportProgress('Processing notes', setFiles.notes.length, setFiles.notes.length);
     } else {
-      reportProgress('Processing notes', 100, 100);
+      reportProgress('Processing notes', 0, 0);
     }
 
     // Create lookup maps for resolving references
@@ -184,9 +192,9 @@ export class UnifiedRemoteSetService {
     const factCardMap = new Map<string, string>(); // remote ID -> local UID
 
     // Track newly created entities for task generation
-    const newVocabUids: string[] = [];
-    const newResourceUids: string[] = [];
-    const newGoalUids: string[] = [];
+    const newVocabIds: string[] = [];
+    const newResourceIds: string[] = [];
+    const newGoalIds: string[] = [];
 
     reportProgress('Processing links', 0, 100);
 
@@ -219,8 +227,8 @@ export class UnifiedRemoteSetService {
       );
 
       // Merge the translation ID mappings
-      translationIdMap.forEach((localUid, remoteId) => {
-        translationMap.set(remoteId, localUid);
+      translationIdMap.forEach((localId, remoteId) => {
+        translationMap.set(remoteId, localId);
       });
     }
 
@@ -236,8 +244,8 @@ export class UnifiedRemoteSetService {
         reportProgress('Processing vocabulary', i, setFiles.vocab.length);
         if (!vocabData.language) continue;
 
-        const noteUids = this.resolveReferences(vocabData.notes || [], noteMap);
-        const translationUids = this.resolveReferences(vocabData.translations || [], translationMap);
+        const noteIds = this.resolveReferences(vocabData.notes || [], noteMap);
+        const translationIds = this.resolveReferences(vocabData.translations || [], translationMap);
         const links = this.resolveLinks(vocabData.links || [], linkMap);
 
         const localVocab: Omit<VocabData, "id" | 'progress'> = {
@@ -248,8 +256,8 @@ export class UnifiedRemoteSetService {
           consideredWord: vocabData.consideredWord,
           priority: vocabData.priority || 1,
           doNotPractice: false,
-          notes: noteUids,
-          translations: translationUids,
+          notes: noteIds,
+          translations: translationIds,
           links: links,
           relatedVocab: [], // Will resolve in second pass
           notRelatedVocab: [], // Will resolve in second pass
@@ -275,7 +283,7 @@ export class UnifiedRemoteSetService {
         const vocabData = setFiles.vocab[i];
         if (vocabData.id && createdVocab[i]) {
           vocabMap.set(vocabData.id, createdVocab[i].id);
-          newVocabUids.push(createdVocab[i].id);
+          newVocabIds.push(createdVocab[i].id);
         }
       }
 
@@ -286,16 +294,16 @@ export class UnifiedRemoteSetService {
         const vocab = createdVocab[i];
         if (!vocab) continue;
 
-        const relatedVocabUids = this.resolveReferences(vocabData.relatedVocab || [], vocabMap);
-        const notRelatedVocabUids = this.resolveReferences(vocabData.notRelatedVocab || [], vocabMap);
-        const similarSoundingUids = this.resolveReferences(vocabData.similarSoundingButNotTheSame || [], vocabMap);
+        const relatedVocabIds = this.resolveReferences(vocabData.relatedVocab || [], vocabMap);
+        const notRelatedVocabIds = this.resolveReferences(vocabData.notRelatedVocab || [], vocabMap);
+        const similarSoundingIds = this.resolveReferences(vocabData.similarSoundingButNotTheSame || [], vocabMap);
 
-        if (relatedVocabUids.length > 0 || notRelatedVocabUids.length > 0 || similarSoundingUids.length > 0) {
+        if (relatedVocabIds.length > 0 || notRelatedVocabIds.length > 0 || similarSoundingIds.length > 0) {
           vocabToUpdate.push({
             ...vocab,
-            relatedVocab: relatedVocabUids,
-            notRelatedVocab: notRelatedVocabUids,
-            similarSoundingButNotTheSame: similarSoundingUids
+            relatedVocab: relatedVocabIds,
+            notRelatedVocab: notRelatedVocabIds,
+            similarSoundingButNotTheSame: similarSoundingIds
           });
         }
       }
@@ -326,7 +334,7 @@ export class UnifiedRemoteSetService {
         const factCardData = setFiles.factCards[i];
         reportProgress('Processing fact cards', i, setFiles.factCards.length);
 
-        const noteUids = this.resolveReferences(factCardData.notes || [], noteMap);
+        const noteIds = this.resolveReferences(factCardData.notes || [], noteMap);
 
         const localFactCard: Omit<FactCardData, "id" | 'progress'> = {
           language: factCardData.language,
@@ -334,7 +342,7 @@ export class UnifiedRemoteSetService {
           back: factCardData.back,
           priority: factCardData.priority || 1,
           doNotPractice: false,
-          notes: noteUids,
+          notes: noteIds,
           links: [],
           origins: [localSet.id],
           _mergeChecked: false // Mark for background merge
@@ -357,9 +365,9 @@ export class UnifiedRemoteSetService {
         const resourceData = setFiles.resources[i];
         reportProgress('Processing resources', i, setFiles.resources.length);
 
-        const noteUids = this.resolveReferences(resourceData.notes || [], noteMap);
-        const vocabUids = this.resolveReferences(resourceData.vocab || [], vocabMap);
-        const factCardUids = this.resolveReferences(resourceData.factCards || [], factCardMap);
+        const noteIds = this.resolveReferences(resourceData.notes || [], noteMap);
+        const vocabIds = this.resolveReferences(resourceData.vocab || [], vocabMap);
+        const factCardIds = this.resolveReferences(resourceData.factCards || [], factCardMap);
         const link = resourceData.link ? linkMap.get(resourceData.link) : undefined;
 
         const localResource: Omit<ResourceData, "id" | 'lastShownAt'> = {
@@ -369,16 +377,16 @@ export class UnifiedRemoteSetService {
           content: resourceData.content,
           priority: resourceData.priority || 1,
           link: link,
-          notes: noteUids,
-          vocab: vocabUids,
-          factCards: factCardUids,
+          notes: noteIds,
+          vocab: vocabIds,
+          factCards: factCardIds,
           origins: [localSet.id],
           finishedExtracting: false,
           _mergeChecked: false // Mark for background merge
         };
 
         const savedResource = await this.resourceRepo.saveResource(localResource);
-        newResourceUids.push(savedResource.id);
+        newResourceIds.push(savedResource.id);
         if (resourceData.id) {
           resourceMap.set(resourceData.id, savedResource.id);
         }
@@ -398,18 +406,18 @@ export class UnifiedRemoteSetService {
         const goalData = setFiles.goals[i];
         reportProgress('Processing goals', i, setFiles.goals.length);
 
-        const noteUids = this.resolveReferences(goalData.notes || [], noteMap);
-        const vocabUids = this.resolveReferences(goalData.vocab || [], vocabMap);
-        const factCardUids = this.resolveReferences(goalData.factCards || [], factCardMap);
-        const subGoalUids = this.resolveReferences(goalData.subGoals || [], goalMap);
+        const noteIds = this.resolveReferences(goalData.notes || [], noteMap);
+        const vocabIds = this.resolveReferences(goalData.vocab || [], vocabMap);
+        const factCardIds = this.resolveReferences(goalData.factCards || [], factCardMap);
+        const subGoalIds = this.resolveReferences(goalData.subGoals || [], goalMap);
 
         const localGoal: Omit<GoalData, "id"> = {
           language: goalData.language,
           title: goalData.title,
-          notes: noteUids,
-          vocab: vocabUids,
-          factCards: factCardUids,
-          subGoals: subGoalUids,
+          notes: noteIds,
+          vocab: vocabIds,
+          factCards: factCardIds,
+          subGoals: subGoalIds,
           origins: [localSet.id],
           finishedAddingSubGoals: false,
           finishedAddingMilestones: false,
@@ -419,7 +427,7 @@ export class UnifiedRemoteSetService {
         };
 
         const savedGoal = await this.goalRepo.create(localGoal);
-        newGoalUids.push(savedGoal.id);
+        newGoalIds.push(savedGoal.id);
         if (goalData.id) {
           goalMap.set(goalData.id, savedGoal.id);
         }
@@ -511,14 +519,14 @@ export class UnifiedRemoteSetService {
   }
 
   private resolveReferences(remoteIds: string[], referenceMap: Map<string, string>): string[] {
-    const resolvedUids: string[] = [];
+    const resolvedIds: string[] = [];
     for (const remoteId of remoteIds) {
-      const localUid = referenceMap.get(remoteId);
-      if (localUid) {
-        resolvedUids.push(localUid);
+      const localId = referenceMap.get(remoteId);
+      if (localId) {
+        resolvedIds.push(localId);
       }
     }
-    return [...new Set(resolvedUids)]; // Remove duplicates
+    return [...new Set(resolvedIds)]; // Remove duplicates
   }
 
   private resolveLinks(remoteIds: string[], linkMap: Map<string, Link>): Link[] {
@@ -567,14 +575,14 @@ export class UnifiedRemoteSetService {
     for (const vocab of vocabData) {
       if (!vocab.id) continue;
       
-      const localVocabUid = vocabMap.get(vocab.id);
-      if (!localVocabUid) continue;
+      const localVocabId = vocabMap.get(vocab.id);
+      if (!localVocabId) continue;
 
       // Process images
       if (vocab.images && vocab.images.length > 0) {
         for (const imageData of vocab.images) {
           try {
-            await this.downloadAndAddImage(languageCode, setName, localVocabUid, imageData);
+            await this.downloadAndAddImage(languageCode, setName, localVocabId, imageData);
           } catch {
             // Silently ignore image download errors
           }
@@ -585,7 +593,7 @@ export class UnifiedRemoteSetService {
       if (vocab.sounds && vocab.sounds.length > 0) {
         for (const soundData of vocab.sounds) {
           try {
-            await this.downloadAndAddSound(languageCode, setName, localVocabUid, soundData);
+            await this.downloadAndAddSound(languageCode, setName, localVocabId, soundData);
           } catch {
             // Silently ignore sound download errors
           }
@@ -597,7 +605,7 @@ export class UnifiedRemoteSetService {
   private async downloadAndAddImage(
     languageCode: string,
     setName: string, 
-    vocabUid: string,
+    vocabId: string,
     imageData: { filename: string; alt?: string; tags?: string[] }
   ): Promise<void> {
     const imageUrl = `/sets/${languageCode}/${setName}/images/${imageData.filename}`;
@@ -610,7 +618,7 @@ export class UnifiedRemoteSetService {
       }
 
       // Check if this image already exists in the vocab
-      const existingVocab = await this.vocabRepo.getVocabByUID(vocabUid);
+      const existingVocab = await this.vocabRepo.getVocabByUID(vocabId);
       if (existingVocab && existingVocab.images) {
         const blob = await response.blob();
         if (this.isImageDuplicate(imageUrl, blob.size, blob.type, existingVocab.images)) {
@@ -620,7 +628,7 @@ export class UnifiedRemoteSetService {
       }
 
       // Use addImageFromUrl instead of addImageFromFile to avoid compression issues
-      await this.vocabRepo.addImageFromUrl(vocabUid, imageUrl, imageData.alt);
+      await this.vocabRepo.addImageFromUrl(vocabId, imageUrl, imageData.alt);
     } catch {
       // Don't rethrow - continue processing other images
     }
@@ -629,7 +637,7 @@ export class UnifiedRemoteSetService {
   private async downloadAndAddSound(
     languageCode: string,
     setName: string,
-    vocabUid: string, 
+    vocabId: string, 
     soundData: { filename: string }
   ): Promise<void> {
     try {
@@ -642,7 +650,7 @@ export class UnifiedRemoteSetService {
       const blob = await response.blob();
 
       // Check if this sound already exists in the vocab
-      const existingVocab = await this.vocabRepo.getVocabByUID(vocabUid);
+      const existingVocab = await this.vocabRepo.getVocabByUID(vocabId);
       if (existingVocab && existingVocab.sounds) {
         if (this.isSoundDuplicate(blob.size, blob.type, soundData.filename, existingVocab.sounds)) {
           
@@ -652,7 +660,7 @@ export class UnifiedRemoteSetService {
 
       const file = new File([blob], soundData.filename, { type: blob.type });
       
-      await this.vocabRepo.addSoundFromFile(vocabUid, file);
+      await this.vocabRepo.addSoundFromFile(vocabId, file);
     } catch {
       // Don't rethrow - continue processing other sounds
     }
@@ -660,7 +668,7 @@ export class UnifiedRemoteSetService {
 
   private async processTranslationsInBatch(
     remoteTranslations: z.infer<typeof translationSchema>[],
-    localSetUid: string,
+    _localSetId: string,
     noteMap: Map<string, string>,
     onProgress?: (current: number, total: number) => void
   ): Promise<Map<string, string>> {
@@ -671,9 +679,7 @@ export class UnifiedRemoteSetService {
 
     onProgress?.(0, remoteTranslations.length);
 
-    // FAST INSERT: Create all translations without checking for duplicates
-    const translationsToCreate: TranslationData[] = [];
-    const remoteIdToLocalUid = new Map<string, string>();
+    const remoteIdToLocalId = new Map<string, string>();
 
     for (let i = 0; i < remoteTranslations.length; i++) {
       const remoteTranslation = remoteTranslations[i];
@@ -681,29 +687,23 @@ export class UnifiedRemoteSetService {
 
       if (!remoteTranslation.content) continue;
 
-      const noteUids = this.resolveReferences(remoteTranslation.notes || [], noteMap);
-      const newTranslation: TranslationData = {
-        id: crypto.randomUUID(),
+      const noteIds = this.resolveReferences(remoteTranslation.notes || [], noteMap);
+
+      // Save and get the Dexie-generated ID back
+      const savedTranslation = await this.translationRepo.saveTranslation({
         content: remoteTranslation.content,
         priority: remoteTranslation.priority || 1,
-        notes: noteUids,
-        origins: [localSetUid],
-        _mergeChecked: false // Mark for background merge
-      };
+        notes: noteIds
+      });
 
-      translationsToCreate.push(newTranslation);
+      // Map remote ID to the actual saved ID
       if (remoteTranslation.id) {
-        remoteIdToLocalUid.set(remoteTranslation.id, newTranslation.id);
+        remoteIdToLocalId.set(remoteTranslation.id, savedTranslation.id);
       }
     }
 
-    // Insert all translations
-    for (const translation of translationsToCreate) {
-      await this.translationRepo.saveTranslation(translation);
-    }
-
     onProgress?.(remoteTranslations.length, remoteTranslations.length);
-    return remoteIdToLocalUid;
+    return remoteIdToLocalId;
   }
 
 }

@@ -175,7 +175,7 @@ const fileInput = ref<HTMLInputElement>();
 
 // Audio playback state
 const audioElement = ref<HTMLAudioElement>();
-const playingSound = ref<string | null>(null); // uid of currently playing sound
+const playingSound = ref<string | null>(null); // id of currently playing sound
 const currentTime = ref(0);
 const createdUrl = ref<string | null>(null);
 

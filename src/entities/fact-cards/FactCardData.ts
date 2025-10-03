@@ -6,7 +6,7 @@ export interface FactCardData {
     language: string
     front: string
     back: string
-    notes: string[] // array of NoteData uids
+    notes: string[] // array of NoteData Ids
     links: Link[]
     
  
@@ -15,7 +15,7 @@ export interface FactCardData {
 
     progress: LearningProgress;
 
-    origins: string[] // uid of set, or the string "user-added"
+    origins: string[] // id of set, or the string "user-added"
 
     // Internal merge tracking
     _mergeChecked?: boolean // Has background merge service processed this item?

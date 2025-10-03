@@ -320,14 +320,14 @@ async function loadFactCards() {
   }
 }
 
-async function deleteFactCard(uid: string) {
-  const factCardToDelete = factCardItems.value.find(f => f.id === uid);
+async function deleteFactCard(id: string) {
+  const factCardToDelete = factCardItems.value.find(f => f.id === id);
   if (!factCardToDelete || !confirm(`Are you sure you want to delete this fact card?`)) {
     return;
   }
 
   try {
-    await factCardRepo.deleteFactCard(uid);
+    await factCardRepo.deleteFactCard(id);
     await loadFactCards(); // Reload to update pagination
   } catch {
     toast.error('Failed to delete fact card');

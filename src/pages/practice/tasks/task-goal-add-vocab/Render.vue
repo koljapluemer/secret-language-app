@@ -56,13 +56,13 @@ const hasChanges = ref(false);
 const showDoneSection = ref(false);
 
 async function loadGoal() {
-  const goalUid = props.task.associatedGoals?.[0];
-  if (!goalUid) {
+  const goalId = props.task.associatedGoals?.[0];
+  if (!goalId) {
     toast.error('No goal association found');
     return;
   }
   
-  const loadedGoal = await goalRepo.getById(goalUid);
+  const loadedGoal = await goalRepo.getById(goalId);
   if (!loadedGoal) {
     toast.error('Goal not found');
     return;

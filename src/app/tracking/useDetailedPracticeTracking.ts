@@ -55,7 +55,7 @@ export function useDetailedPracticeTracking() {
   }
 
   function recordTaskCompletion(
-    setUid: string | null,
+    setId: string | null,
     languageCode: string,
     practiceMode: string,
     taskType: string,
@@ -66,7 +66,7 @@ export function useDetailedPracticeTracking() {
     const event: TaskCompletionEvent = {
       timestamp: new Date(),
       activeDuration,
-      set_uid: setUid,
+      set_Id: setId,
       language_code: languageCode,
       practice_mode: practiceMode,
       task_type: taskType,

@@ -28,16 +28,16 @@ const translationRepo = props.repositories.translationRepo;
 const noteRepo = props.repositories.noteRepo;
 
 const vocabItems = ref<VocabData[]>([]);
-const translations = ref<{ [vocabUid: string]: TranslationData[] }>({});
-const vocabNotes = ref<{ [vocabUid: string]: NoteData[] }>({});
-const translationNotes = ref<{ [vocabUid: string]: NoteData[] }>({});
+const translations = ref<{ [vocabId: string]: TranslationData[] }>({});
+const vocabNotes = ref<{ [vocabId: string]: NoteData[] }>({});
+const translationNotes = ref<{ [vocabId: string]: NoteData[] }>({});
 const sentence = ref('');
 const isRecordTask = props.task.taskType === 'vocab-record-sentence' || props.task.taskType === 'vocab-record-sentence-single';
 const activeTab = ref<'text' | 'audio'>(isRecordTask ? 'audio' : 'text');
 const audioRecording = ref<{ blob: Blob; duration: number } | null>(null);
 
 // Audio playback state
-const playingVocabUid = ref<string | null>(null);
+const playingVocabId = ref<string | null>(null);
 const audioElement = ref<HTMLAudioElement>();
 const audioUrl = ref<string | null>(null);
 
@@ -50,10 +50,10 @@ const isDoneEnabled = computed(() => {
 });
 
 const loadVocab = async () => {
-  const vocabUids = props.task.associatedVocab || [];
-  if (vocabUids.length === 0 || vocabUids.length > 2) return;
+  const vocabIds = props.task.associatedVocab || [];
+  if (vocabIds.length === 0 || vocabIds.length > 2) return;
 
-  const vocabData = await vocabRepo.getVocabByUIDs(vocabUids);
+  const vocabData = await vocabRepo.getVocabByUIDs(vocabIds);
   if (vocabData.length >= 1) {
     vocabItems.value = vocabData;
 
@@ -101,15 +101,15 @@ const getPlayableSound = (vocab: VocabData): VocabSound | null => {
 };
 
 // Play sound for a vocab item
-const playVocabSound = (vocabUid: string) => {
-  const vocab = vocabItems.value.find(v => v.id === vocabUid);
+const playVocabSound = (vocabId: string) => {
+  const vocab = vocabItems.value.find(v => v.id === vocabId);
   if (!vocab) return;
 
   const sound = getPlayableSound(vocab);
   if (!sound || !audioElement.value) return;
 
   // Stop any currently playing audio
-  if (playingVocabUid.value) {
+  if (playingVocabId.value) {
     audioElement.value.pause();
     if (audioUrl.value) {
       URL.revokeObjectURL(audioUrl.value);
@@ -122,7 +122,7 @@ const playVocabSound = (vocabUid: string) => {
     audioUrl.value = url;
     audioElement.value.src = url;
     audioElement.value.play();
-    playingVocabUid.value = vocabUid;
+    playingVocabId.value = vocabId;
   } catch {
     toast.error('Failed to play audio');
   }
@@ -130,7 +130,7 @@ const playVocabSound = (vocabUid: string) => {
 
 // Handle audio ended
 const handleAudioEnded = () => {
-  playingVocabUid.value = null;
+  playingVocabId.value = null;
   if (audioUrl.value) {
     URL.revokeObjectURL(audioUrl.value);
     audioUrl.value = null;
@@ -199,11 +199,11 @@ const handleTaskCompletion = async () => {
   // For backup tasks (single word or lowest due vocab), update lastSeenAt and due date
   if (props.task.taskType === 'vocab-form-sentence-single' ||
     (props.task.taskType === 'vocab-form-sentence' && vocabItems.value.length <= 2)) {
-    const vocabUids = props.task.associatedVocab || [];
-    if (vocabUids.length > 0) {
+    const vocabIds = props.task.associatedVocab || [];
+    if (vocabIds.length > 0) {
       // Set due date to 60 minutes in the future
       const fiveMinutesFromNow = new Date(Date.now() + 60 * 60 * 1000);
-      await vocabRepo.updateVocabLastSeenAndDueDate(vocabUids, fiveMinutesFromNow);
+      await vocabRepo.updateVocabLastSeenAndDueDate(vocabIds, fiveMinutesFromNow);
     }
   }
 };
@@ -232,9 +232,9 @@ onUnmounted(() => {
             <div class="text-4xl font-bold mb-2 flex items-center justify-center gap-3">
               {{ vocab.content }}
               <button v-if="hasPlayableSound(vocab)" @click="playVocabSound(vocab.id)"
-                class="btn btn-circle btn-sm btn-primary" :class="{ 'loading': playingVocabUid === vocab.id }"
-                :disabled="playingVocabUid === vocab.id">
-                <svg v-if="playingVocabUid !== vocab.id" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                class="btn btn-circle btn-sm btn-primary" :class="{ 'loading': playingVocabId === vocab.id }"
+                :disabled="playingVocabId === vocab.id">
+                <svg v-if="playingVocabId !== vocab.id" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />
                 </svg>
               </button>

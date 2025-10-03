@@ -150,7 +150,7 @@ const router = createRouter({
       component: PageResourceAdd
     },
     {
-      path: '/resources/:uid/edit',
+      path: '/resources/:id/edit',
       name: 'resources-edit',
       component: PageResourceEdit
     },

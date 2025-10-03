@@ -32,7 +32,7 @@ class LinguanodonDatabase extends Dexie {
       factCards: '@id, language',
       resources: '@id, language',
       languages: '@id, code',
-      localSets: '@id, language',
+      localSets: '@id, name, language',
       mergeQueue: '@id'
     });
   }

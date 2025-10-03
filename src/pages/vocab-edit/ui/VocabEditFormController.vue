@@ -349,8 +349,8 @@ function updateNote(updatedNote: NoteData) {
   }
 }
 
-function removeNote(uid: string) {
-  const index = state.value.formData.notes.findIndex(n => n.id === uid);
+function removeNote(id: string) {
+  const index = state.value.formData.notes.findIndex(n => n.id === id);
   if (index >= 0) {
     state.value.formData.notes.splice(index, 1);
   }
@@ -382,8 +382,8 @@ function updateTranslation(updatedTranslation: TranslationData) {
   }
 }
 
-async function removeTranslation(uid: string) {
-  const index = state.value.formData.translations.findIndex(t => t.id === uid);
+async function removeTranslation(id: string) {
+  const index = state.value.formData.translations.findIndex(t => t.id === id);
   if (index >= 0) {
     state.value.formData.translations.splice(index, 1);
     await handleFieldChange();

@@ -374,14 +374,14 @@ async function loadTranslationsForCurrentPage() {
   }
 }
 
-async function deleteVocab(uid: string) {
-  const vocabToDelete = vocabItems.value.find(v => v.id === uid);
+async function deleteVocab(id: string) {
+  const vocabToDelete = vocabItems.value.find(v => v.id === id);
   if (!vocabToDelete || !confirm(`Are you sure you want to delete "${vocabToDelete.content}"?`)) {
     return;
   }
 
   try {
-    await vocabRepo.deleteVocab(uid);
+    await vocabRepo.deleteVocab(id);
     await loadVocab(); // Reload to update pagination
   } catch {
     toast.error('Failed to delete vocabulary');

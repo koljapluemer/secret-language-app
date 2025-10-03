@@ -152,8 +152,8 @@ export class EntityMergeService {
     }
 
     // Bulk delete duplicates
-    for (const uid of toDelete) {
-      await this.vocabRepo.deleteVocab(uid)
+    for (const id of toDelete) {
+      await this.vocabRepo.deleteVocab(id)
     }
 
     if (toDelete.length > 0) {
@@ -203,8 +203,8 @@ export class EntityMergeService {
     }
 
     // Bulk delete duplicates
-    for (const uid of toDelete) {
-      await this.translationRepo.deleteTranslations([uid])
+    for (const id of toDelete) {
+      await this.translationRepo.deleteTranslations([id])
     }
 
     return true // Processed something
@@ -222,8 +222,10 @@ export class EntityMergeService {
       return false
     }
 
-    const uids = unchecked.map(n => n.id)
-    await this.noteRepo.bulkMarkNotesAsChecked(uids)
+    // Notes don't merge - just mark as checked
+    for (const note of unchecked) {
+      await this.noteRepo.updateNote({ ...note, _mergeChecked: true })
+    }
 
     return true // Processed something
   }
@@ -269,8 +271,8 @@ export class EntityMergeService {
     }
 
     // Delete duplicates
-    for (const uid of toDelete) {
-      await this.factCardRepo.deleteFactCard(uid)
+    for (const id of toDelete) {
+      await this.factCardRepo.deleteFactCard(id)
     }
 
     if (toDelete.length > 0) {
@@ -318,8 +320,8 @@ export class EntityMergeService {
     }
 
     // Delete duplicates
-    for (const uid of toDelete) {
-      await this.resourceRepo.deleteResource(uid)
+    for (const id of toDelete) {
+      await this.resourceRepo.deleteResource(id)
     }
 
     if (toDelete.length > 0) {

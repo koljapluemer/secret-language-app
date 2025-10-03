@@ -42,7 +42,7 @@ const {
   cleanup
 } = useQueueState();
 
-const lastUsedContentUid = ref<string | null>(null);
+const lastUsedContentId = ref<string | null>(null);
 
 // Generate a single Sisyphos task (seen/due content only)
 async function generateNextTask(): Promise<Task | null> {
@@ -55,7 +55,7 @@ async function generateNextTask(): Promise<Task | null> {
     }
     
     // Create block list with last used content
-    const blockList = lastUsedContentUid.value ? [lastUsedContentUid.value] : undefined;
+    const blockList = lastUsedContentId.value ? [lastUsedContentId.value] : undefined;
     
     return await generateSisyphosTask(
       vocabRepo!,
@@ -168,12 +168,12 @@ const handleTaskFinished = async () => {
   // Track the content UID before completing the task
   if (state.value.status === 'task') {
     const currentTask = state.value.currentTask;
-    const vocabUid = currentTask.associatedVocab?.[0];
-    const factCardUid = currentTask.associatedFactCards?.[0];
-    const contentUid = vocabUid || factCardUid;
+    const vocabId = currentTask.associatedVocab?.[0];
+    const factCardId = currentTask.associatedFactCards?.[0];
+    const contentId = vocabId || factCardId;
     
-    if (contentUid) {
-      lastUsedContentUid.value = contentUid;
+    if (contentId) {
+      lastUsedContentId.value = contentId;
     }
   }
   

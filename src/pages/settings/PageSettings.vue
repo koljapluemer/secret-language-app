@@ -166,9 +166,9 @@ async function deduplicateNotes(notes: NoteData[]): Promise<{ keptNotes: NoteDat
       keptNotes.push(group[0]);
       
       // Delete the duplicate notes
-      const duplicateUids = group.slice(1).map(note => note.id);
-      await noteRepo.deleteNotes(duplicateUids);
-      removedCount += duplicateUids.length;
+      const duplicateIds = group.slice(1).map(note => note.id);
+      await noteRepo.deleteNotes(duplicateIds);
+      removedCount += duplicateIds.length;
     } else {
       // No duplicates, keep the note
       keptNotes.push(group[0]);

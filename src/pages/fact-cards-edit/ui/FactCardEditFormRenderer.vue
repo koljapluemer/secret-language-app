@@ -172,7 +172,7 @@ const emit = defineEmits<{
   'field-change': [];
   'add-note': [];
   'update-note': [note: NoteData];
-  'remove-note': [uid: string];
+  'remove-note': [id: string];
   'add-link': [link: Link];
   'update-link': [index: number, link: Link];
   'remove-link': [index: number];

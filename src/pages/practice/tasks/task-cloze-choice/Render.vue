@@ -48,7 +48,7 @@ const translationNotes = ref<NoteData[]>([]);
 const loading = ref(true);
 const clozeData = ref<ClozeData | null>(null);
 
-const vocabUid = computed(() => {
+const vocabId = computed(() => {
   return props.task.associatedVocab?.[0];
 });
 
@@ -85,13 +85,13 @@ const secondaryContent = computed(() => {
 });
 
 async function loadVocabData() {
-  if (!vocabUid.value) {
+  if (!vocabId.value) {
     loading.value = false;
     return;
   }
 
   try {
-    const vocabData = await vocabRepo.getVocabByUID(vocabUid.value);
+    const vocabData = await vocabRepo.getVocabByUID(vocabId.value);
     if (!vocabData) {
       loading.value = false;
       return;

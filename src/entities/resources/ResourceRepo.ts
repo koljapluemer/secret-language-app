@@ -10,8 +10,8 @@ export class ResourceRepo implements ResourceRepoContract {
     return await db.resources.toArray();
   }
 
-  async getResourceById(uid: string): Promise<ResourceData | undefined> {
-    return await db.resources.get(uid);
+  async getResourceById(id: string): Promise<ResourceData | undefined> {
+    return await db.resources.get(id);
   }
 
   async getResourceByTitleAndLanguage(title: string, language: string): Promise<ResourceData | undefined> {
@@ -101,12 +101,12 @@ export class ResourceRepo implements ResourceRepoContract {
     return updated;
   }
 
-  async deleteResource(uid: string): Promise<void> {
-    await db.resources.delete(uid);
+  async deleteResource(id: string): Promise<void> {
+    await db.resources.delete(id);
   }
 
-  async disconnectVocabFromResource(resourceUid: string, vocabUid: string): Promise<void> {
-    const resource = await db.resources.get(resourceUid);
+  async disconnectVocabFromResource(resourceId: string, vocabId: string): Promise<void> {
+    const resource = await db.resources.get(resourceId);
     if (!resource) {
       throw new Error('Resource not found');
     }
@@ -114,7 +114,7 @@ export class ResourceRepo implements ResourceRepoContract {
     // Remove the vocab UID from the extractedVocab array
     const updatedResource: ResourceData = {
       ...resource,
-      vocab: resource.vocab.filter(id => id !== vocabUid)
+      vocab: resource.vocab.filter(id => id !== vocabId)
     };
 
     await db.resources.put(updatedResource);
@@ -198,10 +198,10 @@ export class ResourceRepo implements ResourceRepoContract {
     return resources;
   }
 
-  async getResourcesByOrigins(setUids: string[]): Promise<ResourceData[]> {
+  async getResourcesByOrigins(setIds: string[]): Promise<ResourceData[]> {
     const resources = await db.resources
       .where('origins')
-      .anyOf(setUids)
+      .anyOf(setIds)
       .toArray();
 
     return resources;

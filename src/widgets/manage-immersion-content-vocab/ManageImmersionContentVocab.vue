@@ -33,7 +33,7 @@ import type { VocabData } from '@/entities/vocab/VocabData';
 import { useToast } from '@/shared/toasts';
 
 const props = defineProps<{
-  resourceUid: string;
+  resourceId: string;
   showDeleteButton?: boolean;
   showDisconnectButton?: boolean;
   allowJumpingToVocabPage?: boolean;
@@ -74,7 +74,7 @@ async function loadResource() {
   
   try {
     if (!resourceRepo) return;
-    const resource = await resourceRepo.getResourceById(props.resourceUid);
+    const resource = await resourceRepo.getResourceById(props.resourceId);
     if (resource) {
       vocabIds.value = [...resource.vocab];
       initialVocabIds.value = [...resource.vocab];
@@ -100,7 +100,7 @@ async function handleVocabUpdate(newVocabIds: string[]) {
   }
 
   // Auto-save - update the resource with new vocab IDs
-  const resource = await resourceRepo.getResourceById(props.resourceUid);
+  const resource = await resourceRepo.getResourceById(props.resourceId);
   if (resource) {
     const updatedResource: ResourceData = {
       ...resource,
@@ -132,7 +132,7 @@ async function handleVocabDisconnected(vocabId: string) {
   
   try {
     // Get current resource and remove the vocab ID
-    const resource = await resourceRepo.getResourceById(props.resourceUid);
+    const resource = await resourceRepo.getResourceById(props.resourceId);
     if (resource) {
       const updatedVocabIds = resource.vocab.filter(id => id !== vocabId);
       const updatedResource: ResourceData = {

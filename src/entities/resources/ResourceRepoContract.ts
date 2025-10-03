@@ -8,7 +8,7 @@ export interface ResourceListFilters {
 
 export interface ResourceRepoContract {
   getAllResources(): Promise<ResourceData[]>;
-  getResourceById(uid: string): Promise<ResourceData | undefined>;
+  getResourceById(id: string): Promise<ResourceData | undefined>;
   getResourceByTitleAndLanguage(title: string, language: string): Promise<ResourceData | undefined>;
   getRandomDueResource(languages?: string[], setsToAvoid?: string[]): Promise<ResourceData | null>;
   getValidImmersionResources(languages: string[]): Promise<ResourceData[]>;
@@ -16,10 +16,10 @@ export interface ResourceRepoContract {
   getTotalResourcesCount(filters?: ResourceListFilters): Promise<number>;
   saveResource(resource: Omit<ResourceData, "id" | 'tasks' | 'lastShownAt'>): Promise<ResourceData>;
   updateResource(resource: ResourceData): Promise<ResourceData>;
-  deleteResource(uid: string): Promise<void>;
-  disconnectVocabFromResource(resourceUid: string, vocabUid: string): Promise<void>;
+  deleteResource(id: string): Promise<void>;
+  disconnectVocabFromResource(resourceId: string, vocabId: string): Promise<void>;
 
   // Merge operations
   getUncheckedResources(limit: number): Promise<ResourceData[]>;
-  getResourcesByOrigins(setUids: string[]): Promise<ResourceData[]>;
+  getResourcesByOrigins(setIds: string[]): Promise<ResourceData[]>;
 }

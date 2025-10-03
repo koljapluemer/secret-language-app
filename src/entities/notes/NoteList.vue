@@ -54,7 +54,7 @@ defineProps<{
 const emit = defineEmits<{
   add: [note: NoteData];
   update: [note: NoteData];
-  delete: [uid: string];
+  delete: [id: string];
 }>();
 
 const editingIndex = ref<number | null>(null);
@@ -69,7 +69,7 @@ function updateNote(note: NoteData) {
   editingIndex.value = null;
 }
 
-function deleteNote(uid: string) {
-  emit('delete', uid);
+function deleteNote(id: string) {
+  emit('delete', id);
 }
 </script>

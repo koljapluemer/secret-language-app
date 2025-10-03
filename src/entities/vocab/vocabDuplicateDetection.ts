@@ -37,7 +37,7 @@ export async function findDuplicateVocab(
 
   // Strategy 2: Match by translation UIDs (for vocab without content)
   if (vocab.translations && vocab.translations.length > 0) {
-    const existing = await vocabRepo.findVocabByTranslationUids(
+    const existing = await vocabRepo.findVocabByTranslationIds(
       vocab.language,
       vocab.translations
     )

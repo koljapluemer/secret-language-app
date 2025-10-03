@@ -35,7 +35,7 @@ import { ref } from 'vue';
 import type { TranslationData } from './TranslationData';
 
 const props = defineProps<{
-  translation?: Pick<TranslationData, 'content' | 'notes'> & { uid?: string };
+  translation?: Pick<TranslationData, 'content' | 'notes'> & { id?: string };
   isNew?: boolean;
 }>();
 

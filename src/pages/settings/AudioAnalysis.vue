@@ -12,7 +12,7 @@ const props = defineProps<Props>();
 
 // Empty sound detection state
 const detectingSounds = ref(false);
-const emptyAudioResults = ref<{ id: string; content: string; reason: string; soundIndex?: number; soundUid: string }[]>([]);
+const emptyAudioResults = ref<{ id: string; content: string; reason: string; soundIndex?: number; soundId: string }[]>([]);
 const analysisCompleted = ref(false);
 const deletingEmptyAudio = ref(false);
 
@@ -99,7 +99,7 @@ async function detectEmptySoundFiles() {
     toast.info(`Analyzing ${totalAudioFiles} audio files from ${vocabWithSound.length} vocab items...`, { duration: 2000 });
 
     let emptyCount = 0;
-    const results: { id: string; content: string; reason: string; soundIndex?: number; soundUid: string }[] = [];
+    const results: { id: string; content: string; reason: string; soundIndex?: number; soundId: string }[] = [];
 
     for (const vocab of vocabWithSound) {
       if (vocab.sounds) {
@@ -114,7 +114,7 @@ async function detectEmptySoundFiles() {
                 content: vocab.content || '...',
                 reason: detection.reason || 'unknown',
                 soundIndex: vocab.sounds.length > 1 ? i : undefined,
-                soundUid: sound.id
+                soundId: sound.id
               });
             }
           }
@@ -153,7 +153,7 @@ async function deleteEmptyAudio() {
     let deletedCount = 0;
 
     for (const result of emptyAudioResults.value) {
-      await props.vocabRepo.removeSoundFromVocab(result.id, result.soundUid);
+      await props.vocabRepo.removeSoundFromVocab(result.id, result.soundId);
       deletedCount++;
     }
 

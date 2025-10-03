@@ -41,7 +41,7 @@ const {
   cleanup
 } = useQueueState();
 
-const lastUsedFactCardUid = ref<string | null>(null);
+const lastUsedFactCardId = ref<string | null>(null);
 
 // Generate a single fact card task
 async function generateNextTask(): Promise<Task | null> {
@@ -54,7 +54,7 @@ async function generateNextTask(): Promise<Task | null> {
     }
     
     // Create block list with last used fact card
-    const blockList = lastUsedFactCardUid.value ? [lastUsedFactCardUid.value] : undefined;
+    const blockList = lastUsedFactCardId.value ? [lastUsedFactCardId.value] : undefined;
 
     return await generateFactCard(factCardRepo!, languageCodes, blockList);
   } catch {
@@ -161,9 +161,9 @@ const handleTaskFinished = async () => {
   // Track the fact card UID before completing the task
   if (state.value.status === 'task') {
     const currentTask = state.value.currentTask;
-    const factCardUid = currentTask.associatedFactCards?.[0];
-    if (factCardUid) {
-      lastUsedFactCardUid.value = factCardUid;
+    const factCardId = currentTask.associatedFactCards?.[0];
+    if (factCardId) {
+      lastUsedFactCardId.value = factCardId;
     }
   }
   

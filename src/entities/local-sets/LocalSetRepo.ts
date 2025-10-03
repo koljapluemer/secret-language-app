@@ -10,8 +10,8 @@ export class LocalSetRepo implements LocalSetRepoContract {
     return await db.localSets.toArray();
   }
 
-  async getLocalSetById(uid: string): Promise<LocalSetData | undefined> {
-    return await db.localSets.get(uid);
+  async getLocalSetById(id: string): Promise<LocalSetData | undefined> {
+    return await db.localSets.get(id);
   }
 
   async getLocalSetByName(name: string): Promise<LocalSetData | undefined> {
@@ -44,8 +44,8 @@ export class LocalSetRepo implements LocalSetRepoContract {
     await db.localSets.put(localSet);
   }
 
-  async deleteLocalSet(uid: string): Promise<void> {
-    await db.localSets.delete(uid);
+  async deleteLocalSet(id: string): Promise<void> {
+    await db.localSets.delete(id);
   }
 
   async isRemoteSetDownloaded(name: string): Promise<boolean> {

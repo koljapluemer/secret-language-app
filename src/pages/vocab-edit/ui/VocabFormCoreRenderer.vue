@@ -164,7 +164,7 @@ const emit = defineEmits<{
   'field-change': [];
   'add-translation': [translation: TranslationData];
   'update-translation': [translation: TranslationData];
-  'remove-translation': [uid: string];
+  'remove-translation': [id: string];
 }>();
 
 // Translation management state
@@ -222,7 +222,7 @@ function cancelEdit() {
   isCreatingNew.value = false;
 }
 
-function deleteTranslation(uid: string) {
-  emit('remove-translation', uid);
+function deleteTranslation(id: string) {
+  emit('remove-translation', id);
 }
 </script>

@@ -12,11 +12,11 @@ export class MergeQueueRepo {
   /**
    * Add a new merge work item to the queue
    */
-  async enqueue(setUid: string, entityType: EntityType, priority?: number): Promise<string> {
+  async enqueue(setId: string, entityType: EntityType, priority?: number): Promise<string> {
     const now = new Date()
 
     const item: Omit<MergeQueueItem, 'id'> = {
-      setUid,
+      setId,
       entityType,
       status: 'pending',
       createdAt: now,
@@ -137,10 +137,10 @@ export class MergeQueueRepo {
   /**
    * Check if a specific set/entityType combination is already queued
    */
-  async isQueued(setUid: string, entityType: EntityType): Promise<boolean> {
+  async isQueued(setId: string, entityType: EntityType): Promise<boolean> {
     const count = await db.mergeQueue
-      .where(['setUid', 'entityType'])
-      .equals([setUid, entityType])
+      .where(['setId', 'entityType'])
+      .equals([setId, entityType])
       .and(item => item.status === 'pending' || item.status === 'processing')
       .count()
 

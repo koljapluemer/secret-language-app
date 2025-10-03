@@ -41,7 +41,7 @@ const {
   cleanup
 } = useQueueState();
 
-const lastUsedContentUid = ref<string | null>(null);
+const lastUsedContentId = ref<string | null>(null);
 
 // Progress tracking
 const progressInfo = ref({
@@ -71,7 +71,7 @@ async function generateNextTask(): Promise<Task | null> {
     }
     
     // Create block list with last used content
-    const blockList = lastUsedContentUid.value ? [lastUsedContentUid.value] : undefined;
+    const blockList = lastUsedContentId.value ? [lastUsedContentId.value] : undefined;
     ;
     
     const task = await generateSentenceSlideTask(
@@ -203,12 +203,12 @@ const handleTaskFinished = async () => {
   // Track the content UID and handle vocab removal before completing the task
   if (state.value.status === 'task') {
     const currentTask = state.value.currentTask;
-    const vocabUid = currentTask.associatedVocab?.[0];
+    const vocabId = currentTask.associatedVocab?.[0];
     
-    if (vocabUid) {
-      lastUsedContentUid.value = vocabUid;
+    if (vocabId) {
+      lastUsedContentId.value = vocabId;
       // Check if this vocab should be removed from connected queue
-      await removeVocabIfNotDue(vocabUid, vocabRepo!);
+      await removeVocabIfNotDue(vocabId, vocabRepo!);
     }
   }
   

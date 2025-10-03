@@ -133,8 +133,8 @@ export class TranslationRepo implements TranslationRepoContract {
       .slice(0, limit);
   }
 
-  async getTranslationsByOrigins(setUids: string[]): Promise<TranslationData[]> {
+  async getTranslationsByOrigins(setIds: string[]): Promise<TranslationData[]> {
     const all = await this.getAllTranslations();
-    return all.filter(t => t.origins.some(origin => setUids.includes(origin)));
+    return all.filter(t => t.origins.some(origin => setIds.includes(origin)));
   }
 }

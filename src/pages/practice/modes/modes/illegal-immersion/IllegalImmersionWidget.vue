@@ -41,7 +41,7 @@ const {
   cleanup
 } = useQueueState();
 
-const lastUsedContentUid = ref<string | null>(null);
+const lastUsedContentId = ref<string | null>(null);
 
 // Progress tracking
 const progressInfo = ref({
@@ -68,7 +68,7 @@ async function generateNextTask(): Promise<Task | null> {
     }
     
     // Create block list with last used content
-    const blockList = lastUsedContentUid.value ? [lastUsedContentUid.value] : undefined;
+    const blockList = lastUsedContentId.value ? [lastUsedContentId.value] : undefined;
     
     return await generateIllegalImmersionTask(
       vocabRepo!,
@@ -194,13 +194,13 @@ const handleTaskFinished = async () => {
   // Track the content UID before completing the task
   if (state.value.status === 'task') {
     const currentTask = state.value.currentTask;
-    const vocabUid = currentTask.associatedVocab?.[0];
-    const factCardUid = currentTask.associatedFactCards?.[0];
-    const resourceUid = currentTask.associatedResources?.[0];
-    const contentUid = vocabUid || factCardUid || resourceUid;
+    const vocabId = currentTask.associatedVocab?.[0];
+    const factCardId = currentTask.associatedFactCards?.[0];
+    const resourceId = currentTask.associatedResources?.[0];
+    const contentId = vocabId || factCardId || resourceId;
     
-    if (contentUid) {
-      lastUsedContentUid.value = contentUid;
+    if (contentId) {
+      lastUsedContentId.value = contentId;
     }
   }
   

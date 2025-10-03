@@ -1,18 +1,18 @@
 import { ref } from 'vue';
 
-const usedVocabUids = ref<string[]>([]);
+const usedVocabIds = ref<string[]>([]);
 
 export function useUsedVocabTracker() {
-  const addUsedVocab = (uid: string) => {
-    usedVocabUids.value.push(uid);
+  const addUsedVocab = (id: string) => {
+    usedVocabIds.value.push(id);
   };
 
-  const getLastUsedVocabUid = (): string | null => {
-    return usedVocabUids.value.length > 0 ? usedVocabUids.value[usedVocabUids.value.length - 1] : null;
+  const getLastUsedVocabId = (): string | null => {
+    return usedVocabIds.value.length > 0 ? usedVocabIds.value[usedVocabIds.value.length - 1] : null;
   };
 
   return {
     addUsedVocab,
-    getLastUsedVocabUid
+    getLastUsedVocabId
   };
 }

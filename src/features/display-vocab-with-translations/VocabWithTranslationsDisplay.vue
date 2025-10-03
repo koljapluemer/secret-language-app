@@ -8,7 +8,7 @@ import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
 import LinkDisplayMini from '@/shared/links/LinkDisplayMini.vue';
 
 interface Props {
-  vocabUid: string;
+  vocabId: string;
   repositories: RepositoriesContextStrict;
   showAllNotesImmediately?: boolean;
 }
@@ -28,9 +28,9 @@ const isSentence = computed(() => {
 });
 
 const loadVocab = async () => {
-  if (!props.vocabUid) return;
+  if (!props.vocabId) return;
 
-  const vocabData = await vocabRepo.getVocabByUID(props.vocabUid);
+  const vocabData = await vocabRepo.getVocabByUID(props.vocabId);
   if (vocabData) {
     vocab.value = vocabData;
     translations.value = await translationRepo.getTranslationsByIds(vocabData.translations);

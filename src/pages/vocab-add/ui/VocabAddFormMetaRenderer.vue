@@ -91,7 +91,7 @@ defineEmits<{
   'field-change': [];
   'add-note': [note: NoteData];
   'update-note': [note: NoteData];
-  'remove-note': [uid: string];
+  'remove-note': [id: string];
   'add-link': [link: Link];
   'remove-link': [index: number];
   'update-images': [images: VocabImage[]];

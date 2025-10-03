@@ -44,12 +44,12 @@ const {
   cleanup
 } = useQueueState();
 
-const lastUsedVocabUid = ref<string | null>(null);
+const lastUsedVocabId = ref<string | null>(null);
 
 // Settings screen state
 const showSettings = ref(true);
 const availableSets = ref<LocalSetData[]>([]);
-const selectedSetUid = ref<string>('');
+const selectedSetId = ref<string>('');
 const maxNewVocab = ref<number>(10);
 const loadingSets = ref(false);
 
@@ -59,11 +59,11 @@ const sessionProgress = ref<{ totalUnseen: number; totalDue: number }>({ totalUn
 
 // Computed
 const selectedSet = computed(() => {
-  return availableSets.value.find(set => set.id === selectedSetUid.value);
+  return availableSets.value.find(set => set.id === selectedSetId.value);
 });
 
 const canStartStudy = computed(() => {
-  return selectedSetUid.value && selectedSet.value;
+  return selectedSetId.value && selectedSet.value;
 });
 
 // Load available sets
@@ -78,7 +78,7 @@ async function loadAvailableSets() {
       const latestSet = sets.reduce((latest, current) => {
         return current.lastDownloadedAt > latest.lastDownloadedAt ? current : latest;
       });
-      selectedSetUid.value = latestSet.id;
+      selectedSetId.value = latestSet.id;
     }
   } catch {
     toast.error('Failed to load available sets');
@@ -89,17 +89,17 @@ async function loadAvailableSets() {
 
 // Generate a single set study task
 async function generateNextTask(): Promise<Task | null> {
-  if (!selectedSetUid.value) return null;
+  if (!selectedSetId.value) return null;
 
   try {
     const options: SetStudyOptions = {
-      setUid: selectedSetUid.value,
+      setId: selectedSetId.value,
       maxNewVocab: maxNewVocab.value,
       currentNewVocabCount: currentNewVocabCount.value
     };
 
     // Create block list with last used vocab
-    const blockList = lastUsedVocabUid.value ? [lastUsedVocabUid.value] : undefined;
+    const blockList = lastUsedVocabId.value ? [lastUsedVocabId.value] : undefined;
 
     return await generateSetStudyTask(
       vocabRepo!,
@@ -137,7 +137,7 @@ async function tryTransitionToTask(): Promise<boolean> {
 
   // Check if we've completed the set
   if (selectedSet.value) {
-    const progress = await getSetStudyProgress(vocabRepo!, selectedSetUid.value);
+    const progress = await getSetStudyProgress(vocabRepo!, selectedSetId.value);
     if (progress.totalDue === 0 && (currentNewVocabCount.value >= maxNewVocab.value || progress.totalUnseen === 0)) {
       setEmpty(`Excellent work! You've completed studying "${selectedSet.value.name}". All vocabulary is learned and no new items remain within your limit.`);
     } else {
@@ -157,8 +157,8 @@ async function initializeQueue() {
 
   try {
     // Load progress for selected set
-    if (selectedSetUid.value) {
-      sessionProgress.value = await getSetStudyProgress(vocabRepo!, selectedSetUid.value);
+    if (selectedSetId.value) {
+      sessionProgress.value = await getSetStudyProgress(vocabRepo!, selectedSetId.value);
     }
 
     const success = await tryTransitionToTask();
@@ -252,13 +252,13 @@ const handleTaskFinished = async () => {
   // Track the vocab UID before completing the task
   if (state.value.status === 'task') {
     const currentTask = state.value.currentTask;
-    const vocabUid = currentTask.associatedVocab?.[0];
-    if (vocabUid) {
-      lastUsedVocabUid.value = vocabUid;
+    const vocabId = currentTask.associatedVocab?.[0];
+    if (vocabId) {
+      lastUsedVocabId.value = vocabId;
 
       // Check if this was new vocab (unseen)
       try {
-        const vocab = await vocabRepo!.getVocabByUID(vocabUid);
+        const vocab = await vocabRepo!.getVocabByUID(vocabId);
         if (vocab && vocab.progress.level === 0) { // Just became seen (was level -1, now level 0 after first completion)
           currentNewVocabCount.value++;
         }
@@ -290,7 +290,7 @@ const handleTaskFinished = async () => {
             <label class="label">
               <span class="label-text">{{ $t('practice.modes.setStudy.setup.selectSet') }}</span>
             </label>
-            <select v-model="selectedSetUid" class="select select-bordered w-full" :disabled="loadingSets">
+            <select v-model="selectedSetId" class="select select-bordered w-full" :disabled="loadingSets">
               <option value="" disabled>
                 {{ loadingSets ? $t('common.loading') : $t('practice.modes.setStudy.setup.chooseSet') }}
               </option>
@@ -393,7 +393,7 @@ const handleTaskFinished = async () => {
       leave-active-class="transition-opacity duration-[50ms] ease-in" enter-from-class="opacity-0"
       enter-to-class="opacity-100" leave-from-class="opacity-100" leave-to-class="opacity-0">
       <TaskRenderer :key="state.currentTask.id" :task="state.currentTask"
-        :practice-context="{ practiceMode: 'set-study', setUid: selectedSetUid }"
+        :practice-context="{ practiceMode: 'set-study', setId: selectedSetId }"
         @finished="handleTaskFinished" />
     </Transition>
   </div>

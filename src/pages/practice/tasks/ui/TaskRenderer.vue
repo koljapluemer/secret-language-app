@@ -92,23 +92,23 @@ function getTaskComponent(taskType: string) {
 }
 
 async function handleTaskFinished(correctness: TaskCorrectness = 'neutral') {
-  // Determine set_uid from task context or vocab origins
-  let setUid: string | null = props.practiceContext.setUid || null;
+  // Determine set_Id from task context or vocab origins
+  let setId: string | null = props.practiceContext.setId || null;
 
-  if (!setUid && props.task.associatedVocab?.length) {
+  if (!setId && props.task.associatedVocab?.length) {
     try {
       const vocab = await vocabRepo?.getVocabByUID(props.task.associatedVocab[0]);
       if (vocab?.origins.length && vocab.origins[0] !== 'user-added') {
-        setUid = vocab.origins[0];
+        setId = vocab.origins[0];
       }
     } catch {
-      // Ignore error, setUid remains null
+      // Ignore error, setId remains null
     }
   }
 
   // Record task completion
   tracking.recordTaskCompletion(
-    setUid,
+    setId,
     props.task.language,
     props.practiceContext.practiceMode,
     props.task.taskType,

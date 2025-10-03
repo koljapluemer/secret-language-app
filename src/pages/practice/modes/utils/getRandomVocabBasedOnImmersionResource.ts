@@ -7,10 +7,10 @@ import { useToast } from '@/shared/toasts';
 async function getVocabFromImmersionResource(
   resourceRepo: ResourceRepoContract,
   vocabRepo: VocabRepoContract,
-  resourceUid: string,
+  resourceId: string,
   vocabBlockList?: string[]
 ): Promise<VocabData[] | null> {
-  const resource = await resourceRepo.getResourceById(resourceUid);
+  const resource = await resourceRepo.getResourceById(resourceId);
   if (!resource?.isImmersionContent || resource.vocab.length === 0) {
     return null;
   }
@@ -28,12 +28,12 @@ async function getVocabFromImmersionResource(
 export async function getRandomVocabBasedOnImmersionResource(
   resourceRepo: ResourceRepoContract,
   vocabRepo: VocabRepoContract,
-  resourceUid: string,
+  resourceId: string,
   vocabBlockList?: string[]
 ): Promise<VocabData | null> {
   const toast = useToast();
   try {
-    const vocabItems = await getVocabFromImmersionResource(resourceRepo, vocabRepo, resourceUid, vocabBlockList);
+    const vocabItems = await getVocabFromImmersionResource(resourceRepo, vocabRepo, resourceId, vocabBlockList);
     if (!vocabItems) return null;
 
     const newVocab = vocabItems.filter(v => v.progress.level === -1);
@@ -56,12 +56,12 @@ export async function getRandomVocabBasedOnImmersionResource(
 export async function getRandomNewVocabFromImmersionResource(
   resourceRepo: ResourceRepoContract,
   vocabRepo: VocabRepoContract,
-  resourceUid: string,
+  resourceId: string,
   vocabBlockList?: string[]
 ): Promise<VocabData | null> {
   const toast = useToast();
   try {
-    const vocabItems = await getVocabFromImmersionResource(resourceRepo, vocabRepo, resourceUid, vocabBlockList);
+    const vocabItems = await getVocabFromImmersionResource(resourceRepo, vocabRepo, resourceId, vocabBlockList);
     if (!vocabItems) return null;
 
     const newVocab = vocabItems.filter(v => v.progress.level === -1);
@@ -75,12 +75,12 @@ export async function getRandomNewVocabFromImmersionResource(
 export async function getRandomSeenVocabFromImmersionResource(
   resourceRepo: ResourceRepoContract,
   vocabRepo: VocabRepoContract,
-  resourceUid: string,
+  resourceId: string,
   vocabBlockList?: string[]
 ): Promise<VocabData | null> {
   const toast = useToast();
   try {
-    const vocabItems = await getVocabFromImmersionResource(resourceRepo, vocabRepo, resourceUid, vocabBlockList);
+    const vocabItems = await getVocabFromImmersionResource(resourceRepo, vocabRepo, resourceId, vocabBlockList);
     if (!vocabItems) return null;
 
     const seenVocab = vocabItems.filter(v => v.progress.level >= 0);

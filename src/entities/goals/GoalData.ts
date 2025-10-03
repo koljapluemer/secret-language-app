@@ -3,16 +3,16 @@ export interface GoalData {
   language: string;
   title: string;
   doNotPractice?: boolean;
-  subGoals: string[]; // array of uids of other goals
-  vocab: string[]; // uids of Vocab
-  factCards: string[]; // uids of FactCardData
-  notes: string[]; // uids of NoteData
+  subGoals: string[]; // array of Ids of other goals
+  vocab: string[]; // Ids of Vocab
+  factCards: string[]; // Ids of FactCardData
+  notes: string[]; // Ids of NoteData
 
   prio?: number;
 
   lastShownAt?: Date;
 
-  origins: string[] // uid of set, or the string "user-added"
+  origins: string[] // id of set, or the string "user-added"
 
   finishedAddingSubGoals: boolean;
   finishedAddingMilestones: boolean;

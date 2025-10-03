@@ -18,5 +18,5 @@ export interface TranslationRepoContract {
 
   // Merge operations
   getUncheckedTranslations(limit: number): Promise<TranslationData[]>;
-  getTranslationsByOrigins(setUids: string[]): Promise<TranslationData[]>;
+  getTranslationsByOrigins(setIds: string[]): Promise<TranslationData[]>;
 }

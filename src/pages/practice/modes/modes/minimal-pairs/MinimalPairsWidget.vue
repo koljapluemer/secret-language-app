@@ -40,7 +40,7 @@ const {
   cleanup
 } = useQueueState();
 
-const lastUsedVocabUid = ref<string | null>(null);
+const lastUsedVocabId = ref<string | null>(null);
 
 // Generate a single minimal pairs task
 async function generateNextTask(): Promise<Task | null> {
@@ -53,7 +53,7 @@ async function generateNextTask(): Promise<Task | null> {
     }
     
     // Create block list with last used vocab
-    const blockList = lastUsedVocabUid.value ? [lastUsedVocabUid.value] : undefined;
+    const blockList = lastUsedVocabId.value ? [lastUsedVocabId.value] : undefined;
 
     return await generateMinimalPairsTask(vocabRepo!, languageCodes, blockList);
   } catch {
@@ -159,9 +159,9 @@ const handleTaskFinished = async () => {
   // Track the vocab UID before completing the task
   if (state.value.status === 'task') {
     const currentTask = state.value.currentTask;
-    const vocabUid = currentTask.associatedVocab?.[0];
-    if (vocabUid) {
-      lastUsedVocabUid.value = vocabUid;
+    const vocabId = currentTask.associatedVocab?.[0];
+    if (vocabId) {
+      lastUsedVocabId.value = vocabId;
     }
   }
   

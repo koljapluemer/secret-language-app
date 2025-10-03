@@ -23,7 +23,7 @@ const emit = defineEmits<{
 const toast = useToast();
 
 // Get the resource ID from associated resources
-const resourceUid = computed(() => {
+const resourceId = computed(() => {
   return props.task.associatedResources?.[0];
 });
 
@@ -38,10 +38,10 @@ const showManagementWidgets = ref<'vocab' | 'facts' | false>(false);
 const hasChanges = ref(false);
 
 const loadResource = async () => {
-  if (!resourceUid.value) return;
+  if (!resourceId.value) return;
 
   try {
-    const resourceData = await resourceRepo.getResourceById(resourceUid.value);
+    const resourceData = await resourceRepo.getResourceById(resourceId.value);
     resource.value = resourceData || null;
   } catch {
     toast.error('Failed to load resource');

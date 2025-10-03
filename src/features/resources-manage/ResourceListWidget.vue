@@ -338,14 +338,14 @@ async function loadResources() {
   }
 }
 
-async function deleteResource(uid: string) {
-  const resourceToDelete = resourceItems.value.find(r => r.id === uid);
+async function deleteResource(id: string) {
+  const resourceToDelete = resourceItems.value.find(r => r.id === id);
   if (!resourceToDelete || !confirm(`Are you sure you want to delete "${resourceToDelete.title}"?`)) {
     return;
   }
 
   try {
-    await resourceRepo.deleteResource(uid);
+    await resourceRepo.deleteResource(id);
     await loadResources(); // Reload to update pagination
   } catch {
     toast.error('Failed to delete resource');

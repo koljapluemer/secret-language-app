@@ -5,7 +5,7 @@ import { getRandomGeneratedTaskForVocab } from '@/pages/practice/modes/utils/get
 import { randomFromArray } from '@/shared/utils/arrayUtils';
 
 export interface SetStudyOptions {
-  setUid: string;
+  setId: string;
   maxNewVocab: number;
   currentNewVocabCount: number;
 }
@@ -17,10 +17,10 @@ export async function generateSetStudyTask(
   vocabBlockList?: string[]
 ): Promise<Task | null> {
   try {
-    const { setUid, maxNewVocab, currentNewVocabCount } = options;
+    const { setId, maxNewVocab, currentNewVocabCount } = options;
 
     // First, try to get due vocab from the set
-    const dueVocab = await vocabRepo.getRandomDueVocabFromSet(setUid, 10, vocabBlockList);
+    const dueVocab = await vocabRepo.getRandomDueVocabFromSet(setId, 10, vocabBlockList);
 
     if (dueVocab.length > 0) {
       // Select random due vocab
@@ -33,7 +33,7 @@ export async function generateSetStudyTask(
 
     // If no due vocab or we want to include new vocab
     if (currentNewVocabCount < maxNewVocab) {
-      const unseenVocab = await vocabRepo.getRandomUnseenVocabFromSet(setUid, 10, vocabBlockList);
+      const unseenVocab = await vocabRepo.getRandomUnseenVocabFromSet(setId, 10, vocabBlockList);
 
       if (unseenVocab.length > 0) {
         // Select random unseen vocab
@@ -54,13 +54,13 @@ export async function generateSetStudyTask(
 
 export async function getSetStudyProgress(
   vocabRepo: VocabRepoContract,
-  setUid: string
+  setId: string
 ): Promise<{ totalUnseen: number; totalDue: number }> {
   try {
-    const totalUnseen = await vocabRepo.getUnseenVocabCountFromSet(setUid);
+    const totalUnseen = await vocabRepo.getUnseenVocabCountFromSet(setId);
 
     // Get due vocab count by fetching and counting
-    const dueVocab = await vocabRepo.getRandomDueVocabFromSet(setUid, 1000); // Large number to get all
+    const dueVocab = await vocabRepo.getRandomDueVocabFromSet(setId, 1000); // Large number to get all
     const totalDue = dueVocab.length;
 
     return { totalUnseen, totalDue };

@@ -21,7 +21,7 @@
           :disabled="isButtonDisabled(index)">
           {{ $t('practice.tasks.iHear') }} {{ vocab.content }}
         </button>
-        <VocabWithTranslationsDisplay :vocab-uid="vocab.id" :repositories="repositories"
+        <VocabWithTranslationsDisplay :vocab-id="vocab.id" :repositories="repositories"
           :showAllNotesImmediately="true" />
       </div>
     </div>
@@ -101,19 +101,19 @@ useReplaySoundWithSpacebar({
 });
 
 // Get the vocab ID from associated vocab
-const vocabUid = computed(() => {
+const vocabId = computed(() => {
   return props.task.associatedVocab?.[0];
 });
 
 async function loadVocabData() {
-  if (!vocabUid.value) {
+  if (!vocabId.value) {
     toast.error('No vocabulary provided for exercise');
     loading.value = false;
     return;
   }
 
   try {
-    const vocabData = await vocabRepo.getVocabByUID(vocabUid.value);
+    const vocabData = await vocabRepo.getVocabByUID(vocabId.value);
     if (!vocabData) {
       toast.error('Vocabulary not found');
       loading.value = false;

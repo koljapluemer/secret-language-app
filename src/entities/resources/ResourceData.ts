@@ -15,10 +15,10 @@ export interface ResourceData {
   priority: number;
   vocab: string[]; // ids of VocabData
   factCards: string[]; // ids of FactCardData
-  notes: string[]; // uids of notes
+  notes: string[]; // Ids of notes
   
   lastShownAt?: Date;
-  origins: string[] // uid of set, or the string "user-added"
+  origins: string[] // id of set, or the string "user-added"
 
   // Internal merge tracking
   _mergeChecked?: boolean // Has background merge service processed this item?

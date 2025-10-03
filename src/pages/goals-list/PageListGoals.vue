@@ -390,14 +390,14 @@ async function loadVocabStatsForCurrentPage() {
   }
 }
 
-async function deleteGoal(uid: string) {
-  const goalToDelete = goalItems.value.find(g => g.id === uid);
+async function deleteGoal(id: string) {
+  const goalToDelete = goalItems.value.find(g => g.id === id);
   if (!goalToDelete || !confirm(`Are you sure you want to delete "${goalToDelete.title}"?`)) {
     return;
   }
 
   try {
-    await goalRepo.delete(uid);
+    await goalRepo.delete(id);
     await loadGoals(); // Reload to update pagination
   } catch (err) {
     toast.error(`Failed to delete goal: ${String(err)}`);

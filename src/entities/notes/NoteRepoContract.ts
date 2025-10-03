@@ -2,20 +2,13 @@ import type { NoteData } from './NoteData';
 
 export interface NoteRepoContract {
   // Basic CRUD operations
-  getNoteByUID(uid: string): Promise<NoteData | undefined>;
-  getNotesByUIDs(uids: string[]): Promise<NoteData[]>;
+  getNoteByUID(id: string): Promise<NoteData | undefined>;
+  getNotesByUIDs(Ids: string[]): Promise<NoteData[]>;
   saveNote(note: Omit<NoteData, "id">): Promise<NoteData>;
   updateNote(note: NoteData): Promise<void>;
-  deleteNote(uid: string): Promise<void>;
-  deleteNotes(uids: string[]): Promise<void>;
-
-  // Remote import operations
-  createNotesFromRemote(remoteNotes: { content: string; showBeforeExercise?: boolean }[]): Promise<string[]>;
-
-  // Batch operations for performance
-  createNotesFromRemoteBatch(remoteNotes: { id?: string; content: string; showBeforeExercice?: boolean; noteType?: string }[], onProgress?: (current: number, total: number) => void): Promise<Map<string, string>>;
+  deleteNote(id: string): Promise<void>;
+  deleteNotes(Ids: string[]): Promise<void>;
 
   // Merge operations (notes don't deduplicate, but need to track as checked)
   getUncheckedNotes(limit: number): Promise<NoteData[]>;
-  bulkMarkNotesAsChecked(uids: string[]): Promise<void>;
 }

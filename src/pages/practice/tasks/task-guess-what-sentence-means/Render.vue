@@ -35,10 +35,10 @@ const canReveal = computed(() => {
 });
 
 const loadVocab = async () => {
-  const vocabUid = props.task.associatedVocab?.[0];
-  if (!vocabUid) return;
+  const vocabId = props.task.associatedVocab?.[0];
+  if (!vocabId) return;
 
-  const vocabData = await vocabRepo.getVocabByUID(vocabUid);
+  const vocabData = await vocabRepo.getVocabByUID(vocabId);
   if (vocabData) {
     vocab.value = vocabData;
     const translationData = await translationRepo.getTranslationsByIds(vocabData.translations);

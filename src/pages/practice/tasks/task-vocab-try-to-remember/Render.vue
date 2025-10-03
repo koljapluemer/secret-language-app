@@ -22,9 +22,9 @@ const vocabRepo = props.repositories.vocabRepo;
 const vocab = ref<VocabData | null>(null);
 
 const loadVocab = async () => {
-  const vocabUid = props.task.associatedVocab?.[0];
-  if (!vocabUid) return;
-  const vocabData = await vocabRepo.getVocabByUID(vocabUid);
+  const vocabId = props.task.associatedVocab?.[0];
+  if (!vocabId) return;
+  const vocabData = await vocabRepo.getVocabByUID(vocabId);
   if (vocabData) {
     vocab.value = vocabData;
   }
@@ -78,7 +78,7 @@ onMounted(loadVocab);
 <template>
   <div v-if="vocab">
     <VocabWithTranslationsDisplay
-      :vocab-uid="task.associatedVocab?.[0] || ''"
+      :vocab-id="task.associatedVocab?.[0] || ''"
       :repositories="repositories"
     />
     

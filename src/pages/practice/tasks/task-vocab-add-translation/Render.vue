@@ -27,9 +27,9 @@ const vocabNotes = ref<NoteData[]>([]);
 const translationNotes = ref<NoteData[]>([]);
 
 async function loadVocab() {
-  const vocabUid = props.task.associatedVocab?.[0];
-  if (!vocabUid) return;
-  const data = await vocabRepo.getVocabByUID(vocabUid);
+  const vocabId = props.task.associatedVocab?.[0];
+  if (!vocabId) return;
+  const data = await vocabRepo.getVocabByUID(vocabId);
   vocab.value = data || null;
   if (vocab.value) {
     const existing = await translationRepo.getTranslationsByIds(vocab.value.translations);
@@ -70,8 +70,8 @@ function addLocalTranslation() {
   newTranslationContent.value = '';
 }
 
-function removeLocalTranslation(uid: string) {
-  translations.value = translations.value.filter(t => t.id !== uid);
+function removeLocalTranslation(id: string) {
+  translations.value = translations.value.filter(t => t.id !== id);
 }
 
 async function handleDone() {
@@ -79,7 +79,7 @@ async function handleDone() {
   if (translations.value.length === 0) return;
 
   // Persist translations, then update vocab to link them
-  const savedUids: string[] = [];
+  const savedIds: string[] = [];
   const plainTranslations = JSON.parse(JSON.stringify(translations.value));
   for (const t of plainTranslations) {
     const saved = await translationRepo.saveTranslation({
@@ -87,12 +87,12 @@ async function handleDone() {
       priority: t.priority,
       notes: t.notes
     });
-    savedUids.push(saved.id);
+    savedIds.push(saved.id);
   }
 
   const updatedVocab: VocabData = {
     ...JSON.parse(JSON.stringify(vocab.value)),
-    translations: [...vocab.value.translations, ...savedUids]
+    translations: [...vocab.value.translations, ...savedIds]
   };
   await vocabRepo.updateVocab(updatedVocab);
   emit('finished', 'neutral');

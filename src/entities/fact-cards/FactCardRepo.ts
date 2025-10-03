@@ -21,13 +21,13 @@ export class FactCardRepo implements FactCardRepoContract {
     return factCards.map(fc => this.ensureFactCardFields(fc));
   }
 
-  async getFactCardByUID(uid: string): Promise<FactCardData | undefined> {
-    const factCard = await db.factCards.get(uid);
+  async getFactCardByUID(id: string): Promise<FactCardData | undefined> {
+    const factCard = await db.factCards.get(id);
     return factCard ? this.ensureFactCardFields(factCard) : undefined;
   }
 
-  async getFactCardsByUIDs(uids: string[]): Promise<FactCardData[]> {
-    const factCards = await db.factCards.where('id').anyOf(uids).toArray();
+  async getFactCardsByUIDs(Ids: string[]): Promise<FactCardData[]> {
+    const factCards = await db.factCards.where('id').anyOf(Ids).toArray();
     return factCards.map(fc => this.ensureFactCardFields(fc));
   }
 
@@ -56,8 +56,8 @@ export class FactCardRepo implements FactCardRepoContract {
     await db.factCards.put(factCard);
   }
 
-  async deleteFactCard(uid: string): Promise<void> {
-    await db.factCards.delete(uid);
+  async deleteFactCard(id: string): Promise<void> {
+    await db.factCards.delete(id);
   }
 
   async getFactCardByFrontBackLanguage(front: string, back: string, language: string): Promise<FactCardData | undefined> {
@@ -229,10 +229,10 @@ export class FactCardRepo implements FactCardRepoContract {
     return factCards.map((fc: FactCardData) => this.ensureFactCardFields(fc));
   }
 
-  async getFactCardsByOrigins(setUids: string[]): Promise<FactCardData[]> {
+  async getFactCardsByOrigins(setIds: string[]): Promise<FactCardData[]> {
     const factCards = await db.factCards
       .where('origins')
-      .anyOf(setUids)
+      .anyOf(setIds)
       .toArray();
 
     return factCards.map((fc: FactCardData) => this.ensureFactCardFields(fc));

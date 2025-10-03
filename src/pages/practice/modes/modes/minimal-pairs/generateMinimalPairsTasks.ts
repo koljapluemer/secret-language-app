@@ -10,10 +10,10 @@ export async function generateMinimalPairsTask(
   blockList?: string[]
 ): Promise<Task | null> {
   try {
-    const { getLastUsedVocabUid, addUsedVocab } = useUsedVocabTracker();
+    const { getLastUsedVocabId, addUsedVocab } = useUsedVocabTracker();
     
     // Only block the last used vocab
-    const lastUsed = getLastUsedVocabUid();
+    const lastUsed = getLastUsedVocabId();
     const combinedBlockList = lastUsed ? [...(blockList || []), lastUsed] : (blockList || []);
     
     // Get a random vocab that meets minimal pairs criteria and wasn't just used

@@ -96,13 +96,13 @@ async function handleUpdateNote(note: NoteData) {
   }
 }
 
-async function handleRemoveNote(noteUid: string) {
-  await noteRepo.deleteNote(noteUid);
-  notes.value = notes.value.filter(n => n.id !== noteUid);
+async function handleRemoveNote(noteId: string) {
+  await noteRepo.deleteNote(noteId);
+  notes.value = notes.value.filter(n => n.id !== noteId);
 
   const updatedResource = toRaw({
     ...toRaw(props.resource),
-    notes: toRaw(props.resource).notes.filter(id => id !== noteUid)
+    notes: toRaw(props.resource).notes.filter(id => id !== noteId)
   });
 
   await resourceRepo.updateResource(updatedResource);
