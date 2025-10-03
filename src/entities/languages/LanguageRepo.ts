@@ -17,7 +17,7 @@ export class LanguageRepo implements LanguageRepoContract {
   }
 
   async getByCode(code: string): Promise<LanguageData | undefined> {
-    return await db.languages.get(code);
+    return await db.languages.where('code').equals(code).first();
   }
 
   async add(language: LanguageData): Promise<void> {

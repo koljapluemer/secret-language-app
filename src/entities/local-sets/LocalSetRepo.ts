@@ -23,20 +23,37 @@ export class LocalSetRepo implements LocalSetRepoContract {
   }
 
   async saveLocalSet(localSet: Omit<LocalSetData, 'id'>): Promise<LocalSetData> {
-    const localSetData: Omit<LocalSetData, 'id'> = {
-      name: localSet.name,
-      language: localSet.language,
-      description: localSet.description,
-      lastDownloadedAt: localSet.lastDownloadedAt
-    };
+    // Check if set already exists with this name+language combination
+    const existing = await db.localSets
+      .where('[name+language]')
+      .equals([localSet.name, localSet.language])
+      .first();
 
+    if (existing) {
+      // Update existing set
+      const updated: LocalSetData = {
+        ...existing,
+        description: localSet.description,
+        lastDownloadedAt: localSet.lastDownloadedAt
+      };
+      await db.localSets.put(updated);
+      return updated;
+    } else {
+      // Create new set
+      const localSetData: Omit<LocalSetData, 'id'> = {
+        name: localSet.name,
+        language: localSet.language,
+        description: localSet.description,
+        lastDownloadedAt: localSet.lastDownloadedAt
+      };
 
-    try {
-      const id = await db.localSets.add(localSetData as LocalSetData);
-      return { ...localSetData, id } as LocalSetData;
-    } catch (error) {
-      this.toast.error(`LocalSetRepo: Failed to save local set: ${String(error)}`);
-      throw error;
+      try {
+        const id = await db.localSets.add(localSetData as LocalSetData);
+        return { ...localSetData, id } as LocalSetData;
+      } catch (error) {
+        this.toast.error(`LocalSetRepo: Failed to save local set: ${String(error)}`);
+        throw error;
+      }
     }
   }
 
