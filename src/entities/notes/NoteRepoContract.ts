@@ -11,7 +11,4 @@ export interface NoteRepoContract {
 
   // Batch operations
   bulkCreateNotes(notes: Omit<NoteData, 'id'>[]): Promise<NoteData[]>;
-
-  // Merge operations (notes don't deduplicate, but need to track as checked)
-  getUncheckedNotes(limit: number): Promise<NoteData[]>;
 }

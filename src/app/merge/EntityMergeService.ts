@@ -6,6 +6,7 @@
  */
 
 import { mergeEntities } from '@/shared/merge/mergeEntities'
+import { deduplicateNoteIds } from './deduplicateEntityNotes'
 import { toRaw } from 'vue'
 
 // Entity repos
@@ -97,11 +98,7 @@ export class EntityMergeService {
       if (processed) return
 
       // Then resources
-      processed = await this.processResourceChunk()
-      if (processed) return
-
-      // Finally notes (lowest priority)
-      await this.processNoteChunk()
+      await this.processResourceChunk()
     } catch (error) {
       console.error('Error in EntityMergeService tick:', error)
     } finally {
@@ -132,13 +129,20 @@ export class EntityMergeService {
       if (duplicate && duplicate.id !== vocab.id) {
         // Found a duplicate - merge them
         const merged = mergeEntities(duplicate, vocab, vocabMergeStrategy)
+
+        // Deduplicate notes
+        merged.notes = await deduplicateNoteIds(merged.notes, this.noteRepo)
+
         toUpdate.push(merged)
         toDelete.push(vocab.id)
         console.log(`[Merge] Merging vocab "${vocab.content}" (${vocab.id} → ${duplicate.id})`)
       } else {
-        // No duplicate - just mark as checked
+        // No duplicate - just mark as checked and deduplicate notes
+        const deduplicatedNotes = await deduplicateNoteIds(vocab.notes, this.noteRepo)
+
         toUpdate.push({
           ...vocab,
+          notes: deduplicatedNotes,
           _mergeChecked: true
         })
       }
@@ -184,12 +188,19 @@ export class EntityMergeService {
       if (duplicate && duplicate.id !== translation.id) {
         // Found a duplicate - merge them
         const merged = mergeEntities(duplicate, translation, translationMergeStrategy)
+
+        // Deduplicate notes
+        merged.notes = await deduplicateNoteIds(merged.notes, this.noteRepo)
+
         toUpdate.push(merged)
         toDelete.push(translation.id)
       } else {
-        // No duplicate - just mark as checked
+        // No duplicate - just mark as checked and deduplicate notes
+        const deduplicatedNotes = await deduplicateNoteIds(translation.notes, this.noteRepo)
+
         toUpdate.push({
           ...translation,
+          notes: deduplicatedNotes,
           _mergeChecked: true
         })
       }
@@ -210,25 +221,6 @@ export class EntityMergeService {
     return true // Processed something
   }
 
-  /**
-   * Process notes (no deduplication, just mark as checked)
-   * @returns true if processed something, false if no work
-   */
-  private async processNoteChunk(): Promise<boolean> {
-    const CHUNK_SIZE = 50
-    const unchecked = await this.noteRepo.getUncheckedNotes(CHUNK_SIZE)
-
-    if (unchecked.length === 0) {
-      return false
-    }
-
-    // Notes don't merge - just mark as checked
-    for (const note of unchecked) {
-      await this.noteRepo.updateNote({ ...note, _mergeChecked: true })
-    }
-
-    return true // Processed something
-  }
 
   /**
    * Process a chunk of fact cards
@@ -253,13 +245,20 @@ export class EntityMergeService {
       if (duplicate && duplicate.id !== factCard.id) {
         // Found a duplicate - merge them
         const merged = mergeEntities(duplicate, factCard, factCardMergeStrategy)
+
+        // Deduplicate notes
+        merged.notes = await deduplicateNoteIds(merged.notes, this.noteRepo)
+
         toUpdate.push(toRaw(merged))
         toDelete.push(factCard.id)
         console.log(`[Merge] Merging fact card "${factCard.front}" (${factCard.id} → ${duplicate.id})`)
       } else {
-        // No duplicate - just mark as checked
+        // No duplicate - just mark as checked and deduplicate notes
+        const deduplicatedNotes = await deduplicateNoteIds(factCard.notes, this.noteRepo)
+
         toUpdate.push(toRaw({
           ...factCard,
+          notes: deduplicatedNotes,
           _mergeChecked: true
         }))
       }
@@ -303,12 +302,19 @@ export class EntityMergeService {
       if (duplicate && duplicate.id !== resource.id) {
         // Found a duplicate - merge them
         const merged = mergeEntities(duplicate, resource, resourceMergeStrategy)
+
+        // Deduplicate notes
+        merged.notes = await deduplicateNoteIds(merged.notes, this.noteRepo)
+
         toUpdate.push(toRaw(merged))
         toDelete.push(resource.id)
       } else {
-        // No duplicate - just mark as checked
+        // No duplicate - just mark as checked and deduplicate notes
+        const deduplicatedNotes = await deduplicateNoteIds(resource.notes, this.noteRepo)
+
         toUpdate.push(toRaw({
           ...resource,
+          notes: deduplicatedNotes,
           _mergeChecked: true
         }))
       }

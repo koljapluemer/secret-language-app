@@ -506,8 +506,15 @@ export class UnifiedRemoteSetService {
               return null;
             }
           }).filter(item => item !== null);
-          
-          setFiles[fileName as keyof RemoteSetFiles] = data as any;
+
+          // Type assertion is safe here because we validate with schemas above
+          if (fileName === 'vocab') setFiles.vocab = data as z.infer<typeof vocabSchema>[];
+          else if (fileName === 'translations') setFiles.translations = data as z.infer<typeof translationSchema>[];
+          else if (fileName === 'notes') setFiles.notes = data as z.infer<typeof noteSchema>[];
+          else if (fileName === 'links') setFiles.links = data as z.infer<typeof linkSchema>[];
+          else if (fileName === 'resources') setFiles.resources = data as z.infer<typeof resourceSchema>[];
+          else if (fileName === 'goals') setFiles.goals = data as z.infer<typeof goalSchema>[];
+          else if (fileName === 'factCards') setFiles.factCards = data as z.infer<typeof factCardSchema>[];
         }
       } catch (error) {
         this.toast.error(`Failed to load ${fileName}.jsonl: ${String(error)}`);

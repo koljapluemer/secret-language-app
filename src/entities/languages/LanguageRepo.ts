@@ -38,7 +38,10 @@ export class LanguageRepo implements LanguageRepoContract {
   }
 
   async delete(code: string): Promise<void> {
-    await db.languages.delete(code);
+    const language = await db.languages.where('code').equals(code).first();
+    if (language?.id) {
+      await db.languages.delete(language.id);
+    }
   }
 
   async setActive(code: string, isActive: boolean): Promise<void> {

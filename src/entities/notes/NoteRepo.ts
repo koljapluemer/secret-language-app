@@ -63,11 +63,4 @@ export class NoteRepo implements NoteRepoContract {
       id: String(generatedIds[index])
     }));
   }
-
-  async getUncheckedNotes(limit: number): Promise<NoteData[]> {
-    const all = await this.getNotesByUIDs([]);
-    return all
-      .filter(n => !n._mergeChecked)
-      .slice(0, limit);
-  }
 }
