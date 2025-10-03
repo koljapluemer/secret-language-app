@@ -26,9 +26,6 @@ dist-ssr
 *storybook.log
 storybook-static
 
-# Dexie Cloud admin credentials (not needed for client app)
-dexie-cloud.key
-
 # Environment variables
 .env
 .env.local
