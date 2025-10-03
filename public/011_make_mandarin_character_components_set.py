@@ -146,17 +146,18 @@ def parse_definition(definition):
         if not part:
             continue
 
-        # Check for parenthetical notes
-        note_match = re.search(r'\(([^)]+)\)', part)
+        # Check for parenthetical notes at the beginning of the part
+        # Match pattern like "(Cant.) something" or "(archaic) something"
+        note_match = re.match(r'^\(([^)]+)\)\s*(.+)$', part)
         if note_match:
             note = note_match.group(1)
-            # Remove the parenthetical from the translation
-            translation = re.sub(r'\s*\([^)]+\)', '', part).strip()
+            translation = note_match.group(2).strip()
             translations.append({
                 'content': translation,
                 'note': note
             })
         else:
+            # No leading parenthetical, use the whole part as translation
             translations.append({
                 'content': part,
                 'note': None
@@ -209,24 +210,33 @@ def generate_vocab_objects(top_components, unihan_data):
             definition = unihan_data[component]['kDefinition']
             parsed_translations = parse_definition(definition)
 
+            trans_idx = 0
             for idx, trans in enumerate(parsed_translations):
-                # Check if this is a "radical" entry
-                if re.match(r'radical\s+\d+', trans['content'].lower()):
+                content = trans['content']
+
+                # Check if this is a "radical" entry (case-insensitive)
+                # Matches: "radical 123", "radical number 123", "radical no. 123", "KangXi radical 123", etc.
+                is_radical = re.search(r'radical\s+(?:number|no\.?)?\s*\d+', content, re.IGNORECASE)
+
+                if is_radical:
+                    # Debug: print when we catch a radical
+                    print(f"  Found radical entry: '{content}' for component {component}")
                     # Add as note to vocab instead of translation
                     radical_note_id = f"note_{vocab_id}_radical_{idx}"
                     radical_note_obj = {
                         'id': radical_note_id,
-                        'content': trans['content'],
+                        'content': content,
                         'noteType': 'radical'
                     }
                     note_list.append(radical_note_obj)
                     vocab_obj['notes'].append(radical_note_id)
                     continue
 
-                trans_id = f"trans_{vocab_id}_{idx}"
+                trans_id = f"trans_{vocab_id}_{trans_idx}"
+                trans_idx += 1
                 trans_obj = {
                     'id': trans_id,
-                    'content': trans['content'],
+                    'content': content,
                     'notes': []
                 }
 

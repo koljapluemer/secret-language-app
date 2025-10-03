@@ -6,13 +6,11 @@
 {"id": "trans_comp_53E3_1", "content": "open end", "notes": []}
 {"id": "trans_comp_53E3_2", "content": "entrance", "notes": []}
 {"id": "trans_comp_53E3_3", "content": "gate", "notes": []}
-{"id": "trans_comp_4EBB_0", "content": "radical number 9", "notes": []}
 {"id": "trans_comp_6728_0", "content": "tree", "notes": []}
 {"id": "trans_comp_6728_1", "content": "wood", "notes": []}
 {"id": "trans_comp_6728_2", "content": "lumber", "notes": []}
 {"id": "trans_comp_6728_3", "content": "wooden", "notes": []}
 {"id": "trans_comp_624C_0", "content": "hand", "notes": []}
-{"id": "trans_comp_624C_1", "content": "radical number 64", "notes": []}
 {"id": "trans_comp_4EBA_0", "content": "man", "notes": []}
 {"id": "trans_comp_4EBA_1", "content": "people", "notes": []}
 {"id": "trans_comp_4EBA_2", "content": "mankind", "notes": []}
@@ -21,15 +19,12 @@
 {"id": "trans_comp_571F_1", "content": "earth", "notes": []}
 {"id": "trans_comp_571F_2", "content": "items made of earth", "notes": []}
 {"id": "trans_comp_6C35_0", "content": "water", "notes": []}
-{"id": "trans_comp_6C35_1", "content": "radical number 85", "notes": []}
 {"id": "trans_comp_53C8_0", "content": "and", "notes": []}
 {"id": "trans_comp_53C8_1", "content": "also", "notes": []}
 {"id": "trans_comp_53C8_2", "content": "again", "notes": []}
 {"id": "trans_comp_53C8_3", "content": "in addition", "notes": []}
 {"id": "trans_comp_8FB6_0", "content": "walk", "notes": []}
 {"id": "trans_comp_8FB6_1", "content": "walking", "notes": []}
-{"id": "trans_comp_8FB6_2", "content": "Kangxi radical 162", "notes": []}
-{"id": "trans_comp_8BA0_0", "content": "simplified Kangxi radical 149", "notes": []}
 {"id": "trans_comp_4E37_0", "content": "“ears-out” component used in some Chinese characters (for example", "notes": []}
 {"id": "trans_comp_4E37_1", "content": "兑)", "notes": []}
 {"id": "trans_comp_4E37_2", "content": "archaic form of 八", "notes": []}
@@ -39,25 +34,18 @@
 {"id": "trans_comp_65E5_1", "content": "day", "notes": []}
 {"id": "trans_comp_65E5_2", "content": "daytime", "notes": []}
 {"id": "trans_comp_5B80_0", "content": "roof", "notes": []}
-{"id": "trans_comp_5B80_1", "content": "Kangxi radical 40", "notes": []}
 {"id": "trans_comp_5341_0", "content": "ten", "notes": []}
 {"id": "trans_comp_5341_1", "content": "tenth", "notes": []}
 {"id": "trans_comp_5341_2", "content": "complete", "notes": []}
 {"id": "trans_comp_5341_3", "content": "perfect", "notes": []}
 {"id": "trans_comp_4EA0_0", "content": "head", "notes": []}
-{"id": "trans_comp_4EA0_1", "content": "Kangxi radical 8", "notes": []}
 {"id": "trans_comp_5202_0", "content": "knife", "notes": []}
-{"id": "trans_comp_5202_1", "content": "radical number 18", "notes": []}
 {"id": "trans_comp_529B_0", "content": "power", "notes": []}
 {"id": "trans_comp_529B_1", "content": "capability", "notes": []}
 {"id": "trans_comp_529B_2", "content": "influence", "notes": []}
-{"id": "trans_comp_529B_3", "content": "Kangxi radical 19", "notes": []}
 {"id": "trans_comp_7E9F_0", "content": "silk", "notes": []}
-{"id": "trans_comp_7E9F_1", "content": "Kangxi radical 120", "notes": []}
 {"id": "trans_comp_5182_0", "content": "wide", "notes": []}
-{"id": "trans_comp_5182_1", "content": "Kangxi radical 13", "notes": []}
 {"id": "trans_comp_961D_0", "content": "place", "notes": []}
-{"id": "trans_comp_961D_1", "content": "Kangxi radical 170", "notes": []}
 {"id": "trans_comp_516B_0", "content": "eight", "notes": []}
 {"id": "trans_comp_516B_1", "content": "all around", "notes": []}
 {"id": "trans_comp_516B_2", "content": "all sides", "notes": []}
@@ -66,17 +54,15 @@
 {"id": "trans_comp_5FC3_2", "content": "intelligence", "notes": []}
 {"id": "trans_comp_5FC3_3", "content": "soul", "notes": []}
 {"id": "trans_comp_5FC3_4", "content": "5th lunar mansion", "notes": []}
-{"id": "trans_comp_5FC3_5", "content": "determinative star α Scorpii", "notes": ["note_trans_comp_5FC3_5"]}
+{"id": "trans_comp_5FC3_5", "content": "determinative star α Scorpii (Antares)", "notes": []}
 {"id": "trans_comp_5BF8_0", "content": "inch", "notes": []}
 {"id": "trans_comp_5BF8_1", "content": "small", "notes": []}
 {"id": "trans_comp_5BF8_2", "content": "tiny", "notes": []}
-{"id": "trans_comp_5BF8_3", "content": "Kangxi radical 41", "notes": []}
 {"id": "trans_comp_56D7_0", "content": "erect", "notes": []}
 {"id": "trans_comp_56D7_1", "content": "proud", "notes": []}
 {"id": "trans_comp_56D7_2", "content": "upright", "notes": []}
 {"id": "trans_comp_56D7_3", "content": "bald", "notes": []}
 {"id": "trans_comp_4E3F_0", "content": "line", "notes": []}
-{"id": "trans_comp_4E3F_1", "content": "Kangxi radical 4", "notes": []}
 {"id": "trans_comp_8D1D_0", "content": "sea shell", "notes": []}
 {"id": "trans_comp_8D1D_1", "content": "money", "notes": []}
 {"id": "trans_comp_8D1D_2", "content": "currency", "notes": []}
@@ -86,9 +72,7 @@
 {"id": "trans_comp_738B_3", "content": "surname", "notes": []}
 {"id": "trans_comp_6535_0", "content": "rap", "notes": []}
 {"id": "trans_comp_6535_1", "content": "tap", "notes": []}
-{"id": "trans_comp_6535_2", "content": "radical number 66", "notes": []}
 {"id": "trans_comp_4E36_0", "content": "dot", "notes": []}
-{"id": "trans_comp_4E36_1", "content": "Kangxi radical 3", "notes": []}
 {"id": "trans_comp_5927_0", "content": "big", "notes": []}
 {"id": "trans_comp_5927_1", "content": "great", "notes": []}
 {"id": "trans_comp_5927_2", "content": "vast", "notes": []}
@@ -97,19 +81,15 @@
 {"id": "trans_comp_5973_0", "content": "woman", "notes": []}
 {"id": "trans_comp_5973_1", "content": "girl", "notes": []}
 {"id": "trans_comp_5973_2", "content": "feminine", "notes": []}
-{"id": "trans_comp_5973_3", "content": "Kangxi radical 38", "notes": []}
-{"id": "trans_comp_5973_4", "content": "10th lunar mansion", "notes": []}
-{"id": "trans_comp_5973_5", "content": "determinative star ε Aquarii", "notes": ["note_trans_comp_5973_5"]}
+{"id": "trans_comp_5973_3", "content": "10th lunar mansion", "notes": []}
+{"id": "trans_comp_5973_4", "content": "determinative star ε Aquarii (Albali)", "notes": []}
 {"id": "trans_comp_4E28_0", "content": "number one", "notes": ["note_trans_comp_4E28_0"]}
 {"id": "trans_comp_4E28_1", "content": "line", "notes": []}
 {"id": "trans_comp_6708_0", "content": "moon", "notes": []}
 {"id": "trans_comp_6708_1", "content": "month", "notes": []}
-{"id": "trans_comp_6708_2", "content": "Kangxi radical 74", "notes": []}
 {"id": "trans_comp_53B6_0", "content": "private", "notes": []}
 {"id": "trans_comp_53B6_1", "content": "secret", "notes": []}
-{"id": "trans_comp_53B6_2", "content": "Kangxi radical 28", "notes": []}
 {"id": "trans_comp_5196_0", "content": "cover", "notes": []}
-{"id": "trans_comp_5196_1", "content": "Kangxi radical 14", "notes": []}
 {"id": "trans_comp_79BE_0", "content": "grain still on stalk", "notes": []}
 {"id": "trans_comp_79BE_1", "content": "rice plant", "notes": []}
 {"id": "trans_comp_6208_0", "content": "halberd", "notes": []}
@@ -121,7 +101,6 @@
 {"id": "trans_comp_76EE_2", "content": "see", "notes": []}
 {"id": "trans_comp_76EE_3", "content": "division", "notes": []}
 {"id": "trans_comp_76EE_4", "content": "topic", "notes": []}
-{"id": "trans_comp_76EE_5", "content": "Kangxi radical 109", "notes": []}
 {"id": "trans_comp_4E42_0", "content": "govern", "notes": []}
 {"id": "trans_comp_4E42_1", "content": "control", "notes": []}
 {"id": "trans_comp_4E42_2", "content": "manage", "notes": []}
@@ -129,7 +108,6 @@
 {"id": "trans_comp_4E8C_0", "content": "two", "notes": []}
 {"id": "trans_comp_4E8C_1", "content": "twice", "notes": []}
 {"id": "trans_comp_8279_0", "content": "grass", "notes": []}
-{"id": "trans_comp_8279_1", "content": "Kangxi radical 140", "notes": []}
 {"id": "trans_comp_5315_0", "content": "spoon", "notes": []}
 {"id": "trans_comp_5315_1", "content": "ladle", "notes": []}
 {"id": "trans_comp_5315_2", "content": "knife", "notes": []}
@@ -145,7 +123,6 @@
 {"id": "trans_comp_5DFE_0", "content": "kerchief", "notes": []}
 {"id": "trans_comp_5DFE_1", "content": "towel", "notes": []}
 {"id": "trans_comp_5DFE_2", "content": "turban", "notes": []}
-{"id": "trans_comp_5DFE_3", "content": "Kangxi radical 50", "notes": []}
 {"id": "trans_comp_7530_0", "content": "field", "notes": []}
 {"id": "trans_comp_7530_1", "content": "arable land", "notes": []}
 {"id": "trans_comp_7530_2", "content": "cultivated", "notes": []}
@@ -153,7 +130,6 @@
 {"id": "trans_comp_4E91_1", "content": "speak", "notes": []}
 {"id": "trans_comp_4E91_2", "content": "clouds", "notes": []}
 {"id": "trans_comp_5F50_0", "content": "snout", "notes": []}
-{"id": "trans_comp_5F50_1", "content": "Kangxi radical 58", "notes": []}
 {"id": "trans_comp_5915_0", "content": "evening", "notes": []}
 {"id": "trans_comp_5915_1", "content": "night", "notes": []}
 {"id": "trans_comp_5915_2", "content": "dusk", "notes": []}
@@ -168,24 +144,20 @@
 {"id": "trans_comp_5B50_3", "content": "seed of", "notes": []}
 {"id": "trans_comp_5B50_4", "content": "first earthly branch", "notes": []}
 {"id": "trans_comp_4E85_0", "content": "hook", "notes": []}
-{"id": "trans_comp_4E85_1", "content": "Kangxi radical 6", "notes": []}
 {"id": "trans_comp_5FC4_0", "content": "heart", "notes": []}
-{"id": "trans_comp_5FC4_1", "content": "radical number 61", "notes": []}
 {"id": "trans_comp_5DE5_0", "content": "labor", "notes": []}
 {"id": "trans_comp_5DE5_1", "content": "work", "notes": []}
 {"id": "trans_comp_5DE5_2", "content": "worker", "notes": []}
 {"id": "trans_comp_5DE5_3", "content": "laborer", "notes": []}
-{"id": "trans_comp_65A4_0", "content": "a catty", "notes": ["note_trans_comp_65A4_0"]}
+{"id": "trans_comp_65A4_0", "content": "a catty (approximately 600 g)", "notes": []}
 {"id": "trans_comp_65A4_1", "content": "an axe", "notes": []}
 {"id": "trans_comp_65A4_2", "content": "keen", "notes": []}
 {"id": "trans_comp_65A4_3", "content": "shrewd", "notes": []}
-{"id": "trans_comp_65A4_4", "content": "Kangxi radical 69", "notes": []}
 {"id": "trans_comp_725B_0", "content": "cow", "notes": []}
 {"id": "trans_comp_725B_1", "content": "ox", "notes": []}
 {"id": "trans_comp_725B_2", "content": "bull", "notes": []}
-{"id": "trans_comp_725B_3", "content": "Kangxi radical 93", "notes": []}
-{"id": "trans_comp_725B_4", "content": "9th lunar mansion", "notes": []}
-{"id": "trans_comp_725B_5", "content": "determinative star β Capricorni", "notes": ["note_trans_comp_725B_5"]}
+{"id": "trans_comp_725B_3", "content": "9th lunar mansion", "notes": []}
+{"id": "trans_comp_725B_4", "content": "determinative star β Capricorni (Dabih)", "notes": []}
 {"id": "trans_comp_7389_0", "content": "jade", "notes": []}
 {"id": "trans_comp_7389_1", "content": "precious stone", "notes": []}
 {"id": "trans_comp_7389_2", "content": "gem", "notes": []}
@@ -200,7 +172,6 @@
 {"id": "trans_comp_8F66_2", "content": "carry in cart", "notes": []}
 {"id": "trans_comp_7F8A_0", "content": "sheep", "notes": []}
 {"id": "trans_comp_7F8A_1", "content": "goat", "notes": []}
-{"id": "trans_comp_7F8A_2", "content": "Kangxi radical 123", "notes": []}
 {"id": "trans_comp_9875_0", "content": "page", "notes": []}
 {"id": "trans_comp_9875_1", "content": "sheet", "notes": []}
 {"id": "trans_comp_9875_2", "content": "leaf", "notes": []}
@@ -214,17 +185,13 @@
 {"id": "trans_comp_6B62_2", "content": "desist", "notes": []}
 {"id": "trans_comp_6B62_3", "content": "detain", "notes": []}
 {"id": "trans_comp_5902_0", "content": "go", "notes": []}
-{"id": "trans_comp_5902_1", "content": "Kangxi radical 34", "notes": []}
 {"id": "trans_comp_51F5_0", "content": "receptacle", "notes": []}
-{"id": "trans_comp_51F5_1", "content": "Kangxi radical 17", "notes": []}
 {"id": "trans_comp_5C0F_0", "content": "small", "notes": []}
 {"id": "trans_comp_5C0F_1", "content": "tiny", "notes": []}
 {"id": "trans_comp_5C0F_2", "content": "insignificant", "notes": []}
 {"id": "trans_comp_706C_0", "content": "fire", "notes": []}
-{"id": "trans_comp_706C_1", "content": "radical number 86", "notes": []}
 {"id": "trans_comp_513F_0", "content": "son", "notes": []}
 {"id": "trans_comp_513F_1", "content": "child", "notes": []}
-{"id": "trans_comp_513F_2", "content": "Kangxi radical 10", "notes": []}
 {"id": "trans_comp_758B_0", "content": "roll", "notes": []}
 {"id": "trans_comp_758B_1", "content": "bolt of cloth", "notes": []}
 {"id": "trans_comp_758B_2", "content": "foot", "notes": []}
@@ -232,21 +199,17 @@
 {"id": "trans_comp_6BB3_1", "content": "kill", "notes": []}
 {"id": "trans_comp_6BB3_2", "content": "rad. 79", "notes": []}
 {"id": "trans_comp_51AB_0", "content": "ice", "notes": []}
-{"id": "trans_comp_51AB_1", "content": "Kangxi radical 15", "notes": []}
 {"id": "trans_comp_5DF3_0", "content": "sixth earthly branch", "notes": []}
 {"id": "trans_comp_91CC_0", "content": "unit of distance", "notes": []}
 {"id": "trans_comp_91CC_1", "content": "village", "notes": []}
 {"id": "trans_comp_91CC_2", "content": "lane", "notes": []}
-{"id": "trans_comp_91CC_3", "content": "Kangxi radical 166", "notes": []}
 {"id": "trans_comp_6B20_0", "content": "owe", "notes": []}
 {"id": "trans_comp_6B20_1", "content": "lack", "notes": []}
 {"id": "trans_comp_6B20_2", "content": "be deficient", "notes": []}
-{"id": "trans_comp_6B20_3", "content": "Kangxi radical 76", "notes": []}
 {"id": "trans_comp_5200_0", "content": "knife", "notes": []}
 {"id": "trans_comp_5200_1", "content": "old coin", "notes": []}
 {"id": "trans_comp_5200_2", "content": "measure", "notes": []}
 {"id": "trans_comp_96B9_0", "content": "short-tailed bird", "notes": []}
-{"id": "trans_comp_96B9_1", "content": "Kangxi radical 172", "notes": []}
 {"id": "trans_comp_65B9_0", "content": "a square", "notes": []}
 {"id": "trans_comp_65B9_1", "content": "rectangle", "notes": []}
 {"id": "trans_comp_65B9_2", "content": "a region", "notes": []}
@@ -259,7 +222,6 @@
 {"id": "trans_comp_8863_1", "content": "clothing", "notes": []}
 {"id": "trans_comp_8863_2", "content": "cover", "notes": []}
 {"id": "trans_comp_8863_3", "content": "skin", "notes": []}
-{"id": "trans_comp_8863_4", "content": "Kangxi radical 145", "notes": []}
 {"id": "trans_comp_5DF1_0", "content": "self", "notes": []}
 {"id": "trans_comp_5DF1_1", "content": "oneself", "notes": []}
 {"id": "trans_comp_5DF1_2", "content": "personal", "notes": []}
@@ -276,20 +238,16 @@
 {"id": "trans_comp_4E5F_0", "content": "also", "notes": []}
 {"id": "trans_comp_4E5F_1", "content": "classical final particle of strong affirmation or identity", "notes": []}
 {"id": "trans_comp_5369_0", "content": "seal", "notes": []}
-{"id": "trans_comp_5369_1", "content": "Kangxi radical 26", "notes": []}
 {"id": "trans_comp_9752_0", "content": "blue", "notes": []}
 {"id": "trans_comp_9752_1", "content": "green", "notes": []}
 {"id": "trans_comp_9752_2", "content": "young", "notes": []}
-{"id": "trans_comp_9752_3", "content": "Kangxi radical 174", "notes": []}
 {"id": "trans_comp_81F3_0", "content": "reach", "notes": []}
 {"id": "trans_comp_81F3_1", "content": "arrive", "notes": []}
 {"id": "trans_comp_81F3_2", "content": "extremely", "notes": []}
 {"id": "trans_comp_81F3_3", "content": "very", "notes": []}
-{"id": "trans_comp_81F3_4", "content": "Kangxi radical 133", "notes": []}
 {"id": "trans_comp_5C38_0", "content": "corpse", "notes": []}
 {"id": "trans_comp_5C38_1", "content": "to impersonate the dead", "notes": []}
 {"id": "trans_comp_5C38_2", "content": "to preside", "notes": []}
-{"id": "trans_comp_5C38_3", "content": "Kangxi radical 44", "notes": []}
 {"id": "trans_comp_7C73_0", "content": "hulled or husked uncooked rice", "notes": []}
 {"id": "trans_comp_624D_0", "content": "talent", "notes": []}
 {"id": "trans_comp_624D_1", "content": "ability", "notes": []}
@@ -309,7 +267,6 @@
 {"id": "trans_comp_8033_1", "content": "merely", "notes": []}
 {"id": "trans_comp_8033_2", "content": "only", "notes": []}
 {"id": "trans_comp_8033_3", "content": "handle", "notes": []}
-{"id": "trans_comp_8033_4", "content": "Kangxi radical 128", "notes": []}
 {"id": "trans_comp_5404_0", "content": "each", "notes": []}
 {"id": "trans_comp_5404_1", "content": "individually", "notes": []}
 {"id": "trans_comp_5404_2", "content": "every", "notes": []}
@@ -322,13 +279,10 @@
 {"id": "trans_comp_672A_0", "content": "not yet", "notes": []}
 {"id": "trans_comp_672A_1", "content": "eighth earthly branch", "notes": []}
 {"id": "trans_comp_5EFE_0", "content": "two hands", "notes": []}
-{"id": "trans_comp_5EFE_1", "content": "Kangxi radical 55", "notes": []}
 {"id": "trans_comp_793B_0", "content": "cult", "notes": []}
-{"id": "trans_comp_793B_1", "content": "radical number 113", "notes": []}
 {"id": "trans_comp_77F3_0", "content": "stone", "notes": []}
 {"id": "trans_comp_77F3_1", "content": "rock", "notes": []}
 {"id": "trans_comp_77F3_2", "content": "mineral", "notes": []}
-{"id": "trans_comp_77F3_3", "content": "Kangxi radical 112", "notes": []}
 {"id": "trans_comp_4E5A_0", "content": "hidden", "notes": []}
 {"id": "trans_comp_4E5A_1", "content": "mysterious", "notes": []}
 {"id": "trans_comp_4E5A_2", "content": "secret", "notes": []}
@@ -337,26 +291,19 @@
 {"id": "trans_comp_4E5A_5", "content": "minute", "notes": []}
 {"id": "trans_comp_8C55_0", "content": "a pig", "notes": []}
 {"id": "trans_comp_8C55_1", "content": "boar", "notes": []}
-{"id": "trans_comp_8C55_2", "content": "Kangxi radical 152", "notes": []}
 {"id": "trans_comp_5C6E_0", "content": "sprout", "notes": []}
-{"id": "trans_comp_5C6E_1", "content": "Kangxi radical 45", "notes": []}
 {"id": "trans_comp_9485_0", "content": "gold", "notes": []}
 {"id": "trans_comp_9485_1", "content": "money", "notes": []}
-{"id": "trans_comp_9485_2", "content": "Kangxi radical 167", "notes": []}
 {"id": "trans_comp_95E8_0", "content": "gate", "notes": []}
 {"id": "trans_comp_95E8_1", "content": "door", "notes": []}
 {"id": "trans_comp_95E8_2", "content": "entrance", "notes": []}
 {"id": "trans_comp_95E8_3", "content": "opening", "notes": []}
 {"id": "trans_comp_5F61_0", "content": "hair", "notes": []}
-{"id": "trans_comp_5F61_1", "content": "Kangxi radical 59", "notes": []}
-{"id": "trans_comp_826E_0", "content": "Kangxi radical 138", "notes": []}
-{"id": "trans_comp_826E_1", "content": "trigram ☶", "notes": []}
-{"id": "trans_comp_826E_2", "content": "hexagram ䷳", "notes": []}
-{"id": "trans_comp_8002_0", "content": "variant of Kangxi radical 125", "notes": []}
+{"id": "trans_comp_826E_0", "content": "trigram ☶", "notes": []}
+{"id": "trans_comp_826E_1", "content": "hexagram ䷳", "notes": []}
 {"id": "trans_comp_5F13_0", "content": "bow", "notes": []}
 {"id": "trans_comp_5F13_1", "content": "curved", "notes": []}
 {"id": "trans_comp_5F13_2", "content": "arched", "notes": []}
-{"id": "trans_comp_5F13_3", "content": "Kangxi radical 57", "notes": []}
 {"id": "trans_comp_767D_0", "content": "white", "notes": []}
 {"id": "trans_comp_767D_1", "content": "pure", "notes": []}
 {"id": "trans_comp_767D_2", "content": "unblemished", "notes": []}
@@ -370,17 +317,14 @@
 {"id": "trans_comp_5EFF_1", "content": "twentieth", "notes": []}
 {"id": "trans_comp_9A6C_0", "content": "horse", "notes": []}
 {"id": "trans_comp_9A6C_1", "content": "surname", "notes": []}
-{"id": "trans_comp_9A6C_2", "content": "Kangxi radical 187", "notes": []}
 {"id": "trans_comp_8D70_0", "content": "walk", "notes": []}
 {"id": "trans_comp_8D70_1", "content": "go on foot", "notes": []}
 {"id": "trans_comp_8D70_2", "content": "run", "notes": []}
 {"id": "trans_comp_8D70_3", "content": "leave", "notes": []}
-{"id": "trans_comp_8D70_4", "content": "Kangxi radical 156", "notes": []}
 {"id": "trans_comp_97F3_0", "content": "sound", "notes": []}
 {"id": "trans_comp_97F3_1", "content": "tone", "notes": []}
 {"id": "trans_comp_97F3_2", "content": "pitch", "notes": []}
 {"id": "trans_comp_97F3_3", "content": "pronunciation", "notes": []}
-{"id": "trans_comp_97F3_4", "content": "Kangxi radical 180", "notes": []}
 {"id": "trans_comp_4E4D_0", "content": "first time", "notes": []}
 {"id": "trans_comp_4E4D_1", "content": "for the first time", "notes": []}
 {"id": "trans_comp_77E2_0", "content": "arrow", "notes": []}
@@ -389,7 +333,6 @@
 {"id": "trans_comp_77E2_3", "content": "swear", "notes": []}
 {"id": "trans_comp_820C_0", "content": "tongue", "notes": []}
 {"id": "trans_comp_820C_1", "content": "clapper of bell", "notes": []}
-{"id": "trans_comp_820C_2", "content": "Kangxi radical 135", "notes": []}
 {"id": "trans_comp_5485_0", "content": "to spit out", "notes": []}
 {"id": "trans_comp_5F0B_0", "content": "catch", "notes": []}
 {"id": "trans_comp_5F0B_1", "content": "arrest", "notes": []}
@@ -400,7 +343,6 @@
 {"id": "trans_comp_8DB3_1", "content": "attain", "notes": []}
 {"id": "trans_comp_8DB3_2", "content": "satisfy", "notes": []}
 {"id": "trans_comp_8DB3_3", "content": "enough", "notes": []}
-{"id": "trans_comp_8DB3_4", "content": "Kangxi radical 156", "notes": []}
 {"id": "trans_comp_4E03_0", "content": "seven", "notes": []}
 {"id": "trans_comp_5140_0", "content": "to cut off the feet", "notes": []}
 {"id": "trans_comp_751F_0", "content": "life", "notes": []}
@@ -429,7 +371,6 @@
 {"id": "trans_comp_7A74_0", "content": "cave", "notes": []}
 {"id": "trans_comp_7A74_1", "content": "den", "notes": []}
 {"id": "trans_comp_7A74_2", "content": "hole", "notes": []}
-{"id": "trans_comp_7A74_3", "content": "Kangxi radical 116", "notes": []}
 {"id": "trans_comp_4EE4_0", "content": "command", "notes": []}
 {"id": "trans_comp_4EE4_1", "content": "order", "notes": []}
 {"id": "trans_comp_4EE4_2", "content": "'commandant'", "notes": []}
@@ -451,14 +392,12 @@
 {"id": "trans_comp_662F_5", "content": "this", "notes": []}
 {"id": "trans_comp_662F_6", "content": "that", "notes": []}
 {"id": "trans_comp_66F0_0", "content": "say", "notes": []}
-{"id": "trans_comp_66F0_1", "content": "Kangxi radical 73", "notes": []}
 {"id": "trans_comp_51E1_0", "content": "all", "notes": []}
 {"id": "trans_comp_51E1_1", "content": "any", "notes": []}
 {"id": "trans_comp_51E1_2", "content": "every", "notes": []}
 {"id": "trans_comp_51E1_3", "content": "ordinary", "notes": []}
 {"id": "trans_comp_51E1_4", "content": "common", "notes": []}
 {"id": "trans_comp_7CF8_0", "content": "silk", "notes": []}
-{"id": "trans_comp_7CF8_1", "content": "Kangxi radical 120", "notes": []}
 {"id": "trans_comp_4F65_0", "content": "all", "notes": []}
 {"id": "trans_comp_4F65_1", "content": "together", "notes": []}
 {"id": "trans_comp_4F65_2", "content": "unanimous", "notes": []}
@@ -470,12 +409,11 @@
 {"id": "trans_comp_4E95_2", "content": "pit", "notes": []}
 {"id": "trans_comp_4E95_3", "content": "surname", "notes": []}
 {"id": "trans_comp_4E95_4", "content": "22nd lunar mansion", "notes": []}
-{"id": "trans_comp_4E95_5", "content": "determinative star μ Geminorum", "notes": ["note_trans_comp_4E95_5"]}
+{"id": "trans_comp_4E95_5", "content": "determinative star μ Geminorum (Tejat)", "notes": []}
 {"id": "trans_comp_4E95_6", "content": "hexagram ䷯", "notes": []}
 {"id": "trans_comp_793A_0", "content": "show", "notes": []}
 {"id": "trans_comp_793A_1", "content": "manifest", "notes": []}
 {"id": "trans_comp_793A_2", "content": "demonstrate", "notes": []}
-{"id": "trans_comp_793A_3", "content": "Kangxi radical 113", "notes": []}
 {"id": "trans_comp_76F4_0", "content": "straight", "notes": []}
 {"id": "trans_comp_76F4_1", "content": "erect", "notes": []}
 {"id": "trans_comp_76F4_2", "content": "vertical", "notes": []}
@@ -483,14 +421,13 @@
 {"id": "trans_comp_4E2D_1", "content": "center", "notes": []}
 {"id": "trans_comp_4E2D_2", "content": "middle", "notes": []}
 {"id": "trans_comp_4E2D_3", "content": "in the midst of", "notes": []}
-{"id": "trans_comp_4E2D_4", "content": "hit", "notes": ["note_trans_comp_4E2D_4"]}
+{"id": "trans_comp_4E2D_4", "content": "hit (target)", "notes": []}
 {"id": "trans_comp_4E2D_5", "content": "attain", "notes": []}
 {"id": "trans_comp_592C_0", "content": "parted", "notes": []}
 {"id": "trans_comp_592C_1", "content": "fork", "notes": []}
 {"id": "trans_comp_592C_2", "content": "certain", "notes": []}
 {"id": "trans_comp_592C_3", "content": "hexagram ䷪", "notes": []}
 {"id": "trans_comp_72AC_0", "content": "dog", "notes": []}
-{"id": "trans_comp_72AC_1", "content": "radical number 94", "notes": []}
 {"id": "trans_comp_5151_0", "content": "cash", "notes": []}
 {"id": "trans_comp_5151_1", "content": "exchange", "notes": []}
 {"id": "trans_comp_5F00_0", "content": "open", "notes": []}
@@ -498,9 +435,9 @@
 {"id": "trans_comp_5F00_2", "content": "begin", "notes": []}
 {"id": "trans_comp_5F00_3", "content": "start", "notes": []}
 {"id": "trans_comp_4E14_0", "content": "moreover", "notes": []}
-{"id": "trans_comp_4E14_1", "content": "also", "notes": ["note_trans_comp_4E14_1"]}
+{"id": "trans_comp_4E14_1", "content": "also (post-subject)", "notes": []}
 {"id": "trans_comp_4E14_2", "content": "about to", "notes": []}
-{"id": "trans_comp_4E14_3", "content": "will soon", "notes": ["note_trans_comp_4E14_3"]}
+{"id": "trans_comp_4E14_3", "content": "will soon (pre-verb)", "notes": []}
 {"id": "trans_comp_53EA_0", "content": "only", "notes": []}
 {"id": "trans_comp_53EA_1", "content": "just", "notes": []}
 {"id": "trans_comp_53EA_2", "content": "simply", "notes": []}
@@ -513,16 +450,14 @@
 {"id": "trans_comp_89D2_1", "content": "angle", "notes": []}
 {"id": "trans_comp_89D2_2", "content": "corner", "notes": []}
 {"id": "trans_comp_89D2_3", "content": "point", "notes": []}
-{"id": "trans_comp_89D2_4", "content": "Kangxi radical 148", "notes": []}
-{"id": "trans_comp_89D2_5", "content": "1st lunar mansion", "notes": []}
-{"id": "trans_comp_89D2_6", "content": "determinative star Spica", "notes": []}
+{"id": "trans_comp_89D2_4", "content": "1st lunar mansion", "notes": []}
+{"id": "trans_comp_89D2_5", "content": "determinative star Spica", "notes": []}
 {"id": "trans_comp_53CA_0", "content": "extend", "notes": []}
 {"id": "trans_comp_53CA_1", "content": "reach", "notes": []}
 {"id": "trans_comp_53CA_2", "content": "come up to", "notes": []}
 {"id": "trans_comp_53CA_3", "content": "and", "notes": []}
 {"id": "trans_comp_5C24_0", "content": "especially", "notes": []}
 {"id": "trans_comp_5C24_1", "content": "particularly", "notes": []}
-{"id": "trans_comp_8980_0", "content": "variant of Kangxi radical 146", "notes": []}
 {"id": "trans_comp_4E0D_0", "content": "no", "notes": []}
 {"id": "trans_comp_4E0D_1", "content": "not", "notes": []}
 {"id": "trans_comp_4E0D_2", "content": "un-", "notes": []}
@@ -531,7 +466,6 @@
 {"id": "trans_comp_807F_0", "content": "writing brush", "notes": []}
 {"id": "trans_comp_807F_1", "content": "pencil", "notes": []}
 {"id": "trans_comp_807F_2", "content": "thereupon", "notes": []}
-{"id": "trans_comp_807F_3", "content": "Kangxi radical 129", "notes": []}
 {"id": "trans_comp_706B_0", "content": "fire", "notes": []}
 {"id": "trans_comp_706B_1", "content": "flame", "notes": []}
 {"id": "trans_comp_706B_2", "content": "burn", "notes": []}
@@ -541,13 +475,11 @@
 {"id": "trans_comp_5DF4_1", "content": "anxiously hope", "notes": []}
 {"id": "trans_comp_5216_0", "content": "cutting off feet as form of punishment", "notes": []}
 {"id": "trans_comp_5338_0", "content": "box", "notes": []}
-{"id": "trans_comp_5338_1", "content": "Kangxi radical 23", "notes": []}
 {"id": "trans_comp_5143_0", "content": "first", "notes": []}
 {"id": "trans_comp_5143_1", "content": "dollar", "notes": []}
 {"id": "trans_comp_5143_2", "content": "origin", "notes": []}
 {"id": "trans_comp_5143_3", "content": "head", "notes": []}
 {"id": "trans_comp_72AD_0", "content": "dog", "notes": []}
-{"id": "trans_comp_72AD_1", "content": "radical number 94", "notes": []}
 {"id": "trans_comp_58EB_0", "content": "scholar", "notes": []}
 {"id": "trans_comp_58EB_1", "content": "gentleman", "notes": []}
 {"id": "trans_comp_58EB_2", "content": "soldier", "notes": []}
@@ -558,7 +490,7 @@
 {"id": "trans_comp_7518_0", "content": "sweetness", "notes": []}
 {"id": "trans_comp_7518_1", "content": "sweet", "notes": []}
 {"id": "trans_comp_7518_2", "content": "tasty", "notes": []}
-{"id": "trans_comp_4E02_0", "content": "obstruction of breath as it seeks release", "notes": ["note_trans_comp_4E02_0"]}
+{"id": "trans_comp_4E02_0", "content": "obstruction of breath (qi) as it seeks release", "notes": []}
 {"id": "trans_comp_4E02_1", "content": "variant of other characters", "notes": []}
 {"id": "trans_comp_6B21_0", "content": "order", "notes": []}
 {"id": "trans_comp_6B21_1", "content": "sequence", "notes": []}
@@ -575,7 +507,6 @@
 {"id": "trans_comp_8A00_1", "content": "speech", "notes": []}
 {"id": "trans_comp_8A00_2", "content": "speak", "notes": []}
 {"id": "trans_comp_8A00_3", "content": "say", "notes": []}
-{"id": "trans_comp_8A00_4", "content": "Kangxi radical 149", "notes": []}
 {"id": "trans_comp_53E4_0", "content": "old", "notes": []}
 {"id": "trans_comp_53E4_1", "content": "classic", "notes": []}
 {"id": "trans_comp_53E4_2", "content": "ancient", "notes": []}
@@ -585,7 +516,6 @@
 {"id": "trans_comp_975E_1", "content": "negative", "notes": []}
 {"id": "trans_comp_975E_2", "content": "non-", "notes": []}
 {"id": "trans_comp_975E_3", "content": "oppose", "notes": []}
-{"id": "trans_comp_975E_4", "content": "Kangxi radical 175", "notes": []}
 {"id": "trans_comp_8005_0", "content": "that which", "notes": []}
 {"id": "trans_comp_8005_1", "content": "he who", "notes": []}
 {"id": "trans_comp_8005_2", "content": "those who", "notes": []}
@@ -594,12 +524,10 @@
 {"id": "trans_comp_9996_2", "content": "leader", "notes": []}
 {"id": "trans_comp_9996_3", "content": "chief", "notes": []}
 {"id": "trans_comp_9996_4", "content": "a poem", "notes": []}
-{"id": "trans_comp_9996_5", "content": "Kangxi radical 185", "notes": []}
 {"id": "trans_comp_752C_0", "content": "path", "notes": []}
 {"id": "trans_comp_752C_1", "content": "river in Ningbo", "notes": []}
 {"id": "trans_comp_752C_2", "content": "Ningbo", "notes": []}
 {"id": "trans_comp_5EF4_0", "content": "go", "notes": []}
-{"id": "trans_comp_5EF4_1", "content": "Kangxi radical 54", "notes": []}
 {"id": "trans_comp_4E13_0", "content": "monopolize", "notes": []}
 {"id": "trans_comp_4E13_1", "content": "take sole possession", "notes": []}
 {"id": "trans_comp_5A04_0", "content": "surname", "notes": []}
@@ -609,7 +537,6 @@
 {"id": "trans_comp_52FA_1", "content": "ladle", "notes": []}
 {"id": "trans_comp_52FA_2", "content": "unit of volume", "notes": []}
 {"id": "trans_comp_8864_0", "content": "clothes", "notes": []}
-{"id": "trans_comp_8864_1", "content": "radical number 145", "notes": []}
 {"id": "trans_comp_76AE_0", "content": "skin", "notes": []}
 {"id": "trans_comp_76AE_1", "content": "hide", "notes": []}
 {"id": "trans_comp_76AE_2", "content": "fur", "notes": []}
@@ -623,12 +550,11 @@
 {"id": "trans_comp_4ECB_5", "content": "to wear armor", "notes": []}
 {"id": "trans_comp_4EA5_0", "content": "twelfth earthly branch", "notes": []}
 {"id": "trans_comp_5165_0", "content": "enter", "notes": []}
-{"id": "trans_comp_5165_1", "content": "come in", "notes": ["note_trans_comp_5165_1"]}
+{"id": "trans_comp_5165_1", "content": "come in(to)", "notes": []}
 {"id": "trans_comp_5165_2", "content": "join", "notes": []}
 {"id": "trans_comp_518B_0", "content": "a desert", "notes": []}
 {"id": "trans_comp_518B_1", "content": "a border", "notes": []}
 {"id": "trans_comp_5C22_0", "content": "weak", "notes": []}
-{"id": "trans_comp_5C22_1", "content": "Kangxi radical 43", "notes": []}
 {"id": "trans_comp_4EA4_0", "content": "mix", "notes": []}
 {"id": "trans_comp_4EA4_1", "content": "intersect", "notes": []}
 {"id": "trans_comp_4EA4_2", "content": "exchange", "notes": []}
@@ -653,7 +579,6 @@
 {"id": "trans_comp_5408_3", "content": "gather", "notes": []}
 {"id": "trans_comp_866B_0", "content": "insects", "notes": []}
 {"id": "trans_comp_866B_1", "content": "worms", "notes": []}
-{"id": "trans_comp_866B_2", "content": "Kangxi radical 142", "notes": []}
 {"id": "trans_comp_6BDB_0", "content": "hair", "notes": []}
 {"id": "trans_comp_6BDB_1", "content": "fur", "notes": []}
 {"id": "trans_comp_6BDB_2", "content": "feathers", "notes": []}
@@ -663,7 +588,6 @@
 {"id": "trans_comp_5173_2", "content": "relation", "notes": []}
 {"id": "trans_comp_4E1A_0", "content": "profession", "notes": []}
 {"id": "trans_comp_4E1A_1", "content": "business", "notes": []}
-{"id": "trans_comp_4E1A_2", "content": "GB radical 111", "notes": []}
 {"id": "trans_comp_5C14_0", "content": "you", "notes": []}
 {"id": "trans_comp_5C14_1", "content": "that", "notes": []}
 {"id": "trans_comp_5C14_2", "content": "those", "notes": []}
@@ -673,10 +597,9 @@
 {"id": "trans_comp_5929_2", "content": "god", "notes": []}
 {"id": "trans_comp_5929_3", "content": "celestial", "notes": []}
 {"id": "trans_comp_6597_0", "content": "a dipper", "notes": []}
-{"id": "trans_comp_6597_1", "content": "unit of volume", "notes": ["note_trans_comp_6597_1"]}
-{"id": "trans_comp_6597_2", "content": "Kangxi radical 68", "notes": []}
-{"id": "trans_comp_6597_3", "content": "8th lunar mansion", "notes": []}
-{"id": "trans_comp_6597_4", "content": "determinative star φ Sagittarii", "notes": []}
+{"id": "trans_comp_6597_1", "content": "unit of volume (ten 升 or litres)", "notes": []}
+{"id": "trans_comp_6597_2", "content": "8th lunar mansion", "notes": []}
+{"id": "trans_comp_6597_3", "content": "determinative star φ Sagittarii", "notes": []}
 {"id": "trans_comp_6BCF_0", "content": "every", "notes": []}
 {"id": "trans_comp_6BCF_1", "content": "each", "notes": []}
 {"id": "trans_comp_4EA6_0", "content": "also", "notes": []}
@@ -688,7 +611,6 @@
 {"id": "trans_comp_54B8_3", "content": "united", "notes": []}
 {"id": "trans_comp_54B8_4", "content": "hexagram ䷞", "notes": []}
 {"id": "trans_comp_7592_0", "content": "sick", "notes": []}
-{"id": "trans_comp_7592_1", "content": "Kangxi radical 104", "notes": []}
 {"id": "trans_comp_53F0_0", "content": "platform", "notes": []}
 {"id": "trans_comp_53F0_1", "content": "unit", "notes": []}
 {"id": "trans_comp_53F0_2", "content": "term of address", "notes": []}
@@ -697,9 +619,7 @@
 {"id": "trans_comp_76F8_2", "content": "each other", "notes": []}
 {"id": "trans_comp_96E8_0", "content": "rain", "notes": []}
 {"id": "trans_comp_96E8_1", "content": "rainy", "notes": []}
-{"id": "trans_comp_96E8_2", "content": "Kangxi radical 173", "notes": []}
 {"id": "trans_comp_52F9_0", "content": "wrap", "notes": []}
-{"id": "trans_comp_52F9_1", "content": "Kangxi radical 20", "notes": []}
 {"id": "trans_comp_5343_0", "content": "thousand", "notes": []}
 {"id": "trans_comp_5343_1", "content": "many", "notes": []}
 {"id": "trans_comp_5343_2", "content": "numerous", "notes": []}
@@ -748,7 +668,6 @@
 {"id": "trans_comp_6267_2", "content": "carry out", "notes": []}
 {"id": "trans_comp_9149_0", "content": "a wine vessel", "notes": []}
 {"id": "trans_comp_9149_1", "content": "tenth earthly branch", "notes": []}
-{"id": "trans_comp_9149_2", "content": "Kangxi radical 164", "notes": []}
 {"id": "trans_comp_4E5B_0", "content": "kwukyel", "notes": []}
 {"id": "trans_comp_4EA1_0", "content": "death", "notes": []}
 {"id": "trans_comp_4EA1_1", "content": "destroyed", "notes": []}
