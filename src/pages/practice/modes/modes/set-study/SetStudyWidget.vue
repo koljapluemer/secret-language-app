@@ -15,6 +15,7 @@ import { useQueueState } from '@/pages/practice/modes/utils/useQueueState';
 import { generateSetStudyTask, getSetStudyProgress, type SetStudyOptions } from './generateSetStudyTasks';
 import { BookOpen } from 'lucide-vue-next';
 import { useToast } from '@/shared/toasts';
+import { useUsedVocabTracker } from '@/app/useUsedVocabTracker';
 
 // Inject repositories
 const vocabRepo = inject<VocabRepoContract>('vocabRepo');
@@ -44,7 +45,7 @@ const {
   cleanup
 } = useQueueState();
 
-const lastUsedVocabId = ref<string | null>(null);
+const { addUsedVocab, getLastUsedVocabId } = useUsedVocabTracker();
 
 // Settings screen state
 const showSettings = ref(true);
@@ -99,7 +100,8 @@ async function generateNextTask(): Promise<Task | null> {
     };
 
     // Create block list with last used vocab
-    const blockList = lastUsedVocabId.value ? [lastUsedVocabId.value] : undefined;
+    const lastVocabId = getLastUsedVocabId();
+    const blockList = lastVocabId ? [lastVocabId] : undefined;
 
     return await generateSetStudyTask(
       vocabRepo!,
@@ -254,7 +256,7 @@ const handleTaskFinished = async () => {
     const currentTask = state.value.currentTask;
     const vocabId = currentTask.associatedVocab?.[0];
     if (vocabId) {
-      lastUsedVocabId.value = vocabId;
+      addUsedVocab(vocabId);
 
       // Check if this was new vocab (unseen)
       try {
