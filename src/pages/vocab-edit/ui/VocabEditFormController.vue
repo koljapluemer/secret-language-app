@@ -18,6 +18,7 @@
       @update-translation="updateTranslation"
       @remove-translation="(index) => removeTranslation(index)"
       @update-related-vocab="updateRelatedVocab"
+      @update-contains="updateContains"
       @update-similar-sounding-vocab="updateSimilarSoundingVocab"
       @update-picturable="updatePicturable"
       @update-images="updateImages"
@@ -52,6 +53,7 @@ interface VocabFormData {
   notes: (NoteData | Omit<NoteData, 'id'>)[];
   links: Link[];
   relatedVocab?: string[];
+  contains?: string[];
   similarSoundingButNotTheSame?: string[];
   isPicturable?: boolean;
   images?: VocabImage[];
@@ -80,6 +82,7 @@ function vocabDataToFormData(vocab: VocabData, notes: NoteData[] = [], translati
     notes: notes,
     links: vocab.links ? [...vocab.links] : [],
     relatedVocab: vocab.relatedVocab ? [...vocab.relatedVocab] : [],
+    contains: vocab.contains ? [...vocab.contains] : [],
     similarSoundingButNotTheSame: vocab.similarSoundingButNotTheSame ? [...vocab.similarSoundingButNotTheSame] : [],
     isPicturable: vocab.isPicturable,
     images: vocab.images ? [...vocab.images] : [],
@@ -104,6 +107,7 @@ function formDataToVocabData(formData: VocabFormData, existingVocab?: VocabData)
     origins: existingVocab.origins,
     relatedVocab: formData.relatedVocab || [],
     notRelatedVocab: existingVocab.notRelatedVocab || [],
+    contains: formData.contains || [],
     similarSoundingButNotTheSame: formData.similarSoundingButNotTheSame || [],
     isPicturable: formData.isPicturable,
     images: formData.images || [],
@@ -124,6 +128,7 @@ function formDataToVocabData(formData: VocabFormData, existingVocab?: VocabData)
     origins: ['user-added'],
     relatedVocab: formData.relatedVocab || [],
     notRelatedVocab: [],
+    contains: formData.contains || [],
     similarSoundingButNotTheSame: formData.similarSoundingButNotTheSame || [],
     isPicturable: formData.isPicturable,
     images: formData.images || [],
@@ -169,6 +174,7 @@ const state = ref<VocabFormState>({
     notes: [],
     links: [],
     relatedVocab: [],
+    contains: [],
     similarSoundingButNotTheSame: []
   },
   loading: false,
@@ -415,6 +421,11 @@ async function removeTranslation(index: number) {
 
 async function updateRelatedVocab(vocabIds: string[]) {
   state.value.formData.relatedVocab = vocabIds;
+  await handleFieldChange();
+}
+
+async function updateContains(vocabIds: string[]) {
+  state.value.formData.contains = vocabIds;
   await handleFieldChange();
 }
 

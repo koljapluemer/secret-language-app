@@ -408,7 +408,8 @@ async function createNewVocab() {
     links: [],
     origins: ['user-added'],
     relatedVocab: [],
-    notRelatedVocab: []
+    notRelatedVocab: [],
+    contains: []
   }));
 
   // Add the new vocab to the local state

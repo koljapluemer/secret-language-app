@@ -47,6 +47,7 @@ export interface VocabData {
 
   relatedVocab: string[]; // Ids of other vocab
   notRelatedVocab: string[]; // Ids of other vocab
+  contains: string[]; // Ids of other vocab
   similarSoundingButNotTheSame?: string[]; // Ids of other vocab that sound similar for minimal pairs
   notInterestedInPronunciationOrAlreadyAdded?: boolean
 

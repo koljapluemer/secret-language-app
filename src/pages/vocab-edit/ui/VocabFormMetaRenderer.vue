@@ -46,6 +46,8 @@
         @update-link="(index, link) => $emit('update-link', index, link)"
         @remove-link="$emit('remove-link', $event)"
         @update-related-vocab="$emit('update-related-vocab', $event)"
+        @update-contains="$emit('update-contains', $event)"
+        @update-similar-sounding-vocab="$emit('update-similar-sounding-vocab', $event)"
         @update-images="$emit('update-images', $event)"
         @update-sounds="$emit('update-sounds', $event)"
       />
@@ -74,6 +76,7 @@ interface VocabFormData {
   notes: (NoteData | Omit<NoteData, 'id'>)[];
   links: Link[];
   relatedVocab?: string[];
+  contains?: string[];
   similarSoundingButNotTheSame?: string[];
   isPicturable?: boolean;
   images?: VocabImage[];
@@ -103,6 +106,8 @@ defineEmits<{
   'update-translation': [translation: TranslationData | Omit<TranslationData, 'id'>];
   'remove-translation': [index: number];
   'update-related-vocab': [vocabIds: string[]];
+  'update-contains': [vocabIds: string[]];
+  'update-similar-sounding-vocab': [vocabIds: string[]];
   'update-images': [images: VocabImage[]];
   'update-sounds': [sounds: VocabSound[]];
 }>();

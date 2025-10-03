@@ -265,6 +265,7 @@ export class UnifiedRemoteSetService {
           links: links,
           relatedVocab: [], // Will resolve in second pass
           notRelatedVocab: [], // Will resolve in second pass
+          contains: [], // Will resolve in second pass
           similarSoundingButNotTheSame: [], // Will resolve in second pass
           origins: [localSet.id],
           isPicturable: vocabData.isPicturable,
@@ -304,13 +305,15 @@ export class UnifiedRemoteSetService {
 
         const relatedVocabIds = this.resolveReferences(vocabData.relatedVocab || [], vocabMap);
         const notRelatedVocabIds = this.resolveReferences(vocabData.notRelatedVocab || [], vocabMap);
+        const containsIds = this.resolveReferences(vocabData.contains || [], vocabMap);
         const similarSoundingIds = this.resolveReferences(vocabData.similarSoundingButNotTheSame || [], vocabMap);
 
-        if (relatedVocabIds.length > 0 || notRelatedVocabIds.length > 0 || similarSoundingIds.length > 0) {
+        if (relatedVocabIds.length > 0 || notRelatedVocabIds.length > 0 || containsIds.length > 0 || similarSoundingIds.length > 0) {
           vocabToUpdate.push({
             ...vocab,
             relatedVocab: relatedVocabIds,
             notRelatedVocab: notRelatedVocabIds,
+            contains: containsIds,
             similarSoundingButNotTheSame: similarSoundingIds
           });
         }

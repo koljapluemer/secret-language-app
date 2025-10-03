@@ -29,6 +29,7 @@ export class VocabRepo implements VocabRepoContract {
       translations: vocab.translations || [],
       relatedVocab: vocab.relatedVocab || [],
       notRelatedVocab: vocab.notRelatedVocab || [],
+      contains: vocab.contains || [],
       similarSoundingButNotTheSame: vocab.similarSoundingButNotTheSame || [],
       images: vocab.images || [],
       sounds: vocab.sounds || []
@@ -393,6 +394,7 @@ export class VocabRepo implements VocabRepoContract {
       origins: vocab.origins,
       relatedVocab: vocab.relatedVocab || [],
       notRelatedVocab: vocab.notRelatedVocab || [],
+      contains: vocab.contains || [],
       isPicturable: vocab.isPicturable,
       images: vocab.images || [],
       hasImage: (vocab.images && vocab.images.length > 0) || false,
@@ -442,6 +444,7 @@ export class VocabRepo implements VocabRepoContract {
       origins: v.origins,
       relatedVocab: v.relatedVocab || [],
       notRelatedVocab: v.notRelatedVocab || [],
+      contains: v.contains || [],
       isPicturable: v.isPicturable,
       images: v.images || [],
       hasImage: (v.images && v.images.length > 0) || false,

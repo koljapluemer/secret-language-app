@@ -110,6 +110,11 @@ export const vocabMergeStrategy: MergeStrategyMap<VocabData> = {
     description: 'Merge not-related vocab from both sources'
   },
 
+  contains: {
+    strategy: 'array-union',
+    description: 'Merge contained vocab from both sources'
+  },
+
   similarSoundingButNotTheSame: {
     strategy: 'array-union',
     description: 'Merge minimal pairs from both sources'

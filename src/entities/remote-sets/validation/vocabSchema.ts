@@ -22,6 +22,7 @@ export const vocabSchema = z.object({
     links: z.array(z.string()).optional(),
     relatedVocab: z.array(z.string()).optional(),
     notRelatedVocab: z.array(z.string()).optional(),
+    contains: z.array(z.string()).optional(),
     similarSoundingButNotTheSame: z.array(z.string()).optional(),
     priority: z.number().optional(),
     isPicturable: z.boolean().optional(),

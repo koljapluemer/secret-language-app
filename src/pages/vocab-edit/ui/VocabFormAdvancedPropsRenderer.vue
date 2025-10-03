@@ -50,6 +50,18 @@
     </div>
 
     <div class="space-y-4">
+      <h3>{{ $t('vocabulary.form.contains') }}</h3>
+      <ManageVocabList :vocab-ids="formData.contains || []" :language="formData.language" :config="{
+        allowAdd: true,
+        allowEdit: true,
+        allowDisconnect: true,
+        allowNavigate: true,
+        allowDelete: false
+      }" @update:vocab-ids="updateContains" @vocab-added="handleContainsVocabAdded"
+        @vocab-updated="handleContainsVocabUpdated" @vocab-disconnected="handleContainsVocabDisconnected" />
+    </div>
+
+    <div class="space-y-4">
       <h3>{{ $t('vocabulary.form.similarSounding') }}</h3>
       <ManageVocabList :vocab-ids="formData.similarSoundingButNotTheSame || []" :language="formData.language" :config="{
         allowAdd: true,
@@ -89,6 +101,7 @@ interface VocabFormData {
   notes: (NoteData | Omit<NoteData, 'id'>)[];
   links: Link[];
   relatedVocab?: string[];
+  contains?: string[];
   similarSoundingButNotTheSame?: string[];
   isPicturable?: boolean;
   images?: VocabImage[];
@@ -108,6 +121,7 @@ const emit = defineEmits<{
   'update-link': [index: number, link: Link];
   'remove-link': [index: number];
   'update-related-vocab': [vocabIds: string[]];
+  'update-contains': [vocabIds: string[]];
   'update-similar-sounding-vocab': [vocabIds: string[]];
   'update-images': [images: VocabImage[]];
   'update-sounds': [sounds: VocabSound[]];
@@ -129,6 +143,24 @@ function handleRelatedVocabUpdated() {
 }
 
 function handleRelatedVocabDisconnected() {
+  emit('field-change');
+}
+
+// Contains vocabulary event handlers
+function updateContains(vocabIds: string[]) {
+  emit('update-contains', vocabIds);
+  emit('field-change');
+}
+
+function handleContainsVocabAdded() {
+  emit('field-change');
+}
+
+function handleContainsVocabUpdated() {
+  emit('field-change');
+}
+
+function handleContainsVocabDisconnected() {
   emit('field-change');
 }
 
