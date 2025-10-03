@@ -265,18 +265,25 @@ def write_jsonl(data, filepath):
         for item in data:
             f.write(json.dumps(item, ensure_ascii=False) + '\n')
 
-def write_metadata():
+def write_metadata(output_dir, title):
     """Write metadata.json"""
     metadata = {
-        'title': 'Mandarin Character Components',
-        'description': 'The 250 most common character components from the 5000 most frequent Chinese words',
-        'language': 'cmn',
-        'tags': ['components', 'characters', 'radicals']
+        'title': title
     }
 
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    with open(OUTPUT_DIR / 'metadata.json', 'w', encoding='utf-8') as f:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    with open(output_dir / 'metadata.json', 'w', encoding='utf-8') as f:
         json.dump(metadata, f, ensure_ascii=False, indent=2)
+
+def write_set(vocab_list, translation_list, note_list, link_list, output_dir, title):
+    """Write a complete set to output directory"""
+    print(f"  Writing {len(vocab_list)} vocab items to {output_dir.name}...")
+    write_jsonl(vocab_list, output_dir / 'vocab.jsonl')
+    write_jsonl(translation_list, output_dir / 'translations.jsonl')
+    write_jsonl(note_list, output_dir / 'notes.jsonl')
+    write_jsonl(link_list, output_dir / 'links.jsonl')
+    write_metadata(output_dir, title)
+    print(f"  Done!")
 
 def main():
     print("Loading character decompositions...")
@@ -297,31 +304,34 @@ def main():
         reverse=True
     )
 
-    # Take top 250
-    top_components = sorted_components[:250]
-
-    print(f"Selected top 250 components")
-
     print("Loading Unihan readings...")
     unihan_data = load_unihan_readings()
 
-    print("Generating vocab objects...")
-    vocab_list, translation_list, note_list, link_list = generate_vocab_objects(
-        top_components, unihan_data
+    # Generate full set (250 components)
+    print("\n=== Generating full set (250 components) ===")
+    top_250 = sorted_components[:250]
+    vocab_list_250, translation_list_250, note_list_250, link_list_250 = generate_vocab_objects(
+        top_250, unihan_data
     )
+    print(f"Generated {len(vocab_list_250)} vocab items, {len(translation_list_250)} translations, {len(note_list_250)} notes")
 
-    print(f"Generated {len(vocab_list)} vocab items")
-    print(f"Generated {len(translation_list)} translations")
-    print(f"Generated {len(note_list)} notes")
+    full_output_dir = Path(__file__).parent / "sets" / "cmn" / "character-components"
+    write_set(vocab_list_250, translation_list_250, note_list_250, link_list_250,
+              full_output_dir, "Mandarin Character Components")
 
-    print("Writing output files...")
-    write_jsonl(vocab_list, OUTPUT_DIR / 'vocab.jsonl')
-    write_jsonl(translation_list, OUTPUT_DIR / 'translations.jsonl')
-    write_jsonl(note_list, OUTPUT_DIR / 'notes.jsonl')
-    write_jsonl(link_list, OUTPUT_DIR / 'links.jsonl')
-    write_metadata()
+    # Generate mini set (20 components)
+    print("\n=== Generating mini set (20 components) ===")
+    top_20 = sorted_components[:20]
+    vocab_list_20, translation_list_20, note_list_20, link_list_20 = generate_vocab_objects(
+        top_20, unihan_data
+    )
+    print(f"Generated {len(vocab_list_20)} vocab items, {len(translation_list_20)} translations, {len(note_list_20)} notes")
 
-    print(f"Done! Output written to {OUTPUT_DIR}")
+    mini_output_dir = Path(__file__).parent / "sets" / "cmn" / "character-components-mini"
+    write_set(vocab_list_20, translation_list_20, note_list_20, link_list_20,
+              mini_output_dir, "Mandarin Character Components (Mini)")
+
+    print(f"\n✓ All done!")
 
 if __name__ == '__main__':
     main()
