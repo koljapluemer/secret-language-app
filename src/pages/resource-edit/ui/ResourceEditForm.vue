@@ -81,7 +81,7 @@ async function handleAddNote(note: NoteData) {
 
   const updatedResource = toRaw({
     ...toRaw(props.resource),
-    notes: [...toRaw(props.resource).notes, savedNote.uid]
+    notes: [...toRaw(props.resource).notes, savedNote.id]
   });
 
   await resourceRepo.updateResource(updatedResource);
@@ -90,7 +90,7 @@ async function handleAddNote(note: NoteData) {
 
 async function handleUpdateNote(note: NoteData) {
   await noteRepo.updateNote(toRaw(note));
-  const index = notes.value.findIndex(n => n.uid === note.uid);
+  const index = notes.value.findIndex(n => n.id === note.id);
   if (index !== -1) {
     notes.value[index] = note;
   }
@@ -98,7 +98,7 @@ async function handleUpdateNote(note: NoteData) {
 
 async function handleRemoveNote(noteUid: string) {
   await noteRepo.deleteNote(noteUid);
-  notes.value = notes.value.filter(n => n.uid !== noteUid);
+  notes.value = notes.value.filter(n => n.id !== noteUid);
 
   const updatedResource = toRaw({
     ...toRaw(props.resource),

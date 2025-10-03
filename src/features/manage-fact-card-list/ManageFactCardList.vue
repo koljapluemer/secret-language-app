@@ -5,7 +5,7 @@
     </div>
 
     <div v-else class="space-y-4">
-      <div v-for="factCard in factCards" :key="factCard.uid" class="card shadow">
+      <div v-for="factCard in factCards" :key="factCard.id" class="card shadow">
         <div class="card-body">
           <div class="space-y-3">
             <!-- Front -->
@@ -51,14 +51,14 @@
 
           <!-- Bottom row: Action buttons -->
           <div class="flex justify-end gap-2 mt-4 pt-3 border-t border-base-300">
-            <button v-if="config.allowDisconnect" type="button" @click="disconnectFactCard(factCard.uid)" class="btn btn-sm btn-ghost"
+            <button v-if="config.allowDisconnect" type="button" @click="disconnectFactCard(factCard.id)" class="btn btn-sm btn-ghost"
               title="Disconnect fact card from parent">
               <Unlink class="w-4 h-4" />
             </button>
-            <button v-if="config.allowNavigate" type="button" @click="goToFactCard(factCard.uid)" class="btn btn-sm btn-ghost" title="Go to fact card">
+            <button v-if="config.allowNavigate" type="button" @click="goToFactCard(factCard.id)" class="btn btn-sm btn-ghost" title="Go to fact card">
               <ExternalLink class="w-4 h-4" />
             </button>
-            <button v-if="config.allowDelete" type="button" @click="deleteFactCard(factCard.uid)" class="btn btn-sm btn-ghost text-error"
+            <button v-if="config.allowDelete" type="button" @click="deleteFactCard(factCard.id)" class="btn btn-sm btn-ghost text-error"
               title="Delete fact card permanently">
               <Trash2 class="w-4 h-4" />
             </button>
@@ -160,7 +160,7 @@ async function updateFactCardFront(factCard: FactCardData, newFront: string | nu
   await factCardRepo.updateFactCard(updatedFactCard);
 
   // Update local state
-  const index = factCards.value.findIndex(fc => fc.uid === factCard.uid);
+  const index = factCards.value.findIndex(fc => fc.id === factCard.id);
   if (index !== -1) {
     factCards.value[index] = updatedFactCard;
   }
@@ -178,7 +178,7 @@ async function updateFactCardBack(factCard: FactCardData, newBack: string | numb
   await factCardRepo.updateFactCard(updatedFactCard);
 
   // Update local state
-  const index = factCards.value.findIndex(fc => fc.uid === factCard.uid);
+  const index = factCards.value.findIndex(fc => fc.id === factCard.id);
   if (index !== -1) {
     factCards.value[index] = updatedFactCard;
   }
@@ -195,7 +195,7 @@ async function updateFactCardPriority(factCard: FactCardData, newPriority: numbe
   await factCardRepo.updateFactCard(updatedFactCard);
 
   // Update local state
-  const index = factCards.value.findIndex(fc => fc.uid === factCard.uid);
+  const index = factCards.value.findIndex(fc => fc.id === factCard.id);
   if (index !== -1) {
     factCards.value[index] = updatedFactCard;
   }
@@ -212,7 +212,7 @@ async function updateFactCardDoNotPractice(factCard: FactCardData, doNotPractice
   await factCardRepo.updateFactCard(updatedFactCard);
 
   // Update local state
-  const index = factCards.value.findIndex(fc => fc.uid === factCard.uid);
+  const index = factCards.value.findIndex(fc => fc.id === factCard.id);
   if (index !== -1) {
     factCards.value[index] = updatedFactCard;
   }
@@ -249,7 +249,7 @@ async function createNewFactCard() {
   newBack.value = '';
   
   // Emit events
-  const updatedFactCardIds = [...props.factCardIds, factCard.uid];
+  const updatedFactCardIds = [...props.factCardIds, factCard.id];
   emit('update:fact-card-ids', updatedFactCardIds);
   emit('fact-card-added', factCard);
 }
@@ -258,7 +258,7 @@ function disconnectFactCard(factCardId: string) {
   if (!confirm('Are you sure you want to disconnect this fact card?')) return;
   
   // Update local state
-  factCards.value = factCards.value.filter(fc => fc.uid !== factCardId);
+  factCards.value = factCards.value.filter(fc => fc.id !== factCardId);
   
   // Emit events
   const updatedFactCardIds = props.factCardIds.filter(id => id !== factCardId);
@@ -277,7 +277,7 @@ async function deleteFactCard(factCardId: string) {
   await factCardRepo.deleteFactCard(factCardId);
 
   // Update local state
-  factCards.value = factCards.value.filter(fc => fc.uid !== factCardId);
+  factCards.value = factCards.value.filter(fc => fc.id !== factCardId);
   
   // Emit events
   const updatedFactCardIds = props.factCardIds.filter(id => id !== factCardId);

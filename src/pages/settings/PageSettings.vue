@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue';
+import { inject, ref, onMounted } from 'vue';
 import { toRaw } from 'vue';
 import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
@@ -9,6 +9,7 @@ import type { NoteData } from '@/entities/notes/NoteData';
 import { useToast } from '@/shared/toasts';
 import LanguageSettings from './LanguageSettings.vue';
 import AudioAnalysis from './AudioAnalysis.vue';
+import { db } from '@/shared/database/db';
 
 const languageRepo = inject<LanguageRepoContract>('languageRepo')!;
 const vocabRepo = inject<VocabRepoContract>('vocabRepo')!;
@@ -18,6 +19,69 @@ const toast = useToast();
 
 const isDeduplicating = ref(false);
 const deduplicationResults = ref<{ vocabProcessed: number; translationsProcessed: number; duplicatesRemoved: number } | null>(null);
+
+// Practice goals
+const MOTIVATION_SETTINGS_KEY = 'linguanodon-motivation-settings';
+interface MotivationSettings {
+  dailyGoalMinutes: number;
+  weeklyGoalMinutes: number;
+}
+
+const dailyGoal = ref(30);
+const weeklyGoal = ref(180);
+
+function loadGoals() {
+  const stored = localStorage.getItem(MOTIVATION_SETTINGS_KEY);
+  if (stored) {
+    const settings: MotivationSettings = JSON.parse(stored);
+    dailyGoal.value = settings.dailyGoalMinutes;
+    weeklyGoal.value = settings.weeklyGoalMinutes;
+  }
+}
+
+function saveGoals() {
+  const settings: MotivationSettings = {
+    dailyGoalMinutes: dailyGoal.value,
+    weeklyGoalMinutes: weeklyGoal.value
+  };
+  localStorage.setItem(MOTIVATION_SETTINGS_KEY, JSON.stringify(settings));
+  toast.success('Goals saved successfully');
+}
+
+loadGoals();
+
+// Cloud Sync
+const isLoggedIn = ref(false);
+const userEmail = ref('');
+const syncState = ref('offline');
+
+onMounted(() => {
+  db.cloud.currentUser.subscribe(user => {
+    isLoggedIn.value = user?.isLoggedIn || false;
+    userEmail.value = user?.email || '';
+  });
+
+  db.cloud.syncState.subscribe(state => {
+    syncState.value = state.phase;
+  });
+});
+
+async function login() {
+  try {
+    await db.cloud.login();
+  } catch (error) {
+    toast.error(`Login failed: ${String(error)}`);
+  }
+}
+
+async function logout() {
+  try {
+    await db.cloud.logout();
+    toast.success('Logged out successfully');
+  } catch (error) {
+    toast.error(`Logout failed: ${String(error)}`);
+  }
+}
 
 async function deduplicateNotesAndTranslations() {
   isDeduplicating.value = true;
@@ -40,7 +104,7 @@ async function deduplicateNotesAndTranslations() {
           // Update vocab with deduplicated note UIDs
           const updatedVocab = {
             ...vocab,
-            notes: keptNotes.map(note => note.uid)
+            notes: keptNotes.map(note => note.id)
           };
           await vocabRepo.updateVocab(toRaw(updatedVocab));
           duplicatesRemoved += removedCount;
@@ -61,7 +125,7 @@ async function deduplicateNotesAndTranslations() {
           // Update translation with deduplicated note UIDs
           const updatedTranslation = {
             ...translation,
-            notes: keptNotes.map(note => note.uid)
+            notes: keptNotes.map(note => note.id)
           };
           await translationRepo.updateTranslation(toRaw(updatedTranslation));
           duplicatesRemoved += removedCount;
@@ -102,7 +166,7 @@ async function deduplicateNotes(notes: NoteData[]): Promise<{ keptNotes: NoteDat
       keptNotes.push(group[0]);
       
       // Delete the duplicate notes
-      const duplicateUids = group.slice(1).map(note => note.uid);
+      const duplicateUids = group.slice(1).map(note => note.id);
       await noteRepo.deleteNotes(duplicateUids);
       removedCount += duplicateUids.length;
     } else {
@@ -121,6 +185,74 @@ async function deduplicateNotes(notes: NoteData[]): Promise<{ keptNotes: NoteDat
   <LanguageSettings :language-repo="languageRepo" />
 
   <AudioAnalysis :vocab-repo="vocabRepo" />
+
+  <h3>Cloud Sync</h3>
+  <p class="text-light mb-4">
+    Sync your data across devices using Dexie Cloud. Your data is private by default.
+  </p>
+
+  <div v-if="!isLoggedIn" class="mb-8">
+    <button @click="login" class="btn btn-primary btn-sm">
+      Enable Cloud Sync (Login)
+    </button>
+    <p class="text-sm text-light mt-2">
+      The app works offline without login. Sync is completely optional.
+    </p>
+  </div>
+
+  <div v-else class="mb-8 space-y-2">
+    <p class="text-sm">
+      <span class="font-semibold">Email:</span> {{ userEmail }}
+    </p>
+    <p class="text-sm">
+      <span class="font-semibold">Sync status:</span>
+      <span :class="{
+        'text-success': syncState === 'online',
+        'text-warning': syncState === 'syncing',
+        'text-error': syncState === 'offline'
+      }">
+        {{ syncState }}
+      </span>
+    </p>
+    <button @click="logout" class="btn btn-outline btn-sm">
+      Disable Cloud Sync (Logout)
+    </button>
+  </div>
+
+  <h3>{{ $t('settings.practiceGoals') }}</h3>
+  <p class="text-light mb-4">
+    {{ $t('settings.practiceGoalsDescription') }}
+  </p>
+
+  <div class="space-y-4 mb-8">
+    <div class="form-control w-full max-w-xs">
+      <label class="label">
+        <span class="label-text">{{ $t('settings.dailyGoal') }}</span>
+      </label>
+      <input
+        v-model.number="dailyGoal"
+        type="number"
+        :placeholder="$t('settings.dailyGoalPlaceholder')"
+        class="input input-bordered w-full max-w-xs"
+        min="0"
+        @change="saveGoals"
+      />
+    </div>
+
+    <div class="form-control w-full max-w-xs">
+      <label class="label">
+        <span class="label-text">{{ $t('settings.weeklyGoal') }}</span>
+      </label>
+      <input
+        v-model.number="weeklyGoal"
+        type="number"
+        :placeholder="$t('settings.weeklyGoalPlaceholder')"
+        class="input input-bordered w-full max-w-xs"
+        min="0"
+        @change="saveGoals"
+      />
+    </div>
+  </div>
 
   <h3>{{ $t('settings.noteDeduplication') }}</h3>
   <p class="text-light mb-4">

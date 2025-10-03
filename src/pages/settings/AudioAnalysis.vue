@@ -12,7 +12,7 @@ const props = defineProps<Props>();
 
 // Empty sound detection state
 const detectingSounds = ref(false);
-const emptyAudioResults = ref<{ uid: string; content: string; reason: string; soundIndex?: number; soundUid: string }[]>([]);
+const emptyAudioResults = ref<{ id: string; content: string; reason: string; soundIndex?: number; soundUid: string }[]>([]);
 const analysisCompleted = ref(false);
 const deletingEmptyAudio = ref(false);
 
@@ -99,7 +99,7 @@ async function detectEmptySoundFiles() {
     toast.info(`Analyzing ${totalAudioFiles} audio files from ${vocabWithSound.length} vocab items...`, { duration: 2000 });
 
     let emptyCount = 0;
-    const results: { uid: string; content: string; reason: string; soundIndex?: number; soundUid: string }[] = [];
+    const results: { id: string; content: string; reason: string; soundIndex?: number; soundUid: string }[] = [];
 
     for (const vocab of vocabWithSound) {
       if (vocab.sounds) {
@@ -110,11 +110,11 @@ async function detectEmptySoundFiles() {
             if (detection.isEmpty) {
               emptyCount++;
               results.push({
-                uid: vocab.uid,
+                id: vocab.id,
                 content: vocab.content || '...',
                 reason: detection.reason || 'unknown',
                 soundIndex: vocab.sounds.length > 1 ? i : undefined,
-                soundUid: sound.uid
+                soundUid: sound.id
               });
             }
           }
@@ -153,7 +153,7 @@ async function deleteEmptyAudio() {
     let deletedCount = 0;
 
     for (const result of emptyAudioResults.value) {
-      await props.vocabRepo.removeSoundFromVocab(result.uid, result.soundUid);
+      await props.vocabRepo.removeSoundFromVocab(result.id, result.soundUid);
       deletedCount++;
     }
 
@@ -200,9 +200,9 @@ async function deleteEmptyAudio() {
       </summary>
       <div class="collapse-content">
         <ul class="list-disc list-inside space-y-1  mt-2">
-          <li v-for="result in emptyAudioResults" :key="result.uid">
+          <li v-for="result in emptyAudioResults" :key="result.id">
             <router-link
-              :to="{ name: 'vocab-list', query: { search: result.content !== '...' ? result.content : result.uid } }"
+              :to="{ name: 'vocab-list', query: { search: result.content !== '...' ? result.content : result.id } }"
               class="link link-primary hover:link-hover">
               {{ result.content }}
             </router-link>

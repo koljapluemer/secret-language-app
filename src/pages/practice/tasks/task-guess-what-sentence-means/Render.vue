@@ -71,7 +71,7 @@ const handleDone = async () => {
       // Add note to vocab
       const updatedVocab = {
         ...vocab.value,
-        notes: [...vocab.value.notes, savedNote.uid],
+        notes: [...vocab.value.notes, savedNote.id],
         progress: {
           ...vocab.value.progress,
           level: 0,
@@ -118,7 +118,7 @@ onMounted(loadVocab);
         
         <NoteDisplayMini 
           v-for="note in vocabNotes.filter(note => note.showBeforeExercise)" 
-          :key="note.uid"
+          :key="note.id"
           :note="note"
         />
       </div>

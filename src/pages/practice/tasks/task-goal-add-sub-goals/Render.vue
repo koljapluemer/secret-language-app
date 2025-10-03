@@ -74,7 +74,7 @@ const handleSkip = async () => {
   
   try {
     // Just update lastShownAt - no other changes
-    await goalRepo.update(goal.value.uid, {
+    await goalRepo.update(goal.value.id, {
       lastShownAt: new Date()
     });
 
@@ -95,7 +95,7 @@ const handleSkipAndDisable = async () => {
       finishedAddingSubGoals: true,
       lastShownAt: new Date()
     };
-    await goalRepo.update(goal.value.uid, updatedGoal);
+    await goalRepo.update(goal.value.id, updatedGoal);
 
     emit('finished');
   } catch {
@@ -117,7 +117,7 @@ const handleFinishDecision = async (wantToDoAgain: boolean) => {
       finishedAddingSubGoals: !wantToDoAgain,
       lastShownAt: new Date()
     };
-    await goalRepo.update(goal.value.uid, updatedGoal);
+    await goalRepo.update(goal.value.id, updatedGoal);
 
     emit('finished');
   } catch {

@@ -28,7 +28,7 @@ export async function findDuplicateResource(
   )
 
   // Make sure we don't match against ourselves
-  if (existing && existing.uid !== resource.uid) {
+  if (existing && existing.id !== resource.id) {
     return existing
   }
 

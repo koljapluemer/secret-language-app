@@ -3,6 +3,7 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useDetailedPracticeTracking } from '@/app/tracking/useDetailedPracticeTracking';
 import { ChevronDown, ChevronUp } from 'lucide-vue-next';
+import type { ChartDataCustomTypesPerDataset } from 'chart.js';
 import WhiskersChart from './WhiskersChart.vue';
 
 const { t } = useI18n();
@@ -129,7 +130,7 @@ const maxPossibleDaysToShow = computed(() => {
 });
 
 // Chart.js data configuration with whiskers
-const chartData = computed(() => {
+const chartData = computed((): ChartDataCustomTypesPerDataset<'boxplot'> => {
   if (dailyAccuracyData.value.length === 0) {
     return {
       labels: [],
@@ -145,25 +146,8 @@ const chartData = computed(() => {
     labels,
     datasets: [
       {
-        type: 'line',
-        label: 'Daily Average Accuracy',
-        data: dailyAccuracyData.value.map(point => point.accuracy),
-        borderColor: '#10B981',
-        backgroundColor: '#10B981',
-        borderWidth: 3,
-        pointRadius: 6,
-        pointHoverRadius: 9,
-        pointBackgroundColor: '#10B981',
-        pointBorderColor: '#059669',
-        pointBorderWidth: 2,
-        pointHoverBackgroundColor: '#34D399',
-        pointHoverBorderColor: '#10B981',
-        fill: false,
-        tension: 0.2,
-      },
-      {
         type: 'boxplot',
-        label: 'Daily Variance (±1σ)',
+        label: 'Daily Accuracy Distribution',
         data: dailyAccuracyData.value.map(point => ({
           min: Math.max(0, point.accuracy - point.stdDev),
           q1: Math.max(0, point.accuracy - point.stdDev * 0.5),
@@ -172,12 +156,12 @@ const chartData = computed(() => {
           max: Math.min(100, point.accuracy + point.stdDev),
           outliers: []
         })),
-        borderColor: '#6B7280',
-        backgroundColor: 'rgba(107, 114, 128, 0.2)',
+        borderColor: '#10B981',
+        backgroundColor: 'rgba(16, 185, 129, 0.2)',
         borderWidth: 2,
         itemRadius: 2,
-        itemBackgroundColor: 'rgba(107, 114, 128, 0.3)',
-        itemBorderColor: '#6B7280',
+        itemBackgroundColor: 'rgba(16, 185, 129, 0.3)',
+        itemBorderColor: '#059669',
         itemBorderWidth: 1,
       }
     ]

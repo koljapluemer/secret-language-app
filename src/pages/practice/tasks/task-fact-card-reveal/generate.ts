@@ -2,13 +2,13 @@ import type { FactCardData } from '@/entities/fact-cards/FactCardData';
 import type { Task } from '@/pages/practice/Task';
 
 export function generateFactCardReveal(factCard: FactCardData): Task {
-  const uid = `fact-card-reveal-${factCard.uid}-${Date.now()}`;
+  const id = `fact-card-reveal-${factCard.id}-${Date.now()}`;
   
   return {
-    uid,
+    id,
     language: factCard.language,
     taskType: 'fact-card-reveal',
     prompt: 'What does this mean?',
-    associatedFactCards: [factCard.uid]
+    associatedFactCards: [factCard.id]
   };
 }

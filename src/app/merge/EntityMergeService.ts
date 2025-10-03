@@ -129,12 +129,12 @@ export class EntityMergeService {
     for (const vocab of unchecked) {
       const duplicate = await findDuplicateVocab(vocab, this.vocabRepo)
 
-      if (duplicate && duplicate.uid !== vocab.uid) {
+      if (duplicate && duplicate.id !== vocab.id) {
         // Found a duplicate - merge them
         const merged = mergeEntities(duplicate, vocab, vocabMergeStrategy)
         toUpdate.push(merged)
-        toDelete.push(vocab.uid)
-        console.log(`[Merge] Merging vocab "${vocab.content}" (${vocab.uid} → ${duplicate.uid})`)
+        toDelete.push(vocab.id)
+        console.log(`[Merge] Merging vocab "${vocab.content}" (${vocab.id} → ${duplicate.id})`)
       } else {
         // No duplicate - just mark as checked
         toUpdate.push({
@@ -146,7 +146,9 @@ export class EntityMergeService {
 
     // Bulk update
     if (toUpdate.length > 0) {
-      await this.vocabRepo.bulkProcessVocab(toUpdate, [])
+      for (const vocab of toUpdate) {
+        await this.vocabRepo.updateVocab(vocab)
+      }
     }
 
     // Bulk delete duplicates
@@ -179,11 +181,11 @@ export class EntityMergeService {
     for (const translation of unchecked) {
       const duplicate = await findDuplicateTranslation(translation, this.translationRepo)
 
-      if (duplicate && duplicate.uid !== translation.uid) {
+      if (duplicate && duplicate.id !== translation.id) {
         // Found a duplicate - merge them
         const merged = mergeEntities(duplicate, translation, translationMergeStrategy)
         toUpdate.push(merged)
-        toDelete.push(translation.uid)
+        toDelete.push(translation.id)
       } else {
         // No duplicate - just mark as checked
         toUpdate.push({
@@ -195,7 +197,9 @@ export class EntityMergeService {
 
     // Bulk update
     if (toUpdate.length > 0) {
-      await this.translationRepo.bulkProcessTranslations(toUpdate, [])
+      for (const translation of toUpdate) {
+        await this.translationRepo.updateTranslation(translation)
+      }
     }
 
     // Bulk delete duplicates
@@ -218,7 +222,7 @@ export class EntityMergeService {
       return false
     }
 
-    const uids = unchecked.map(n => n.uid)
+    const uids = unchecked.map(n => n.id)
     await this.noteRepo.bulkMarkNotesAsChecked(uids)
 
     return true // Processed something
@@ -244,12 +248,12 @@ export class EntityMergeService {
     for (const factCard of unchecked) {
       const duplicate = await findDuplicateFactCard(factCard, this.factCardRepo)
 
-      if (duplicate && duplicate.uid !== factCard.uid) {
+      if (duplicate && duplicate.id !== factCard.id) {
         // Found a duplicate - merge them
         const merged = mergeEntities(duplicate, factCard, factCardMergeStrategy)
         toUpdate.push(toRaw(merged))
-        toDelete.push(factCard.uid)
-        console.log(`[Merge] Merging fact card "${factCard.front}" (${factCard.uid} → ${duplicate.uid})`)
+        toDelete.push(factCard.id)
+        console.log(`[Merge] Merging fact card "${factCard.front}" (${factCard.id} → ${duplicate.id})`)
       } else {
         // No duplicate - just mark as checked
         toUpdate.push(toRaw({
@@ -294,11 +298,11 @@ export class EntityMergeService {
     for (const resource of unchecked) {
       const duplicate = await findDuplicateResource(resource, this.resourceRepo)
 
-      if (duplicate && duplicate.uid !== resource.uid) {
+      if (duplicate && duplicate.id !== resource.id) {
         // Found a duplicate - merge them
         const merged = mergeEntities(duplicate, resource, resourceMergeStrategy)
         toUpdate.push(toRaw(merged))
-        toDelete.push(resource.uid)
+        toDelete.push(resource.id)
       } else {
         // No duplicate - just mark as checked
         toUpdate.push(toRaw({

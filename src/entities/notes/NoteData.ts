@@ -1,5 +1,5 @@
 export interface NoteData {
-    uid: string
+    id: string
     content: string;
     showBeforeExercise?: boolean;
     noteType?: string

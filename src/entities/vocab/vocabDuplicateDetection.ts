@@ -30,7 +30,7 @@ export async function findDuplicateVocab(
     )
 
     // Make sure we don't match against ourselves
-    if (existing && existing.uid !== vocab.uid) {
+    if (existing && existing.id !== vocab.id) {
       return existing
     }
   }
@@ -43,7 +43,7 @@ export async function findDuplicateVocab(
     )
 
     // Make sure we don't match against ourselves
-    if (existing && existing.uid !== vocab.uid) {
+    if (existing && existing.id !== vocab.id) {
       return existing
     }
   }

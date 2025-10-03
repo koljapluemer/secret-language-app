@@ -1,40 +1,28 @@
-import Dexie, { type Table } from 'dexie';
 import type { ResourceRepoContract, ResourceListFilters } from './ResourceRepoContract';
 import type { ResourceData } from './ResourceData';
 import { useToast } from '@/shared/toasts';
-
-class ResourceDatabase extends Dexie {
-  resources!: Table<ResourceData>;
-
-  constructor() {
-    super('ResourceDatabase');
-    this.version(1).stores({
-      resources: 'uid, language'
-    });
-  }
-}
+import { db } from '@/shared/database/db';
 
 export class ResourceRepo implements ResourceRepoContract {
-  private db = new ResourceDatabase();
   private toast = useToast();
 
   async getAllResources(): Promise<ResourceData[]> {
-    return await this.db.resources.toArray();
+    return await db.resources.toArray();
   }
 
   async getResourceById(uid: string): Promise<ResourceData | undefined> {
-    return await this.db.resources.get(uid);
+    return await db.resources.get(uid);
   }
 
   async getResourceByTitleAndLanguage(title: string, language: string): Promise<ResourceData | undefined> {
-    const allResources = await this.db.resources.toArray();
-    return allResources.find(resource => 
+    const allResources = await db.resources.toArray();
+    return allResources.find(resource =>
       resource.title === title && resource.language === language
     );
   }
 
   async getRandomDueResource(languages?: string[], setsToAvoid?: string[]): Promise<ResourceData | null> {
-    const allResources = await this.db.resources.toArray();
+    const allResources = await db.resources.toArray();
     
     // Filter by languages if provided
     let filteredResources = languages 
@@ -67,11 +55,11 @@ export class ResourceRepo implements ResourceRepoContract {
   }
 
   async getValidImmersionResources(languages: string[]): Promise<ResourceData[]> {
-    const allResources = await this.db.resources.toArray();
-    
+    const allResources = await db.resources.toArray();
+
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-    
-    return allResources.filter(resource => 
+
+    return allResources.filter(resource =>
       resource.isImmersionContent &&
       languages.includes(resource.language) &&
       !resource.finishedExtracting &&
@@ -79,9 +67,8 @@ export class ResourceRepo implements ResourceRepoContract {
     );
   }
 
-  async saveResource(resource: Omit<ResourceData, 'uid' | 'lastShownAt'>): Promise<ResourceData> {
-    const resourceData: ResourceData = {
-      uid: crypto.randomUUID(),
+  async saveResource(resource: Omit<ResourceData, 'id' | 'lastShownAt'>): Promise<ResourceData> {
+    const resourceData: Omit<ResourceData, 'id'> = {
       language: resource.language,
       isImmersionContent: resource.isImmersionContent,
       title: resource.title,
@@ -95,10 +82,10 @@ export class ResourceRepo implements ResourceRepoContract {
       finishedExtracting: resource.finishedExtracting ?? false
     };
 
-    
+
     try {
-      await this.db.resources.add(resourceData);
-      return resourceData;
+      const id = await db.resources.add(resourceData as ResourceData);
+      return { ...resourceData, id } as ResourceData;
     } catch (error) {
       this.toast.error(`ResourceRepo: Failed to save resource: ${String(error)}`);
       throw error;
@@ -106,20 +93,20 @@ export class ResourceRepo implements ResourceRepoContract {
   }
 
   async updateResource(resource: ResourceData): Promise<ResourceData> {
-    await this.db.resources.put(resource);
-    const updated = await this.db.resources.get(resource.uid);
+    await db.resources.put(resource);
+    const updated = await db.resources.get(resource.id);
     if (!updated) {
-      throw new Error(`Resource with uid ${resource.uid} not found after update`);
+      throw new Error(`Resource with id ${resource.id} not found after update`);
     }
     return updated;
   }
 
   async deleteResource(uid: string): Promise<void> {
-    await this.db.resources.delete(uid);
+    await db.resources.delete(uid);
   }
 
   async disconnectVocabFromResource(resourceUid: string, vocabUid: string): Promise<void> {
-    const resource = await this.db.resources.get(resourceUid);
+    const resource = await db.resources.get(resourceUid);
     if (!resource) {
       throw new Error('Resource not found');
     }
@@ -130,7 +117,7 @@ export class ResourceRepo implements ResourceRepoContract {
       vocab: resource.vocab.filter(id => id !== vocabUid)
     };
 
-    await this.db.resources.put(updatedResource);
+    await db.resources.put(updatedResource);
   }
 
   private applyFilters(resources: ResourceData[], filters?: ResourceListFilters): ResourceData[] {
@@ -180,9 +167,9 @@ export class ResourceRepo implements ResourceRepoContract {
   }
 
   async getResourcesPaginated(offset: number, limit: number, filters?: ResourceListFilters): Promise<ResourceData[]> {
-    const allResources = await this.db.resources.toArray();
+    const allResources = await db.resources.toArray();
     const filtered = this.applyFilters(allResources, filters);
-    
+
     // Sort by lastShownAt descending (most recent first), then by title
     filtered.sort((a, b) => {
       if (a.lastShownAt && b.lastShownAt) {
@@ -192,18 +179,18 @@ export class ResourceRepo implements ResourceRepoContract {
       if (!a.lastShownAt && b.lastShownAt) return 1;
       return a.title.localeCompare(b.title);
     });
-    
+
     return filtered.slice(offset, offset + limit);
   }
 
   async getTotalResourcesCount(filters?: ResourceListFilters): Promise<number> {
-    const allResources = await this.db.resources.toArray();
+    const allResources = await db.resources.toArray();
     const filtered = this.applyFilters(allResources, filters);
     return filtered.length;
   }
 
   async getUncheckedResources(limit: number): Promise<ResourceData[]> {
-    const resources = await this.db.resources
+    const resources = await db.resources
       .filter(r => !r._mergeChecked)
       .limit(limit)
       .toArray();
@@ -212,7 +199,7 @@ export class ResourceRepo implements ResourceRepoContract {
   }
 
   async getResourcesByOrigins(setUids: string[]): Promise<ResourceData[]> {
-    const resources = await this.db.resources
+    const resources = await db.resources
       .where('origins')
       .anyOf(setUids)
       .toArray();

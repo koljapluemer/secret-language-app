@@ -83,7 +83,7 @@ const languageOptions = computed(() => {
 
 async function updateField(field: keyof GoalData, value: string | number | boolean | undefined) {
   try {
-    const updatedGoal = await goalRepo.update(props.goal.uid, {
+    const updatedGoal = await goalRepo.update(props.goal.id, {
       [field]: value
     });
     emit('goal-updated', updatedGoal);

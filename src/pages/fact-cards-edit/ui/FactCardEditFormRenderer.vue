@@ -61,7 +61,7 @@
         <div v-else class="space-y-4">
           <div
             v-for="note in formData.notes"
-            :key="note.uid"
+            :key="note.id"
             class="flex items-center justify-between p-3 bg-base-200 rounded-lg"
           >
             <div class="flex-1">
@@ -70,7 +70,7 @@
             <div class="flex items-center gap-2">
               <button
                 type="button"
-                @click="$emit('remove-note', note.uid)"
+                @click="$emit('remove-note', note.id)"
                 class="btn btn-ghost btn-circle text-error flex-shrink-0"
               >
                 <X class="w-4 h-4" />

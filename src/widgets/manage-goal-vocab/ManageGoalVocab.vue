@@ -36,15 +36,15 @@ const vocabListConfig = computed(() => ({
 }));
 
 async function handleVocabIdsUpdate(newVocabIds: string[]) {
-  const updatedGoal = await goalRepo.update(props.goal.uid, {
+  const updatedGoal = await goalRepo.update(props.goal.id, {
     vocab: newVocabIds
   });
   emit('goal-updated', updatedGoal);
 }
 
 async function handleVocabAdded(vocab: VocabData) {
-  const updatedGoal = await goalRepo.update(props.goal.uid, {
-    vocab: [...props.goal.vocab, vocab.uid]
+  const updatedGoal = await goalRepo.update(props.goal.id, {
+    vocab: [...props.goal.vocab, vocab.id]
   });
   emit('goal-updated', updatedGoal);
 }
@@ -52,7 +52,7 @@ async function handleVocabAdded(vocab: VocabData) {
 
 async function handleVocabRemoved(vocabId: string) {
   const updatedVocab = props.goal.vocab.filter(id => id !== vocabId);
-  const updatedGoal = await goalRepo.update(props.goal.uid, {
+  const updatedGoal = await goalRepo.update(props.goal.id, {
     vocab: updatedVocab
   });
   emit('goal-updated', updatedGoal);
@@ -60,7 +60,7 @@ async function handleVocabRemoved(vocabId: string) {
 
 async function handleVocabDisconnected(vocabId: string) {
   const updatedVocab = props.goal.vocab.filter(id => id !== vocabId);
-  const updatedGoal = await goalRepo.update(props.goal.uid, {
+  const updatedGoal = await goalRepo.update(props.goal.id, {
     vocab: updatedVocab
   });
   emit('goal-updated', updatedGoal);

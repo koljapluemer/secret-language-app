@@ -90,7 +90,7 @@ async function handleGoalUpdate(updatedGoal: GoalData) {
 async function updateFinishedAddingSubGoals(value: boolean | undefined) {
   if (!goal.value) return;
   
-  const updatedGoal = await goalRepo.update(goal.value.uid, {
+  const updatedGoal = await goalRepo.update(goal.value.id, {
     finishedAddingSubGoals: value
   });
   
@@ -100,7 +100,7 @@ async function updateFinishedAddingSubGoals(value: boolean | undefined) {
 async function updateFinishedAddingKnowledge(value: boolean | undefined) {
   if (!goal.value) return;
   
-  const updatedGoal = await goalRepo.update(goal.value.uid, {
+  const updatedGoal = await goalRepo.update(goal.value.id, {
     finishedAddingKnowledge: value
   });
   

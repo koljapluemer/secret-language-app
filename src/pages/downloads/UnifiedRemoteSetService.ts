@@ -7,6 +7,7 @@ import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoCont
 import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract';
 import type { FactCardRepoContract } from '@/entities/fact-cards/FactCardRepoContract';
 import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
+import type { LanguageData } from '@/entities/languages/LanguageData';
 import { useToast } from '@/shared/toasts';
 
 import { vocabSchema } from '@/entities/remote-sets/validation/vocabSchema';
@@ -146,7 +147,7 @@ export class UnifiedRemoteSetService {
     const existingLanguage = await this.languageRepo.getByCode(languageCode);
     if (!existingLanguage) {
       const newLanguage = await this.languageRepo.createLanguageFromCode(languageCode);
-      await this.languageRepo.add(newLanguage);
+      await this.languageRepo.add(newLanguage as LanguageData);
     }
 
     // Create or update local set entry
@@ -212,7 +213,7 @@ export class UnifiedRemoteSetService {
     if (setFiles.translations) {
       const translationIdMap = await this.processTranslationsInBatch(
         setFiles.translations,
-        localSet.uid,
+        localSet.id,
         noteMap,
         (current, total) => reportProgress('Processing translations', current, total)
       );
@@ -227,7 +228,7 @@ export class UnifiedRemoteSetService {
     if (setFiles.vocab) {
       reportProgress('Processing vocabulary', 0, setFiles.vocab.length);
 
-      const vocabToCreate: Omit<VocabData, 'uid' | 'progress'>[] = [];
+      const vocabToCreate: Omit<VocabData, "id" | 'progress'>[] = [];
 
       // First pass: Create all vocab items
       for (let i = 0; i < setFiles.vocab.length; i++) {
@@ -239,7 +240,7 @@ export class UnifiedRemoteSetService {
         const translationUids = this.resolveReferences(vocabData.translations || [], translationMap);
         const links = this.resolveLinks(vocabData.links || [], linkMap);
 
-        const localVocab: Omit<VocabData, 'uid' | 'progress'> = {
+        const localVocab: Omit<VocabData, "id" | 'progress'> = {
           language: vocabData.language,
           content: vocabData.content,
           consideredCharacter: vocabData.consideredCharacter,
@@ -253,7 +254,7 @@ export class UnifiedRemoteSetService {
           relatedVocab: [], // Will resolve in second pass
           notRelatedVocab: [], // Will resolve in second pass
           similarSoundingButNotTheSame: [], // Will resolve in second pass
-          origins: [localSet.uid],
+          origins: [localSet.id],
           isPicturable: vocabData.isPicturable,
           notInterestedInPronunciationOrAlreadyAdded: vocabData.notInterestedInPronunciationOrAlreadyAdded,
           _mergeChecked: false // Mark for background merge
@@ -262,15 +263,19 @@ export class UnifiedRemoteSetService {
         vocabToCreate.push(localVocab);
       }
 
-      // Bulk create all vocab
-      const createdVocab = await this.vocabRepo.bulkProcessVocab([], vocabToCreate);
+      // Create all vocab
+      const createdVocab: VocabData[] = [];
+      for (const vocab of vocabToCreate) {
+        const created = await this.vocabRepo.saveVocab(vocab);
+        createdVocab.push(created);
+      }
 
       // Build ID mapping for cross-references
       for (let i = 0; i < setFiles.vocab.length; i++) {
         const vocabData = setFiles.vocab[i];
         if (vocabData.id && createdVocab[i]) {
-          vocabMap.set(vocabData.id, createdVocab[i].uid);
-          newVocabUids.push(createdVocab[i].uid);
+          vocabMap.set(vocabData.id, createdVocab[i].id);
+          newVocabUids.push(createdVocab[i].id);
         }
       }
 
@@ -296,7 +301,9 @@ export class UnifiedRemoteSetService {
       }
 
       if (vocabToUpdate.length > 0) {
-        await this.vocabRepo.bulkProcessVocab(vocabToUpdate, []);
+        for (const vocab of vocabToUpdate) {
+          await this.vocabRepo.updateVocab(vocab);
+        }
       }
 
       reportProgress('Processing vocabulary', setFiles.vocab.length, setFiles.vocab.length);
@@ -321,7 +328,7 @@ export class UnifiedRemoteSetService {
 
         const noteUids = this.resolveReferences(factCardData.notes || [], noteMap);
 
-        const localFactCard: Omit<FactCardData, 'uid' | 'progress'> = {
+        const localFactCard: Omit<FactCardData, "id" | 'progress'> = {
           language: factCardData.language,
           front: factCardData.front,
           back: factCardData.back,
@@ -329,13 +336,13 @@ export class UnifiedRemoteSetService {
           doNotPractice: false,
           notes: noteUids,
           links: [],
-          origins: [localSet.uid],
+          origins: [localSet.id],
           _mergeChecked: false // Mark for background merge
         };
 
         const savedFactCard = await this.factCardRepo.saveFactCard(localFactCard);
         if (factCardData.id) {
-          factCardMap.set(factCardData.id, savedFactCard.uid);
+          factCardMap.set(factCardData.id, savedFactCard.id);
         }
       }
 
@@ -355,7 +362,7 @@ export class UnifiedRemoteSetService {
         const factCardUids = this.resolveReferences(resourceData.factCards || [], factCardMap);
         const link = resourceData.link ? linkMap.get(resourceData.link) : undefined;
 
-        const localResource: Omit<ResourceData, 'uid' | 'lastShownAt'> = {
+        const localResource: Omit<ResourceData, "id" | 'lastShownAt'> = {
           language: resourceData.language,
           isImmersionContent: resourceData.isImmersionContent,
           title: resourceData.title,
@@ -365,15 +372,15 @@ export class UnifiedRemoteSetService {
           notes: noteUids,
           vocab: vocabUids,
           factCards: factCardUids,
-          origins: [localSet.uid],
+          origins: [localSet.id],
           finishedExtracting: false,
           _mergeChecked: false // Mark for background merge
         };
 
         const savedResource = await this.resourceRepo.saveResource(localResource);
-        newResourceUids.push(savedResource.uid);
+        newResourceUids.push(savedResource.id);
         if (resourceData.id) {
-          resourceMap.set(resourceData.id, savedResource.uid);
+          resourceMap.set(resourceData.id, savedResource.id);
         }
       }
 
@@ -396,14 +403,14 @@ export class UnifiedRemoteSetService {
         const factCardUids = this.resolveReferences(goalData.factCards || [], factCardMap);
         const subGoalUids = this.resolveReferences(goalData.subGoals || [], goalMap);
 
-        const localGoal: Omit<GoalData, 'uid'> = {
+        const localGoal: Omit<GoalData, "id"> = {
           language: goalData.language,
           title: goalData.title,
           notes: noteUids,
           vocab: vocabUids,
           factCards: factCardUids,
           subGoals: subGoalUids,
-          origins: [localSet.uid],
+          origins: [localSet.id],
           finishedAddingSubGoals: false,
           finishedAddingMilestones: false,
           finishedAddingKnowledge: false,
@@ -412,9 +419,9 @@ export class UnifiedRemoteSetService {
         };
 
         const savedGoal = await this.goalRepo.create(localGoal);
-        newGoalUids.push(savedGoal.uid);
+        newGoalUids.push(savedGoal.id);
         if (goalData.id) {
-          goalMap.set(goalData.id, savedGoal.uid);
+          goalMap.set(goalData.id, savedGoal.id);
         }
       }
 
@@ -676,7 +683,7 @@ export class UnifiedRemoteSetService {
 
       const noteUids = this.resolveReferences(remoteTranslation.notes || [], noteMap);
       const newTranslation: TranslationData = {
-        uid: crypto.randomUUID(),
+        id: crypto.randomUUID(),
         content: remoteTranslation.content,
         priority: remoteTranslation.priority || 1,
         notes: noteUids,
@@ -686,12 +693,14 @@ export class UnifiedRemoteSetService {
 
       translationsToCreate.push(newTranslation);
       if (remoteTranslation.id) {
-        remoteIdToLocalUid.set(remoteTranslation.id, newTranslation.uid);
+        remoteIdToLocalUid.set(remoteTranslation.id, newTranslation.id);
       }
     }
 
-    // Bulk insert (no updates needed - everything is new)
-    await this.translationRepo.bulkProcessTranslations([], translationsToCreate);
+    // Insert all translations
+    for (const translation of translationsToCreate) {
+      await this.translationRepo.saveTranslation(translation);
+    }
 
     onProgress?.(remoteTranslations.length, remoteTranslations.length);
     return remoteIdToLocalUid;

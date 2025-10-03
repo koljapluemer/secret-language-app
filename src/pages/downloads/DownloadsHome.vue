@@ -179,7 +179,7 @@ interface ExtendedSetInfo extends RemoteSetInfo {
 
 // Data
 const allSets = ref<ExtendedSetInfo[]>([]);
-const availableLanguages = ref<LanguageData[]>([]);
+const availableLanguages = ref<Array<LanguageData | Omit<LanguageData, 'id'>>>([]);
 const downloadedSets = ref<Set<string>>(new Set());
 const loading = ref(false);
 const error = ref<string | null>(null);

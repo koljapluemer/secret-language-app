@@ -1,50 +1,36 @@
-import Dexie, { type Table } from 'dexie';
 import type { TranslationRepoContract } from './TranslationRepoContract';
 import type { TranslationData } from './TranslationData';
 import { levenshteinDistance, isLengthWithinRange } from '@/shared/utils/stringUtils';
 import { shuffleArray } from '@/shared/utils/arrayUtils';
-
-class TranslationDatabase extends Dexie {
-  translations!: Table<TranslationData>;
-
-  constructor() {
-    super('TranslationDatabase');
-    this.version(1).stores({
-      translations: 'uid, content, *origins'
-    });
-  }
-}
-
-const translationDb = new TranslationDatabase();
+import { db } from '@/shared/database/db';
 
 export class TranslationRepo implements TranslationRepoContract {
-  
+
   async getTranslationsByIds(ids: string[]): Promise<TranslationData[]> {
-    return await translationDb.translations.where('uid').anyOf(ids).toArray();
+    return await db.translations.where('id').anyOf(ids).toArray();
   }
 
   async getAllTranslations(): Promise<TranslationData[]> {
-    return await translationDb.translations.toArray();
+    return await db.translations.toArray();
   }
 
   async getTranslationByContent(content: string): Promise<TranslationData | undefined> {
-    return await translationDb.translations.where('content').equals(content).first();
+    return await db.translations.where('content').equals(content).first();
   }
 
-  async saveTranslation(translation: Omit<TranslationData, 'uid' | 'origins'>): Promise<TranslationData> {
-    const translationToSave: TranslationData = {
-      uid: crypto.randomUUID(),
+  async saveTranslation(translation: Omit<TranslationData, 'id' | 'origins'>): Promise<TranslationData> {
+    const translationToSave: Omit<TranslationData, 'id'> = {
       content: translation.content,
       priority: translation.priority,
       notes: translation.notes,
       origins: []
     };
-    
-    await translationDb.translations.add(translationToSave);
-    return translationToSave;
+
+    const id = await db.translations.add(translationToSave as TranslationData);
+    return { ...translationToSave, id: id as string };
   }
 
-  async saveOrGetExistingTranslation(translation: Omit<TranslationData, 'uid' | 'origins'>): Promise<TranslationData> {
+  async saveOrGetExistingTranslation(translation: Omit<TranslationData, 'id' | 'origins'>): Promise<TranslationData> {
     // Check if a translation with this content already exists
     const existing = await this.getTranslationByContent(translation.content);
     
@@ -65,22 +51,22 @@ export class TranslationRepo implements TranslationRepoContract {
   }
 
   async updateTranslation(translation: TranslationData): Promise<void> {
-    await translationDb.translations.put(translation);
+    await db.translations.put(translation);
   }
 
   async deleteTranslations(ids: string[]): Promise<void> {
-    await translationDb.translations.where('uid').anyOf(ids).delete();
+    await db.translations.where('id').anyOf(ids).delete();
   }
 
   async searchTranslationsByContent(content: string): Promise<TranslationData[]> {
-    const allTranslations = await translationDb.translations.toArray();
+    const allTranslations = await db.translations.toArray();
     return allTranslations.filter(translation => 
       translation.content.toLowerCase().includes(content.toLowerCase())
     );
   }
 
   private async findIdealWrongTranslation(correctTranslationContent: string): Promise<string | null> {
-    const allTranslations = await translationDb.translations.toArray();
+    const allTranslations = await db.translations.toArray();
     
     const idealCandidates = allTranslations.filter(translation => {
       if (translation.content === correctTranslationContent) return false;
@@ -101,7 +87,7 @@ export class TranslationRepo implements TranslationRepoContract {
   }
 
   private async getFallbackWrongTranslation(correctTranslationContent: string): Promise<string | null> {
-    const allTranslations = await translationDb.translations.toArray();
+    const allTranslations = await db.translations.toArray();
     
     const candidates = allTranslations.filter(translation => 
       translation.content !== correctTranslationContent
@@ -138,17 +124,6 @@ export class TranslationRepo implements TranslationRepoContract {
     }
     
     return wrongAnswers;
-  }
-
-  async bulkProcessTranslations(toUpdate: TranslationData[], toCreate: TranslationData[]): Promise<void> {
-    await translationDb.transaction('rw', translationDb.translations, async () => {
-      if (toUpdate.length > 0) {
-        await translationDb.translations.bulkPut(toUpdate);
-      }
-      if (toCreate.length > 0) {
-        await translationDb.translations.bulkAdd(toCreate);
-      }
-    });
   }
 
   async getUncheckedTranslations(limit: number): Promise<TranslationData[]> {

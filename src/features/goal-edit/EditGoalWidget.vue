@@ -64,9 +64,9 @@ async function saveGoal() {
   try {
     let updatedGoal: GoalData;
     
-    if (props.goal.uid) {
+    if (props.goal.id) {
       // Update existing goal
-      updatedGoal = await goalRepo.update(props.goal.uid, {
+      updatedGoal = await goalRepo.update(props.goal.id, {
         title: goalTitle.value.trim(),
         language: selectedLanguage.value
       });

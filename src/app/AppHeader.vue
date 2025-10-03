@@ -2,12 +2,13 @@
 import { ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { 
-  Play, 
-  Settings, 
-  Clock, 
+import {
+  Play,
+  Settings,
+  Clock,
   Download,
-  FolderOpen
+  FolderOpen,
+  TrendingUp
 } from 'lucide-vue-next';
 import MyMaterialSubmenu from './MyMaterialSubmenu.vue';
 
@@ -42,9 +43,13 @@ const isOnStatsPage = computed(() => {
 });
 
 const isOnDownloadsPage = computed(() => {
-  return route.path.startsWith('/downloads') || 
-         route.name === 'downloads' || 
+  return route.path.startsWith('/downloads') ||
+         route.name === 'downloads' ||
          route.name === 'set-overview';
+});
+
+const isOnMotivationPage = computed(() => {
+  return route.path.startsWith('/motivation') || route.name === 'motivation';
 });
 
 const shouldShowSubmenu = computed(() => isOnMaterialPage.value && !isOnMyMaterialOverviewPage.value);
@@ -112,10 +117,20 @@ const toggleMaterialSubmenu = () => {
           <Clock :size="16" />
           <span class="hidden md:inline ml-2">{{ t('navigation.stats') }}</span>
         </router-link>
-        
+
+        <!-- Motivation -->
+        <router-link
+          :to="{ name: 'motivation' }"
+          class="btn btn-ghost btn-sm"
+          :class="{ 'btn-active': isOnMotivationPage }"
+        >
+          <TrendingUp :size="16" />
+          <span class="hidden md:inline ml-2">{{ t('navigation.motivation') }}</span>
+        </router-link>
+
         <!-- Downloads -->
-        <router-link 
-          :to="{ name: 'downloads' }" 
+        <router-link
+          :to="{ name: 'downloads' }"
           class="btn btn-ghost btn-sm"
           :class="{ 'btn-active': isOnDownloadsPage }"
         >

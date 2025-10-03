@@ -77,7 +77,7 @@ const handleDone = async () => {
   try {
     // Save the experience comment as a note if provided
     if (experienceComment.value.trim()) {
-      const noteData: Omit<NoteData, 'uid'> = {
+      const noteData: Omit<NoteData, "id"> = {
         content: experienceComment.value.trim(),
         noteType: 'immersion-experience'
       };
@@ -87,7 +87,7 @@ const handleDone = async () => {
       // Add the note to the resource
       const updatedResource: ResourceData = {
         ...toRaw(resource.value),
-        notes: [...resource.value.notes, note.uid],
+        notes: [...resource.value.notes, note.id],
         lastShownAt: new Date()
       };
       

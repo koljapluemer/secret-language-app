@@ -94,8 +94,8 @@ const handleRating = async (rating: Rating) => {
     // Score vocab and update last review
     // In illegal immersion mode, use immediateDue for low ratings
     const immediateDue = props.modeContext?.setWrongVocabDueAgainImmediately || false;
-    await vocabRepo.scoreVocab(vocab.value.uid, rating, immediateDue);
-    await vocabRepo.updateLastReview(vocab.value.uid);
+    await vocabRepo.scoreVocab(vocab.value.id, rating, immediateDue);
+    await vocabRepo.updateLastReview(vocab.value.id);
 
     // Map rating to correctness
     const correctness = (rating === 1 || rating === 2) ? 'incorrect' : 'correct'; // Rating.Again=1, Hard=2 are incorrect
@@ -124,7 +124,7 @@ onMounted(loadVocab);
           
           <NoteDisplayMini 
             v-for="note in vocabNotes.filter(note => note.showBeforeExercise)" 
-            :key="note.uid"
+            :key="note.id"
             :note="note"
           />
         </div>
@@ -134,7 +134,7 @@ onMounted(loadVocab);
           
           <NoteDisplayMini 
             v-for="note in translationNotes.filter(note => note.showBeforeExercise)" 
-            :key="note.uid"
+            :key="note.id"
             :note="note"
           />
         </div>

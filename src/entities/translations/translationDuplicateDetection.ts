@@ -26,7 +26,7 @@ export async function findDuplicateTranslation(
     const existing = await translationRepo.getTranslationByContent(translation.content)
 
     // Make sure we don't match against ourselves
-    if (existing && existing.uid !== translation.uid) {
+    if (existing && existing.id !== translation.id) {
       return existing
     }
   }

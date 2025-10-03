@@ -10,7 +10,8 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { Line } from 'vue-chartjs';
+import { Chart } from 'vue-chartjs';
+import type { ChartOptions, ChartDataCustomTypesPerDataset } from 'chart.js';
 import { BoxPlotController, BoxAndWiskers } from '@sgratzl/chartjs-chart-boxplot';
 
 // Register Chart.js components
@@ -27,16 +28,8 @@ ChartJS.register(
 );
 
 interface Props {
-  data: {
-    labels: string[];
-    datasets: Array<{
-      label: string;
-      data: number[][];
-      backgroundColor?: string;
-      borderColor?: string;
-    }>;
-  };
-  options?: Record<string, unknown>;
+  data: ChartDataCustomTypesPerDataset<'boxplot'>;
+  options?: ChartOptions<'boxplot'>;
   height?: number;
 }
 
@@ -101,7 +94,8 @@ const chartOptions = computed(() => ({
 
 <template>
   <div :style="{ height: `${height}px` }" class="relative">
-    <Line
+    <Chart
+      type="boxplot"
       :data="chartData"
       :options="chartOptions"
     />

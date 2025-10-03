@@ -40,7 +40,7 @@
       <div v-else class="space-y-4">
         <div
           v-for="(translation, index) in formData.translations"
-          :key="translation.uid"
+          :key="translation.id"
         >
           <!-- Edit mode -->
           <div v-if="editingIndex === index" class="space-y-4">
@@ -87,7 +87,7 @@
               </button>
               <button
                 type="button"
-                @click="deleteTranslation(translation.uid)"
+                @click="deleteTranslation(translation.id)"
                 class="btn btn-ghost btn-circle text-error flex-shrink-0"
               >
                 <X class="w-4 h-4" />
@@ -171,7 +171,7 @@ const emit = defineEmits<{
 const editingIndex = ref<number | null>(null);
 const isCreatingNew = ref(false);
 const tempTranslation = ref<TranslationData>({
-  uid: '',
+  id: '',
   content: '',
   priority: 1,
   notes: [],
@@ -180,7 +180,7 @@ const tempTranslation = ref<TranslationData>({
 
 function addNewTranslation() {
   tempTranslation.value = {
-    uid: '',
+    id: '',
     content: '',
     priority: 1,
     notes: [],
@@ -195,7 +195,7 @@ function saveNewTranslation() {
   const newTranslation: TranslationData = {
     ...tempTranslation.value,
     content: tempTranslation.value.content.trim(),
-    uid: crypto.randomUUID()
+    id: crypto.randomUUID()
   };
   
   emit('add-translation', newTranslation);

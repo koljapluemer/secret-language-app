@@ -1,5 +1,5 @@
 export interface GoalData {
-  uid: string;
+  id: string;
   language: string;
   title: string;
   doNotPractice?: boolean;

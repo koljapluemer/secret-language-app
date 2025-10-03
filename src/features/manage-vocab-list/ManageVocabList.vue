@@ -1,7 +1,7 @@
 <template>
   <div class="py-4">
     <div v-if="vocabItems.length !== 0" class="space-y-4">
-      <div v-for="(vocab, index) in vocabItems" :key="vocab.uid" class="card shadow">
+      <div v-for="(vocab, index) in vocabItems" :key="vocab.id" class="card shadow">
         <div class="card-body">
           <div class="flex">
             <!-- Left side: Content -->
@@ -81,15 +81,15 @@
 
           <!-- Bottom row: Action buttons -->
           <div class="flex justify-end gap-2 mt-4 pt-3 border-t border-base-300">
-            <button v-if="config.allowDisconnect" type="button" @click="disconnectVocab(vocab.uid)"
+            <button v-if="config.allowDisconnect" type="button" @click="disconnectVocab(vocab.id)"
               class="btn btn-sm btn-ghost" title="Disconnect vocab from parent">
               <Unlink class="w-4 h-4" />
             </button>
-            <button v-if="config.allowNavigate" type="button" @click="goToVocab(vocab.uid)" class="btn btn-sm btn-ghost"
+            <button v-if="config.allowNavigate" type="button" @click="goToVocab(vocab.id)" class="btn btn-sm btn-ghost"
               title="Go to vocab">
               <ExternalLink class="w-4 h-4" />
             </button>
-            <button v-if="config.allowDelete" type="button" @click="deleteVocab(vocab.uid)"
+            <button v-if="config.allowDelete" type="button" @click="deleteVocab(vocab.id)"
               class="btn btn-sm btn-ghost text-error" title="Delete vocab permanently">
               <Trash2 class="w-4 h-4" />
             </button>
@@ -250,7 +250,7 @@ async function loadVocab() {
 
   translations.value.clear();
   translationResults.forEach(t => {
-    translations.value.set(t.uid, t);
+    translations.value.set(t.id, t);
   });
 }
 
@@ -273,7 +273,7 @@ async function updateVocabContent(vocab: VocabData, newContent: string | number 
   await vocabRepo.updateVocab(updatedVocab);
 
   // Update local state
-  const index = vocabItems.value.findIndex(v => v.uid === vocab.uid);
+  const index = vocabItems.value.findIndex(v => v.id === vocab.id);
   if (index !== -1) {
     vocabItems.value[index] = updatedVocab;
   }
@@ -300,19 +300,19 @@ async function saveNewTranslation(vocab: VocabData) {
   // Update vocab with new translation ID
   const updatedVocab = toRaw({
     ...toRaw(vocab),
-    translations: [...toRaw(vocab).translations, newTranslation.uid]
+    translations: [...toRaw(vocab).translations, newTranslation.id]
   });
 
   await vocabRepo.updateVocab(updatedVocab);
 
   // Update local state
-  const index = vocabItems.value.findIndex(v => v.uid === vocab.uid);
+  const index = vocabItems.value.findIndex(v => v.id === vocab.id);
   if (index !== -1) {
     vocabItems.value[index] = updatedVocab;
   }
 
   // Add to translations map
-  translations.value.set(newTranslation.uid, newTranslation);
+  translations.value.set(newTranslation.id, newTranslation);
 
   // Clear form
   creatingTranslationForVocab.value = null;
@@ -371,7 +371,7 @@ async function deleteTranslation(vocab: VocabData, translationId: string) {
   await vocabRepo.updateVocab(updatedVocab);
 
   // Update local state
-  const index = vocabItems.value.findIndex(v => v.uid === vocab.uid);
+  const index = vocabItems.value.findIndex(v => v.id === vocab.id);
   if (index !== -1) {
     vocabItems.value[index] = updatedVocab;
   }
@@ -395,7 +395,7 @@ async function createNewVocab() {
       priority: 1,
       notes: []
     }));
-    translationIds.push(translation.uid);
+    translationIds.push(translation.id);
   }
 
   // Create vocabulary
@@ -418,7 +418,7 @@ async function createNewVocab() {
   if (translationIds.length > 0 && creationMode.value !== 'vocab-only') {
     const newTranslations = await translationRepo.getTranslationsByIds(translationIds);
     newTranslations.forEach(t => {
-      translations.value.set(t.uid, t);
+      translations.value.set(t.id, t);
     });
   }
 
@@ -427,7 +427,7 @@ async function createNewVocab() {
   newTranslationContent.value = '';
 
   // Emit events
-  const updatedVocabIds = [...props.vocabIds, vocab.uid];
+  const updatedVocabIds = [...props.vocabIds, vocab.id];
   emit('update:vocab-ids', updatedVocabIds);
   emit('vocab-added', vocab);
 }
@@ -436,7 +436,7 @@ function disconnectVocab(vocabId: string) {
   if (!confirm('Are you sure you want to disconnect this vocabulary?')) return;
 
   // Update local state
-  vocabItems.value = vocabItems.value.filter(v => v.uid !== vocabId);
+  vocabItems.value = vocabItems.value.filter(v => v.id !== vocabId);
 
   // Emit events
   const updatedVocabIds = props.vocabIds.filter(id => id !== vocabId);
@@ -451,7 +451,7 @@ function goToVocab(vocabId: string) {
 async function deleteVocab(vocabId: string) {
   if (!confirm('Are you sure you want to permanently delete this vocabulary? This cannot be undone.')) return;
 
-  const vocab = vocabItems.value.find(v => v.uid === vocabId);
+  const vocab = vocabItems.value.find(v => v.id === vocabId);
   if (!vocab) return;
 
   // Delete all translations associated with this vocab
@@ -463,7 +463,7 @@ async function deleteVocab(vocabId: string) {
   await vocabRepo.deleteVocab(vocabId);
 
   // Update local state
-  vocabItems.value = vocabItems.value.filter(v => v.uid !== vocabId);
+  vocabItems.value = vocabItems.value.filter(v => v.id !== vocabId);
 
   // Emit events
   const updatedVocabIds = props.vocabIds.filter(id => id !== vocabId);

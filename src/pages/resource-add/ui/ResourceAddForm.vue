@@ -146,7 +146,7 @@ async function saveResource(): Promise<ResourceData | null> {
   error.value = null;
 
   try {
-    const resourceData: Omit<ResourceData, 'uid' | 'lastShownAt'> = {
+    const resourceData: Omit<ResourceData, "id" | 'lastShownAt'> = {
       title: formData.value.title.trim(),
       language: formData.value.language.trim(),
       isImmersionContent: formData.value.isImmersionContent,

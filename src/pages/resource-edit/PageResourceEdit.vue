@@ -88,7 +88,7 @@ async function loadVocabItems() {
 async function loadResource() {
   loading.value = true;
 
-  const resourceId = route.params.uid as string;
+  const resourceId = route.params.id as string;
   const loadedResource = await resourceRepo.getResourceById(resourceId);
   if (!loadedResource) {
     router.push('/resources');

@@ -31,7 +31,7 @@ export interface VocabRepoContract {
   getTotalVocabCount(filters?: VocabListFilters): Promise<number>;
   
   // CRUD operations
-  saveVocab(vocab: Omit<VocabData, 'uid' | 'progress' | 'tasks'>): Promise<VocabData>;
+  saveVocab(vocab: Omit<VocabData, "id" | 'progress' | 'tasks'>): Promise<VocabData>;
   updateVocab(vocab: VocabData): Promise<void>;
   deleteVocab(id: string): Promise<void>;
   
@@ -98,9 +98,6 @@ export interface VocabRepoContract {
   getRandomDueVocabFromSet(setUid: string, count: number, vocabBlockList?: string[]): Promise<VocabData[]>;
   getRandomUnseenVocabFromSet(setUid: string, count: number, vocabBlockList?: string[]): Promise<VocabData[]>;
   getUnseenVocabCountFromSet(setUid: string): Promise<number>;
-
-  // Bulk operations for performance
-  bulkProcessVocab(toUpdate: VocabData[], toCreate: Omit<VocabData, 'uid' | 'progress'>[]): Promise<VocabData[]>;
 
   // Merge operations
   getUncheckedVocab(limit: number): Promise<VocabData[]>;

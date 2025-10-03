@@ -2,25 +2,25 @@ import type { VocabData } from '@/entities/vocab/VocabData';
 import type { Task } from '@/pages/practice/Task';
 
 export function generateClozeChoiceFromFour(vocab: VocabData): Task {
-  const uid = `cloze-choose-from-four-${vocab.uid}-${Date.now()}`;
+  const id = `cloze-choose-from-four-${vocab.id}-${Date.now()}`;
   
   return {
-    uid,
+    id,
     language: vocab.language,
     taskType: 'cloze-choose-from-four',
     prompt: 'Complete the missing word',
-    associatedVocab: [vocab.uid]
+    associatedVocab: [vocab.id]
   };
 }
 
 export function generateClozeChoiceFromTwo(vocab: VocabData): Task {
-  const uid = `cloze-choose-from-two-${vocab.uid}-${Date.now()}`;
+  const id = `cloze-choose-from-two-${vocab.id}-${Date.now()}`;
   
   return {
-    uid,
+    id,
     language: vocab.language,
     taskType: 'cloze-choose-from-two',
     prompt: 'Complete the missing word',
-    associatedVocab: [vocab.uid]
+    associatedVocab: [vocab.id]
   };
 }

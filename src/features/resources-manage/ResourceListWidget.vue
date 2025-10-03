@@ -47,9 +47,9 @@
               {{ $t('common.userAdded') }}
             </label>
           </li>
-          <li v-for="set in availableSets" :key="set.uid">
+          <li v-for="set in availableSets" :key="set.id">
             <label class="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" :checked="selectedSets.includes(set.uid)" @change="toggleSet(set.uid)"
+              <input type="checkbox" :checked="selectedSets.includes(set.id)" @change="toggleSet(set.id)"
                 class="checkbox checkbox-sm" />
               {{ set.name }}
             </label>
@@ -88,9 +88,9 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="resource in resourceItems" :key="resource.uid">
+          <tr v-for="resource in resourceItems" :key="resource.id">
             <td>
-              <router-link :to="`/resources/${resource.uid}/edit`" class="font-bold link link-hover">
+              <router-link :to="`/resources/${resource.id}/edit`" class="font-bold link link-hover">
                 {{ resource.title }}
               </router-link>
             </td>
@@ -122,7 +122,7 @@
               </div>
             </td>
             <td>
-              <button @click="deleteResource(resource.uid)" class="btn btn-sm btn-ghost">
+              <button @click="deleteResource(resource.id)" class="btn btn-sm btn-ghost">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M3 6h18" />
@@ -306,7 +306,7 @@ function getLanguageEmoji(code: string): string | undefined {
 
 function getOriginDisplayName(origin: string): string {
   if (origin === 'user-added') return 'User Added';
-  const set = availableSets.value.find(s => s.uid === origin);
+  const set = availableSets.value.find(s => s.id === origin);
   return set?.name || origin;
 }
 
@@ -339,7 +339,7 @@ async function loadResources() {
 }
 
 async function deleteResource(uid: string) {
-  const resourceToDelete = resourceItems.value.find(r => r.uid === uid);
+  const resourceToDelete = resourceItems.value.find(r => r.id === uid);
   if (!resourceToDelete || !confirm(`Are you sure you want to delete "${resourceToDelete.title}"?`)) {
     return;
   }
@@ -363,7 +363,7 @@ async function loadFilterOptions() {
     // If no URL filters are set, initialize with all languages and sets selected
     if (selectedLanguages.value.length === 0 && selectedSets.value.length === 0) {
       selectedLanguages.value = availableLanguages.value.map(l => l.code);
-      selectedSets.value = ['user-added', ...availableSets.value.map(s => s.uid)];
+      selectedSets.value = ['user-added', ...availableSets.value.map(s => s.id)];
     }
   } catch {
     toast.error('Failed to load filter options');

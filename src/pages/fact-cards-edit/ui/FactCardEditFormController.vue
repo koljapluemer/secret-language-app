@@ -50,7 +50,7 @@ interface FactCardFormState {
 
 function factCardDataToFormData(factCard: FactCardData, notes: NoteData[] = []): FactCardFormData {
   return {
-    id: factCard.uid,
+    id: factCard.id,
     language: factCard.language,
     front: factCard.front || '',
     back: factCard.back || '',
@@ -63,11 +63,11 @@ function factCardDataToFormData(factCard: FactCardData, notes: NoteData[] = []):
 
 function formDataToFactCardData(formData: FactCardFormData, existingFactCard?: FactCardData): Omit<FactCardData, 'progress'> | FactCardData {
   const baseData: Omit<FactCardData, 'progress'> = {
-    uid: formData.id || crypto.randomUUID(),
+    id: formData.id || crypto.randomUUID(),
     language: formData.language,
     front: formData.front,
     back: formData.back,
-    notes: formData.notes.map(note => note.uid),
+    notes: formData.notes.map(note => note.id),
     links: formData.links,
     priority: formData.priority ?? 1,
     doNotPractice: formData.doNotPractice,
@@ -172,9 +172,9 @@ async function saveInternal(): Promise<void> {
   const serializedFormData = serializeFormData(state.value.formData);
 
   for (const note of serializedFormData.notes) {
-    if (note.uid && loadedNotes.value.find(n => n.uid === note.uid)) {
+    if (note.id && loadedNotes.value.find(n => n.id === note.id)) {
       await noteRepo.updateNote(toRaw(note));
-    } else if (!note.uid || !loadedNotes.value.find(n => n.uid === note.uid)) {
+    } else if (!note.id || !loadedNotes.value.find(n => n.id === note.id)) {
       const savedNote = await noteRepo.saveNote(toRaw(note));
       const noteIndex = serializedFormData.notes.findIndex(n => n === note);
       if (noteIndex >= 0) {
@@ -183,10 +183,10 @@ async function saveInternal(): Promise<void> {
     }
   }
 
-  const currentNoteUIDs = serializedFormData.notes.map(n => n.uid);
-  const notesToDelete = loadedNotes.value.filter(n => !currentNoteUIDs.includes(n.uid));
+  const currentNoteUIDs = serializedFormData.notes.map(n => n.id);
+  const notesToDelete = loadedNotes.value.filter(n => !currentNoteUIDs.includes(n.id));
   if (notesToDelete.length > 0) {
-    await noteRepo.deleteNotes(notesToDelete.map(n => n.uid));
+    await noteRepo.deleteNotes(notesToDelete.map(n => n.id));
   }
 
   let finalFactCardId = props.factCardId;
@@ -203,10 +203,10 @@ async function saveInternal(): Promise<void> {
     };
     
     await factCardRepo.updateFactCard(toRaw(updatedFactCard));
-    finalFactCardId = updatedFactCard.uid;
+    finalFactCardId = updatedFactCard.id;
   } else {
     const savedFactCard = await factCardRepo.saveFactCard(toRaw(formDataToFactCardData(serializedFormData)));
-    finalFactCardId = savedFactCard.uid;
+    finalFactCardId = savedFactCard.id;
   }
 
   if (finalFactCardId) {
@@ -244,7 +244,7 @@ async function handleFieldChange() {
 
 function addNote() {
   const newNote: NoteData = {
-    uid: crypto.randomUUID(),
+    id: crypto.randomUUID(),
     content: '',
     showBeforeExercise: false
   };
@@ -252,7 +252,7 @@ function addNote() {
 }
 
 function updateNote(updatedNote: NoteData) {
-  const index = state.value.formData.notes.findIndex(n => n.uid === updatedNote.uid);
+  const index = state.value.formData.notes.findIndex(n => n.id === updatedNote.id);
   if (index >= 0) {
     state.value.formData.notes[index] = updatedNote;
     handleFieldChange();
@@ -260,7 +260,7 @@ function updateNote(updatedNote: NoteData) {
 }
 
 function removeNote(uid: string) {
-  const index = state.value.formData.notes.findIndex(n => n.uid === uid);
+  const index = state.value.formData.notes.findIndex(n => n.id === uid);
   if (index >= 0) {
     state.value.formData.notes.splice(index, 1);
   }

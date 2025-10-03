@@ -78,7 +78,7 @@ const handleSkipAndDisable = async () => {
   if (!vocab.value) return;
   
   try {
-    await vocabRepo.markVocabNotPicturable(vocab.value.uid);
+    await vocabRepo.markVocabNotPicturable(vocab.value.id);
     emit('finished');
   } catch {
     toast.error('Failed to update vocabulary settings');
@@ -105,7 +105,7 @@ onMounted(loadVocab);
         <div v-if="vocabNotes.filter(note => note.showBeforeExercise).length > 0" class="w-64 space-y-2">
           <NoteDisplayMini 
             v-for="note in vocabNotes.filter(note => note.showBeforeExercise)" 
-            :key="note.uid"
+            :key="note.id"
             :note="note"
           />
         </div>
@@ -115,16 +115,16 @@ onMounted(loadVocab);
       
       <!-- Translation sections -->
       <div class="space-y-4 mb-8">
-        <div v-for="translation in translations" :key="translation.uid" class="flex gap-4">
+        <div v-for="translation in translations" :key="translation.id" class="flex gap-4">
           <div class="flex-1 text-center">
             <div :class="isSentence ? 'text-xl' : 'text-2xl'" class="text-light">{{ translation.content }}</div>
           </div>
           <!-- Translation notes sidebar -->
-          <div v-if="translationNotes.filter(note => note.showBeforeExercise && translation.notes?.includes(note.uid)).length > 0" class="w-64 space-y-2">
+          <div v-if="translationNotes.filter(note => note.showBeforeExercise && translation.notes?.includes(note.id)).length > 0" class="w-64 space-y-2">
             
             <NoteDisplayMini 
-              v-for="note in translationNotes.filter(note => note.showBeforeExercise && translation.notes?.includes(note.uid))" 
-              :key="note.uid"
+              v-for="note in translationNotes.filter(note => note.showBeforeExercise && translation.notes?.includes(note.id))" 
+              :key="note.id"
               :note="note"
             />
           </div>
@@ -135,7 +135,7 @@ onMounted(loadVocab);
     <!-- Image Management -->
     <div class="max-w-2xl mx-auto mb-8">
       <VocabImageManager
-        :vocab-id="vocab.uid"
+        :vocab-id="vocab.id"
         :images="vocab.images"
         :is-picturable="vocab.isPicturable"
         @images-changed="handleImagesChanged"

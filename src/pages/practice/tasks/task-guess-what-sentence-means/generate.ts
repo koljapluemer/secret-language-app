@@ -2,13 +2,13 @@ import type { VocabData } from '@/entities/vocab/VocabData';
 import type { Task } from '@/pages/practice/Task';
 
 export function generateGuessWhatSentenceMeans(vocab: VocabData): Task {
-  const uid = `guess-what-sentence-means-${vocab.uid}-${Date.now()}`;
+  const id = `guess-what-sentence-means-${vocab.id}-${Date.now()}`;
   
   return {
-    uid,
+    id,
     language: vocab.language,
     taskType: 'guess-what-sentence-means',
     prompt: 'Guess what this sentence means',
-    associatedVocab: [vocab.uid]
+    associatedVocab: [vocab.id]
   };
 }

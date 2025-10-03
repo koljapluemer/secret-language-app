@@ -203,8 +203,8 @@ const handleCompletion = async () => {
   try {
     const rating = firstAttemptWrong.value ? Rating.Again : Rating.Good;
     const immediateDue = props.modeContext?.setWrongVocabDueAgainImmediately || false;
-    await vocabRepo.scoreVocab(vocab.value.uid, rating, immediateDue);
-    await vocabRepo.updateLastReview(vocab.value.uid);
+    await vocabRepo.scoreVocab(vocab.value.id, rating, immediateDue);
+    await vocabRepo.updateLastReview(vocab.value.id);
     
     const correctness = firstAttemptWrong.value ? 'incorrect' : 'correct';
     setTimeout(() => emit('finished', correctness), 750);
@@ -245,7 +245,7 @@ onMounted(loadVocabData);
         <div v-if="vocabNotes.filter(note => note.showBeforeExercise).length > 0" class="space-y-2">
           <NoteDisplayMini 
             v-for="note in vocabNotes.filter(note => note.showBeforeExercise)" 
-            :key="note.uid"
+            :key="note.id"
             :note="note"
           />
         </div>
@@ -255,7 +255,7 @@ onMounted(loadVocabData);
           
           <NoteDisplayMini 
             v-for="note in translationNotes.filter(note => note.showBeforeExercise)" 
-            :key="note.uid"
+            :key="note.id"
             :note="note"
           />
         </div>

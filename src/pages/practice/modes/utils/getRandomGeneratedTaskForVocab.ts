@@ -88,7 +88,7 @@ export async function getRandomGeneratedTaskForVocab(
     eligibleTasks.push(async () => {
       try {
         const otherVocabs = await vocabRepo.getDueNonSentenceVocabInLanguage(vocab.language);
-        const otherVocab = otherVocabs.find(v => v.uid !== vocab.uid);
+        const otherVocab = otherVocabs.find(v => v.id !== vocab.id);
         if (otherVocab) {
           return generateTaskFormSentenceFromTwoVocab(vocab, otherVocab);
         }

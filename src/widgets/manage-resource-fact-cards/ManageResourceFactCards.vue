@@ -46,7 +46,7 @@ async function handleFactCardIdsUpdate(newFactCardIds: string[]) {
 async function handleFactCardAdded(factCard: FactCardData) {
   const updatedResource = await resourceRepo.updateResource(toRaw({
     ...toRaw(props.resource),
-    factCards: [...toRaw(props.resource).factCards, factCard.uid]
+    factCards: [...toRaw(props.resource).factCards, factCard.id]
   }));
   emit('resource-updated', updatedResource);
 }

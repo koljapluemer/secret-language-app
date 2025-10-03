@@ -1,56 +1,44 @@
-import Dexie, { type Table } from 'dexie';
 import type { LanguageRepoContract } from './LanguageRepoContract';
 import type { LanguageData } from './LanguageData';
 import { useToast } from '@/shared/toasts';
 import isoLangs from './isoLangs.json';
-
-class LanguageDatabase extends Dexie {
-  languages!: Table<LanguageData>;
-
-  constructor() {
-    super('LanguageStorage');
-    this.version(1).stores({
-      languages: 'code, name, isActive'
-    });
-  }
-}
+import { db } from '@/shared/database/db';
 
 export class LanguageRepo implements LanguageRepoContract {
-  private db = new LanguageDatabase();
   private toast = useToast();
 
   async getAll(): Promise<LanguageData[]> {
-    return await this.db.languages.toArray();
+    return await db.languages.toArray();
   }
 
   async getActiveTargetLanguages(): Promise<LanguageData[]> {
-    const all = await this.db.languages.toArray();
+    const all = await db.languages.toArray();
     return all.filter(lang => lang.isActive);
   }
 
   async getByCode(code: string): Promise<LanguageData | undefined> {
-    return await this.db.languages.get(code);
+    return await db.languages.get(code);
   }
 
   async add(language: LanguageData): Promise<void> {
     // Merge emoji from isoLangs.json if available
     const isoLang = (isoLangs as { code: string; name: string; emoji?: string }[])
       .find(l => l.code === language.code);
-    
+
     const languageWithEmoji: LanguageData = {
       ...language,
       emoji: isoLang?.emoji || language.emoji
     };
 
-    await this.db.languages.put(languageWithEmoji);
+    await db.languages.put(languageWithEmoji);
   }
 
   async update(language: LanguageData): Promise<void> {
-    await this.db.languages.put(language);
+    await db.languages.put(language);
   }
 
   async delete(code: string): Promise<void> {
-    await this.db.languages.delete(code);
+    await db.languages.delete(code);
   }
 
   async setActive(code: string, isActive: boolean): Promise<void> {
@@ -70,15 +58,15 @@ export class LanguageRepo implements LanguageRepoContract {
     return all.length;
   }
 
-  async createLanguageFromCode(code: string): Promise<LanguageData> {
+  async createLanguageFromCode(code: string): Promise<Omit<LanguageData, 'id'>> {
     const isoLang = (isoLangs as { code: string; name: string; emoji?: string }[])
       .find(l => l.code === code);
-    
+
     if (!isoLang) {
       this.toast.error(`Language code '${code}' not found in ISO language data`);
       throw new Error(`Unknown language code: ${code}`);
     }
-    
+
     return {
       code,
       name: isoLang.name,

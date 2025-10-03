@@ -2,7 +2,7 @@ import type { LearningProgress } from "@/shared/types/LearningProgress";
 import type { Link } from "@/shared/links/Link";
 
 export interface FactCardData {
-    uid: string
+    id: string
     language: string
     front: string
     back: string

@@ -7,7 +7,7 @@
     <div v-else class="space-y-2">
       <div
         v-for="subGoal in subGoals"
-        :key="subGoal.uid"
+        :key="subGoal.id"
         class="flex items-center gap-3 p-3 border border-base-200 rounded-lg"
       >
         <input
@@ -18,13 +18,13 @@
           @keydown.enter="updateSubGoal(subGoal)"
         />
         <router-link
-          :to="`/goals/${subGoal.uid}/edit`"
+          :to="`/goals/${subGoal.id}/edit`"
           class="btn btn-sm btn-outline"
         >
           {{ $t('common.edit') }}
         </router-link>
         <button
-          @click="removeSubGoal(subGoal.uid)"
+          @click="removeSubGoal(subGoal.id)"
           class="btn btn-sm btn-error btn-outline"
         >
           {{ $t('goals.manage.subGoals.remove') }}
@@ -97,8 +97,8 @@ async function addSubGoal() {
   });
   
   // Update parent goal to include this sub-goal
-  const updatedGoal = await goalRepo.update(props.goal.uid, {
-    subGoals: [...props.goal.subGoals, newSubGoal.uid]
+  const updatedGoal = await goalRepo.update(props.goal.id, {
+    subGoals: [...props.goal.subGoals, newSubGoal.id]
   });
   
   subGoals.value.push(newSubGoal);
@@ -109,7 +109,7 @@ async function addSubGoal() {
 async function updateSubGoal(subGoal: GoalData) {
   if (!subGoal.title.trim()) return;
   
-  await goalRepo.update(subGoal.uid, {
+  await goalRepo.update(subGoal.id, {
     title: subGoal.title.trim()
   });
 }
@@ -119,7 +119,7 @@ async function removeSubGoal(subGoalId: string) {
   
   // Remove from parent goal's subGoals array
   const updatedSubGoals = props.goal.subGoals.filter(id => id !== subGoalId);
-  const updatedGoal = await goalRepo.update(props.goal.uid, {
+  const updatedGoal = await goalRepo.update(props.goal.id, {
     subGoals: updatedSubGoals
   });
   
@@ -127,7 +127,7 @@ async function removeSubGoal(subGoalId: string) {
   await goalRepo.delete(subGoalId);
   
   // Update local state
-  subGoals.value = subGoals.value.filter(sg => sg.uid !== subGoalId);
+  subGoals.value = subGoals.value.filter(sg => sg.id !== subGoalId);
   emit('goal-updated', updatedGoal);
 }
 

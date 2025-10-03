@@ -14,6 +14,6 @@ import type { ResourceData } from '@/entities/resources/ResourceData';
 const router = useRouter();
 
 function handleResourceSaved(resource: ResourceData) {
-  router.push(`/resources/${resource.uid}/edit`);
+  router.push(`/resources/${resource.id}/edit`);
 }
 </script>

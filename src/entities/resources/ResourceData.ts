@@ -1,7 +1,7 @@
 import type { Link } from "@/shared/links/Link";
 
 export interface ResourceData {
-  uid: string;
+  id: string;
   language: string;
   isImmersionContent: boolean;
 

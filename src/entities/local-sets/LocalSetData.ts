@@ -1,5 +1,5 @@
 export interface LocalSetData {
-  uid: string;
+  id: string;
   name: string;
   language: string;
   description?: string;

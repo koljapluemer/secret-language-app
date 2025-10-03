@@ -31,7 +31,7 @@ export async function generateSentenceSlideTask(
     console.log('[SentenceSlide] generateSentenceSlideTask called with:', { 
       languageCodes, 
       blockList, 
-      currentSentence: slideState.currentSentence?.uid,
+      currentSentence: slideState.currentSentence?.id,
       phase: slideState.phase 
     });
     
@@ -44,8 +44,8 @@ export async function generateSentenceSlideTask(
         blockList
       );
       
-      console.log('[SentenceSlide] Found sentence:', sentence ? 
-        { uid: sentence.uid, content: sentence.content, relatedVocabCount: sentence.relatedVocab?.length } : 
+      console.log('[SentenceSlide] Found sentence:', sentence ?
+        { id: sentence.id, content: sentence.content, relatedVocabCount: sentence.relatedVocab?.length } :
         'null'
       );
       
@@ -185,7 +185,7 @@ export async function removeVocabIfNotDue(
     
     if (!isStillDue) {
       // Remove from connected vocab queue
-      slideState.connectedVocabQueue = slideState.connectedVocabQueue.filter(v => v.uid !== vocabId);
+      slideState.connectedVocabQueue = slideState.connectedVocabQueue.filter(v => v.id !== vocabId);
     }
   } catch (error) {
     const toast = useToast();

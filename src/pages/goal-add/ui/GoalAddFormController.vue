@@ -85,7 +85,7 @@ async function handleSave(action: 'edit' | 'add-another') {
       isAchieved: false
     });
     
-    emit('goal-saved', newGoal.uid, action);
+    emit('goal-saved', newGoal.id, action);
   } catch {
     toast.error('Failed to save goal');
     alert('Failed to save goal. Please try again.');

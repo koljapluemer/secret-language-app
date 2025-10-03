@@ -29,7 +29,7 @@ export async function findDuplicateFactCard(
   )
 
   // Make sure we don't match against ourselves
-  if (existing && existing.uid !== factCard.uid) {
+  if (existing && existing.id !== factCard.id) {
     return existing
   }
 

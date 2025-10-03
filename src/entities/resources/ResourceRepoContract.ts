@@ -14,7 +14,7 @@ export interface ResourceRepoContract {
   getValidImmersionResources(languages: string[]): Promise<ResourceData[]>;
   getResourcesPaginated(offset: number, limit: number, filters?: ResourceListFilters): Promise<ResourceData[]>;
   getTotalResourcesCount(filters?: ResourceListFilters): Promise<number>;
-  saveResource(resource: Omit<ResourceData, 'uid' | 'tasks' | 'lastShownAt'>): Promise<ResourceData>;
+  saveResource(resource: Omit<ResourceData, "id" | 'tasks' | 'lastShownAt'>): Promise<ResourceData>;
   updateResource(resource: ResourceData): Promise<ResourceData>;
   deleteResource(uid: string): Promise<void>;
   disconnectVocabFromResource(resourceUid: string, vocabUid: string): Promise<void>;

@@ -58,16 +58,16 @@ interface VocabFormState {
 
 function formDataToVocabData(formData: VocabFormData): Omit<VocabData, 'progress' | 'tasks'> {
   return {
-    uid: crypto.randomUUID(),
+    id: crypto.randomUUID(),
     language: formData.language,
     content: formData.content,
     consideredCharacter: formData.consideredCharacter,
     consideredSentence: formData.consideredSentence,
     consideredWord: formData.consideredWord,
-    translations: formData.translations.map(translation => translation.uid),
+    translations: formData.translations.map(translation => translation.id),
     priority: formData.priority,
     doNotPractice: formData.doNotPractice,
-    notes: formData.notes.map(note => note.uid),
+    notes: formData.notes.map(note => note.id),
     links: formData.links,
     origins: ['user-added'],
     relatedVocab: [],
@@ -163,7 +163,7 @@ async function saveInternal(): Promise<void> {
   
   
   const savedVocab = await vocabRepo.saveVocab(toRaw(vocabDataConverted));
-  emit('vocab-saved', savedVocab.uid);
+  emit('vocab-saved', savedVocab.id);
 }
 
 async function save(): Promise<boolean> {
@@ -193,20 +193,20 @@ function handleFieldChange() {
 function addNote(note: NoteData) {
   const newNote: NoteData = {
     ...note,
-    uid: crypto.randomUUID()
+    id: crypto.randomUUID()
   };
   state.value.formData.notes.push(newNote);
 }
 
 function updateNote(updatedNote: NoteData) {
-  const index = state.value.formData.notes.findIndex(n => n.uid === updatedNote.uid);
+  const index = state.value.formData.notes.findIndex(n => n.id === updatedNote.id);
   if (index >= 0) {
     state.value.formData.notes[index] = updatedNote;
   }
 }
 
 function removeNote(uid: string) {
-  const index = state.value.formData.notes.findIndex(n => n.uid === uid);
+  const index = state.value.formData.notes.findIndex(n => n.id === uid);
   if (index >= 0) {
     state.value.formData.notes.splice(index, 1);
   }

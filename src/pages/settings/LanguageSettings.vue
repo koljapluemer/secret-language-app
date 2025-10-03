@@ -52,14 +52,14 @@ async function addLanguage() {
 
   addLanguageSaving.value = true;
   try {
-    const newLanguage: LanguageData = {
+    const newLanguage: Omit<LanguageData, 'id'> = {
       code: addLanguageSelected.value.code,
       name: addLanguageSelected.value.name,
       emoji: addLanguageSelected.value.emoji,
       isActive: true
     };
 
-    await props.languageRepo.add(newLanguage);
+    await props.languageRepo.add(newLanguage as LanguageData);
     addLanguageSelected.value = null;
     addLanguageSearch.value = '';
     await loadLanguages();

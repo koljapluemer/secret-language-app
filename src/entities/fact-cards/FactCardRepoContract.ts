@@ -12,7 +12,7 @@ export interface FactCardRepoContract {
   getAllFactCards(): Promise<FactCardData[]>;
   getFactCardByUID(uid: string): Promise<FactCardData | undefined>;
   getFactCardsByUIDs(uids: string[]): Promise<FactCardData[]>;
-  saveFactCard(factCard: Omit<FactCardData, 'uid' | 'progress'>): Promise<FactCardData>;
+  saveFactCard(factCard: Omit<FactCardData, "id" | 'progress'>): Promise<FactCardData>;
   updateFactCard(factCard: FactCardData): Promise<void>;
   deleteFactCard(uid: string): Promise<void>;
 

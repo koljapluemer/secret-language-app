@@ -117,7 +117,7 @@ async function handleVocabIdsUpdate(newVocabIds: string[]) {
 }
 
 async function handleVocabAdded(vocab: VocabData) {
-  const newVocabIds = [...vocabIds.value, vocab.uid];
+  const newVocabIds = [...vocabIds.value, vocab.id];
   await handleVocabUpdate(newVocabIds);
 }
 

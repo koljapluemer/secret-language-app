@@ -3,7 +3,7 @@
     <h4>{{ $t('translations.title') }}</h4>
     
     <!-- Existing translations -->
-    <div v-for="(translation, index) in translations" :key="translation.uid" class="space-y-2">
+    <div v-for="(translation, index) in translations" :key="translation.id" class="space-y-2">
       <TranslationRowRender
         :translation="translation"
         :allow-edit-on-click="allowEditOnClick"
@@ -65,13 +65,12 @@ function deleteTranslation(index: number) {
   translations.value.splice(index, 1);
 }
 
-function addNewTranslation(translationData: Omit<TranslationData, 'uid' | 'origins'>) {
-  const newTranslation: TranslationData = {
-    uid: crypto.randomUUID(),
+function addNewTranslation(translationData: Omit<TranslationData, "id" | 'origins'>) {
+  const newTranslation: Omit<TranslationData, 'id'> = {
     ...translationData,
     origins: []
   };
-  translations.value.push(newTranslation);
+  translations.value.push(newTranslation as TranslationData);
   resetNewTranslation();
 }
 

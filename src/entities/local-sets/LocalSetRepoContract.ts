@@ -5,7 +5,7 @@ export interface LocalSetRepoContract {
   getLocalSetById(uid: string): Promise<LocalSetData | undefined>;
   getLocalSetByName(name: string): Promise<LocalSetData | undefined>;
   getLocalSetsByLanguage(language: string): Promise<LocalSetData[]>;
-  saveLocalSet(localSet: Omit<LocalSetData, 'uid'>): Promise<LocalSetData>;
+  saveLocalSet(localSet: Omit<LocalSetData, "id">): Promise<LocalSetData>;
   updateLocalSet(localSet: LocalSetData): Promise<void>;
   deleteLocalSet(uid: string): Promise<void>;
   isRemoteSetDownloaded(name: string): Promise<boolean>;

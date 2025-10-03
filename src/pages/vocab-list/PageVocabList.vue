@@ -47,9 +47,9 @@
               {{ $t('common.userAdded') }}
             </label>
           </li>
-          <li v-for="set in availableSets" :key="set.uid">
+          <li v-for="set in availableSets" :key="set.id">
             <label class="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" :checked="selectedSets.includes(set.uid)" @change="toggleSet(set.uid)"
+              <input type="checkbox" :checked="selectedSets.includes(set.id)" @change="toggleSet(set.id)"
                 class="checkbox checkbox-sm" />
               {{ set.name }}
             </label>
@@ -87,9 +87,9 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="vocab in vocabItems" :key="vocab.uid">
+          <tr v-for="vocab in vocabItems" :key="vocab.id">
             <td>
-              <router-link :to="`/vocab/${vocab.uid}/edit`" class="font-bold link link-hover">
+              <router-link :to="`/vocab/${vocab.id}/edit`" class="font-bold link link-hover">
                 {{ vocab.content }}
               </router-link>
             </td>
@@ -102,14 +102,14 @@
             <td>
               <div class="flex flex-wrap gap-1">
                 <span 
-                  v-for="translation in vocabTranslations[vocab.uid] || []" 
+                  v-for="translation in vocabTranslations[vocab.id] || []" 
                   :key="translation"
                   class="badge badge-sm"
                 >
                   {{ translation }}
                 </span>
                 <span 
-                  v-if="!vocabTranslations[vocab.uid] || vocabTranslations[vocab.uid].length === 0"
+                  v-if="!vocabTranslations[vocab.id] || vocabTranslations[vocab.id].length === 0"
                   class="text-light"
                 >
                   {{ $t('vocabulary.noTranslations') }}
@@ -124,7 +124,7 @@
               </div>
             </td>
             <td>
-              <button @click="deleteVocab(vocab.uid)" class="btn btn-sm btn-ghost">
+              <button @click="deleteVocab(vocab.id)" class="btn btn-sm btn-ghost">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M3 6h18" />
@@ -303,7 +303,7 @@ function getLanguageEmoji(code: string): string | undefined {
 
 function getOriginDisplayName(origin: string): string {
   if (origin === 'user-added') return 'User Added';
-  const set = availableSets.value.find(s => s.uid === origin);
+  const set = availableSets.value.find(s => s.id === origin);
   return set?.name || origin;
 }
 
@@ -318,7 +318,7 @@ async function loadVocab() {
     // If there's a search query, also search translations
     if (searchQuery.value?.trim()) {
       const matchingTranslations = await translationRepo.searchTranslationsByContent(searchQuery.value.trim());
-      translationIds = matchingTranslations.map(t => t.uid);
+      translationIds = matchingTranslations.map(t => t.id);
     }
 
     const filters: VocabListFilters = {
@@ -358,11 +358,11 @@ async function loadTranslationsForCurrentPage() {
     if (uniqueTranslationIds.length > 0) {
       // Load all translations at once
       const translations = await translationRepo.getTranslationsByIds(uniqueTranslationIds);
-      const translationMap = new Map(translations.map(t => [t.uid, t.content]));
+      const translationMap = new Map(translations.map(t => [t.id, t.content]));
       
       // Map translations back to vocab items
       for (const vocab of vocabItems.value) {
-        translationData[vocab.uid] = vocab.translations
+        translationData[vocab.id] = vocab.translations
           .map(id => translationMap.get(id))
           .filter((content): content is string => content !== undefined);
       }
@@ -375,7 +375,7 @@ async function loadTranslationsForCurrentPage() {
 }
 
 async function deleteVocab(uid: string) {
-  const vocabToDelete = vocabItems.value.find(v => v.uid === uid);
+  const vocabToDelete = vocabItems.value.find(v => v.id === uid);
   if (!vocabToDelete || !confirm(`Are you sure you want to delete "${vocabToDelete.content}"?`)) {
     return;
   }
@@ -399,7 +399,7 @@ async function loadFilterOptions() {
     // If no URL filters are set, initialize with all languages and sets selected
     if (selectedLanguages.value.length === 0 && selectedSets.value.length === 0) {
       selectedLanguages.value = availableLanguages.value.map(l => l.code);
-      selectedSets.value = ['user-added', ...availableSets.value.map(s => s.uid)];
+      selectedSets.value = ['user-added', ...availableSets.value.map(s => s.id)];
     }
   } catch {
     toast.error('Failed to load filter options');

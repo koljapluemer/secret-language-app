@@ -43,8 +43,8 @@ const handleRating = async (rating: Rating) => {
   try {
     // Score fact card and update last review
     const immediateDue = props.modeContext?.setWrongVocabDueAgainImmediately || false;
-    await factCardRepo.scoreFactCard(factCard.value.uid, rating, immediateDue);
-    await factCardRepo.updateLastReview(factCard.value.uid);
+    await factCardRepo.scoreFactCard(factCard.value.id, rating, immediateDue);
+    await factCardRepo.updateLastReview(factCard.value.id);
 
     emit('finished');
   } catch {

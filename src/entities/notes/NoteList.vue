@@ -12,7 +12,7 @@
   </div>
 
   <div v-else class="space-y-4">
-    <div v-for="(note, index) in notes" :key="note.uid">
+    <div v-for="(note, index) in notes" :key="note.id">
       <NoteEdit v-if="editingIndex === index" :note="note" :show-before-exercise-option="showBeforeExerciseOption"
         @update:note="(updatedNote) => updateNote(updatedNote)" @close="editingIndex = null" />
       <div v-else class="flex items-start justify-between gap-4">
@@ -23,7 +23,7 @@
           <button type="button" @click="editingIndex = index" class="btn btn-sm btn-ghost">
             <Edit class="w-4 h-4" />
           </button>
-          <button type="button" @click="deleteNote(note.uid)" class="btn btn-ghost btn-circle text-error flex-shrink-0">
+          <button type="button" @click="deleteNote(note.id)" class="btn btn-ghost btn-circle text-error flex-shrink-0">
             <X class="w-4 h-4" />
           </button>
         </div>
@@ -33,7 +33,7 @@
 
   <!-- New note creation form -->
   <div v-if="isCreatingNew">
-    <NoteEdit :note="{ uid: '', content: '', noteType: undefined, showBeforeExercise: false }"
+    <NoteEdit :note="{ id: '', content: '', noteType: undefined, showBeforeExercise: false }"
       :show-before-exercise-option="showBeforeExerciseOption"
       @update:note="(newNote) => { $emit('add', newNote); isCreatingNew = false; }" @close="isCreatingNew = false" />
   </div>

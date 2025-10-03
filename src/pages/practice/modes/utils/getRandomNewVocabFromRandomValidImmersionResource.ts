@@ -19,7 +19,7 @@ export async function getRandomNewVocabFromRandomValidImmersionResource(
     const resource = randomFromArray(resources);
     if (!resource) return null;
 
-    return await getRandomNewVocabFromImmersionResource(resourceRepo, vocabRepo, resource.uid, vocabBlockList);
+    return await getRandomNewVocabFromImmersionResource(resourceRepo, vocabRepo, resource.id, vocabBlockList);
   } catch (error) {
     toast.error(`Error getting random new vocab from random valid immersion resource: ${String(error)}`);
     return null;

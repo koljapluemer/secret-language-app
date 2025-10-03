@@ -35,7 +35,7 @@ interface FactCardFormState {
 
 function formDataToFactCardData(formData: FactCardFormData): Omit<FactCardData, 'progress'> {
   return {
-    uid: crypto.randomUUID(),
+    id: crypto.randomUUID(),
     language: formData.language,
     front: formData.front,
     back: formData.back,
@@ -86,7 +86,7 @@ async function saveInternal(): Promise<string> {
 
   const serializedFormData = serializeFormData(state.value.formData);
   const savedFactCard = await factCardRepo.saveFactCard(toRaw(formDataToFactCardData(serializedFormData)));
-  return savedFactCard.uid;
+  return savedFactCard.id;
 }
 
 async function save(): Promise<boolean> {

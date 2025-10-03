@@ -59,11 +59,11 @@ const loadVocab = async () => {
 
     for (const vocab of vocabData) {
       const translationData = await translationRepo.getTranslationsByIds(vocab.translations);
-      translations.value[vocab.uid] = translationData;
+      translations.value[vocab.id] = translationData;
 
       // Load vocab notes
       if (vocab.notes && vocab.notes.length > 0) {
-        vocabNotes.value[vocab.uid] = await noteRepo.getNotesByUIDs(vocab.notes);
+        vocabNotes.value[vocab.id] = await noteRepo.getNotesByUIDs(vocab.notes);
       }
 
       // Load translation notes
@@ -74,7 +74,7 @@ const loadVocab = async () => {
         }
       });
       if (allTranslationNoteIds.length > 0) {
-        translationNotes.value[vocab.uid] = await noteRepo.getNotesByUIDs(allTranslationNoteIds);
+        translationNotes.value[vocab.id] = await noteRepo.getNotesByUIDs(allTranslationNoteIds);
       }
     }
   }
@@ -102,7 +102,7 @@ const getPlayableSound = (vocab: VocabData): VocabSound | null => {
 
 // Play sound for a vocab item
 const playVocabSound = (vocabUid: string) => {
-  const vocab = vocabItems.value.find(v => v.uid === vocabUid);
+  const vocab = vocabItems.value.find(v => v.id === vocabUid);
   if (!vocab) return;
 
   const sound = getPlayableSound(vocab);
@@ -159,14 +159,14 @@ const handleDone = async () => {
       for (const vocab of vocabItems.value) {
         const updatedVocab = {
           ...vocab,
-          notes: [...vocab.notes, savedNote.uid]
+          notes: [...vocab.notes, savedNote.id]
         };
         await vocabRepo.updateVocab(toRaw(updatedVocab));
       }
     } else if (activeTab.value === 'audio' && audioRecording.value) {
       // Create VocabSound from the audio recording
       const vocabSound = {
-        uid: crypto.randomUUID(),
+        id: crypto.randomUUID(),
         blob: audioRecording.value.blob,
         addedAt: new Date(),
         fileSize: audioRecording.value.blob.size,
@@ -226,33 +226,33 @@ onUnmounted(() => {
     <!-- Vocabulary Display -->
     <div class="mb-8">
       <div class="grid gap-6" :class="vocabItems.length === 1 ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'">
-        <div v-for="vocab in vocabItems" :key="vocab.uid" class="text-center">
+        <div v-for="vocab in vocabItems" :key="vocab.id" class="text-center">
           <!-- Vocab Content and Translation -->
           <div class="mb-4">
             <div class="text-4xl font-bold mb-2 flex items-center justify-center gap-3">
               {{ vocab.content }}
-              <button v-if="hasPlayableSound(vocab)" @click="playVocabSound(vocab.uid)"
-                class="btn btn-circle btn-sm btn-primary" :class="{ 'loading': playingVocabUid === vocab.uid }"
-                :disabled="playingVocabUid === vocab.uid">
-                <svg v-if="playingVocabUid !== vocab.uid" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <button v-if="hasPlayableSound(vocab)" @click="playVocabSound(vocab.id)"
+                class="btn btn-circle btn-sm btn-primary" :class="{ 'loading': playingVocabUid === vocab.id }"
+                :disabled="playingVocabUid === vocab.id">
+                <svg v-if="playingVocabUid !== vocab.id" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />
                 </svg>
               </button>
             </div>
-            <div class="text-xl text-light mb-4">{{translations[vocab.uid]?.map(t => t.content).join(', ')}}</div>
+            <div class="text-xl text-light mb-4">{{translations[vocab.id]?.map(t => t.content).join(', ')}}</div>
 
             <!-- Vocab notes that should show before exercise -->
-            <div v-if="vocabNotes[vocab.uid]?.filter(note => note.showBeforeExercise).length > 0"
+            <div v-if="vocabNotes[vocab.id]?.filter(note => note.showBeforeExercise).length > 0"
               class="space-y-2 mb-2">
-              <NoteDisplayMini v-for="note in vocabNotes[vocab.uid]?.filter(note => note.showBeforeExercise)"
-                :key="note.uid" :note="note" />
+              <NoteDisplayMini v-for="note in vocabNotes[vocab.id]?.filter(note => note.showBeforeExercise)"
+                :key="note.id" :note="note" />
             </div>
 
             <!-- Translation notes that should show before exercise -->
-            <div v-if="translationNotes[vocab.uid]?.filter(note => note.showBeforeExercise).length > 0"
+            <div v-if="translationNotes[vocab.id]?.filter(note => note.showBeforeExercise).length > 0"
               class="space-y-2 mb-2">
-              <NoteDisplayMini v-for="note in translationNotes[vocab.uid]?.filter(note => note.showBeforeExercise)"
-                :key="note.uid" :note="note" />
+              <NoteDisplayMini v-for="note in translationNotes[vocab.id]?.filter(note => note.showBeforeExercise)"
+                :key="note.id" :note="note" />
             </div>
 
           </div>
@@ -261,7 +261,7 @@ onUnmounted(() => {
           <div v-if="vocab.images && vocab.images.length > 0" class="mb-4">
             <div class="grid gap-2"
               :class="vocab.images.length === 1 ? 'grid-cols-1 max-w-xs mx-auto' : vocab.images.length === 2 ? 'grid-cols-2 max-w-md mx-auto' : 'grid-cols-2 md:grid-cols-3 max-w-lg mx-auto'">
-              <VocabImageDisplay v-for="image in vocab.images.slice(0, 6)" :key="image.uid" :image="image"
+              <VocabImageDisplay v-for="image in vocab.images.slice(0, 6)" :key="image.id" :image="image"
                 class="rounded-lg" />
             </div>
             <div v-if="vocab.images.length > 6" class=" text-base-content/50 mt-2">
@@ -326,8 +326,8 @@ onUnmounted(() => {
 
     <!-- Links -->
     <div class="space-y-2 mb-6">
-      <template v-for="vocabItem in vocabItems" :key="vocabItem.uid">
-        <LinkDisplayMini v-for="(link, index) in vocabItem.links || []" :key="`${vocabItem.uid}-${index}`"
+      <template v-for="vocabItem in vocabItems" :key="vocabItem.id">
+        <LinkDisplayMini v-for="(link, index) in vocabItem.links || []" :key="`${vocabItem.id}-${index}`"
           :link="link" />
       </template>
     </div>

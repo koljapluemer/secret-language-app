@@ -1,21 +1,9 @@
-import Dexie, { type Table } from 'dexie';
 import type { FactCardRepoContract, FactCardListFilters } from './FactCardRepoContract';
 import type { FactCardData } from './FactCardData';
 import { createEmptyCard, fsrs, Rating } from 'ts-fsrs';
-
-class FactCardDatabase extends Dexie {
-  factCards!: Table<FactCardData>;
-
-  constructor() {
-    super('FactCardDatabase');
-    this.version(1).stores({
-      factCards: 'uid, language'
-    });
-  }
-}
+import { db } from '@/shared/database/db';
 
 export class FactCardRepo implements FactCardRepoContract {
-  private db = new FactCardDatabase();
 
   private ensureFactCardFields(factCard: FactCardData): FactCardData {
     return {
@@ -29,23 +17,22 @@ export class FactCardRepo implements FactCardRepoContract {
   }
 
   async getAllFactCards(): Promise<FactCardData[]> {
-    const factCards = await this.db.factCards.toArray();
+    const factCards = await db.factCards.toArray();
     return factCards.map(fc => this.ensureFactCardFields(fc));
   }
 
   async getFactCardByUID(uid: string): Promise<FactCardData | undefined> {
-    const factCard = await this.db.factCards.get(uid);
+    const factCard = await db.factCards.get(uid);
     return factCard ? this.ensureFactCardFields(factCard) : undefined;
   }
 
   async getFactCardsByUIDs(uids: string[]): Promise<FactCardData[]> {
-    const factCards = await this.db.factCards.where('uid').anyOf(uids).toArray();
+    const factCards = await db.factCards.where('id').anyOf(uids).toArray();
     return factCards.map(fc => this.ensureFactCardFields(fc));
   }
 
-  async saveFactCard(factCard: Omit<FactCardData, 'uid' | 'progress'>): Promise<FactCardData> {
-    const newFactCard: FactCardData = {
-      uid: crypto.randomUUID(),
+  async saveFactCard(factCard: Omit<FactCardData, 'id' | 'progress'>): Promise<FactCardData> {
+    const newFactCard: Omit<FactCardData, 'id'> = {
       language: factCard.language,
       front: factCard.front,
       back: factCard.back,
@@ -61,20 +48,20 @@ export class FactCardRepo implements FactCardRepoContract {
       origins: factCard.origins
     };
 
-    await this.db.factCards.add(newFactCard);
-    return newFactCard;
+    const id = await db.factCards.add(newFactCard as FactCardData);
+    return { ...newFactCard, id: id as string };
   }
 
   async updateFactCard(factCard: FactCardData): Promise<void> {
-    await this.db.factCards.put(factCard);
+    await db.factCards.put(factCard);
   }
 
   async deleteFactCard(uid: string): Promise<void> {
-    await this.db.factCards.delete(uid);
+    await db.factCards.delete(uid);
   }
 
   async getFactCardByFrontBackLanguage(front: string, back: string, language: string): Promise<FactCardData | undefined> {
-    const factCard = await this.db.factCards
+    const factCard = await db.factCards
       .where('language')
       .equals(language)
       .filter(fc => fc.front === front && fc.back === back)
@@ -128,7 +115,7 @@ export class FactCardRepo implements FactCardRepoContract {
   }
 
   async getRandomUnseenFactCards(count: number, languages: string[], factCardBlockList?: string[]): Promise<FactCardData[]> {
-    const factCards = await this.db.factCards
+    const factCards = await db.factCards
       .where('language')
       .anyOf(languages)
       .filter(factCard => {
@@ -136,17 +123,17 @@ export class FactCardRepo implements FactCardRepoContract {
         if (factCard.progress.level !== -1) {
           return false;
         }
-        
+
         // Must not be excluded from practice
         if (factCard.doNotPractice) {
           return false;
         }
-        
+
         // Must not be in block list
-        if (factCardBlockList && factCardBlockList.includes(factCard.uid)) {
+        if (factCardBlockList && factCardBlockList.includes(factCard.id)) {
           return false;
         }
-        
+
         return true;
       })
       .toArray();
@@ -159,7 +146,7 @@ export class FactCardRepo implements FactCardRepoContract {
 
   async getRandomAlreadySeenDueFactCards(count: number, languages: string[], factCardBlockList?: string[]): Promise<FactCardData[]> {
     const now = new Date();
-    const factCards = await this.db.factCards
+    const factCards = await db.factCards
       .where('language')
       .anyOf(languages)
       .filter(factCard => {
@@ -167,22 +154,22 @@ export class FactCardRepo implements FactCardRepoContract {
         if (factCard.progress.level < 0) {
           return false;
         }
-        
+
         // Must be due
         if (!factCard.progress.due || factCard.progress.due > now) {
           return false;
         }
-        
+
         // Must not be excluded from practice
         if (factCard.doNotPractice) {
           return false;
         }
-        
+
         // Must not be in block list
-        if (factCardBlockList && factCardBlockList.includes(factCard.uid)) {
+        if (factCardBlockList && factCardBlockList.includes(factCard.id)) {
           return false;
         }
-        
+
         return true;
       })
       .toArray();
@@ -194,10 +181,10 @@ export class FactCardRepo implements FactCardRepoContract {
   }
 
   private buildFilteredQuery(filters?: FactCardListFilters) {
-    let collection = this.db.factCards.toCollection();
+    let collection = db.factCards.toCollection();
 
     if (filters?.languages && filters.languages.length > 0) {
-      collection = this.db.factCards.where('language').anyOf(filters.languages);
+      collection = db.factCards.where('language').anyOf(filters.languages);
     }
 
     return collection.filter(factCard => {
@@ -234,7 +221,7 @@ export class FactCardRepo implements FactCardRepoContract {
   }
 
   async getUncheckedFactCards(limit: number): Promise<FactCardData[]> {
-    const factCards = await this.db.factCards
+    const factCards = await db.factCards
       .filter((fc: FactCardData) => !fc._mergeChecked)
       .limit(limit)
       .toArray();
@@ -243,7 +230,7 @@ export class FactCardRepo implements FactCardRepoContract {
   }
 
   async getFactCardsByOrigins(setUids: string[]): Promise<FactCardData[]> {
-    const factCards = await this.db.factCards
+    const factCards = await db.factCards
       .where('origins')
       .anyOf(setUids)
       .toArray();

@@ -72,7 +72,7 @@ onMounted(loadVocab);
 
             <NoteDisplayMini
               v-for="note in vocabNotes.filter(note => note.showBeforeExercise || props.showAllNotesImmediately)"
-              :key="note.uid" :note="note" />
+              :key="note.id" :note="note" />
           </div>
         </div>
 
@@ -80,19 +80,19 @@ onMounted(loadVocab);
 
         <!-- Translation sections -->
         <div class="space-y-4">
-          <div v-for="translation in translations" :key="translation.uid" class="flex gap-4">
+          <div v-for="translation in translations" :key="translation.id" class="flex gap-4">
             <div class="flex-1 text-center">
               <div :class="isSentence ? 'text-3xl' : 'text-5xl'" class="font-bold text-light">{{ translation.content }}
               </div>
             </div>
             <!-- Translation notes sidebar -->
             <div
-              v-if="translationNotes.filter(note => props.showAllNotesImmediately || note.showBeforeExercise && translation.notes?.includes(note.uid)).length > 0"
+              v-if="translationNotes.filter(note => props.showAllNotesImmediately || note.showBeforeExercise && translation.notes?.includes(note.id)).length > 0"
               class="w-64 space-y-2">
 
               <NoteDisplayMini
-                v-for="note in translationNotes.filter(note => props.showAllNotesImmediately || note.showBeforeExercise && translation.notes?.includes(note.uid))"
-                :key="note.uid" :note="note" />
+                v-for="note in translationNotes.filter(note => props.showAllNotesImmediately || note.showBeforeExercise && translation.notes?.includes(note.id))"
+                :key="note.id" :note="note" />
             </div>
           </div>
         </div>

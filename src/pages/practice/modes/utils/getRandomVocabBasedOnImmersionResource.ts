@@ -19,7 +19,7 @@ async function getVocabFromImmersionResource(
   
   // Filter out blocked vocab
   const filteredVocab = vocabBlockList 
-    ? vocabItems.filter(v => !vocabBlockList.includes(v.uid))
+    ? vocabItems.filter(v => !vocabBlockList.includes(v.id))
     : vocabItems;
     
   return filteredVocab.length > 0 ? filteredVocab : null;

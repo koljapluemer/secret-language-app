@@ -1,4 +1,3 @@
-import Dexie, { type Table } from 'dexie';
 import type { VocabRepoContract, VocabPaginationResult, VocabListFilters } from './VocabRepoContract';
 import type { VocabData, VocabImage, VocabSound } from './VocabData';
 import { fsrs, createEmptyCard, Rating } from 'ts-fsrs';
@@ -8,31 +7,12 @@ import { compressImage, compressImageFromUrl } from '@/shared/utils/imageUtils';
 import { validateAudioFile, getAudioDuration, fetchAudioAsBlob } from '@/shared/utils/audioUtils';
 import { useToast } from '@/shared/toasts';
 import { toRaw } from 'vue';
+import { db } from '@/shared/database/db';
 
 // Utility functions
 function isUnseen(vocab: VocabData): boolean {
   return vocab.progress.level === -1;
 }
-
-
-class VocabDatabase extends Dexie {
-  vocab!: Table<VocabData>;
-
-  constructor() {
-    super('VocabDatabase');
-    this.version(1).stores({
-      vocab: 'uid, language, content, *origins, [language+content]'
-    });
-    this.version(2).stores({
-      vocab: 'uid, language, content, *origins, [language+content], progress.due'
-    });
-    this.version(3).stores({
-      vocab: 'uid, language, content, *origins, [language+content], progress.due, hasImage, hasSound'
-    });
-  }
-}
-
-const vocabDb = new VocabDatabase();
 
 export class VocabRepo implements VocabRepoContract {
   private toast = useToast();
@@ -57,12 +37,12 @@ export class VocabRepo implements VocabRepoContract {
 
 
   async getVocab(): Promise<VocabData[]> {
-    const vocab = await vocabDb.vocab.toArray();
+    const vocab = await db.vocab.toArray();
     return vocab.map(v => this.ensureVocabFields(v));
   }
 
   async getVocabByUID(uid: string): Promise<VocabData | undefined> {
-    const vocab = await vocabDb.vocab.get(uid);
+    const vocab = await db.vocab.get(uid);
     if (vocab) {
       return this.ensureVocabFields(vocab);
     }
@@ -70,24 +50,24 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   async getVocabByUIDs(uids: string[]): Promise<VocabData[]> {
-    const vocab = await vocabDb.vocab.where('uid').anyOf(uids).toArray();
+    const vocab = await db.vocab.where('id').anyOf(uids).toArray();
     return vocab.map(v => this.ensureVocabFields(v));
   }
 
   async getVocabByLanguageAndContent(language: string, content: string): Promise<VocabData | undefined> {
-    const vocab = await vocabDb.vocab.where({ language, content }).first();
+    const vocab = await db.vocab.where({ language, content }).first();
     return vocab ? this.ensureVocabFields(vocab) : undefined;
   }
 
   async getRandomAlreadySeenDueVocab(count: number, languages: string[], vocabBlockList?: string[]): Promise<VocabData[]> {
-    const vocab = await vocabDb.vocab
+    const vocab = await db.vocab
       .where('language')
       .anyOf(languages)
       .filter(vocab =>
         vocab.progress.level >= 0 &&
         vocab.progress.due && new Date(vocab.progress.due) <= new Date() &&
         !vocab.doNotPractice &&
-        (!vocabBlockList || !vocabBlockList.includes(vocab.uid))
+        (!vocabBlockList || !vocabBlockList.includes(vocab.id))
       )
       .toArray();
 
@@ -95,15 +75,15 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   async getRandomUnseenVocab(count: number, languages: string[], vocabBlockList?: string[]): Promise<VocabData[]> {
-    const vocab = await vocabDb.vocab
+    const vocab = await db.vocab
       .where('language')
       .anyOf(languages)
       .filter(vocab => {
         if (!vocab.progress) {
           
-          return !vocab.doNotPractice && (!vocabBlockList || !vocabBlockList.includes(vocab.uid));
+          return !vocab.doNotPractice && (!vocabBlockList || !vocabBlockList.includes(vocab.id));
         }
-        return isUnseen(vocab) && !vocab.doNotPractice && (!vocabBlockList || !vocabBlockList.includes(vocab.uid));
+        return isUnseen(vocab) && !vocab.doNotPractice && (!vocabBlockList || !vocabBlockList.includes(vocab.id));
       })
       .toArray();
 
@@ -111,7 +91,7 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   async getRandomUnseenSentenceVocab(count: number, languages: string[], vocabBlockList?: string[]): Promise<VocabData[]> {
-    const vocab = await vocabDb.vocab
+    const vocab = await db.vocab
       .where('language')
       .anyOf(languages)
       .filter(vocab => {
@@ -127,9 +107,9 @@ export class VocabRepo implements VocabRepoContract {
 
         if (!vocab.progress) {
           
-          return !vocab.doNotPractice && (!vocabBlockList || !vocabBlockList.includes(vocab.uid));
+          return !vocab.doNotPractice && (!vocabBlockList || !vocabBlockList.includes(vocab.id));
         }
-        return isUnseen(vocab) && !vocab.doNotPractice && (!vocabBlockList || !vocabBlockList.includes(vocab.uid));
+        return isUnseen(vocab) && !vocab.doNotPractice && (!vocabBlockList || !vocabBlockList.includes(vocab.id));
       })
       .toArray();
 
@@ -162,7 +142,7 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   async scoreVocab(vocabId: string, rating: Rating, setWrongVocabDueAgainImmediately?: boolean): Promise<void> {
-    const vocab = await vocabDb.vocab.get(vocabId);
+    const vocab = await db.vocab.get(vocabId);
     if (!vocab) {
       return;
     }
@@ -220,11 +200,11 @@ export class VocabRepo implements VocabRepoContract {
     }
 
 
-    await vocabDb.vocab.put(vocab);
+    await db.vocab.put(vocab);
   }
 
   async updateLastReview(vocabId: string): Promise<void> {
-    const vocab = await vocabDb.vocab.get(vocabId);
+    const vocab = await db.vocab.get(vocabId);
     if (!vocab) {
       return;
     }
@@ -241,7 +221,7 @@ export class VocabRepo implements VocabRepoContract {
     // Always update last review time
     const newLastReview = new Date();
     vocab.progress.last_review = newLastReview;
-    await vocabDb.vocab.put(vocab);
+    await db.vocab.put(vocab);
   }
 
   async addPronunciationToVocab(_uid: string, _pronunciation: string): Promise<void> {
@@ -260,7 +240,7 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   async getRandomVocabWithMissingPronunciation(languages: string[], vocabBlockList?: string[]): Promise<VocabData | null> {
-    const vocab = await vocabDb.vocab
+    const vocab = await db.vocab
       .where('language')
       .anyOf(languages)
       .and(vocab => 
@@ -274,7 +254,7 @@ export class VocabRepo implements VocabRepoContract {
       // Since pronunciation is now handled as notes, we'll check for pronunciation notes
       // For now, assume all vocab needs pronunciation (to be refined later)
       const hasNoPronunciation = true; // TODO: Check if vocab has pronunciation notes
-      const isNotBlocked = !vocabBlockList || !vocabBlockList.includes(vocab.uid);
+      const isNotBlocked = !vocabBlockList || !vocabBlockList.includes(vocab.id);
       return hasNoPronunciation && isNotBlocked;
     });
 
@@ -283,7 +263,7 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   async getVocabPaginated(cursor?: string, limit: number = 20, filters?: VocabListFilters): Promise<VocabPaginationResult> {
-    const allVocab = await vocabDb.vocab.toArray();
+    const allVocab = await db.vocab.toArray();
 
     // Apply filters
     let filteredVocab = allVocab;
@@ -351,10 +331,10 @@ export class VocabRepo implements VocabRepoContract {
 
   async getTotalVocabCount(filters?: VocabListFilters): Promise<number> {
     if (!filters || (!filters.searchQuery && !filters.translationIds && !filters.languages && !filters.origins)) {
-      return await vocabDb.vocab.count();
+      return await db.vocab.count();
     }
 
-    const allVocab = await vocabDb.vocab.toArray();
+    const allVocab = await db.vocab.toArray();
     let filteredVocab = allVocab;
 
     // Search filter (OR logic: vocab content OR translation match)
@@ -397,10 +377,9 @@ export class VocabRepo implements VocabRepoContract {
     return filteredVocab.length;
   }
 
-  async saveVocab(vocab: Omit<VocabData, 'uid' | 'progress'>): Promise<VocabData> {
-    
-    const newVocab: VocabData = {
-      uid: crypto.randomUUID(),
+  async saveVocab(vocab: Omit<VocabData, 'id' | 'progress'>): Promise<VocabData> {
+
+    const newVocab: Omit<VocabData, 'id'> = {
       language: vocab.language,
       content: vocab.content,
       consideredCharacter: vocab.consideredCharacter,
@@ -426,8 +405,8 @@ export class VocabRepo implements VocabRepoContract {
       }
     };
 
-    await vocabDb.vocab.add(newVocab);
-    return newVocab;
+    const id = await db.vocab.add(newVocab as VocabData);
+    return { ...newVocab, id: id as string };
   }
 
   async updateVocab(vocab: VocabData): Promise<void> {
@@ -436,22 +415,22 @@ export class VocabRepo implements VocabRepoContract {
     vocab.hasImage = vocab.images && vocab.images.length > 0;
     vocab.hasSound = vocab.sounds && vocab.sounds.some(sound => !sound.disableForPractice);
     
-    await vocabDb.vocab.put(vocab);
+    await db.vocab.put(vocab);
   }
 
   async deleteVocab(id: string): Promise<void> {
-    await vocabDb.vocab.delete(id);
+    await db.vocab.delete(id);
   }
 
   async getDueVocabInLanguage(language: string, vocabBlockList?: string[]): Promise<VocabData[]> {
-    const vocab = await vocabDb.vocab
+    const vocab = await db.vocab
       .where('language')
       .equals(language)
       .filter(vocab =>
         vocab.progress.level >= 0 &&
         vocab.progress.due && new Date(vocab.progress.due) <= new Date() &&
         !vocab.doNotPractice &&
-        (!vocabBlockList || !vocabBlockList.includes(vocab.uid))
+        (!vocabBlockList || !vocabBlockList.includes(vocab.id))
       )
       .toArray();
 
@@ -459,7 +438,7 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   async getDueNonSentenceVocabInLanguage(language: string, vocabBlockList?: string[]): Promise<VocabData[]> {
-    const vocab = await vocabDb.vocab
+    const vocab = await db.vocab
       .where('language')
       .equals(language)
       .filter(vocab =>
@@ -467,7 +446,7 @@ export class VocabRepo implements VocabRepoContract {
         vocab.progress.due && new Date(vocab.progress.due) <= new Date() &&
         !vocab.doNotPractice &&
         vocab.consideredSentence !== true && // Exclude sentence vocab
-        (!vocabBlockList || !vocabBlockList.includes(vocab.uid))
+        (!vocabBlockList || !vocabBlockList.includes(vocab.id))
       )
       .toArray();
 
@@ -483,14 +462,14 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   async getDueVocabInLanguages(languages: string[], setsToAvoid?: string[], vocabBlockList?: string[]): Promise<VocabData[]> {
-    let query = vocabDb.vocab
+    let query = db.vocab
       .where('language')
       .anyOf(languages)
       .filter(vocab =>
         vocab.progress.level >= 0 &&
         vocab.progress.due && new Date(vocab.progress.due) <= new Date() &&
         !vocab.doNotPractice &&
-        (!vocabBlockList || !vocabBlockList.includes(vocab.uid))
+        (!vocabBlockList || !vocabBlockList.includes(vocab.id))
       );
 
     // Database-level filtering for set avoidance
@@ -505,13 +484,13 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   async getRandomUnseenVocabInLanguages(languages: string[], count: number, setsToAvoid?: string[], vocabBlockList?: string[]): Promise<VocabData[]> {
-    let query = vocabDb.vocab
+    let query = db.vocab
       .where('language')
       .anyOf(languages)
       .filter(vocab =>
         isUnseen(vocab) &&
         !vocab.doNotPractice &&
-        (!vocabBlockList || !vocabBlockList.includes(vocab.uid))
+        (!vocabBlockList || !vocabBlockList.includes(vocab.id))
       );
 
     // Database-level filtering for set avoidance
@@ -530,7 +509,7 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   async getRandomUnseenVocabWithContentAndTranslations(languages: string[], count: number, setsToAvoid?: string[], vocabBlockList?: string[]): Promise<VocabData[]> {
-    let query = vocabDb.vocab
+    let query = db.vocab
       .where('language')
       .anyOf(languages)
       .filter(vocab =>
@@ -540,7 +519,7 @@ export class VocabRepo implements VocabRepoContract {
         vocab.content.trim() !== '' && // Content must not be empty
         !!vocab.translations && // Must have translations array
         vocab.translations.length > 0 && // Must have at least one translation
-        (!vocabBlockList || !vocabBlockList.includes(vocab.uid))
+        (!vocabBlockList || !vocabBlockList.includes(vocab.id))
       );
 
     // Database-level filtering for set avoidance
@@ -559,19 +538,19 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   async addRelatedVocab(uid: string, relatedVocabUid: string): Promise<void> {
-    const vocab = await vocabDb.vocab.get(uid);
+    const vocab = await db.vocab.get(uid);
     if (!vocab) return;
 
     const relatedVocab = vocab.relatedVocab || [];
     if (!relatedVocab.includes(relatedVocabUid)) {
       relatedVocab.push(relatedVocabUid);
       vocab.relatedVocab = relatedVocab;
-      await vocabDb.vocab.put(vocab);
+      await db.vocab.put(vocab);
     }
   }
 
   async removeRelatedVocab(uid: string, relatedVocabUid: string): Promise<void> {
-    const vocab = await vocabDb.vocab.get(uid);
+    const vocab = await db.vocab.get(uid);
     if (!vocab) return;
 
     const relatedVocab = vocab.relatedVocab || [];
@@ -579,24 +558,24 @@ export class VocabRepo implements VocabRepoContract {
     if (index > -1) {
       relatedVocab.splice(index, 1);
       vocab.relatedVocab = relatedVocab;
-      await vocabDb.vocab.put(vocab);
+      await db.vocab.put(vocab);
     }
   }
 
   async addNotRelatedVocab(uid: string, notRelatedVocabUid: string): Promise<void> {
-    const vocab = await vocabDb.vocab.get(uid);
+    const vocab = await db.vocab.get(uid);
     if (!vocab) return;
 
     const notRelatedVocab = vocab.notRelatedVocab || [];
     if (!notRelatedVocab.includes(notRelatedVocabUid)) {
       notRelatedVocab.push(notRelatedVocabUid);
       vocab.notRelatedVocab = notRelatedVocab;
-      await vocabDb.vocab.put(vocab);
+      await db.vocab.put(vocab);
     }
   }
 
   async removeNotRelatedVocab(uid: string, notRelatedVocabUid: string): Promise<void> {
-    const vocab = await vocabDb.vocab.get(uid);
+    const vocab = await db.vocab.get(uid);
     if (!vocab) return;
 
     const notRelatedVocab = vocab.notRelatedVocab || [];
@@ -604,14 +583,14 @@ export class VocabRepo implements VocabRepoContract {
     if (index > -1) {
       notRelatedVocab.splice(index, 1);
       vocab.notRelatedVocab = notRelatedVocab;
-      await vocabDb.vocab.put(vocab);
+      await db.vocab.put(vocab);
     }
   }
 
   async findVocabByTranslationUids(language: string, translationUids: string[]): Promise<VocabData | undefined> {
     if (translationUids.length === 0) return undefined;
 
-    const vocab = await vocabDb.vocab
+    const vocab = await db.vocab
       .where('language')
       .equals(language)
       .filter(vocab => {
@@ -625,7 +604,7 @@ export class VocabRepo implements VocabRepoContract {
 
   private async findIdealWrongVocab(targetLanguage: string, correctVocabContent: string): Promise<string | null> {
     const now = new Date();
-    const dueVocab = await vocabDb.vocab
+    const dueVocab = await db.vocab
       .where('language').equals(targetLanguage)
       .and(vocab => vocab.consideredSentence !== true)
       .and(vocab => vocab.content !== correctVocabContent)
@@ -653,7 +632,7 @@ export class VocabRepo implements VocabRepoContract {
 
   private async getFallbackWrongVocab(targetLanguage: string, correctVocabContent: string): Promise<string | null> {
     // Query all vocab excluding sentences and the correct answer
-    const candidates = await vocabDb.vocab
+    const candidates = await db.vocab
       .where('language').equals(targetLanguage)
       .and(vocab => vocab.consideredSentence !== true)
       .and(vocab => vocab.content !== correctVocabContent)
@@ -694,8 +673,8 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   async getUnseenVocabByIds(vocabIds: string[]): Promise<VocabData[]> {
-    const vocab = await vocabDb.vocab
-      .where('uid')
+    const vocab = await db.vocab
+      .where('id')
       .anyOf(vocabIds)
       .toArray();
 
@@ -705,8 +684,8 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   async getDueVocabByIds(vocabIds: string[]): Promise<VocabData[]> {
-    const vocab = await vocabDb.vocab
-      .where('uid')
+    const vocab = await db.vocab
+      .where('id')
       .anyOf(vocabIds)
       .toArray();
 
@@ -716,13 +695,13 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   async getRandomVocabWithNoTranslationsInLanguages(languages: string[], vocabBlockList?: string[]): Promise<VocabData | null> {
-    const vocab = await vocabDb.vocab
+    const vocab = await db.vocab
       .where('language')
       .anyOf(languages)
       .filter(v => 
         !v.doNotPractice && 
         (!!v.content && (v.translations?.length ?? 0) === 0) &&
-        (!vocabBlockList || !vocabBlockList.includes(v.uid))
+        (!vocabBlockList || !vocabBlockList.includes(v.id))
       )
       .toArray();
     if (vocab.length === 0) return null;
@@ -733,7 +712,7 @@ export class VocabRepo implements VocabRepoContract {
 
   async getVocabWithLowestDueDate(count: number, languages: string[], vocabBlockList?: string[]): Promise<VocabData[]> {
     // Use the indexed progress.due field for efficient sorting
-    const vocab = await vocabDb.vocab
+    const vocab = await db.vocab
       .orderBy('progress.due')
       .filter(v =>
         languages.includes(v.language) &&
@@ -742,7 +721,7 @@ export class VocabRepo implements VocabRepoContract {
         v.translations &&
         v.translations.length > 0 &&
         v.progress.level >= 0 &&
-        (!vocabBlockList || !vocabBlockList.includes(v.uid))
+        (!vocabBlockList || !vocabBlockList.includes(v.id))
       )
       .limit(count)
       .toArray();
@@ -754,20 +733,20 @@ export class VocabRepo implements VocabRepoContract {
     const now = new Date();
 
     for (const vocabId of vocabIds) {
-      const vocab = await vocabDb.vocab.get(vocabId);
+      const vocab = await db.vocab.get(vocabId);
       if (!vocab) continue;
 
       // Update last_review to now and due date to specified time
       vocab.progress.last_review = now;
       vocab.progress.due = dueDate;
 
-      await vocabDb.vocab.put(vocab);
+      await db.vocab.put(vocab);
     }
   }
 
   async getDueSentenceVocabWithMaxLevel(languages: string[], maxLevel: number, vocabBlockList?: string[]): Promise<VocabData[]> {
     const now = new Date();
-    let query = vocabDb.vocab
+    let query = db.vocab
       .where('language').anyOf(languages)
       .and(vocab => vocab.consideredSentence === true)
       .and(vocab => vocab.progress.level >= 0)
@@ -775,7 +754,7 @@ export class VocabRepo implements VocabRepoContract {
       .and(vocab => vocab.progress.due && new Date(vocab.progress.due) <= now);
 
     if (vocabBlockList && vocabBlockList.length > 0) {
-      query = query.and(vocab => !vocabBlockList.includes(vocab.uid));
+      query = query.and(vocab => !vocabBlockList.includes(vocab.id));
     }
 
     const results = await query.toArray();
@@ -793,7 +772,7 @@ export class VocabRepo implements VocabRepoContract {
         format: 'jpeg'
       });
 
-      const vocab = await vocabDb.vocab.get(vocabId);
+      const vocab = await db.vocab.get(vocabId);
       if (!vocab) throw new Error('Vocab not found');
 
       // Check for duplicates before adding
@@ -811,7 +790,7 @@ export class VocabRepo implements VocabRepoContract {
       }
 
       const vocabImage: VocabImage = {
-        uid: crypto.randomUUID(),
+        id: crypto.randomUUID(),
         url: imageUrl,
         blob: compressedBlob,
         alt: alt,
@@ -824,7 +803,7 @@ export class VocabRepo implements VocabRepoContract {
       vocab.images.push(vocabImage);
       vocab.hasImage = true;
 
-      await vocabDb.vocab.put(toRaw(vocab));
+      await db.vocab.put(toRaw(vocab));
     } catch {
       // Don't throw - gracefully handle missing/invalid images
     }
@@ -840,11 +819,11 @@ export class VocabRepo implements VocabRepoContract {
         format: 'jpeg'
       });
 
-      const vocab = await vocabDb.vocab.get(vocabId);
+      const vocab = await db.vocab.get(vocabId);
       if (!vocab) throw new Error('Vocab not found');
 
       const vocabImage: VocabImage = {
-        uid: crypto.randomUUID(),
+        id: crypto.randomUUID(),
         blob: compressedBlob,
         alt: alt || file.name,
         addedAt: new Date(),
@@ -858,7 +837,7 @@ export class VocabRepo implements VocabRepoContract {
       vocab.images.push(vocabImage);
       vocab.hasImage = true;
 
-      await vocabDb.vocab.put(toRaw(vocab));
+      await db.vocab.put(toRaw(vocab));
     } catch (error) {
       this.toast.error(`Failed to add image from file: ${String(error)}`);
       throw error;
@@ -866,16 +845,16 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   async removeImageFromVocab(vocabId: string, imageId: string): Promise<void> {
-    const vocab = await vocabDb.vocab.get(vocabId);
+    const vocab = await db.vocab.get(vocabId);
     if (!vocab) return;
 
-    vocab.images = vocab.images?.filter(img => img.uid !== imageId) || [];
+    vocab.images = vocab.images?.filter(img => img.id !== imageId) || [];
     vocab.hasImage = vocab.images.length > 0;
-    await vocabDb.vocab.put(toRaw(vocab));
+    await db.vocab.put(toRaw(vocab));
   }
 
   async getVocabNeedingImages(languages: string[], vocabBlockList?: string[]): Promise<VocabData[]> {
-    const vocab = await vocabDb.vocab
+    const vocab = await db.vocab
       .where('language')
       .anyOf(languages)
       .filter(vocab => {
@@ -890,7 +869,7 @@ export class VocabRepo implements VocabRepoContract {
         }
         
         // Must not be in block list
-        if (vocabBlockList && vocabBlockList.includes(vocab.uid)) {
+        if (vocabBlockList && vocabBlockList.includes(vocab.id)) {
           return false;
         }
         
@@ -912,11 +891,11 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   async markVocabNotPicturable(vocabId: string): Promise<void> {
-    const vocab = await vocabDb.vocab.get(vocabId);
+    const vocab = await db.vocab.get(vocabId);
     if (!vocab) return;
 
     vocab.isPicturable = false;
-    await vocabDb.vocab.put(toRaw(vocab));
+    await db.vocab.put(toRaw(vocab));
   }
 
   // Sound operations
@@ -927,7 +906,7 @@ export class VocabRepo implements VocabRepoContract {
       throw new Error(validationError);
     }
 
-    const vocab = await vocabDb.vocab.get(vocabId);
+    const vocab = await db.vocab.get(vocabId);
     if (!vocab) throw new Error('Vocab not found');
 
     try {
@@ -949,7 +928,7 @@ export class VocabRepo implements VocabRepoContract {
       const duration = await getAudioDuration(file);
 
       const vocabSound: VocabSound = {
-        uid: crypto.randomUUID(),
+        id: crypto.randomUUID(),
         blob: file, // Store the file as a blob directly
         addedAt: new Date(),
         fileSize: file.size,
@@ -960,14 +939,14 @@ export class VocabRepo implements VocabRepoContract {
 
       vocab.sounds.push(vocabSound);
       vocab.hasSound = vocab.sounds.some(sound => !sound.disableForPractice);
-      await vocabDb.vocab.put(toRaw(vocab));
+      await db.vocab.put(toRaw(vocab));
     } catch {
       // Don't throw - gracefully handle missing/invalid sounds
     }
   }
 
   async addSoundFromUrl(vocabId: string, url: string): Promise<void> {
-    const vocab = await vocabDb.vocab.get(vocabId);
+    const vocab = await db.vocab.get(vocabId);
     if (!vocab) throw new Error('Vocab not found');
 
     try {
@@ -985,7 +964,7 @@ export class VocabRepo implements VocabRepoContract {
       const duration = await getAudioDuration(blob);
 
       const vocabSound: VocabSound = {
-        uid: crypto.randomUUID(),
+        id: crypto.randomUUID(),
         blob: blob,
         addedAt: new Date(),
         fileSize: blob.size,
@@ -997,7 +976,7 @@ export class VocabRepo implements VocabRepoContract {
       vocab.sounds = vocab.sounds || [];
       vocab.sounds.push(vocabSound);
       vocab.hasSound = vocab.sounds.some(sound => !sound.disableForPractice);
-      await vocabDb.vocab.put(toRaw(vocab));
+      await db.vocab.put(toRaw(vocab));
     } catch (error) {
       this.toast.error(`Failed to add sound from URL: ${String(error)}`);
       throw error;
@@ -1005,17 +984,17 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   async removeSoundFromVocab(vocabId: string, soundId: string): Promise<void> {
-    const vocab = await vocabDb.vocab.get(vocabId);
+    const vocab = await db.vocab.get(vocabId);
     if (!vocab) return;
 
-    vocab.sounds = vocab.sounds?.filter(sound => sound.uid !== soundId) || [];
+    vocab.sounds = vocab.sounds?.filter(sound => sound.id !== soundId) || [];
     vocab.hasSound = vocab.sounds.length > 0;
-    await vocabDb.vocab.put(toRaw(vocab));
+    await db.vocab.put(toRaw(vocab));
   }
 
   // Eyes and Ears operations
   async getRandomUnseenVocabWithSoundAndImages(languages: string[], vocabBlockList?: string[]): Promise<VocabData | null> {
-    const vocab = await vocabDb.vocab
+    const vocab = await db.vocab
       .where('language')
       .anyOf(languages)
       .filter(vocab => 
@@ -1023,7 +1002,7 @@ export class VocabRepo implements VocabRepoContract {
         vocab.hasImage === true &&
         vocab.progress.level === -1 &&
         !vocab.doNotPractice &&
-        (!vocabBlockList || !vocabBlockList.includes(vocab.uid))
+        (!vocabBlockList || !vocabBlockList.includes(vocab.id))
       )
       .toArray();
 
@@ -1033,7 +1012,7 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   async getRandomDueVocabWithSoundAndImages(languages: string[], vocabBlockList?: string[]): Promise<VocabData | null> {
-    const vocab = await vocabDb.vocab
+    const vocab = await db.vocab
       .where('language')
       .anyOf(languages)
       .filter(vocab => 
@@ -1042,7 +1021,7 @@ export class VocabRepo implements VocabRepoContract {
         vocab.progress.level >= 0 &&
         vocab.progress.due && new Date(vocab.progress.due) <= new Date() &&
         !vocab.doNotPractice &&
-        (!vocabBlockList || !vocabBlockList.includes(vocab.uid))
+        (!vocabBlockList || !vocabBlockList.includes(vocab.id))
       )
       .toArray();
 
@@ -1052,13 +1031,13 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   async getRandomVocabWithImages(language: string, excludeVocabUid: string, vocabBlockList?: string[]): Promise<VocabData | null> {
-    const vocab = await vocabDb.vocab
+    const vocab = await db.vocab
       .where('language')
       .equals(language)
       .filter(vocab =>
         vocab.hasImage === true &&
-        vocab.uid !== excludeVocabUid &&
-        (!vocabBlockList || !vocabBlockList.includes(vocab.uid))
+        vocab.id !== excludeVocabUid &&
+        (!vocabBlockList || !vocabBlockList.includes(vocab.id))
       )
       .toArray();
 
@@ -1068,7 +1047,7 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   async getRandomUnseenSentenceVocabWithRelatedVocab(languages: string[], vocabBlockList?: string[]): Promise<VocabData | null> {
-    const vocab = await vocabDb.vocab
+    const vocab = await db.vocab
       .where('language')
       .anyOf(languages)
       .filter(vocab => 
@@ -1076,7 +1055,7 @@ export class VocabRepo implements VocabRepoContract {
         vocab.progress.level === -1 &&
         vocab.relatedVocab && vocab.relatedVocab.length >= 1 &&
         !vocab.doNotPractice &&
-        (!vocabBlockList || !vocabBlockList.includes(vocab.uid))
+        (!vocabBlockList || !vocabBlockList.includes(vocab.id))
       )
       .toArray();
 
@@ -1086,7 +1065,7 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   async getRandomDueOrUnseenVocabForMinimalPairs(languages: string[], vocabBlockList?: string[]): Promise<VocabData | null> {
-    const vocab = await vocabDb.vocab
+    const vocab = await db.vocab
       .where('language')
       .anyOf(languages)
       .filter(vocab => {
@@ -1094,7 +1073,7 @@ export class VocabRepo implements VocabRepoContract {
         if (vocab.doNotPractice) return false;
         
         // Must not be in block list
-        if (vocabBlockList && vocabBlockList.includes(vocab.uid)) return false;
+        if (vocabBlockList && vocabBlockList.includes(vocab.id)) return false;
         
         // Must have content set
         if (!vocab.content) return false;
@@ -1127,7 +1106,7 @@ export class VocabRepo implements VocabRepoContract {
       const ensuredCandidate = this.ensureVocabFields(candidate);
       
       // Get similar sounding vocab and check if at least one meets criteria
-      const relatedVocabList = await vocabDb.vocab.where('uid').anyOf(ensuredCandidate.similarSoundingButNotTheSame!).toArray();
+      const relatedVocabList = await db.vocab.where('id').anyOf(ensuredCandidate.similarSoundingButNotTheSame!).toArray();
       const validRelatedVocab = relatedVocabList.filter(v =>
         v.content &&
         v.sounds && v.sounds.some(s => !s.disableForPractice)
@@ -1145,7 +1124,7 @@ export class VocabRepo implements VocabRepoContract {
   async getRandomDueVocabFromSet(setUid: string, count: number, vocabBlockList?: string[]): Promise<VocabData[]> {
     const now = new Date();
 
-    const vocab = await vocabDb.vocab
+    const vocab = await db.vocab
       .where('origins')
       .equals(setUid)
       .filter(vocab => {
@@ -1153,7 +1132,7 @@ export class VocabRepo implements VocabRepoContract {
         const dueOk = vocab.progress.due && new Date(vocab.progress.due) <= now;
         const practiceOk = !vocab.doNotPractice;
         const originOk = vocab.origins.includes(setUid);
-        const notBlockedOk = !vocabBlockList || !vocabBlockList.includes(vocab.uid);
+        const notBlockedOk = !vocabBlockList || !vocabBlockList.includes(vocab.id);
 
         return levelOk && dueOk && practiceOk && originOk && notBlockedOk;
       })
@@ -1164,7 +1143,7 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   async getRandomUnseenVocabFromSet(setUid: string, count: number, vocabBlockList?: string[]): Promise<VocabData[]> {
-    const vocab = await vocabDb.vocab
+    const vocab = await db.vocab
       .where('origins')
       .equals(setUid)
       .filter(vocab => {
@@ -1172,12 +1151,12 @@ export class VocabRepo implements VocabRepoContract {
           
           return !vocab.doNotPractice &&
                  vocab.origins.includes(setUid) &&
-                 (!vocabBlockList || !vocabBlockList.includes(vocab.uid));
+                 (!vocabBlockList || !vocabBlockList.includes(vocab.id));
         }
         return isUnseen(vocab) &&
                !vocab.doNotPractice &&
                vocab.origins.includes(setUid) &&
-               (!vocabBlockList || !vocabBlockList.includes(vocab.uid));
+               (!vocabBlockList || !vocabBlockList.includes(vocab.id));
       })
       .toArray();
 
@@ -1186,7 +1165,7 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   async getUnseenVocabCountFromSet(setUid: string): Promise<number> {
-    const count = await vocabDb.vocab
+    const count = await db.vocab
       .where('origins')
       .equals(setUid)
       .filter(vocab => {
@@ -1202,40 +1181,9 @@ export class VocabRepo implements VocabRepoContract {
     return count;
   }
 
-  async bulkProcessVocab(toUpdate: VocabData[], toCreate: Omit<VocabData, 'uid' | 'progress'>[]): Promise<VocabData[]> {
-    const createdVocab: VocabData[] = [];
-
-    await vocabDb.transaction('rw', vocabDb.vocab, async () => {
-      // Handle updates
-      if (toUpdate.length > 0) {
-        await vocabDb.vocab.bulkPut(toUpdate);
-      }
-
-      // Handle creates - generate UIDs and progress in the repo where it belongs
-      if (toCreate.length > 0) {
-        const vocabToAdd: VocabData[] = toCreate.map(vocabData => {
-          const newVocab: VocabData = {
-            uid: crypto.randomUUID(),
-            ...vocabData,
-            progress: {
-              ...createEmptyCard(),
-              streak: 0,
-              level: -1
-            }
-          };
-          createdVocab.push(newVocab);
-          return newVocab;
-        });
-
-        await vocabDb.vocab.bulkAdd(vocabToAdd);
-      }
-    });
-
-    return createdVocab;
-  }
 
   async getUncheckedVocab(limit: number): Promise<VocabData[]> {
-    const vocab = await vocabDb.vocab
+    const vocab = await db.vocab
       .filter(v => !v._mergeChecked)
       .limit(limit)
       .toArray();
@@ -1244,7 +1192,7 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   async getVocabByOrigins(setUids: string[]): Promise<VocabData[]> {
-    const vocab = await vocabDb.vocab
+    const vocab = await db.vocab
       .where('origins')
       .anyOf(setUids)
       .toArray();

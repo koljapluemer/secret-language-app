@@ -36,7 +36,7 @@
         <!-- Existing translations -->
         <div
           v-for="(translation, index) in formData.translations"
-          :key="translation.uid"
+          :key="translation.id"
           class="flex items-center gap-2"
         >
           <input
@@ -106,7 +106,7 @@ const newTranslationContent = ref('');
 function addTranslationIfNeeded() {
   if (newTranslationContent.value.trim()) {
     const newTranslation: TranslationData = {
-      uid: crypto.randomUUID(),
+      id: crypto.randomUUID(),
       content: newTranslationContent.value.trim(),
       priority: 1,
       notes: [],

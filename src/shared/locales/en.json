@@ -53,6 +53,7 @@
     "settings": "Settings",
     "stats": "Stats",
     "downloads": "Downloads",
+    "motivation": "Motivation",
     "home": "Home",
     "vocabulary": "Vocabulary",
     "factCards": "Fact Cards",
@@ -498,6 +499,12 @@
     "removedDuplicates": "Removed",
     "duplicateNotesFrom": "duplicate notes from",
     "entries": "entries",
+    "practiceGoals": "Practice Goals",
+    "practiceGoalsDescription": "Set your daily and weekly practice time goals.",
+    "dailyGoal": "Daily Goal (minutes)",
+    "weeklyGoal": "Weekly Goal (minutes)",
+    "dailyGoalPlaceholder": "e.g., 30",
+    "weeklyGoalPlaceholder": "e.g., 180",
     "languages": {
       "title": "Languages",
       "description": "Manage your target languages",
@@ -729,5 +736,29 @@
     "completeLanguageTasks": "Complete practice tasks to see your daily language activity!",
     "stackedBarsDescription": "Stacked bars show the number of exercises completed per language each day."
   },
-  "minutes": "m"
+  "minutes": "m",
+  "motivation": {
+    "title": "Motivation",
+    "goals": {
+      "longerThanYesterday": "Practiced longer than yesterday",
+      "longerThanDayBeforeYesterday": "Practiced longer than day before yesterday",
+      "moreTasksThanYesterday": "More tasks than yesterday",
+      "moreTasksThanDayBeforeYesterday": "More tasks than day before yesterday",
+      "dailyGoalReached": "Daily goal reached",
+      "weeklyGoalReached": "Weekly goal reached",
+      "longerThan10DayAverage": "Longer than 10-day average",
+      "longerThan3DayAverage": "Longer than 3-day average",
+      "longerThisWeekThanLastWeek": "Longer this week than last week"
+    },
+    "descriptions": {
+      "moreTime": "+{diff} min",
+      "lessTime": "{diff} min",
+      "moreTasks": "+{diff} tasks",
+      "lessTasks": "{diff} tasks",
+      "progress": "{current} / {target} min",
+      "percentage": "{percent}%"
+    },
+    "noDataYet": "No practice data available yet. Start practicing to track your progress!",
+    "noGoalSet": "No goal set"
+  }
 }

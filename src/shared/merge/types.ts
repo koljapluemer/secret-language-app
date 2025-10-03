@@ -40,5 +40,5 @@ export interface PropertyMergeStrategy<T = unknown> {
  * Excludes 'uid' which should never be merged.
  */
 export type MergeStrategyMap<T> = {
-  [K in keyof Omit<T, 'uid'>]-?: PropertyMergeStrategy<T[K]>
+  [K in keyof Omit<T, "id">]-?: PropertyMergeStrategy<T[K]>
 }

@@ -74,7 +74,7 @@ const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 const tempNote = ref<NoteData>({
-  uid: props.note.uid,
+  id: props.note.id,
   content: props.note.content || '',
   noteType: props.note.noteType || '',
   showBeforeExercise: props.note.showBeforeExercise || false
@@ -89,7 +89,7 @@ function saveEdit() {
   
   // Convert empty strings back to undefined for optional fields
   const noteToSave: NoteData = {
-    uid: tempNote.value.uid,
+    id: tempNote.value.id,
     content: tempNote.value.content.trim(),
     noteType: tempNote.value.noteType?.trim() || undefined,
     showBeforeExercise: tempNote.value.showBeforeExercise
@@ -101,7 +101,7 @@ function saveEdit() {
 
 function cancelEdit() {
   tempNote.value = {
-    uid: props.note.uid,
+    id: props.note.id,
     content: props.note.content || '',
     noteType: props.note.noteType || '',
     showBeforeExercise: props.note.showBeforeExercise || false

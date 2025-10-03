@@ -6,7 +6,7 @@
     <div class="flex gap-2">
       <!-- <router-link 
         v-if="isEditing && currentVocab" 
-        :to="{ path: '/practice/classic-queue', query: { focusOnVocab: currentVocab.uid } }" 
+        :to="{ path: '/practice/classic-queue', query: { focusOnVocab: currentVocab.id } }" 
         class="btn btn-primary"
       >
         Practice this

@@ -2,13 +2,13 @@ import type { GoalData } from '@/entities/goals/GoalData';
 import type { Task } from '@/pages/practice/Task';
 
 export function generateAddSubGoals(goal: GoalData): Task {
-  const uid = `add-sub-goals-${goal.uid}-${Date.now()}`;
+  const id = `add-sub-goals-${goal.id}-${Date.now()}`;
   
   return {
-    uid,
+    id,
     language: goal.language,
     taskType: 'add-sub-goals',
     prompt: `Break down this goal into smaller, achievable sub-goals.`,
-    associatedGoals: [goal.uid]
+    associatedGoals: [goal.id]
   };
 }

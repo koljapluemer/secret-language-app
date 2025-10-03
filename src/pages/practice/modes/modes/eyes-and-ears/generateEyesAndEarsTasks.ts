@@ -28,7 +28,7 @@ async function getVocabWithSoundAndImages(
     if (!languageCodes.includes(vocab.language)) return false;
     
     // Must not be in block list
-    if (vocabBlockList && vocabBlockList.includes(vocab.uid)) return false;
+    if (vocabBlockList && vocabBlockList.includes(vocab.id)) return false;
     
     // Must not be marked as doNotPractice
     if (vocab.doNotPractice) return false;

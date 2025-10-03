@@ -24,7 +24,7 @@ export async function generateMinimalPairsTask(
     }
     
     // Track this vocab as used (only the main vocab, not the distractor)
-    addUsedVocab(vocab.uid);
+    addUsedVocab(vocab.id);
     
     // Generate the vocab-choose-from-sound task 
     return generateVocabChooseFromSound(vocab);

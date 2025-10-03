@@ -1,5 +1,6 @@
 export interface LanguageData {
-    code: string // serves as uid, standardized code
+    id: string
+    code: string // standardized code
     name: string
     emoji?: string
     isActive: boolean

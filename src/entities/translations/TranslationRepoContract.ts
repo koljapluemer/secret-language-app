@@ -5,7 +5,8 @@ export interface TranslationRepoContract {
   getTranslationsByIds(ids: string[]): Promise<TranslationData[]>;
   getAllTranslations(): Promise<TranslationData[]>;
   getTranslationByContent(content: string): Promise<TranslationData | undefined>;
-  saveTranslation(translation: Omit<TranslationData, 'uid' | 'origins'>): Promise<TranslationData>;
+  saveTranslation(translation: Omit<TranslationData, 'id' | 'origins'>): Promise<TranslationData>;
+  saveOrGetExistingTranslation(translation: Omit<TranslationData, 'id' | 'origins'>): Promise<TranslationData>;
   updateTranslation(translation: TranslationData): Promise<void>;
   deleteTranslations(ids: string[]): Promise<void>;
   
@@ -14,9 +15,6 @@ export interface TranslationRepoContract {
   
   // Distractor generation operations
   generateWrongTranslations(correctTranslationContent: string, count: number): Promise<string[]>;
-
-  // Bulk operations for performance
-  bulkProcessTranslations(toUpdate: TranslationData[], toCreate: TranslationData[]): Promise<void>;
 
   // Merge operations
   getUncheckedTranslations(limit: number): Promise<TranslationData[]>;

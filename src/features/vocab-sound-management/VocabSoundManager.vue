@@ -4,16 +4,16 @@
 
     <!-- Current Sounds -->
     <div v-if="localSounds && localSounds.length > 0" class="space-y-3">
-      <div v-for="sound in localSounds" :key="sound.uid" class="card shadow">
+      <div v-for="sound in localSounds" :key="sound.id" class="card shadow">
         <div class="card-body p-4">
           <div class="flex items-center gap-4">
             <!-- Play/Pause Button -->
             <button 
-              @click="togglePlayback(sound.uid)"
+              @click="togglePlayback(sound.id)"
               class="btn btn-circle btn-primary"
               :disabled="loading"
             >
-              <svg v-if="playingSound !== sound.uid" class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+              <svg v-if="playingSound !== sound.id" class="w-5 h-5 fill-current" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z"/>
               </svg>
               <svg v-else class="w-5 h-5 fill-current" viewBox="0 0 24 24">
@@ -35,7 +35,7 @@
 
             <!-- Remove Button -->
             <button 
-              @click="removeSound(sound.uid)"
+              @click="removeSound(sound.id)"
               class="btn btn-sm btn-error btn-outline"
               :disabled="loading"
             >
@@ -44,7 +44,7 @@
           </div>
 
           <!-- Audio Progress Bar (when playing) -->
-          <div v-if="playingSound === sound.uid && audioElement && sound.duration" class="mt-3">
+          <div v-if="playingSound === sound.id && audioElement && sound.duration" class="mt-3">
             <div class="flex items-center gap-2 text-xs text-base-content/60">
               <span>{{ formatAudioDuration(currentTime) }}</span>
               <progress 
@@ -199,7 +199,7 @@ function getAudioUrl(sound: VocabSound): string {
 function togglePlayback(soundId: string) {
   if (!audioElement.value) return;
   
-  const sound = localSounds.value.find(s => s.uid === soundId);
+  const sound = localSounds.value.find(s => s.id === soundId);
   if (!sound) return;
   
   if (playingSound.value === soundId) {
@@ -267,7 +267,7 @@ async function addFromUrl() {
     const duration = await getAudioDuration(blob);
     
     const vocabSound: VocabSound = {
-      uid: crypto.randomUUID(),
+      id: crypto.randomUUID(),
       blob: blob,
       addedAt: new Date(),
       fileSize: blob.size,
@@ -315,7 +315,7 @@ async function handleFileUpload(event: Event) {
     const duration = await getAudioDuration(file);
     
     const vocabSound: VocabSound = {
-      uid: crypto.randomUUID(),
+      id: crypto.randomUUID(),
       blob: file, // Store the file as a blob directly
       addedAt: new Date(),
       fileSize: file.size,
@@ -350,7 +350,7 @@ function removeSound(soundId: string) {
   }
   
   // Remove sound from local state
-  localSounds.value = localSounds.value.filter(sound => sound.uid !== soundId);
+  localSounds.value = localSounds.value.filter(sound => sound.id !== soundId);
   
   // Tell parent about the change
   emit('soundsChanged', [...localSounds.value]);

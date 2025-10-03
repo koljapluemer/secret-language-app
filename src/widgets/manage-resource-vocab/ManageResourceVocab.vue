@@ -46,7 +46,7 @@ async function handleVocabIdsUpdate(newVocabIds: string[]) {
 async function handleVocabAdded(vocab: VocabData) {
   const updatedResource = await resourceRepo.updateResource(toRaw({
     ...toRaw(props.resource),
-    vocab: [...toRaw(props.resource).vocab, vocab.uid]
+    vocab: [...toRaw(props.resource).vocab, vocab.id]
   }));
   emit('resource-updated', updatedResource);
 }

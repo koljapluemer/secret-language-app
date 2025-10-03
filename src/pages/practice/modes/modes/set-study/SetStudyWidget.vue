@@ -59,7 +59,7 @@ const sessionProgress = ref<{ totalUnseen: number; totalDue: number }>({ totalUn
 
 // Computed
 const selectedSet = computed(() => {
-  return availableSets.value.find(set => set.uid === selectedSetUid.value);
+  return availableSets.value.find(set => set.id === selectedSetUid.value);
 });
 
 const canStartStudy = computed(() => {
@@ -78,7 +78,7 @@ async function loadAvailableSets() {
       const latestSet = sets.reduce((latest, current) => {
         return current.lastDownloadedAt > latest.lastDownloadedAt ? current : latest;
       });
-      selectedSetUid.value = latestSet.uid;
+      selectedSetUid.value = latestSet.id;
     }
   } catch {
     toast.error('Failed to load available sets');
@@ -294,7 +294,7 @@ const handleTaskFinished = async () => {
               <option value="" disabled>
                 {{ loadingSets ? $t('common.loading') : $t('practice.modes.setStudy.setup.chooseSet') }}
               </option>
-              <option v-for="set in availableSets" :key="set.uid" :value="set.uid">
+              <option v-for="set in availableSets" :key="set.id" :value="set.id">
                 {{ set.name }} {{ $t('practice.modes.setStudy.setup.setLanguagePrefix') }}{{ set.language }}{{ $t('practice.modes.setStudy.setup.setLanguageSuffix') }}
               </option>
             </select>
@@ -392,7 +392,7 @@ const handleTaskFinished = async () => {
     <Transition mode="out-in" enter-active-class="transition-opacity duration-[50ms] ease-out"
       leave-active-class="transition-opacity duration-[50ms] ease-in" enter-from-class="opacity-0"
       enter-to-class="opacity-100" leave-from-class="opacity-100" leave-to-class="opacity-0">
-      <TaskRenderer :key="state.currentTask.uid" :task="state.currentTask"
+      <TaskRenderer :key="state.currentTask.id" :task="state.currentTask"
         :practice-context="{ practiceMode: 'set-study', setUid: selectedSetUid }"
         @finished="handleTaskFinished" />
     </Transition>

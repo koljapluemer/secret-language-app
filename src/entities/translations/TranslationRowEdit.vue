@@ -40,7 +40,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  'save': [Omit<TranslationData, 'uid' | 'origins'>];
+  'save': [Omit<TranslationData, "id" | 'origins'>];
   'cancel': [];
 }>();
 
@@ -53,7 +53,7 @@ const editTranslation = ref<Pick<TranslationData, 'content' | 'notes'>>({
 function save() {
   if (!editTranslation.value.content?.trim()) return;
   
-  const translationToSave: Omit<TranslationData, 'uid' | 'origins'> = {
+  const translationToSave: Omit<TranslationData, "id" | 'origins'> = {
     content: editTranslation.value.content.trim(),
     priority: 1,
     notes: editTranslation.value.notes || []

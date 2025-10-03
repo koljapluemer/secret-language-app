@@ -9,8 +9,8 @@ export interface GoalListFilters {
 export interface GoalRepoContract {
   getAll(): Promise<GoalData[]>;
   getById(id: string): Promise<GoalData | undefined>;
-  create(goal: Omit<GoalData, 'uid' | 'tasks'>): Promise<GoalData>;
-  update(id: string, updates: Omit<Partial<GoalData>, 'uid' | 'tasks'>): Promise<GoalData>;
+  create(goal: Omit<GoalData, "id" | 'tasks'>): Promise<GoalData>;
+  update(id: string, updates: Omit<Partial<GoalData>, "id" | 'tasks'>): Promise<GoalData>;
   delete(id: string): Promise<void>;
 
   // Existence check operations

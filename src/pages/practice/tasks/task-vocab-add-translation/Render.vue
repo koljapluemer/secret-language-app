@@ -60,7 +60,7 @@ function canAdd(): boolean {
 function addLocalTranslation() {
   if (!canAdd()) return;
   const entry: TranslationData = {
-    uid: crypto.randomUUID(),
+    id: crypto.randomUUID(),
     content: newTranslationContent.value.trim(),
     priority: 1,
     notes: [],
@@ -71,7 +71,7 @@ function addLocalTranslation() {
 }
 
 function removeLocalTranslation(uid: string) {
-  translations.value = translations.value.filter(t => t.uid !== uid);
+  translations.value = translations.value.filter(t => t.id !== uid);
 }
 
 async function handleDone() {
@@ -87,7 +87,7 @@ async function handleDone() {
       priority: t.priority,
       notes: t.notes
     });
-    savedUids.push(saved.uid);
+    savedUids.push(saved.id);
   }
 
   const updatedVocab: VocabData = {
@@ -113,7 +113,7 @@ onMounted(loadVocab);
         
         <NoteDisplayMini 
           v-for="note in vocabNotes.filter(note => note.showBeforeExercise)" 
-          :key="note.uid"
+          :key="note.id"
           :note="note"
         />
       </div>
@@ -126,7 +126,7 @@ onMounted(loadVocab);
         
         <NoteDisplayMini 
           v-for="note in translationNotes.filter(note => note.showBeforeExercise)" 
-          :key="note.uid"
+          :key="note.id"
           :note="note"
         />
       </div>
@@ -135,7 +135,7 @@ onMounted(loadVocab);
     <div class="space-y-3 mb-4">
       <div
         v-for="t in translations"
-        :key="t.uid"
+        :key="t.id"
         class="flex items-center gap-2"
       >
         <input
@@ -144,7 +144,7 @@ onMounted(loadVocab);
           class="input input-bordered input-lg flex-1"
           placeholder="Enter translation..."
         />
-        <button type="button" class="btn btn-ghost btn-circle text-error" @click="removeLocalTranslation(t.uid)">{{ $t('practice.tasks.removeTranslation') }}</button>
+        <button type="button" class="btn btn-ghost btn-circle text-error" @click="removeLocalTranslation(t.id)">{{ $t('practice.tasks.removeTranslation') }}</button>
       </div>
 
       <div class="flex items-center gap-2">

@@ -14,14 +14,14 @@
     <SoundPlayer ref="soundPlayerRef" :sound="playableSound" :auto-play="true" />
 
     <div class="flex flex-row gap-4 mx-auto justify-center my-6">
-      <div v-for="(vocab, index) in shuffledVocabs" :key="vocab.uid" 
+      <div v-for="(vocab, index) in shuffledVocabs" :key="vocab.id" 
            :class="getOptionContainerClass(index)"
            class="flex gap-2 flex-col transition-all duration-300 ease-out">
         <button :class="getButtonClass(index)" class="btn btn-lg transition-all duration-300" @click="selectOption(index)"
           :disabled="isButtonDisabled(index)">
           {{ $t('practice.tasks.iHear') }} {{ vocab.content }}
         </button>
-        <VocabWithTranslationsDisplay :vocab-uid="vocab.uid" :repositories="repositories"
+        <VocabWithTranslationsDisplay :vocab-uid="vocab.id" :repositories="repositories"
           :showAllNotesImmediately="true" />
       </div>
     </div>
@@ -146,7 +146,7 @@ async function loadVocabData() {
     // Shuffle the two vocabs and track correct index
     const vocabArray = [vocab1.value, vocab2.value];
     shuffledVocabs.value = shuffleArray(vocabArray);
-    correctIndex.value = shuffledVocabs.value.findIndex(v => v.uid === vocab1.value!.uid);
+    correctIndex.value = shuffledVocabs.value.findIndex(v => v.id === vocab1.value!.id);
 
   } catch {
     toast.error('Failed to load vocabulary data');
@@ -233,8 +233,8 @@ const handleCompletion = async () => {
   try {
     const rating = firstAttemptWrong.value ? Rating.Again : Rating.Good;
     const immediateDue = props.modeContext?.setWrongVocabDueAgainImmediately || false;
-    await vocabRepo.scoreVocab(vocab1.value.uid, rating, immediateDue);
-    await vocabRepo.updateLastReview(vocab1.value.uid);
+    await vocabRepo.scoreVocab(vocab1.value.id, rating, immediateDue);
+    await vocabRepo.updateLastReview(vocab1.value.id);
 
     const correctness = firstAttemptWrong.value ? 'incorrect' : 'correct';
     setTimeout(() => emit('finished', correctness), 750);

@@ -68,7 +68,7 @@ interface VocabFormState {
 
 function vocabDataToFormData(vocab: VocabData, notes: NoteData[] = [], translations: TranslationData[] = []): VocabFormData {
   return {
-    id: vocab.uid,
+    id: vocab.id,
     language: vocab.language,
     content: vocab.content || '',
     consideredCharacter: vocab.consideredCharacter ?? false,
@@ -89,16 +89,16 @@ function vocabDataToFormData(vocab: VocabData, notes: NoteData[] = [], translati
 
 function formDataToVocabData(formData: VocabFormData, existingVocab?: VocabData): Omit<VocabData, 'progress' | 'tasks'> | VocabData {
   const baseData: Omit<VocabData, 'progress' | 'tasks'> = {
-    uid: formData.id || crypto.randomUUID(),
+    id: formData.id || crypto.randomUUID(),
     language: formData.language,
     content: formData.content,
     consideredCharacter: formData.consideredCharacter,
     consideredSentence: formData.consideredSentence,
     consideredWord: formData.consideredWord,
-    translations: formData.translations.map(translation => translation.uid),
+    translations: formData.translations.map(translation => translation.id),
     priority: formData.priority,
     doNotPractice: formData.doNotPractice,
-    notes: formData.notes.map(note => note.uid),
+    notes: formData.notes.map(note => note.id),
     links: formData.links,
     origins: existingVocab?.origins || ['user-added'],
     relatedVocab: formData.relatedVocab || [],
@@ -241,9 +241,9 @@ async function saveInternal(): Promise<void> {
   
 
   for (const note of serializedFormData.notes) {
-    if (note.uid && loadedNotes.value.find(n => n.uid === note.uid)) {
+    if (note.id && loadedNotes.value.find(n => n.id === note.id)) {
       await noteRepo.updateNote(toRaw(note));
-    } else if (!note.uid || !loadedNotes.value.find(n => n.uid === note.uid)) {
+    } else if (!note.id || !loadedNotes.value.find(n => n.id === note.id)) {
       const savedNote = await noteRepo.saveNote(toRaw(note));
       const noteIndex = serializedFormData.notes.findIndex(n => n === note);
       if (noteIndex >= 0) {
@@ -252,16 +252,16 @@ async function saveInternal(): Promise<void> {
     }
   }
 
-  const currentNoteUIDs = serializedFormData.notes.map(n => n.uid);
-  const notesToDelete = loadedNotes.value.filter(n => !currentNoteUIDs.includes(n.uid));
+  const currentNoteUIDs = serializedFormData.notes.map(n => n.id);
+  const notesToDelete = loadedNotes.value.filter(n => !currentNoteUIDs.includes(n.id));
   if (notesToDelete.length > 0) {
-    await noteRepo.deleteNotes(notesToDelete.map(n => n.uid));
+    await noteRepo.deleteNotes(notesToDelete.map(n => n.id));
   }
 
   for (const translation of serializedFormData.translations) {
-    if (translation.uid && loadedTranslations.value.find(t => t.uid === translation.uid)) {
+    if (translation.id && loadedTranslations.value.find(t => t.id === translation.id)) {
       await translationRepo.updateTranslation(toRaw(translation));
-    } else if (!translation.uid || !loadedTranslations.value.find(t => t.uid === translation.uid)) {
+    } else if (!translation.id || !loadedTranslations.value.find(t => t.id === translation.id)) {
       const savedTranslation = await translationRepo.saveTranslation(toRaw(translation));
       const translationIndex = serializedFormData.translations.findIndex(t => t === translation);
       if (translationIndex >= 0) {
@@ -270,10 +270,10 @@ async function saveInternal(): Promise<void> {
     }
   }
 
-  const currentTranslationUIDs = serializedFormData.translations.map(t => t.uid);
-  const translationsToDelete = loadedTranslations.value.filter(t => !currentTranslationUIDs.includes(t.uid));
+  const currentTranslationUIDs = serializedFormData.translations.map(t => t.id);
+  const translationsToDelete = loadedTranslations.value.filter(t => !currentTranslationUIDs.includes(t.id));
   if (translationsToDelete.length > 0) {
-    await translationRepo.deleteTranslations(translationsToDelete.map(t => t.uid));
+    await translationRepo.deleteTranslations(translationsToDelete.map(t => t.id));
   }
 
   let finalVocabId = props.vocabId;
@@ -293,10 +293,10 @@ async function saveInternal(): Promise<void> {
     
     
     await vocabRepo.updateVocab(toRaw(updatedVocab));
-    finalVocabId = updatedVocab.uid;
+    finalVocabId = updatedVocab.id;
   } else {
     const savedVocab = await vocabRepo.saveVocab(toRaw(formDataToVocabData(serializedFormData)));
-    finalVocabId = savedVocab.uid;
+    finalVocabId = savedVocab.id;
   }
 
   if (finalVocabId) {
@@ -336,13 +336,13 @@ async function handleFieldChange() {
 function addNote(note: NoteData) {
   const newNote: NoteData = {
     ...note,
-    uid: crypto.randomUUID()
+    id: crypto.randomUUID()
   };
   state.value.formData.notes.push(newNote);
 }
 
 function updateNote(updatedNote: NoteData) {
-  const index = state.value.formData.notes.findIndex(n => n.uid === updatedNote.uid);
+  const index = state.value.formData.notes.findIndex(n => n.id === updatedNote.id);
   if (index >= 0) {
     state.value.formData.notes[index] = updatedNote;
     handleFieldChange();
@@ -350,7 +350,7 @@ function updateNote(updatedNote: NoteData) {
 }
 
 function removeNote(uid: string) {
-  const index = state.value.formData.notes.findIndex(n => n.uid === uid);
+  const index = state.value.formData.notes.findIndex(n => n.id === uid);
   if (index >= 0) {
     state.value.formData.notes.splice(index, 1);
   }
@@ -375,7 +375,7 @@ function addTranslation(translation: TranslationData) {
 }
 
 function updateTranslation(updatedTranslation: TranslationData) {
-  const index = state.value.formData.translations.findIndex(t => t.uid === updatedTranslation.uid);
+  const index = state.value.formData.translations.findIndex(t => t.id === updatedTranslation.id);
   if (index >= 0) {
     state.value.formData.translations[index] = updatedTranslation;
     handleFieldChange();
@@ -383,7 +383,7 @@ function updateTranslation(updatedTranslation: TranslationData) {
 }
 
 async function removeTranslation(uid: string) {
-  const index = state.value.formData.translations.findIndex(t => t.uid === uid);
+  const index = state.value.formData.translations.findIndex(t => t.id === uid);
   if (index >= 0) {
     state.value.formData.translations.splice(index, 1);
     await handleFieldChange();

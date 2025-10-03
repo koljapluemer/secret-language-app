@@ -3,7 +3,7 @@ import type { Link } from "@/shared/links/Link";
 
 
 export interface VocabImage {
-  uid: string;
+  id: string;
   url?: string;
   blob?: Blob;
   alt?: string;
@@ -19,7 +19,7 @@ export interface VocabImage {
 }
 
 export interface VocabSound {
-  uid: string;
+  id: string;
   blob: Blob;
   addedAt: Date;
   fileSize: number;
@@ -30,7 +30,7 @@ export interface VocabSound {
 }
 
 export interface VocabData {
-  uid: string;
+  id: string;
   language: string;
   content?: string;
   consideredCharacter?: boolean; // if undefined, assume false

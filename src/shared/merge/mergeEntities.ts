@@ -101,7 +101,7 @@ export function executeMergeStrategy<T>(
  * @param strategies - Merge strategy for each property
  * @returns The merged entity (new object)
  */
-export function mergeEntities<T extends { uid: string }>(
+export function mergeEntities<T extends { id: string }>(
   target: T,
   source: T,
   strategies: MergeStrategyMap<T>

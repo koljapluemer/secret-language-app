@@ -21,5 +21,5 @@ export interface LanguageRepoContract {
   getCount(): Promise<number>;
   
   // Language creation from codes
-  createLanguageFromCode(code: string): Promise<LanguageData>;
+  createLanguageFromCode(code: string): Promise<Omit<LanguageData, 'id'>>;
 }

@@ -92,7 +92,7 @@ async function addMilestone() {
     [newMilestone.value.trim()]: false
   };
   
-  const updatedGoal = await goalRepo.update(props.goal.uid, {
+  const updatedGoal = await goalRepo.update(props.goal.id, {
     milestones: updatedMilestones
   });
   
@@ -113,7 +113,7 @@ async function updateMilestone(oldMilestone: string, newMilestoneText: string) {
   delete updatedMilestones[oldMilestone];
   updatedMilestones[newMilestoneText.trim()] = wasAchieved;
   
-  const updatedGoal = await goalRepo.update(props.goal.uid, {
+  const updatedGoal = await goalRepo.update(props.goal.id, {
     milestones: updatedMilestones
   });
   
@@ -126,7 +126,7 @@ async function toggleMilestone(milestone: string, isAchieved: boolean) {
     [milestone]: isAchieved
   };
   
-  const updatedGoal = await goalRepo.update(props.goal.uid, {
+  const updatedGoal = await goalRepo.update(props.goal.id, {
     milestones: updatedMilestones
   });
   
@@ -139,7 +139,7 @@ async function removeMilestone(milestone: string) {
   const updatedMilestones = { ...props.goal.milestones };
   delete updatedMilestones[milestone];
   
-  const updatedGoal = await goalRepo.update(props.goal.uid, {
+  const updatedGoal = await goalRepo.update(props.goal.id, {
     milestones: updatedMilestones
   });
   
@@ -147,7 +147,7 @@ async function removeMilestone(milestone: string) {
 }
 
 async function updateFinishedAddingMilestones(value: boolean | undefined) {
-  const updatedGoal = await goalRepo.update(props.goal.uid, {
+  const updatedGoal = await goalRepo.update(props.goal.id, {
     finishedAddingMilestones: value
   });
   

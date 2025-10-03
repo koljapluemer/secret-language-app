@@ -58,7 +58,7 @@ export async function generateIllegalImmersionTask(
       
       // Filter out blocked resources
       const availableResources = blockList ? 
-        resources.filter(r => !blockList.includes(r.uid)) : resources;
+        resources.filter(r => !blockList.includes(r.id)) : resources;
       
       if (availableResources.length === 0) {
         return null;

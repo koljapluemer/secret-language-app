@@ -29,6 +29,7 @@ import DownloadsHome from '@/pages/downloads/DownloadsHome.vue';
 import PageStats from '@/pages/time-tracking/PageTimeTracking.vue';
 import PageMyMaterial from '@/pages/my-material/PageMyMaterial.vue';
 import PageSettings from '@/pages/settings/PageSettings.vue';
+import PageMotivation from '@/pages/motivation/PageMotivation.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -197,6 +198,11 @@ const router = createRouter({
     {
       path: '/time-tracking',
       redirect: '/stats'
+    },
+    {
+      path: '/motivation',
+      name: 'motivation',
+      component: PageMotivation
     }
   ]
 });

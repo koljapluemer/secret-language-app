@@ -4,7 +4,7 @@
 
     <!-- Current Images -->
     <div v-if="localImages && localImages.length > 0" class="grid grid-cols-2 md:grid-cols-3 gap-4">
-      <div v-for="image in localImages" :key="image.uid" class="relative group">
+      <div v-for="image in localImages" :key="image.id" class="relative group">
         <div class="aspect-square bg-base-200 rounded-lg overflow-hidden border">
           <img 
             :src="getImageUrl(image)" 
@@ -17,14 +17,14 @@
         <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
           <div class="flex gap-2">
             <button 
-              @click="replaceImage(image.uid)"
+              @click="replaceImage(image.id)"
               class="btn btn-sm btn-primary"
               :disabled="loading || isPicturable === false"
             >
               {{ $t('media.images.replace') }}
             </button>
             <button 
-              @click="removeImage(image.uid)"
+              @click="removeImage(image.id)"
               class="btn btn-sm btn-error"
               :disabled="loading"
             >
@@ -208,7 +208,7 @@ async function addFromUrl() {
     });
     
     const vocabImage: VocabImage = {
-      uid: crypto.randomUUID(),
+      id: crypto.randomUUID(),
       url: imageUrl.value,
       blob: compressedBlob,
       alt: undefined,
@@ -265,7 +265,7 @@ async function handleFileUpload(event: Event) {
     });
     
     const vocabImage: VocabImage = {
-      uid: crypto.randomUUID(),
+      id: crypto.randomUUID(),
       blob: compressedBlob,
       alt: file.name,
       addedAt: new Date(),
@@ -324,7 +324,7 @@ async function handleReplaceFile(event: Event) {
     });
     
     const newVocabImage: VocabImage = {
-      uid: crypto.randomUUID(),
+      id: crypto.randomUUID(),
       blob: compressedBlob,
       alt: file.name,
       addedAt: new Date(),
@@ -335,7 +335,7 @@ async function handleReplaceFile(event: Event) {
     };
     
     // Replace the image in local state
-    const index = localImages.value.findIndex(img => img.uid === replacingImageId.value);
+    const index = localImages.value.findIndex(img => img.id === replacingImageId.value);
     if (index >= 0) {
       localImages.value[index] = newVocabImage;
       emit('imagesChanged', [...localImages.value]);
@@ -364,7 +364,7 @@ function replaceImage(imageId: string) {
 // Remove image
 function removeImage(imageId: string) {
   // Remove from local state
-  localImages.value = localImages.value.filter(img => img.uid !== imageId);
+  localImages.value = localImages.value.filter(img => img.id !== imageId);
   
   // Tell parent about the new image list
   emit('imagesChanged', [...localImages.value]);
