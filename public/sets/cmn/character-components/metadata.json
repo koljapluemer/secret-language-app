@@ -1,10 +1,4 @@
 {
   "title": "Mandarin Character Components",
-  "description": "The 250 most common character components from the 5000 most frequent Chinese words",
-  "language": "cmn",
-  "tags": [
-    "components",
-    "characters",
-    "radicals"
-  ]
+  "preferredMode": "practice-mode-set-study"
 }
