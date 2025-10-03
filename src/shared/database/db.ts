@@ -35,6 +35,33 @@ class LinguanodonDatabase extends Dexie {
       notes: '@id',
       factCards: '@id, language',
       resources: '@id, language',
+      languages: '@id, code',
+      localSets: '@id, name, language',
+      mergeQueue: '@id'
+    });
+
+    this.version(2).stores({
+      vocab: '@id, language, content, *origins, [language+content], progress.due, hasImage, hasSound',
+      translations: '@id, content, *origins',
+      goals: '@id, taskType, title, isActive, parentGoal, lastShownAt, *subGoals, *vocab, *examples, *factCards, *notes',
+      notes: '@id',
+      factCards: '@id, language',
+      resources: '@id, language',
+      languages: '@id, code',
+      localSets: '@id, name, language',
+      mergeQueue: '@id',
+      taskCompletions: '@id, timestamp, language_code, practice_mode, session_id',
+      motivationSettings: '@id'
+    });
+
+    // Version 3: Add unique compound index for localSets
+    this.version(3).stores({
+      vocab: '@id, language, content, *origins, [language+content], progress.due, hasImage, hasSound',
+      translations: '@id, content, *origins',
+      goals: '@id, taskType, title, isActive, parentGoal, lastShownAt, *subGoals, *vocab, *examples, *factCards, *notes',
+      notes: '@id',
+      factCards: '@id, language',
+      resources: '@id, language',
       languages: '@id, &code',
       localSets: '@id, &[name+language], lastDownloadedAt',
       mergeQueue: '@id',
