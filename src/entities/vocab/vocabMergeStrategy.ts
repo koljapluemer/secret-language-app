@@ -125,6 +125,11 @@ export const vocabMergeStrategy: MergeStrategyMap<VocabData> = {
     description: 'If either marked as not interested, respect that'
   },
 
+  notInterestedInAddingTranslations: {
+    strategy: 'boolean-true-wins',
+    description: 'If either marked as not interested, respect that'
+  },
+
   // Media metadata
   isPicturable: {
     strategy: 'prefer-target',

@@ -50,6 +50,7 @@ export interface VocabData {
   contains: string[]; // Ids of other vocab
   similarSoundingButNotTheSame?: string[]; // Ids of other vocab that sound similar for minimal pairs
   notInterestedInPronunciationOrAlreadyAdded?: boolean
+  notInterestedInAddingTranslations?: boolean
 
   isPicturable?: boolean; // can this vocab be visualized with images?
   images?: VocabImage[]; // associated images for this vocab

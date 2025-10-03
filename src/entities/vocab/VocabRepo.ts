@@ -747,8 +747,9 @@ export class VocabRepo implements VocabRepoContract {
     const vocab = await db.vocab
       .where('language')
       .anyOf(languages)
-      .filter(v => 
-        !v.doNotPractice && 
+      .filter(v =>
+        !v.doNotPractice &&
+        !v.notInterestedInAddingTranslations &&
         (!!v.content && (v.translations?.length ?? 0) === 0) &&
         (!vocabBlockList || !vocabBlockList.includes(v.id))
       )

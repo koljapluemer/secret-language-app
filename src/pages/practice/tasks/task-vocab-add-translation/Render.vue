@@ -98,6 +98,17 @@ async function handleDone() {
   emit('finished', 'neutral');
 }
 
+async function handleSkipAndDisable() {
+  if (!vocab.value) return;
+
+  const updatedVocab: VocabData = {
+    ...JSON.parse(JSON.stringify(vocab.value)),
+    notInterestedInAddingTranslations: true
+  };
+  await vocabRepo.updateVocab(updatedVocab);
+  emit('finished', 'neutral');
+}
+
 onMounted(loadVocab);
 </script>
 
@@ -170,6 +181,7 @@ onMounted(loadVocab);
     </div>
     
     <div class="flex gap-2 justify-end">
+      <button class="btn btn-ghost" @click="handleSkipAndDisable">Skip & Disable</button>
       <button class="btn btn-primary" :disabled="translations.length === 0" @click="handleDone">{{ $t('common.done') }}</button>
     </div>
   </div>

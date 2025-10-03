@@ -102,7 +102,7 @@ export async function getRandomGeneratedTaskForVocab(
   }
 
   // Content enhancement tasks
-  if (hasContent && !hasTranslations) {
+  if (hasContent && !hasTranslations && !vocab.notInterestedInAddingTranslations) {
     eligibleTasks.push(() => generateAddTranslation(vocab));
   }
 
