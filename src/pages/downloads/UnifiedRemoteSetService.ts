@@ -507,7 +507,6 @@ export class UnifiedRemoteSetService {
             }
           }).filter(item => item !== null);
           
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           setFiles[fileName as keyof RemoteSetFiles] = data as any;
         }
       } catch (error) {

@@ -34,7 +34,7 @@ interface FactCardFormData {
   language: string;
   front: string;
   back: string;
-  notes: NoteData[];
+  notes: (NoteData | Omit<NoteData, 'id'>)[];
   links: Link[];
   priority?: number;
   doNotPractice?: boolean;
@@ -61,25 +61,30 @@ function factCardDataToFormData(factCard: FactCardData, notes: NoteData[] = []):
   };
 }
 
-function formDataToFactCardData(formData: FactCardFormData, existingFactCard?: FactCardData): Omit<FactCardData, 'progress'> | FactCardData {
-  const baseData: Omit<FactCardData, 'progress'> = {
-    id: formData.id || crypto.randomUUID(),
+function formDataToFactCardData(formData: FactCardFormData, existingFactCard?: FactCardData): Omit<FactCardData, 'id' | 'progress'> | FactCardData {
+  const baseData: Omit<FactCardData, 'id' | 'progress'> | FactCardData = existingFactCard ? {
+    // For updates: include id and all fields
+    id: existingFactCard.id,
     language: formData.language,
     front: formData.front,
     back: formData.back,
-    notes: formData.notes.map(note => note.id),
+    notes: formData.notes.filter((n): n is NoteData => 'id' in n).map(n => n.id),
     links: formData.links,
     priority: formData.priority ?? 1,
     doNotPractice: formData.doNotPractice,
-    origins: existingFactCard?.origins ?? ['user-added']
+    origins: existingFactCard.origins,
+    progress: existingFactCard.progress
+  } : {
+    // For new fact cards: omit id, let Dexie generate it
+    language: formData.language,
+    front: formData.front,
+    back: formData.back,
+    notes: formData.notes.filter((n): n is NoteData => 'id' in n).map(n => n.id),
+    links: formData.links,
+    priority: formData.priority ?? 1,
+    doNotPractice: formData.doNotPractice,
+    origins: ['user-added']
   };
-
-  if (existingFactCard) {
-    return {
-      ...baseData,
-      progress: existingFactCard.progress
-    };
-  }
 
   return baseData;
 }
@@ -171,19 +176,20 @@ async function saveInternal(): Promise<void> {
 
   const serializedFormData = serializeFormData(state.value.formData);
 
-  for (const note of serializedFormData.notes) {
-    if (note.id && loadedNotes.value.find(n => n.id === note.id)) {
-      await noteRepo.updateNote(toRaw(note));
-    } else if (!note.id || !loadedNotes.value.find(n => n.id === note.id)) {
+  // Save or update notes
+  for (let i = 0; i < serializedFormData.notes.length; i++) {
+    const note = serializedFormData.notes[i];
+    if ('id' in note && note.id && loadedNotes.value.find(n => n.id === note.id)) {
+      // Existing note - update it
+      await noteRepo.updateNote(toRaw(note as NoteData));
+    } else {
+      // New note (no id) - save it and get the real ID back
       const savedNote = await noteRepo.saveNote(toRaw(note));
-      const noteIndex = serializedFormData.notes.findIndex(n => n === note);
-      if (noteIndex >= 0) {
-        serializedFormData.notes[noteIndex] = savedNote;
-      }
+      serializedFormData.notes[i] = savedNote;
     }
   }
 
-  const currentNoteUIDs = serializedFormData.notes.map(n => n.id);
+  const currentNoteUIDs = serializedFormData.notes.filter((n): n is NoteData => 'id' in n).map(n => n.id);
   const notesToDelete = loadedNotes.value.filter(n => !currentNoteUIDs.includes(n.id));
   if (notesToDelete.length > 0) {
     await noteRepo.deleteNotes(notesToDelete.map(n => n.id));
@@ -213,7 +219,12 @@ async function saveInternal(): Promise<void> {
     emit('fact-card-saved', finalFactCardId);
   }
 
-  loadedNotes.value = [...serializedFormData.notes];
+  // Update loaded data with the saved entities (which now have real Dexie IDs)
+  loadedNotes.value = serializedFormData.notes.filter((n): n is NoteData => 'id' in n);
+
+  // Update form state with real IDs to keep everything in sync
+  state.value.formData.notes = serializedFormData.notes.filter((n): n is NoteData => 'id' in n);
+  state.value.formData.id = finalFactCardId;
 }
 
 async function save(): Promise<boolean> {
@@ -243,27 +254,27 @@ async function handleFieldChange() {
 }
 
 function addNote() {
-  const newNote: NoteData = {
-    id: crypto.randomUUID(),
+  // Don't add an ID - let Dexie generate it when saved
+  const newNote: Omit<NoteData, 'id'> = {
     content: '',
     showBeforeExercise: false
   };
   state.value.formData.notes.push(newNote);
 }
 
-function updateNote(updatedNote: NoteData) {
-  const index = state.value.formData.notes.findIndex(n => n.id === updatedNote.id);
-  if (index >= 0) {
-    state.value.formData.notes[index] = updatedNote;
-    handleFieldChange();
+function updateNote(updatedNote: NoteData | Omit<NoteData, 'id'>) {
+  // Find by id if it exists
+  if ('id' in updatedNote && updatedNote.id) {
+    const index = state.value.formData.notes.findIndex(n => 'id' in n && n.id === updatedNote.id);
+    if (index >= 0) {
+      state.value.formData.notes[index] = updatedNote;
+      handleFieldChange();
+    }
   }
 }
 
-function removeNote(id: string) {
-  const index = state.value.formData.notes.findIndex(n => n.id === id);
-  if (index >= 0) {
-    state.value.formData.notes.splice(index, 1);
-  }
+function removeNote(index: number) {
+  state.value.formData.notes.splice(index, 1);
 }
 
 function addLink(link: Link) {

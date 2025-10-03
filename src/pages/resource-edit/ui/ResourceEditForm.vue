@@ -75,7 +75,7 @@ async function updateLink(link: Link | undefined) {
   emit('resource-updated', updatedResource);
 }
 
-async function handleAddNote(note: NoteData) {
+async function handleAddNote(note: NoteData | Omit<NoteData, 'id'>) {
   const savedNote = await noteRepo.saveNote(toRaw(note));
   notes.value.push(savedNote);
 
@@ -88,25 +88,30 @@ async function handleAddNote(note: NoteData) {
   emit('resource-updated', updatedResource);
 }
 
-async function handleUpdateNote(note: NoteData) {
-  await noteRepo.updateNote(toRaw(note));
-  const index = notes.value.findIndex(n => n.id === note.id);
-  if (index !== -1) {
-    notes.value[index] = note;
+async function handleUpdateNote(note: NoteData | Omit<NoteData, 'id'>) {
+  if ('id' in note) {
+    await noteRepo.updateNote(toRaw(note as NoteData));
+    const index = notes.value.findIndex(n => n.id === note.id);
+    if (index !== -1) {
+      notes.value[index] = note as NoteData;
+    }
   }
 }
 
-async function handleRemoveNote(noteId: string) {
-  await noteRepo.deleteNote(noteId);
-  notes.value = notes.value.filter(n => n.id !== noteId);
+async function handleRemoveNote(index: number) {
+  const note = notes.value[index];
+  if ('id' in note) {
+    await noteRepo.deleteNote(note.id);
+    notes.value.splice(index, 1);
 
-  const updatedResource = toRaw({
-    ...toRaw(props.resource),
-    notes: toRaw(props.resource).notes.filter(id => id !== noteId)
-  });
+    const updatedResource = toRaw({
+      ...toRaw(props.resource),
+      notes: toRaw(props.resource).notes.filter(id => id !== note.id)
+    });
 
-  await resourceRepo.updateResource(updatedResource);
-  emit('resource-updated', updatedResource);
+    await resourceRepo.updateResource(updatedResource);
+    emit('resource-updated', updatedResource);
+  }
 }
 
 async function loadNotes() {

@@ -36,7 +36,7 @@
         <!-- Existing translations -->
         <div
           v-for="(translation, index) in formData.translations"
-          :key="translation.id"
+          :key="'id' in translation ? translation.id : `temp-${index}`"
           class="flex items-center gap-2"
         >
           <input
@@ -81,10 +81,10 @@ import LanguageDropdown from '@/entities/languages/LanguageDropdown.vue';
 interface VocabFormData {
   language: string;
   content: string;
-  translations: TranslationData[];
+  translations: (TranslationData | Omit<TranslationData, 'id'>)[];
   priority?: number;
   doNotPractice?: boolean;
-  notes: NoteData[];
+  notes: (NoteData | Omit<NoteData, 'id'>)[];
   links: Array<{
     label: string;
     url: string;
@@ -105,14 +105,14 @@ const newTranslationContent = ref('');
 
 function addTranslationIfNeeded() {
   if (newTranslationContent.value.trim()) {
-    const newTranslation: TranslationData = {
-      id: crypto.randomUUID(),
+    // Don't add an ID - let Dexie generate it when saved
+    const newTranslation: Omit<TranslationData, 'id'> = {
       content: newTranslationContent.value.trim(),
       priority: 1,
       notes: [],
       origins: []
     };
-    
+
     props.formData.translations.push(newTranslation);
     newTranslationContent.value = '';
     emit('field-change');

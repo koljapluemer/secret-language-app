@@ -12,7 +12,7 @@
   </div>
 
   <div v-else class="space-y-4">
-    <div v-for="(note, index) in notes" :key="note.id">
+    <div v-for="(note, index) in notes" :key="'id' in note ? note.id : `temp-${index}`">
       <NoteEdit v-if="editingIndex === index" :note="note" :show-before-exercise-option="showBeforeExerciseOption"
         @update:note="(updatedNote) => updateNote(updatedNote)" @close="editingIndex = null" />
       <div v-else class="flex items-start justify-between gap-4">
@@ -23,7 +23,7 @@
           <button type="button" @click="editingIndex = index" class="btn btn-sm btn-ghost">
             <Edit class="w-4 h-4" />
           </button>
-          <button type="button" @click="deleteNote(note.id)" class="btn btn-ghost btn-circle text-error flex-shrink-0">
+          <button type="button" @click="deleteNote(index)" class="btn btn-ghost btn-circle text-error flex-shrink-0">
             <X class="w-4 h-4" />
           </button>
         </div>
@@ -47,14 +47,14 @@ import NoteDisplay from './NoteDisplay.vue';
 import type { NoteData } from './NoteData';
 
 defineProps<{
-  notes: NoteData[];
+  notes: (NoteData | Omit<NoteData, 'id'>)[];
   showBeforeExerciseOption?: boolean;
 }>();
 
 const emit = defineEmits<{
-  add: [note: NoteData];
-  update: [note: NoteData];
-  delete: [id: string];
+  add: [note: NoteData | Omit<NoteData, 'id'>];
+  update: [note: NoteData | Omit<NoteData, 'id'>];
+  delete: [index: number];
 }>();
 
 const editingIndex = ref<number | null>(null);
@@ -64,12 +64,12 @@ function addNewNote() {
   isCreatingNew.value = true;
 }
 
-function updateNote(note: NoteData) {
+function updateNote(note: NoteData | Omit<NoteData, 'id'>) {
   emit('update', note);
   editingIndex.value = null;
 }
 
-function deleteNote(id: string) {
-  emit('delete', id);
+function deleteNote(index: number) {
+  emit('delete', index);
 }
 </script>

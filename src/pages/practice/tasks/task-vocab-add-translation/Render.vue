@@ -22,7 +22,7 @@ const noteRepo = props.repositories.noteRepo;
 
 const vocab = ref<VocabData | null>(null);
 const newTranslationContent = ref('');
-const translations = ref<TranslationData[]>([]);
+const translations = ref<(TranslationData | Omit<TranslationData, 'id'>)[]>([]);
 const vocabNotes = ref<NoteData[]>([]);
 const translationNotes = ref<NoteData[]>([]);
 
@@ -59,8 +59,8 @@ function canAdd(): boolean {
 
 function addLocalTranslation() {
   if (!canAdd()) return;
-  const entry: TranslationData = {
-    id: crypto.randomUUID(),
+  // Don't add an ID - let Dexie generate it when saved
+  const entry: Omit<TranslationData, 'id'> = {
     content: newTranslationContent.value.trim(),
     priority: 1,
     notes: [],
@@ -70,8 +70,8 @@ function addLocalTranslation() {
   newTranslationContent.value = '';
 }
 
-function removeLocalTranslation(id: string) {
-  translations.value = translations.value.filter(t => t.id !== id);
+function removeLocalTranslation(index: number) {
+  translations.value.splice(index, 1);
 }
 
 async function handleDone() {
@@ -134,8 +134,8 @@ onMounted(loadVocab);
     
     <div class="space-y-3 mb-4">
       <div
-        v-for="t in translations"
-        :key="t.id"
+        v-for="(t, index) in translations"
+        :key="'id' in t ? t.id : `temp-${index}`"
         class="flex items-center gap-2"
       >
         <input
@@ -144,7 +144,7 @@ onMounted(loadVocab);
           class="input input-bordered input-lg flex-1"
           placeholder="Enter translation..."
         />
-        <button type="button" class="btn btn-ghost btn-circle text-error" @click="removeLocalTranslation(t.id)">{{ $t('practice.tasks.removeTranslation') }}</button>
+        <button type="button" class="btn btn-ghost btn-circle text-error" @click="removeLocalTranslation(index)">{{ $t('practice.tasks.removeTranslation') }}</button>
       </div>
 
       <div class="flex items-center gap-2">

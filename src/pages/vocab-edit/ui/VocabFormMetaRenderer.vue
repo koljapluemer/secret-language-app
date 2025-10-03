@@ -68,10 +68,10 @@ interface VocabFormData {
   consideredCharacter?: boolean;
   consideredSentence?: boolean;
   consideredWord?: boolean;
-  translations: TranslationData[];
+  translations: (TranslationData | Omit<TranslationData, 'id'>)[];
   priority?: number;
   doNotPractice?: boolean;
-  notes: NoteData[];
+  notes: (NoteData | Omit<NoteData, 'id'>)[];
   links: Link[];
   relatedVocab?: string[];
   similarSoundingButNotTheSame?: string[];
@@ -93,15 +93,15 @@ defineProps<{
 
 defineEmits<{
   'field-change': [];
-  'add-note': [note: NoteData];
-  'update-note': [note: NoteData];
-  'remove-note': [id: string];
+  'add-note': [note: NoteData | Omit<NoteData, 'id'>];
+  'update-note': [note: NoteData | Omit<NoteData, 'id'>];
+  'remove-note': [index: number];
   'add-link': [link: Link];
   'update-link': [index: number, link: Link];
   'remove-link': [index: number];
-  'add-translation': [translation: TranslationData];
-  'update-translation': [translation: TranslationData];
-  'remove-translation': [id: string];
+  'add-translation': [translation: TranslationData | Omit<TranslationData, 'id'>];
+  'update-translation': [translation: TranslationData | Omit<TranslationData, 'id'>];
+  'remove-translation': [index: number];
   'update-related-vocab': [vocabIds: string[]];
   'update-images': [images: VocabImage[]];
   'update-sounds': [sounds: VocabSound[]];

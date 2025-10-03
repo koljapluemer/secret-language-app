@@ -16,7 +16,7 @@
       @remove-link="removeLink"
       @add-translation="addTranslation"
       @update-translation="updateTranslation"
-      @remove-translation="removeTranslation"
+      @remove-translation="(index) => removeTranslation(index)"
       @update-related-vocab="updateRelatedVocab"
       @update-similar-sounding-vocab="updateSimilarSoundingVocab"
       @update-picturable="updatePicturable"
@@ -46,10 +46,10 @@ interface VocabFormData {
   consideredCharacter?: boolean;
   consideredSentence?: boolean;
   consideredWord?: boolean;
-  translations: TranslationData[];
+  translations: (TranslationData | Omit<TranslationData, 'id'>)[];
   priority?: number;
   doNotPractice?: boolean;
-  notes: NoteData[];
+  notes: (NoteData | Omit<NoteData, 'id'>)[];
   links: Link[];
   relatedVocab?: string[];
   similarSoundingButNotTheSame?: string[];
@@ -87,35 +87,48 @@ function vocabDataToFormData(vocab: VocabData, notes: NoteData[] = [], translati
   };
 }
 
-function formDataToVocabData(formData: VocabFormData, existingVocab?: VocabData): Omit<VocabData, 'progress' | 'tasks'> | VocabData {
-  const baseData: Omit<VocabData, 'progress' | 'tasks'> = {
-    id: formData.id || crypto.randomUUID(),
+function formDataToVocabData(formData: VocabFormData, existingVocab?: VocabData): Omit<VocabData, 'id' | 'progress' | 'tasks'> | VocabData {
+  const baseData: Omit<VocabData, 'id' | 'progress' | 'tasks'> | VocabData = existingVocab ? {
+    // For updates: include id and all fields
+    id: existingVocab.id,
     language: formData.language,
     content: formData.content,
     consideredCharacter: formData.consideredCharacter,
     consideredSentence: formData.consideredSentence,
     consideredWord: formData.consideredWord,
-    translations: formData.translations.map(translation => translation.id),
+    translations: formData.translations.filter((t): t is TranslationData => 'id' in t).map(t => t.id),
     priority: formData.priority,
     doNotPractice: formData.doNotPractice,
-    notes: formData.notes.map(note => note.id),
+    notes: formData.notes.filter((n): n is NoteData => 'id' in n).map(n => n.id),
     links: formData.links,
-    origins: existingVocab?.origins || ['user-added'],
+    origins: existingVocab.origins,
     relatedVocab: formData.relatedVocab || [],
-    notRelatedVocab: existingVocab?.notRelatedVocab || [],
+    notRelatedVocab: existingVocab.notRelatedVocab || [],
+    similarSoundingButNotTheSame: formData.similarSoundingButNotTheSame || [],
+    isPicturable: formData.isPicturable,
+    images: formData.images || [],
+    sounds: formData.sounds || [],
+    progress: existingVocab.progress
+  } : {
+    // For new vocab: omit id, let Dexie generate it
+    language: formData.language,
+    content: formData.content,
+    consideredCharacter: formData.consideredCharacter,
+    consideredSentence: formData.consideredSentence,
+    consideredWord: formData.consideredWord,
+    translations: formData.translations.filter((t): t is TranslationData => 'id' in t).map(t => t.id),
+    priority: formData.priority,
+    doNotPractice: formData.doNotPractice,
+    notes: formData.notes.filter((n): n is NoteData => 'id' in n).map(n => n.id),
+    links: formData.links,
+    origins: ['user-added'],
+    relatedVocab: formData.relatedVocab || [],
+    notRelatedVocab: [],
     similarSoundingButNotTheSame: formData.similarSoundingButNotTheSame || [],
     isPicturable: formData.isPicturable,
     images: formData.images || [],
     sounds: formData.sounds || []
   };
-
-  // For updates, include existing progress
-  if (existingVocab) {
-    return {
-      ...baseData,
-      progress: existingVocab.progress
-    };
-  }
 
   return baseData;
 }
@@ -240,37 +253,39 @@ async function saveInternal(): Promise<void> {
   serializedFormData.sounds = originalSounds;
   
 
-  for (const note of serializedFormData.notes) {
-    if (note.id && loadedNotes.value.find(n => n.id === note.id)) {
-      await noteRepo.updateNote(toRaw(note));
-    } else if (!note.id || !loadedNotes.value.find(n => n.id === note.id)) {
+  // Save or update notes
+  for (let i = 0; i < serializedFormData.notes.length; i++) {
+    const note = serializedFormData.notes[i];
+    if ('id' in note && note.id && loadedNotes.value.find(n => n.id === note.id)) {
+      // Existing note - update it
+      await noteRepo.updateNote(toRaw(note as NoteData));
+    } else {
+      // New note (no id) - save it and get the real ID back
       const savedNote = await noteRepo.saveNote(toRaw(note));
-      const noteIndex = serializedFormData.notes.findIndex(n => n === note);
-      if (noteIndex >= 0) {
-        serializedFormData.notes[noteIndex] = savedNote;
-      }
+      serializedFormData.notes[i] = savedNote;
     }
   }
 
-  const currentNoteUIDs = serializedFormData.notes.map(n => n.id);
+  const currentNoteUIDs = serializedFormData.notes.filter((n): n is NoteData => 'id' in n).map(n => n.id);
   const notesToDelete = loadedNotes.value.filter(n => !currentNoteUIDs.includes(n.id));
   if (notesToDelete.length > 0) {
     await noteRepo.deleteNotes(notesToDelete.map(n => n.id));
   }
 
-  for (const translation of serializedFormData.translations) {
-    if (translation.id && loadedTranslations.value.find(t => t.id === translation.id)) {
-      await translationRepo.updateTranslation(toRaw(translation));
-    } else if (!translation.id || !loadedTranslations.value.find(t => t.id === translation.id)) {
+  // Save or update translations
+  for (let i = 0; i < serializedFormData.translations.length; i++) {
+    const translation = serializedFormData.translations[i];
+    if ('id' in translation && translation.id && loadedTranslations.value.find(t => t.id === translation.id)) {
+      // Existing translation - update it
+      await translationRepo.updateTranslation(toRaw(translation as TranslationData));
+    } else {
+      // New translation (no id) - save it and get the real ID back
       const savedTranslation = await translationRepo.saveTranslation(toRaw(translation));
-      const translationIndex = serializedFormData.translations.findIndex(t => t === translation);
-      if (translationIndex >= 0) {
-        serializedFormData.translations[translationIndex] = savedTranslation;
-      }
+      serializedFormData.translations[i] = savedTranslation;
     }
   }
 
-  const currentTranslationUIDs = serializedFormData.translations.map(t => t.id);
+  const currentTranslationUIDs = serializedFormData.translations.filter((t): t is TranslationData => 'id' in t).map(t => t.id);
   const translationsToDelete = loadedTranslations.value.filter(t => !currentTranslationUIDs.includes(t.id));
   if (translationsToDelete.length > 0) {
     await translationRepo.deleteTranslations(translationsToDelete.map(t => t.id));
@@ -303,8 +318,14 @@ async function saveInternal(): Promise<void> {
     emit('vocab-saved', finalVocabId);
   }
 
-  loadedNotes.value = [...serializedFormData.notes];
-  loadedTranslations.value = [...serializedFormData.translations];
+  // Update loaded data with the saved entities (which now have real Dexie IDs)
+  loadedNotes.value = serializedFormData.notes.filter((n): n is NoteData => 'id' in n);
+  loadedTranslations.value = serializedFormData.translations.filter((t): t is TranslationData => 'id' in t);
+
+  // Update form state with real IDs to keep everything in sync
+  state.value.formData.notes = serializedFormData.notes.filter((n): n is NoteData => 'id' in n);
+  state.value.formData.translations = serializedFormData.translations.filter((t): t is TranslationData => 'id' in t);
+  state.value.formData.id = finalVocabId;
 }
 
 async function save(): Promise<boolean> {
@@ -333,27 +354,29 @@ async function handleFieldChange() {
   }
 }
 
-function addNote(note: NoteData) {
-  const newNote: NoteData = {
-    ...note,
-    id: crypto.randomUUID()
+function addNote(note: NoteData | Omit<NoteData, 'id'>) {
+  // Don't add an ID - let Dexie generate it when saved
+  const newNote: Omit<NoteData, 'id'> = {
+    content: note.content,
+    showBeforeExercise: note.showBeforeExercise,
+    noteType: note.noteType
   };
   state.value.formData.notes.push(newNote);
 }
 
-function updateNote(updatedNote: NoteData) {
-  const index = state.value.formData.notes.findIndex(n => n.id === updatedNote.id);
-  if (index >= 0) {
-    state.value.formData.notes[index] = updatedNote;
-    handleFieldChange();
+function updateNote(updatedNote: NoteData | Omit<NoteData, 'id'>) {
+  // Find by id if it exists, otherwise this is a bug - notes should be identified
+  if ('id' in updatedNote && updatedNote.id) {
+    const index = state.value.formData.notes.findIndex(n => 'id' in n && n.id === updatedNote.id);
+    if (index >= 0) {
+      state.value.formData.notes[index] = updatedNote;
+      handleFieldChange();
+    }
   }
 }
 
-function removeNote(id: string) {
-  const index = state.value.formData.notes.findIndex(n => n.id === id);
-  if (index >= 0) {
-    state.value.formData.notes.splice(index, 1);
-  }
+function removeNote(index: number) {
+  state.value.formData.notes.splice(index, 1);
 }
 
 function addLink(link: Link) {
@@ -369,25 +392,25 @@ async function removeLink(index: number) {
   await handleFieldChange();
 }
 
-function addTranslation(translation: TranslationData) {
+function addTranslation(translation: TranslationData | Omit<TranslationData, 'id'>) {
   state.value.formData.translations.push(translation);
   handleFieldChange();
 }
 
-function updateTranslation(updatedTranslation: TranslationData) {
-  const index = state.value.formData.translations.findIndex(t => t.id === updatedTranslation.id);
-  if (index >= 0) {
-    state.value.formData.translations[index] = updatedTranslation;
-    handleFieldChange();
+function updateTranslation(updatedTranslation: TranslationData | Omit<TranslationData, 'id'>) {
+  // Find by id if it exists
+  if ('id' in updatedTranslation && updatedTranslation.id) {
+    const index = state.value.formData.translations.findIndex(t => 'id' in t && t.id === updatedTranslation.id);
+    if (index >= 0) {
+      state.value.formData.translations[index] = updatedTranslation;
+      handleFieldChange();
+    }
   }
 }
 
-async function removeTranslation(id: string) {
-  const index = state.value.formData.translations.findIndex(t => t.id === id);
-  if (index >= 0) {
-    state.value.formData.translations.splice(index, 1);
-    await handleFieldChange();
-  }
+async function removeTranslation(index: number) {
+  state.value.formData.translations.splice(index, 1);
+  await handleFieldChange();
 }
 
 async function updateRelatedVocab(vocabIds: string[]) {

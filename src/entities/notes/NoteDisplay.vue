@@ -22,6 +22,6 @@
 import type { NoteData } from './NoteData';
 
 defineProps<{
-  note: NoteData;
+  note: NoteData | Omit<NoteData, 'id'>;
 }>();
 </script>

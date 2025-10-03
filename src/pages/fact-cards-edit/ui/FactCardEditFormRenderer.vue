@@ -60,8 +60,8 @@
         
         <div v-else class="space-y-4">
           <div
-            v-for="note in formData.notes"
-            :key="note.id"
+            v-for="(note, index) in formData.notes"
+            :key="'id' in note ? note.id : `temp-${index}`"
             class="flex items-center justify-between p-3 bg-base-200 rounded-lg"
           >
             <div class="flex-1">
@@ -70,7 +70,7 @@
             <div class="flex items-center gap-2">
               <button
                 type="button"
-                @click="$emit('remove-note', note.id)"
+                @click="$emit('remove-note', index)"
                 class="btn btn-ghost btn-circle text-error flex-shrink-0"
               >
                 <X class="w-4 h-4" />
@@ -153,7 +153,7 @@ interface FactCardFormData {
   language: string;
   front: string;
   back: string;
-  notes: NoteData[];
+  notes: (NoteData | Omit<NoteData, 'id'>)[];
   links: Link[];
   priority?: number;
   doNotPractice?: boolean;
@@ -171,8 +171,8 @@ defineProps<{
 const emit = defineEmits<{
   'field-change': [];
   'add-note': [];
-  'update-note': [note: NoteData];
-  'remove-note': [id: string];
+  'update-note': [note: NoteData | Omit<NoteData, 'id'>];
+  'remove-note': [index: number];
   'add-link': [link: Link];
   'update-link': [index: number, link: Link];
   'remove-link': [index: number];

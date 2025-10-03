@@ -61,20 +61,24 @@ import { Check, X } from 'lucide-vue-next';
 import type { NoteData } from './NoteData';
 
 interface Props {
-  note: NoteData;
+  note: NoteData | Omit<NoteData, 'id'>;
   showBeforeExerciseOption?: boolean;
 }
 
 interface Emits {
-  (e: 'update:note', value: NoteData): void;
+  (e: 'update:note', value: NoteData | Omit<NoteData, 'id'>): void;
   (e: 'close'): void;
 }
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
-const tempNote = ref<NoteData>({
+const tempNote = ref<NoteData | Omit<NoteData, 'id'>>('id' in props.note ? {
   id: props.note.id,
+  content: props.note.content || '',
+  noteType: props.note.noteType || '',
+  showBeforeExercise: props.note.showBeforeExercise || false
+} : {
   content: props.note.content || '',
   noteType: props.note.noteType || '',
   showBeforeExercise: props.note.showBeforeExercise || false
@@ -86,22 +90,30 @@ function saveEdit() {
     alert('Note content is required');
     return;
   }
-  
+
   // Convert empty strings back to undefined for optional fields
-  const noteToSave: NoteData = {
+  const noteToSave: NoteData | Omit<NoteData, 'id'> = 'id' in tempNote.value ? {
     id: tempNote.value.id,
     content: tempNote.value.content.trim(),
     noteType: tempNote.value.noteType?.trim() || undefined,
     showBeforeExercise: tempNote.value.showBeforeExercise
+  } : {
+    content: tempNote.value.content.trim(),
+    noteType: tempNote.value.noteType?.trim() || undefined,
+    showBeforeExercise: tempNote.value.showBeforeExercise
   };
-  
+
   emit('update:note', noteToSave);
   emit('close');
 }
 
 function cancelEdit() {
-  tempNote.value = {
+  tempNote.value = 'id' in props.note ? {
     id: props.note.id,
+    content: props.note.content || '',
+    noteType: props.note.noteType || '',
+    showBeforeExercise: props.note.showBeforeExercise || false
+  } : {
     content: props.note.content || '',
     noteType: props.note.noteType || '',
     showBeforeExercise: props.note.showBeforeExercise || false

@@ -33,9 +33,9 @@ interface FactCardFormState {
   error: string | null;
 }
 
-function formDataToFactCardData(formData: FactCardFormData): Omit<FactCardData, 'progress'> {
+function formDataToFactCardData(formData: FactCardFormData): Omit<FactCardData, 'id' | 'progress'> {
+  // Don't add an ID - let Dexie generate it when saved
   return {
-    id: crypto.randomUUID(),
     language: formData.language,
     front: formData.front,
     back: formData.back,

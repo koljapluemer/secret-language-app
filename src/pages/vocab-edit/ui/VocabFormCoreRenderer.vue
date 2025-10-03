@@ -40,7 +40,7 @@
       <div v-else class="space-y-4">
         <div
           v-for="(translation, index) in formData.translations"
-          :key="translation.id"
+          :key="'id' in translation ? translation.id : `temp-${index}`"
         >
           <!-- Edit mode -->
           <div v-if="editingIndex === index" class="space-y-4">
@@ -87,7 +87,7 @@
               </button>
               <button
                 type="button"
-                @click="deleteTranslation(translation.id)"
+                @click="deleteTranslation(index)"
                 class="btn btn-ghost btn-circle text-error flex-shrink-0"
               >
                 <X class="w-4 h-4" />
@@ -146,10 +146,10 @@ interface VocabFormData {
   consideredCharacter?: boolean;
   consideredSentence?: boolean;
   consideredWord?: boolean;
-  translations: TranslationData[];
+  translations: (TranslationData | Omit<TranslationData, 'id'>)[];
   priority?: number;
   doNotPractice?: boolean;
-  notes: NoteData[];
+  notes: (NoteData | Omit<NoteData, 'id'>)[];
   links: Array<{
     label: string;
     url: string;
@@ -162,16 +162,15 @@ defineProps<{
 
 const emit = defineEmits<{
   'field-change': [];
-  'add-translation': [translation: TranslationData];
-  'update-translation': [translation: TranslationData];
-  'remove-translation': [id: string];
+  'add-translation': [translation: TranslationData | Omit<TranslationData, 'id'>];
+  'update-translation': [translation: TranslationData | Omit<TranslationData, 'id'>];
+  'remove-translation': [index: number];
 }>();
 
 // Translation management state
 const editingIndex = ref<number | null>(null);
 const isCreatingNew = ref(false);
-const tempTranslation = ref<TranslationData>({
-  id: '',
+const tempTranslation = ref<TranslationData | Omit<TranslationData, 'id'>>({
   content: '',
   priority: 1,
   notes: [],
@@ -180,7 +179,6 @@ const tempTranslation = ref<TranslationData>({
 
 function addNewTranslation() {
   tempTranslation.value = {
-    id: '',
     content: '',
     priority: 1,
     notes: [],
@@ -191,13 +189,15 @@ function addNewTranslation() {
 
 function saveNewTranslation() {
   if (!tempTranslation.value.content?.trim()) return;
-  
-  const newTranslation: TranslationData = {
-    ...tempTranslation.value,
+
+  // Don't add an ID - let Dexie generate it when saved
+  const newTranslation: Omit<TranslationData, 'id'> = {
     content: tempTranslation.value.content.trim(),
-    id: crypto.randomUUID()
+    priority: tempTranslation.value.priority || 1,
+    notes: tempTranslation.value.notes || [],
+    origins: tempTranslation.value.origins || []
   };
-  
+
   emit('add-translation', newTranslation);
   isCreatingNew.value = false;
 }
@@ -207,12 +207,12 @@ function saveEdit() {
     alert('Translation content is required');
     return;
   }
-  
-  const translationToSave: TranslationData = {
+
+  const translationToSave: TranslationData | Omit<TranslationData, 'id'> = {
     ...tempTranslation.value,
     content: tempTranslation.value.content.trim()
   };
-  
+
   emit('update-translation', translationToSave);
   editingIndex.value = null;
 }
@@ -222,7 +222,7 @@ function cancelEdit() {
   isCreatingNew.value = false;
 }
 
-function deleteTranslation(id: string) {
-  emit('remove-translation', id);
+function deleteTranslation(index: number) {
+  emit('remove-translation', index);
 }
 </script>

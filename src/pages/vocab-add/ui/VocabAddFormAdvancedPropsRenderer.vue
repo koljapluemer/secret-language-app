@@ -87,10 +87,10 @@ interface VocabFormData {
   consideredCharacter?: boolean;
   consideredSentence?: boolean;
   consideredWord?: boolean;
-  translations: TranslationData[];
+  translations: (TranslationData | Omit<TranslationData, 'id'>)[];
   priority?: number;
   doNotPractice?: boolean;
-  notes: NoteData[];
+  notes: (NoteData | Omit<NoteData, 'id'>)[];
   links: Link[];
   isPicturable?: boolean;
   images?: VocabImage[];
@@ -103,9 +103,9 @@ defineProps<{
 
 defineEmits<{
   'field-change': [];
-  'add-note': [note: NoteData];
-  'update-note': [note: NoteData];
-  'remove-note': [id: string];
+  'add-note': [note: NoteData | Omit<NoteData, 'id'>];
+  'update-note': [note: NoteData | Omit<NoteData, 'id'>];
+  'remove-note': [index: number];
   'add-link': [link: Link];
   'update-link': [index: number, link: Link];
   'remove-link': [index: number];
