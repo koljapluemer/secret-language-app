@@ -46,6 +46,23 @@ export class NoteRepo implements NoteRepoContract {
     await db.notes.where('id').anyOf(Ids).delete();
   }
 
+  async bulkCreateNotes(notes: Omit<NoteData, 'id'>[]): Promise<NoteData[]> {
+    if (notes.length === 0) {
+      return [];
+    }
+
+    // Insert all notes and get back their auto-generated IDs
+    const generatedIds = await db.notes.bulkAdd(
+      notes as NoteData[],
+      { allKeys: true }
+    );
+
+    // Combine the input data with the generated IDs
+    return notes.map((note, index) => ({
+      ...note,
+      id: String(generatedIds[index])
+    }));
+  }
 
   async getUncheckedNotes(limit: number): Promise<NoteData[]> {
     const all = await this.getNotesByUIDs([]);

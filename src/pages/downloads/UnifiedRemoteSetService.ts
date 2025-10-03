@@ -22,6 +22,7 @@ import type { VocabData, VocabImage, VocabSound } from '@/entities/vocab/VocabDa
 import type { ResourceData } from '@/entities/resources/ResourceData';
 import type { GoalData } from '@/entities/goals/GoalData';
 import type { FactCardData } from '@/entities/fact-cards/FactCardData';
+import type { NoteData } from '@/entities/notes/NoteData';
 import type { Link } from '@/shared/links/Link';
 
 import { z } from 'zod';
@@ -163,18 +164,20 @@ export class UnifiedRemoteSetService {
     if (setFiles.notes) {
       reportProgress('Processing notes', 0, setFiles.notes.length);
 
+      // Prepare all notes for bulk insert
+      const notesToCreate: Omit<NoteData, 'id'>[] = setFiles.notes.map(remoteNote => ({
+        content: remoteNote.content,
+        showBeforeExercise: remoteNote.showBeforeExercice ?? false,
+        noteType: remoteNote.noteType
+      }));
+
+      // Bulk insert all notes
+      const savedNotes = await this.noteRepo.bulkCreateNotes(notesToCreate);
+
+      // Map remote IDs to saved IDs
       for (let i = 0; i < setFiles.notes.length; i++) {
-        const remoteNote = setFiles.notes[i];
-        reportProgress('Processing notes', i, setFiles.notes.length);
-
-        const savedNote = await this.noteRepo.saveNote({
-          content: remoteNote.content,
-          showBeforeExercise: remoteNote.showBeforeExercice ?? false,
-          noteType: remoteNote.noteType
-        });
-
-        if (remoteNote.id) {
-          noteMap.set(remoteNote.id, savedNote.id);
+        if (setFiles.notes[i].id && savedNotes[i]) {
+          noteMap.set(setFiles.notes[i].id!, savedNotes[i].id);
         }
       }
 
@@ -698,32 +701,39 @@ export class UnifiedRemoteSetService {
       return new Map();
     }
 
-    onProgress?.(0, remoteTranslations.length);
-
+    const BATCH_SIZE = 50;
+    const total = remoteTranslations.length;
+    let completed = 0;
     const remoteIdToLocalId = new Map<string, string>();
 
-    for (let i = 0; i < remoteTranslations.length; i++) {
-      const remoteTranslation = remoteTranslations[i];
-      onProgress?.(i, remoteTranslations.length);
+    onProgress?.(0, total);
 
-      if (!remoteTranslation.content) continue;
+    for (let i = 0; i < remoteTranslations.length; i += BATCH_SIZE) {
+      const batch = remoteTranslations.slice(i, i + BATCH_SIZE);
 
-      const noteIds = this.resolveReferences(remoteTranslation.notes || [], noteMap);
+      await Promise.all(batch.map(async (remoteTranslation) => {
+        if (!remoteTranslation.content) {
+          completed++;
+          return;
+        }
 
-      // Save and get the Dexie-generated ID back
-      const savedTranslation = await this.translationRepo.saveTranslation({
-        content: remoteTranslation.content,
-        priority: remoteTranslation.priority || 1,
-        notes: noteIds
-      });
+        const noteIds = this.resolveReferences(remoteTranslation.notes || [], noteMap);
 
-      // Map remote ID to the actual saved ID
-      if (remoteTranslation.id) {
-        remoteIdToLocalId.set(remoteTranslation.id, savedTranslation.id);
-      }
+        const savedTranslation = await this.translationRepo.saveTranslation({
+          content: remoteTranslation.content,
+          priority: remoteTranslation.priority || 1,
+          notes: noteIds
+        });
+
+        if (remoteTranslation.id) {
+          remoteIdToLocalId.set(remoteTranslation.id, savedTranslation.id);
+        }
+
+        completed++;
+        onProgress?.(completed, total);
+      }));
     }
 
-    onProgress?.(remoteTranslations.length, remoteTranslations.length);
     return remoteIdToLocalId;
   }
 

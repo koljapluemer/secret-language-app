@@ -9,6 +9,9 @@ export interface NoteRepoContract {
   deleteNote(id: string): Promise<void>;
   deleteNotes(Ids: string[]): Promise<void>;
 
+  // Batch operations
+  bulkCreateNotes(notes: Omit<NoteData, 'id'>[]): Promise<NoteData[]>;
+
   // Merge operations (notes don't deduplicate, but need to track as checked)
   getUncheckedNotes(limit: number): Promise<NoteData[]>;
 }
