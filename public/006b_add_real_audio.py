@@ -11,9 +11,13 @@ from pathlib import Path
 
 # Paths (relative to script location)
 VOCAB_FILE = Path("sets/cmn/mandarin-character-deck/vocab.jsonl")
+LINKS_FILE = Path("sets/cmn/mandarin-character-deck/links.jsonl")
 AUDIO_SOURCE = Path("data_in/hugolpz")
 AUDIO_DEST = Path("sets/cmn/mandarin-character-deck/audio")
 TEMP_FILE = VOCAB_FILE.with_suffix('.jsonl.tmp')
+
+# License/credit link ID
+AUDIO_CREDIT_LINK_ID = "link_hugolpz_audio"
 
 def find_audio_file(content: str, audio_source: Path) -> str | None:
     """
@@ -34,9 +38,28 @@ def find_audio_file(content: str, audio_source: Path) -> str | None:
 
     return None
 
+def create_links_file():
+    """Create links.jsonl with audio credit/license information."""
+    link_entry = {
+        "id": AUDIO_CREDIT_LINK_ID,
+        "label": "Audio: hugolpz/audio-cmn",
+        "url": "https://github.com/hugolpz/audio-cmn",
+        "owner": "Hugo Lopez, Chen Wang, Yue Tan, Nicolas Vion",
+        "license": "CC-BY-SA"
+    }
+
+    with open(LINKS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(link_entry, f, ensure_ascii=False)
+        f.write('\n')
+
+    print(f"Created {LINKS_FILE} with audio credit link")
+
 def main():
     # Create audio destination directory if it doesn't exist
     AUDIO_DEST.mkdir(parents=True, exist_ok=True)
+
+    # Create links.jsonl with audio credit
+    create_links_file()
 
     # Statistics
     total_entries = 0
@@ -78,6 +101,12 @@ def main():
                 existing_filenames = [s.get('filename') for s in entry['sounds']]
                 if audio_filename not in existing_filenames:
                     entry['sounds'].append({"filename": audio_filename})
+
+                # Add link to audio credit
+                if 'links' not in entry:
+                    entry['links'] = []
+                if AUDIO_CREDIT_LINK_ID not in entry['links']:
+                    entry['links'].append(AUDIO_CREDIT_LINK_ID)
 
                 if matched_entries <= 10:  # Show first 10 matches
                     print(f"✓ {content} -> {audio_filename}")
