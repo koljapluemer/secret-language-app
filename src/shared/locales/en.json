@@ -281,6 +281,7 @@
       "language": "Language",
       "pronunciation": "Pronunciation",
       "notes": "Notes",
+      "transcriptions": "Transcriptions",
       "advanced": "Advanced Properties",
       "meta": "Meta Information",
       "core": "Core Properties",

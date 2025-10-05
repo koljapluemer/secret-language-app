@@ -8,6 +8,7 @@ import pluginImport from "eslint-plugin-import";
 import vueParser from "vue-eslint-parser";
 import tsParser from "@typescript-eslint/parser";
 import pluginJsdoc from "eslint-plugin-jsdoc";
+import vueI18n from "@intlify/eslint-plugin-vue-i18n";
 import { defineConfig } from "eslint/config";
 
 const importResolverSettings = {
@@ -104,6 +105,31 @@ export default defineConfig([
       'import/no-unresolved': 'off',
     },
     settings: importResolverSettings,
+  },
+  {
+    files: ["src/**/*.{js,ts,vue}"],
+    plugins: {
+      '@intlify/vue-i18n': vueI18n
+    },
+    rules: {
+      '@intlify/vue-i18n/no-missing-keys': 'error',
+      '@intlify/vue-i18n/no-unused-keys': [
+        'error',
+        {
+          src: './src',
+          extensions: ['.js', '.ts', '.vue'],
+          enableFix: false
+        }
+      ],
+      '@intlify/vue-i18n/no-dynamic-keys': 'error',
+      '@intlify/vue-i18n/no-duplicate-keys-in-locale': 'error',
+    },
+    settings: {
+      'vue-i18n': {
+        localeDir: './src/shared/locales/*.json',
+        messageSyntaxVersion: '^9.0.0'
+      }
+    }
   },
   {
     files: ["**/*.test.ts", "**/*.spec.ts"],
