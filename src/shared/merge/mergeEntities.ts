@@ -29,7 +29,23 @@ export function executeMergeStrategy<T>(
       return sourceValue !== undefined && sourceValue !== null ? sourceValue : targetValue
 
     case 'array-union':
+      // Handle cases where one or both values are undefined/null
+      if (!targetValue && !sourceValue) {
+        return [] as T
+      }
+      if (!targetValue) {
+        return (Array.isArray(sourceValue) ? sourceValue : []) as T
+      }
+      if (!sourceValue) {
+        return (Array.isArray(targetValue) ? targetValue : []) as T
+      }
       if (!Array.isArray(targetValue) || !Array.isArray(sourceValue)) {
+        console.error('array-union strategy error:', {
+          targetValue,
+          sourceValue,
+          targetIsArray: Array.isArray(targetValue),
+          sourceIsArray: Array.isArray(sourceValue)
+        })
         throw new Error('array-union strategy requires array values')
       }
       return [...new Set([...targetValue, ...sourceValue])] as T
