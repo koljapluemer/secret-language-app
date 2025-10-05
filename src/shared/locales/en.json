@@ -276,7 +276,9 @@
     },
     "form": {
       "content": "Vocabulary Content",
-      "language": "Language", 
+      "contains": "Contains",
+      "containedIn": "Contained In",
+      "language": "Language",
       "pronunciation": "Pronunciation",
       "notes": "Notes",
       "advanced": "Advanced Properties",

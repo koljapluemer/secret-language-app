@@ -7,6 +7,7 @@
       :error="state.error"
       :is-editing="state.isEditing"
       :loaded-vocab-data="loadedVocabData"
+      :contained-in-vocab-ids="containedInVocabIds"
       @field-change="handleFieldChange"
       @add-note="addNote"
       @update-note="updateNote"
@@ -195,6 +196,7 @@ const loadedVocabData = ref<VocabData | null>(null);
 const loadedNotes = ref<NoteData[]>([]);
 const loadedTranscriptions = ref<NoteData[]>([]);
 const loadedTranslations = ref<TranslationData[]>([]);
+const containedInVocabIds = ref<string[]>([]);
 
 const isValid = computed(() => {
   return state.value.formData.language.trim() !== '' && 
@@ -252,7 +254,16 @@ async function loadVocab() {
       } else {
         loadedTranslations.value = [];
       }
-      
+
+      // Load vocab that contains this vocab
+      try {
+        const containingVocab = await vocabRepo.getVocabContainingVocabId(props.vocabId);
+        containedInVocabIds.value = containingVocab.map(v => v.id);
+      } catch {
+        toast.error('Failed to load containing vocab');
+        containedInVocabIds.value = [];
+      }
+
       state.value.formData = vocabDataToFormData(vocab, loadedNotes.value, loadedTranscriptions.value, loadedTranslations.value);
     } else {
       state.value.error = 'Vocab not found';

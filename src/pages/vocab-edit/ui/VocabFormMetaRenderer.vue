@@ -38,6 +38,7 @@
       <VocabFormAdvancedPropsRenderer
         v-if="showAllData"
         :form-data="formData"
+        :contained-in-vocab-ids="containedInVocabIds"
         @field-change="$emit('field-change')"
         @add-note="$emit('add-note', $event)"
         @update-note="$emit('update-note', $event)"
@@ -96,6 +97,7 @@ defineProps<{
   error: string | null;
   isEditing: boolean;
   loadedVocabData: VocabData | null;
+  containedInVocabIds: string[];
 }>();
 
 defineEmits<{

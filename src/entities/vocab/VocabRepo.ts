@@ -636,6 +636,14 @@ export class VocabRepo implements VocabRepoContract {
     }
   }
 
+  async getVocabContainingVocabId(vocabId: string): Promise<VocabData[]> {
+    const vocab = await db.vocab
+      .filter(v => v.contains && v.contains.includes(vocabId))
+      .toArray();
+
+    return vocab.map(v => this.ensureVocabFields(v));
+  }
+
   async findVocabByTranslationIds(language: string, translationIds: string[]): Promise<VocabData | undefined> {
     if (translationIds.length === 0) return undefined;
 

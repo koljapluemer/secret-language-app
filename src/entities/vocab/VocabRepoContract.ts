@@ -52,7 +52,8 @@ export interface VocabRepoContract {
   removeRelatedVocab(id: string, relatedVocabId: string): Promise<void>;
   addNotRelatedVocab(id: string, notRelatedVocabId: string): Promise<void>;
   removeNotRelatedVocab(id: string, notRelatedVocabId: string): Promise<void>;
-  
+  getVocabContainingVocabId(vocabId: string): Promise<VocabData[]>;
+
   // Query operations for distractor generation
   getDueVocabInLanguage(language: string, vocabBlockList?: string[]): Promise<VocabData[]>;
   getDueNonSentenceVocabInLanguage(language: string, vocabBlockList?: string[]): Promise<VocabData[]>;

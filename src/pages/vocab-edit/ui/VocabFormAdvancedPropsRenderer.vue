@@ -67,6 +67,17 @@
     </div>
 
     <div class="space-y-4">
+      <h3>{{ $t('vocabulary.form.containedIn') }}</h3>
+      <ManageVocabList :vocab-ids="containedInVocabIds" :language="formData.language" :config="{
+        allowAdd: false,
+        allowEdit: false,
+        allowDisconnect: false,
+        allowNavigate: true,
+        allowDelete: false
+      }" />
+    </div>
+
+    <div class="space-y-4">
       <h3>{{ $t('vocabulary.form.similarSounding') }}</h3>
       <ManageVocabList :vocab-ids="formData.similarSoundingButNotTheSame || []" :language="formData.language" :config="{
         allowAdd: true,
@@ -116,6 +127,7 @@ interface VocabFormData {
 
 defineProps<{
   formData: VocabFormData;
+  containedInVocabIds: string[];
 }>();
 
 const emit = defineEmits<{
