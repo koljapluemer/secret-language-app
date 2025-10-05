@@ -15,7 +15,7 @@ import { useQueueState } from '@/pages/practice/modes/utils/useQueueState';
 import { generateSetStudyTask, getSetStudyProgress, type SetStudyOptions } from './generateSetStudyTasks';
 import { BookOpen } from 'lucide-vue-next';
 import { useToast } from '@/shared/toasts';
-import { useUsedVocabTracker } from '@/app/useUsedVocabTracker';
+import { useUsedVocabTracker } from '@/features/track/useUsedVocabTracker';
 
 // Inject repositories
 const vocabRepo = inject<VocabRepoContract>('vocabRepo');

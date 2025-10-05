@@ -1,7 +1,7 @@
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { Task } from '@/pages/practice/Task';
 import { generateVocabChooseFromSound } from '@/pages/practice/tasks/task-vocab-choose-from-sound/generate';
-import { useUsedVocabTracker } from '@/app/useUsedVocabTracker';
+import { useUsedVocabTracker } from '@/features/track/useUsedVocabTracker';
 import { useToast } from '@/shared/toasts';
 
 export async function generateMinimalPairsTask(

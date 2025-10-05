@@ -6,7 +6,7 @@
  */
 
 import type { VocabData, VocabImage, VocabSound } from './VocabData'
-import type { MergeStrategyMap } from '@/shared/merge/types'
+import type { MergeStrategyMap } from '@/features/merge/types'
 import type { Link } from '@/shared/links/Link'
 
 /**

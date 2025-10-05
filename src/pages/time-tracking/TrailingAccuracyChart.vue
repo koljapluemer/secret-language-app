@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useDetailedPracticeTracking } from '@/app/tracking/useDetailedPracticeTracking';
+import { useDetailedPracticeTracking } from '@/features/track/useDetailedPracticeTracking';
 import type { TaskCompletionData } from '@/entities/practice-tracking/TaskCompletionData';
 import { ChevronDown, ChevronUp } from 'lucide-vue-next';
 import SimpleLineChart from './SimpleLineChart.vue';

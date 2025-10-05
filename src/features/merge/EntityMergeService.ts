@@ -5,7 +5,7 @@
  * Runs continuously in the background, processing one chunk at a time.
  */
 
-import { mergeEntities } from '@/shared/merge/mergeEntities'
+import { mergeEntities } from '@/features/merge/mergeEntities'
 import { deduplicateNoteIds } from './deduplicateEntityNotes'
 import { toRaw } from 'vue'
 

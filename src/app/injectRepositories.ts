@@ -6,7 +6,7 @@ import { FactCardRepo } from '@/entities/fact-cards/FactCardRepo';
 import { ResourceRepo } from '@/entities/resources/ResourceRepo';
 import { LanguageRepo } from '@/entities/languages/LanguageRepo';
 import { LocalSetRepo } from '@/entities/local-sets/LocalSetRepo';
-import { MergeQueueRepo } from '@/app/merge/MergeQueueRepo';
+import { MergeQueueRepo } from '@/features/merge/MergeQueueRepo';
 import { PracticeTrackingRepo } from '@/entities/practice-tracking/PracticeTrackingRepo';
 
 export function setupRepositories() {

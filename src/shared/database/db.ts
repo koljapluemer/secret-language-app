@@ -8,7 +8,7 @@ import type { FactCardData } from '@/entities/fact-cards/FactCardData';
 import type { ResourceData } from '@/entities/resources/ResourceData';
 import type { LanguageData } from '@/entities/languages/LanguageData';
 import type { LocalSetData } from '@/entities/local-sets/LocalSetData';
-import type { MergeQueueItem } from '@/app/merge/MergeQueueData';
+import type { MergeQueueItem } from '@/features/merge/MergeQueueData';
 import type { TaskCompletionData } from '@/entities/practice-tracking/TaskCompletionData';
 import type { MotivationSettingsData } from '@/entities/practice-tracking/MotivationSettingsData';
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getCurrentInstance, onMounted } from 'vue';
 import { provideRepositories } from './injectRepositories';
-import { startMergeService } from './merge/startMergeService';
+import { startMergeService } from '../features/merge/startMergeService';
 import AppHeader from './AppHeader.vue';
 import ToastContainer from '@/shared/toasts/ToastContainer.vue';
 

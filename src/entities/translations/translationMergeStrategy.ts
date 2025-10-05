@@ -6,7 +6,7 @@
  */
 
 import type { TranslationData } from './TranslationData'
-import type { MergeStrategyMap } from '@/shared/merge/types'
+import type { MergeStrategyMap } from '@/features/merge/types'
 
 /**
  * Complete merge strategy for TranslationData

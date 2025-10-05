@@ -30,8 +30,8 @@ import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoCont
 import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract';
 import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract';
 import LanguageDisplay from '@/entities/languages/LanguageDisplay.vue';
-import { useDetailedPracticeTracking } from '@/app/tracking/useDetailedPracticeTracking';
-import type { PracticeContext, TaskCorrectness } from '@/app/tracking/types';
+import { useDetailedPracticeTracking } from '@/features/track/useDetailedPracticeTracking';
+import type { PracticeContext, TaskCorrectness } from '@/features/track/types';
 
 interface Props {
   task: Task;

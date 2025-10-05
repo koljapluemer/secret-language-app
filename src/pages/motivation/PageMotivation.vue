@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { CheckCircle2 } from 'lucide-vue-next';
-import { useDetailedPracticeTracking } from '@/app/tracking/useDetailedPracticeTracking';
+import { useDetailedPracticeTracking } from '@/features/track/useDetailedPracticeTracking';
 import type { TaskCompletionData } from '@/entities/practice-tracking/TaskCompletionData';
 import type { PracticeTrackingRepoContract } from '@/entities/practice-tracking/PracticeTrackingRepoContract';
 

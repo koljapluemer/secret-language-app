@@ -5,7 +5,8 @@
  * merge strategy map.
  */
 
-import type { PropertyMergeStrategy, MergeStrategyMap } from './types'
+import type { MergeStrategyMap, PropertyMergeStrategy } from "./types"
+
 
 /**
  * Execute a merge strategy for a single property

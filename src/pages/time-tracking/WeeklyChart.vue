@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useDetailedPracticeTracking } from '@/app/tracking/useDetailedPracticeTracking';
+import { useDetailedPracticeTracking } from '@/features/track/useDetailedPracticeTracking';
 import { formatTime } from '@/shared/utils/formatTime';
 import type { TaskCompletionData } from '@/entities/practice-tracking/TaskCompletionData';
 

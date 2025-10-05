@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useDetailedPracticeTracking } from '@/app/tracking/useDetailedPracticeTracking';
+import { useDetailedPracticeTracking } from '@/features/track/useDetailedPracticeTracking';
 import { formatTime } from '@/shared/utils/formatTime';
 
 const { t } = useI18n();
