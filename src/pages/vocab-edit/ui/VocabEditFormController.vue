@@ -11,6 +11,9 @@
       @add-note="addNote"
       @update-note="updateNote"
       @remove-note="removeNote"
+      @add-transcription="addTranscription"
+      @update-transcription="updateTranscription"
+      @remove-transcription="removeTranscription"
       @add-link="addLink"
       @update-link="updateLink"
       @remove-link="removeLink"
@@ -51,6 +54,7 @@ interface VocabFormData {
   priority?: number;
   doNotPractice?: boolean;
   notes: (NoteData | Omit<NoteData, 'id'>)[];
+  transcriptions: (NoteData | Omit<NoteData, 'id'>)[];
   links: Link[];
   relatedVocab?: string[];
   contains?: string[];
@@ -68,7 +72,7 @@ interface VocabFormState {
   isEditing: boolean;
 }
 
-function vocabDataToFormData(vocab: VocabData, notes: NoteData[] = [], translations: TranslationData[] = []): VocabFormData {
+function vocabDataToFormData(vocab: VocabData, notes: NoteData[] = [], transcriptions: NoteData[] = [], translations: TranslationData[] = []): VocabFormData {
   return {
     id: vocab.id,
     language: vocab.language,
@@ -80,6 +84,7 @@ function vocabDataToFormData(vocab: VocabData, notes: NoteData[] = [], translati
     priority: vocab.priority,
     doNotPractice: vocab.doNotPractice,
     notes: notes,
+    transcriptions: transcriptions,
     links: vocab.links ? [...vocab.links] : [],
     relatedVocab: vocab.relatedVocab ? [...vocab.relatedVocab] : [],
     contains: vocab.contains ? [...vocab.contains] : [],
@@ -103,6 +108,7 @@ function formDataToVocabData(formData: VocabFormData, existingVocab?: VocabData)
     priority: formData.priority,
     doNotPractice: formData.doNotPractice,
     notes: formData.notes.filter((n): n is NoteData => 'id' in n).map(n => n.id),
+    transcriptions: formData.transcriptions.filter((n): n is NoteData => 'id' in n).map(n => n.id),
     links: formData.links,
     origins: existingVocab.origins,
     relatedVocab: formData.relatedVocab || [],
@@ -124,6 +130,7 @@ function formDataToVocabData(formData: VocabFormData, existingVocab?: VocabData)
     priority: formData.priority,
     doNotPractice: formData.doNotPractice,
     notes: formData.notes.filter((n): n is NoteData => 'id' in n).map(n => n.id),
+    transcriptions: formData.transcriptions.filter((n): n is NoteData => 'id' in n).map(n => n.id),
     links: formData.links,
     origins: ['user-added'],
     relatedVocab: formData.relatedVocab || [],
@@ -172,6 +179,7 @@ const state = ref<VocabFormState>({
     priority: undefined,
     doNotPractice: undefined,
     notes: [],
+    transcriptions: [],
     links: [],
     relatedVocab: [],
     contains: [],
@@ -185,6 +193,7 @@ const state = ref<VocabFormState>({
 
 const loadedVocabData = ref<VocabData | null>(null);
 const loadedNotes = ref<NoteData[]>([]);
+const loadedTranscriptions = ref<NoteData[]>([]);
 const loadedTranslations = ref<TranslationData[]>([]);
 
 const isValid = computed(() => {
@@ -220,6 +229,18 @@ async function loadVocab() {
         loadedNotes.value = [];
       }
 
+      if (vocab.transcriptions && vocab.transcriptions.length > 0 && noteRepo) {
+        try {
+          const transcriptions = await noteRepo.getNotesByUIDs(vocab.transcriptions);
+          loadedTranscriptions.value = transcriptions;
+        } catch {
+          toast.error('Failed to load transcriptions');
+          loadedTranscriptions.value = [];
+        }
+      } else {
+        loadedTranscriptions.value = [];
+      }
+
       if (vocab.translations && vocab.translations.length > 0 && translationRepo) {
         try {
           const translations = await translationRepo.getTranslationsByIds(vocab.translations);
@@ -232,7 +253,7 @@ async function loadVocab() {
         loadedTranslations.value = [];
       }
       
-      state.value.formData = vocabDataToFormData(vocab, loadedNotes.value, loadedTranslations.value);
+      state.value.formData = vocabDataToFormData(vocab, loadedNotes.value, loadedTranscriptions.value, loadedTranslations.value);
     } else {
       state.value.error = 'Vocab not found';
     }
@@ -276,6 +297,25 @@ async function saveInternal(): Promise<void> {
   const notesToDelete = loadedNotes.value.filter(n => !currentNoteUIDs.includes(n.id));
   if (notesToDelete.length > 0) {
     await noteRepo.deleteNotes(notesToDelete.map(n => n.id));
+  }
+
+  // Save or update transcriptions
+  for (let i = 0; i < serializedFormData.transcriptions.length; i++) {
+    const transcription = serializedFormData.transcriptions[i];
+    if ('id' in transcription && transcription.id && loadedTranscriptions.value.find(n => n.id === transcription.id)) {
+      // Existing transcription - update it
+      await noteRepo.updateNote(toRaw(transcription as NoteData));
+    } else {
+      // New transcription (no id) - save it and get the real ID back
+      const savedTranscription = await noteRepo.saveNote(toRaw(transcription));
+      serializedFormData.transcriptions[i] = savedTranscription;
+    }
+  }
+
+  const currentTranscriptionUIDs = serializedFormData.transcriptions.filter((n): n is NoteData => 'id' in n).map(n => n.id);
+  const transcriptionsToDelete = loadedTranscriptions.value.filter(n => !currentTranscriptionUIDs.includes(n.id));
+  if (transcriptionsToDelete.length > 0) {
+    await noteRepo.deleteNotes(transcriptionsToDelete.map(n => n.id));
   }
 
   // Save or update translations
@@ -326,10 +366,12 @@ async function saveInternal(): Promise<void> {
 
   // Update loaded data with the saved entities (which now have real Dexie IDs)
   loadedNotes.value = serializedFormData.notes.filter((n): n is NoteData => 'id' in n);
+  loadedTranscriptions.value = serializedFormData.transcriptions.filter((n): n is NoteData => 'id' in n);
   loadedTranslations.value = serializedFormData.translations.filter((t): t is TranslationData => 'id' in t);
 
   // Update form state with real IDs to keep everything in sync
   state.value.formData.notes = serializedFormData.notes.filter((n): n is NoteData => 'id' in n);
+  state.value.formData.transcriptions = serializedFormData.transcriptions.filter((n): n is NoteData => 'id' in n);
   state.value.formData.translations = serializedFormData.translations.filter((t): t is TranslationData => 'id' in t);
   state.value.formData.id = finalVocabId;
 }
@@ -383,6 +425,29 @@ function updateNote(updatedNote: NoteData | Omit<NoteData, 'id'>) {
 
 function removeNote(index: number) {
   state.value.formData.notes.splice(index, 1);
+}
+
+function addTranscription(transcription: NoteData | Omit<NoteData, 'id'>) {
+  const newTranscription: Omit<NoteData, 'id'> = {
+    content: transcription.content,
+    showBeforeExercise: transcription.showBeforeExercise,
+    noteType: transcription.noteType
+  };
+  state.value.formData.transcriptions.push(newTranscription);
+}
+
+function updateTranscription(updatedTranscription: NoteData | Omit<NoteData, 'id'>) {
+  if ('id' in updatedTranscription && updatedTranscription.id) {
+    const index = state.value.formData.transcriptions.findIndex(n => 'id' in n && n.id === updatedTranscription.id);
+    if (index >= 0) {
+      state.value.formData.transcriptions[index] = updatedTranscription;
+      handleFieldChange();
+    }
+  }
+}
+
+function removeTranscription(index: number) {
+  state.value.formData.transcriptions.splice(index, 1);
 }
 
 function addLink(link: Link) {

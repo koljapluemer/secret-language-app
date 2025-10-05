@@ -63,6 +63,11 @@ export const vocabMergeStrategy: MergeStrategyMap<VocabData> = {
     description: 'Merge all notes from both sources'
   },
 
+  transcriptions: {
+    strategy: 'array-union',
+    description: 'Merge all transcriptions from both sources'
+  },
+
   translations: {
     strategy: 'array-union',
     description: 'Merge all translations from both sources'

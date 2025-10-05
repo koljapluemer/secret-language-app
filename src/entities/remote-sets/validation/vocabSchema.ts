@@ -18,6 +18,7 @@ export const vocabSchema = z.object({
     consideredSentence: z.boolean().optional(),
     consideredWord: z.boolean().optional(),
     notes: z.array(z.string()).optional(),
+    transcriptions: z.array(z.string()).optional(),
     translations: z.array(z.string()).optional(),
     links: z.array(z.string()).optional(),
     relatedVocab: z.array(z.string()).optional(),

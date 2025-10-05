@@ -42,6 +42,9 @@
         @add-note="$emit('add-note', $event)"
         @update-note="$emit('update-note', $event)"
         @remove-note="$emit('remove-note', $event)"
+        @add-transcription="$emit('add-transcription', $event)"
+        @update-transcription="$emit('update-transcription', $event)"
+        @remove-transcription="$emit('remove-transcription', $event)"
         @add-link="$emit('add-link', $event)"
         @update-link="(index, link) => $emit('update-link', index, link)"
         @remove-link="$emit('remove-link', $event)"
@@ -74,6 +77,7 @@ interface VocabFormData {
   priority?: number;
   doNotPractice?: boolean;
   notes: (NoteData | Omit<NoteData, 'id'>)[];
+  transcriptions: (NoteData | Omit<NoteData, 'id'>)[];
   links: Link[];
   relatedVocab?: string[];
   contains?: string[];
@@ -99,6 +103,9 @@ defineEmits<{
   'add-note': [note: NoteData | Omit<NoteData, 'id'>];
   'update-note': [note: NoteData | Omit<NoteData, 'id'>];
   'remove-note': [index: number];
+  'add-transcription': [transcription: NoteData | Omit<NoteData, 'id'>];
+  'update-transcription': [transcription: NoteData | Omit<NoteData, 'id'>];
+  'remove-transcription': [index: number];
   'add-link': [link: Link];
   'update-link': [index: number, link: Link];
   'remove-link': [index: number];

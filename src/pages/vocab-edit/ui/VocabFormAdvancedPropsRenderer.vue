@@ -25,6 +25,11 @@
     <NoteList :notes="formData.notes" :show-before-exercise-option="true" @add="$emit('add-note', $event)"
       @update="$emit('update-note', $event)" @delete="$emit('remove-note', $event)" />
 
+    <!-- Transcriptions -->
+    <h3>{{ $t('vocabulary.form.transcriptions') }}</h3>
+    <NoteList :notes="formData.transcriptions" :show-before-exercise-option="true" @add="$emit('add-transcription', $event)"
+      @update="$emit('update-transcription', $event)" @delete="$emit('remove-transcription', $event)" />
+
     <!-- Links -->
     <LinksForm :links="formData.links" @add-link="$emit('add-link', $event)"
       @update-link="(index, link) => $emit('update-link', index, link)" @remove-link="$emit('remove-link', $event)"
@@ -99,6 +104,7 @@ interface VocabFormData {
   priority?: number;
   doNotPractice?: boolean;
   notes: (NoteData | Omit<NoteData, 'id'>)[];
+  transcriptions: (NoteData | Omit<NoteData, 'id'>)[];
   links: Link[];
   relatedVocab?: string[];
   contains?: string[];
@@ -117,6 +123,9 @@ const emit = defineEmits<{
   'add-note': [note: NoteData | Omit<NoteData, 'id'>];
   'update-note': [note: NoteData | Omit<NoteData, 'id'>];
   'remove-note': [index: number];
+  'add-transcription': [transcription: NoteData | Omit<NoteData, 'id'>];
+  'update-transcription': [transcription: NoteData | Omit<NoteData, 'id'>];
+  'remove-transcription': [index: number];
   'add-link': [link: Link];
   'update-link': [index: number, link: Link];
   'remove-link': [index: number];
