@@ -57,6 +57,7 @@ interface RemoteSetFiles {
 
 export class UnifiedRemoteSetService {
   private toast = useToast();
+  private readonly baseUrl: string;
 
   constructor(
     private localSetRepo: LocalSetRepoContract,
@@ -67,11 +68,13 @@ export class UnifiedRemoteSetService {
     private goalRepo: GoalRepoContract,
     private factCardRepo: FactCardRepoContract,
     private languageRepo: LanguageRepoContract
-  ) {}
+  ) {
+    this.baseUrl = import.meta.env.VITE_SETS_BASE_URL || '/sets';
+  }
 
   async getAvailableLanguages(): Promise<string[]> {
     try {
-      const response = await fetch('/sets/index.json');
+      const response = await fetch(`${this.baseUrl}/index.json`);
       if (!response.ok) return [];
       return await response.json();
     } catch (error) {
@@ -82,21 +85,16 @@ export class UnifiedRemoteSetService {
 
   async getAvailableSets(languageCode: string): Promise<RemoteSetInfo[]> {
     try {
-      const response = await fetch(`/sets/${languageCode}/index.json`);
+      const response = await fetch(`${this.baseUrl}/${languageCode}/index.json`);
       if (!response.ok) return [];
-      const setNames: string[] = await response.json();
-      
-      // Fetch metadata for each set
-      const setsWithMetadata = await Promise.all(
-        setNames.map(async (setName) => {
-          const metadata = await this.getSetMetadata(languageCode, setName);
-          return {
-            name: setName,
-            title: metadata?.title
-          };
-        })
-      );
-      
+      const setsDict: Record<string, z.infer<typeof remoteSetMetaDataSchema>> = await response.json();
+
+      // Convert dict to array of RemoteSetInfo
+      const setsWithMetadata = Object.entries(setsDict).map(([setName, metadata]) => ({
+        name: setName,
+        title: metadata.title
+      }));
+
       return setsWithMetadata;
     } catch (error) {
       this.toast.error(`Failed to fetch sets for ${languageCode}: ${String(error)}`);
@@ -106,18 +104,19 @@ export class UnifiedRemoteSetService {
 
   async getSetMetadata(languageCode: string, setName: string): Promise<z.infer<typeof remoteSetMetaDataSchema> | null> {
     try {
-      const response = await fetch(`/sets/${languageCode}/${setName}/metadata.json`);
-      if (!response.ok) return null;
-      
-      const data = await response.json();
-      const result = remoteSetMetaDataSchema.safeParse(data);
-      
+      // Fetch from the language index (metadata is embedded there now)
+      const indexResponse = await fetch(`${this.baseUrl}/${languageCode}/index.json`);
+      if (!indexResponse.ok) return null;
+
+      const setsDict: Record<string, z.infer<typeof remoteSetMetaDataSchema>> = await indexResponse.json();
+      if (!setsDict[setName]) return null;
+
+      const result = remoteSetMetaDataSchema.safeParse(setsDict[setName]);
       if (result.success) {
         return result.data;
-      } else {
-        
-        return null;
       }
+
+      return null;
     } catch (error) {
       this.toast.error(`Failed to fetch metadata for ${languageCode}/${setName}: ${String(error)}`);
       return null;
@@ -464,7 +463,7 @@ export class UnifiedRemoteSetService {
 
     for (const fileName of possibleFiles) {
       try {
-        const response = await fetch(`/sets/${languageCode}/${setName}/${fileName}.jsonl`);
+        const response = await fetch(`${this.baseUrl}/${languageCode}/${setName}/${fileName}.jsonl`);
         if (!response.ok) {
           if (response.status === 404) {
             continue;
@@ -642,11 +641,11 @@ export class UnifiedRemoteSetService {
 
   private async downloadAndAddImage(
     languageCode: string,
-    setName: string, 
+    setName: string,
     vocabId: string,
     imageData: { filename: string; alt?: string; tags?: string[] }
   ): Promise<void> {
-    const imageUrl = `/sets/${languageCode}/${setName}/images/${imageData.filename}`;
+    const imageUrl = `${this.baseUrl}/${languageCode}/${setName}/images/${imageData.filename}`;
     
     try {
       const response = await fetch(imageUrl);
@@ -675,11 +674,11 @@ export class UnifiedRemoteSetService {
   private async downloadAndAddSound(
     languageCode: string,
     setName: string,
-    vocabId: string, 
+    vocabId: string,
     soundData: { filename: string }
   ): Promise<void> {
     try {
-      const response = await fetch(`/sets/${languageCode}/${setName}/audio/${soundData.filename}`);
+      const response = await fetch(`${this.baseUrl}/${languageCode}/${setName}/audio/${soundData.filename}`);
       if (!response.ok) {
         
         return; // Skip this sound and continue

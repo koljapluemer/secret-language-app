@@ -20,7 +20,6 @@
           <h1>{{ metadata?.title || setName }}</h1>
           <p class="text-base-content/60 mb-6">
             <span class="badge badge-outline">{{ language.toUpperCase() }}</span>
-            <span v-if="metadata?.title" class="ml-2">{{ setName }}</span>
           </p>
 
           <div class="divider"></div>
@@ -41,9 +40,6 @@
                 <span v-if="downloading" class="loading loading-spinner loading-sm mr-2"></span>
                 {{ isDownloaded ? $t('downloads.start') : $t('downloads.downloadAndStart') }}
               </button>
-              <p class=" text-base-content/60 mt-2 text-center">
-                {{ $t('downloads.willStartIn') }} {{ getPracticeModeName(metadata.preferredMode) }} {{ $t('downloads.mode') }}
-              </p>
             </div>
             
             <button 
@@ -112,20 +108,6 @@ const remoteSetService = new UnifiedRemoteSetService(
 );
 
 const downloadAndPracticeService = new DownloadAndPracticeService(remoteSetService, router);
-
-function getPracticeModeName(mode: string): string {
-  const modeNames: { [key: string]: string } = {
-    'practice-mode-fact-card-grind': 'Fact Card Grind',
-    'practice-mode-goal-getter': 'Goal Getter',
-    'practice-mode-sisyphos': 'Sisyphos',
-    'practice-mode-insert-images': 'Insert Images',
-    'practice-mode-eyes-and-ears': 'Eyes and Ears',
-    'practice-mode-ultrarandom': 'Ultrarandom',
-    'practice-mode-illegal-immersion': 'Illegal Immersion',
-    'practice-mode-sentence-slide': 'Sentence Slide'
-  };
-  return modeNames[mode] || mode;
-}
 
 async function loadSetInfo() {
   loading.value = true;
