@@ -1073,7 +1073,7 @@ export class VocabRepo implements VocabRepoContract {
     const vocab = await db.vocab
       .where('language')
       .anyOf(languages)
-      .filter(vocab => 
+      .filter(vocab =>
         vocab.hasSound === true &&
         vocab.hasImage === true &&
         vocab.progress.level >= 0 &&
@@ -1086,6 +1086,54 @@ export class VocabRepo implements VocabRepoContract {
     if (vocab.length === 0) return null;
     const ensured = vocab.map(v => this.ensureVocabFields(v));
     return pickRandom(ensured, 1)[0];
+  }
+
+  async getDueVocabWithSoundAndImages(languages: string[], vocabBlockList?: string[]): Promise<VocabData[]> {
+    const vocab = await db.vocab
+      .where('language')
+      .anyOf(languages)
+      .filter(vocab => {
+        // Must have valid sound and images
+        const hasPlayableSound = vocab.sounds && vocab.sounds.some(sound => !sound.disableForPractice);
+        const hasImages = vocab.images && vocab.images.length > 0;
+        if (!(hasPlayableSound && hasImages)) return false;
+
+        // Must not be marked as doNotPractice
+        if (vocab.doNotPractice) return false;
+
+        // Must not be in block list
+        if (vocabBlockList && vocabBlockList.includes(vocab.id)) return false;
+
+        // Must be due vocab: level >= 0 and due <= now
+        return vocab.progress.level >= 0 && vocab.progress.due && vocab.progress.due <= new Date();
+      })
+      .toArray();
+
+    return vocab.map(v => this.ensureVocabFields(v));
+  }
+
+  async getUnseenVocabWithSoundAndImages(languages: string[], vocabBlockList?: string[]): Promise<VocabData[]> {
+    const vocab = await db.vocab
+      .where('language')
+      .anyOf(languages)
+      .filter(vocab => {
+        // Must have valid sound and images
+        const hasPlayableSound = vocab.sounds && vocab.sounds.some(sound => !sound.disableForPractice);
+        const hasImages = vocab.images && vocab.images.length > 0;
+        if (!(hasPlayableSound && hasImages)) return false;
+
+        // Must not be marked as doNotPractice
+        if (vocab.doNotPractice) return false;
+
+        // Must not be in block list
+        if (vocabBlockList && vocabBlockList.includes(vocab.id)) return false;
+
+        // Must be unseen vocab: level === -1
+        return vocab.progress.level === -1;
+      })
+      .toArray();
+
+    return vocab.map(v => this.ensureVocabFields(v));
   }
 
   async getRandomVocabWithImages(language: string, excludeVocabId: string, vocabBlockList?: string[]): Promise<VocabData | null> {

@@ -91,6 +91,8 @@ export interface VocabRepoContract {
   getRandomUnseenVocabWithSoundAndImages(languages: string[], vocabBlockList?: string[]): Promise<VocabData | null>;
   getRandomDueVocabWithSoundAndImages(languages: string[], vocabBlockList?: string[]): Promise<VocabData | null>;
   getRandomVocabWithImages(language: string, excludeVocabId: string, vocabBlockList?: string[]): Promise<VocabData | null>;
+  getDueVocabWithSoundAndImages(languages: string[], vocabBlockList?: string[]): Promise<VocabData[]>;
+  getUnseenVocabWithSoundAndImages(languages: string[], vocabBlockList?: string[]): Promise<VocabData[]>;
 
   // Sentence Slide operations
   getRandomUnseenSentenceVocabWithRelatedVocab(languages: string[], vocabBlockList?: string[]): Promise<VocabData | null>;

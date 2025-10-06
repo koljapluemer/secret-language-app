@@ -6,47 +6,6 @@ import { generateRecordSentenceTaskFromTwoVocab, generateRecordSentenceTaskFromS
 import { randomFromArray, pickRandom } from '@/shared/utils/arrayUtils';
 import { useToast } from '@/shared/toasts';
 
-// Helper function to check if vocab has both sound and images
-function hasValidSoundAndImages(vocab: VocabData): boolean {
-  const hasPlayableSound = vocab.sounds && vocab.sounds.some(sound => !sound.disableForPractice);
-  const hasImages = vocab.images && vocab.images.length > 0;
-  return !!(hasPlayableSound && hasImages);
-}
-
-// Helper function to get vocab with sound and images (custom filtering)
-async function getVocabWithSoundAndImages(
-  vocabRepo: VocabRepoContract,
-  languageCodes: string[],
-  vocabBlockList?: string[],
-  preferDue: boolean = true
-): Promise<VocabData[]> {
-  // Get all vocab for the specified languages
-  const allVocab = await vocabRepo.getVocab();
-  
-  return allVocab.filter(vocab => {
-    // Must be in target languages
-    if (!languageCodes.includes(vocab.language)) return false;
-    
-    // Must not be in block list
-    if (vocabBlockList && vocabBlockList.includes(vocab.id)) return false;
-    
-    // Must not be marked as doNotPractice
-    if (vocab.doNotPractice) return false;
-    
-    // Must have sound and images
-    if (!hasValidSoundAndImages(vocab)) return false;
-    
-    // Filter by due status if specified
-    if (preferDue) {
-      // Due vocab: level >= 0 and due <= now
-      return vocab.progress.level >= 0 && vocab.progress.due <= new Date();
-    } else {
-      // Unseen vocab: level === -1
-      return vocab.progress.level === -1;
-    }
-  });
-}
-
 export interface EyesAndEarsOptions {
   includeGenerationExercises?: boolean;
 }
@@ -105,15 +64,23 @@ export async function generateEyesAndEars(
       // Form sentence task with vocab that has sound and images
       // 70% chance to prefer due vocab, 30% unseen
       const preferDueVocab = Math.random() < 0.7;
-      
-      // Get eligible vocab
-      let eligibleVocab = await getVocabWithSoundAndImages(vocabRepo, languageCodes, vocabBlockList, preferDueVocab);
-      
-      // If no vocab available with preferred due status, try the opposite
-      if (eligibleVocab.length === 0) {
-        eligibleVocab = await getVocabWithSoundAndImages(vocabRepo, languageCodes, vocabBlockList, !preferDueVocab);
+
+      // Get eligible vocab using repository methods
+      let eligibleVocab: VocabData[] = [];
+      if (preferDueVocab) {
+        eligibleVocab = await vocabRepo.getDueVocabWithSoundAndImages(languageCodes, vocabBlockList);
+        // If no due vocab available, try unseen
+        if (eligibleVocab.length === 0) {
+          eligibleVocab = await vocabRepo.getUnseenVocabWithSoundAndImages(languageCodes, vocabBlockList);
+        }
+      } else {
+        eligibleVocab = await vocabRepo.getUnseenVocabWithSoundAndImages(languageCodes, vocabBlockList);
+        // If no unseen vocab available, try due
+        if (eligibleVocab.length === 0) {
+          eligibleVocab = await vocabRepo.getDueVocabWithSoundAndImages(languageCodes, vocabBlockList);
+        }
       }
-      
+
       if (eligibleVocab.length >= 2) {
         // Try to create a two-vocab sentence task
         // Group by language for better sentence formation
@@ -124,24 +91,24 @@ export async function generateEyesAndEars(
           }
           languageGroups[vocab.language].push(vocab);
         }
-        
+
         // Find a language with at least 2 vocab items
         const languagesWithPairs = Object.entries(languageGroups)
           .filter(([, vocabs]) => vocabs.length >= 2);
-        
+
         if (languagesWithPairs.length > 0) {
           const [, vocabsInLanguage] = randomFromArray(languagesWithPairs)!;
           const selectedPair = pickRandom(vocabsInLanguage, 2);
           return generateRecordSentenceTaskFromTwoVocab(selectedPair[0], selectedPair[1]);
         }
       }
-      
+
       if (eligibleVocab.length >= 1) {
         // Create single-vocab record sentence task
         const selectedVocab = randomFromArray(eligibleVocab)!;
         return generateRecordSentenceTaskFromSingleVocab(selectedVocab);
       }
-      
+
       console.warn('Eyes and Ears: No vocab found with both sound and images for form-sentence task', {
         languageCodes,
         vocabBlockListSize: vocabBlockList?.length || 0,
