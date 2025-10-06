@@ -1305,4 +1305,86 @@ export class VocabRepo implements VocabRepoContract {
 
     return vocab.map(v => this.ensureVocabFields(v));
   }
+
+  // Component Clusters operations
+  async getRandomDueOrUnseenVocabContainedInMultiple(languages: string[], minContainers: number, vocabBlockList?: string[]): Promise<VocabData | null> {
+    const now = new Date();
+
+    // Get all vocab in the specified languages
+    const allVocab = await db.vocab
+      .where('language')
+      .anyOf(languages)
+      .toArray();
+
+    // Find vocab that are contained in at least minContainers other vocab
+    const potentialComponents: VocabData[] = [];
+
+    for (const vocab of allVocab) {
+      // Skip if in block list
+      if (vocabBlockList && vocabBlockList.includes(vocab.id)) {
+        continue;
+      }
+
+      // Skip if marked as doNotPractice
+      if (vocab.doNotPractice) {
+        continue;
+      }
+
+      // Check if due or unseen
+      const isUnseen = vocab.progress.level === -1;
+      const isDue = vocab.progress.level >= 0 && vocab.progress.due && new Date(vocab.progress.due) <= now;
+
+      if (!isUnseen && !isDue) {
+        continue;
+      }
+
+      // Count how many vocab contain this vocab
+      const containingCount = allVocab.filter(v =>
+        v.contains && v.contains.includes(vocab.id)
+      ).length;
+
+      if (containingCount >= minContainers) {
+        potentialComponents.push(vocab);
+      }
+    }
+
+    if (potentialComponents.length === 0) {
+      return null;
+    }
+
+    // Return a random component
+    const randomIndex = Math.floor(Math.random() * potentialComponents.length);
+    return this.ensureVocabFields(potentialComponents[randomIndex]);
+  }
+
+  async getDueOrUnseenVocabContainingVocabId(vocabId: string, vocabBlockList?: string[]): Promise<VocabData[]> {
+    const now = new Date();
+
+    const vocab = await db.vocab
+      .filter(v => {
+        // Must contain the specified vocab ID
+        if (!v.contains || !v.contains.includes(vocabId)) {
+          return false;
+        }
+
+        // Must not be in block list
+        if (vocabBlockList && vocabBlockList.includes(v.id)) {
+          return false;
+        }
+
+        // Must not be marked as doNotPractice
+        if (v.doNotPractice) {
+          return false;
+        }
+
+        // Check if due or unseen
+        const isUnseen = v.progress.level === -1;
+        const isDue = v.progress.level >= 0 && v.progress.due && new Date(v.progress.due) <= now;
+
+        return isUnseen || isDue;
+      })
+      .toArray();
+
+    return vocab.map(v => this.ensureVocabFields(v));
+  }
 }

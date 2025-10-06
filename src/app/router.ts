@@ -12,6 +12,7 @@ import SentenceSlideWidget from '@/pages/practice/modes/modes/sentence-slide/Sen
 import ResourceRotationWidget from '@/pages/practice/modes/modes/resource-rotation/ResourceRotationWidget.vue';
 import MinimalPairsWidget from '@/pages/practice/modes/modes/minimal-pairs/MinimalPairsWidget.vue';
 import SetStudyWidget from '@/pages/practice/modes/modes/set-study/SetStudyWidget.vue';
+import ComponentClustersWidget from '@/pages/practice/modes/modes/component-clusters/ComponentClustersWidget.vue';
 import PageVocabList from '@/pages/vocab-list/PageVocabList.vue';
 import PageVocabEdit from '@/pages/vocab-edit/PageVocabEdit.vue';
 import PageVocabAdd from '@/pages/vocab-add/PageVocabAdd.vue';
@@ -101,6 +102,11 @@ const router = createRouter({
           path: 'set-study',
           name: 'practice-mode-set-study',
           component: SetStudyWidget
+        },
+        {
+          path: 'component-clusters',
+          name: 'practice-mode-component-clusters',
+          component: ComponentClustersWidget
         }
       ]
     },

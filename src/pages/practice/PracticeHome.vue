@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BookOpen, Target, RotateCcw, ImagePlus, Eye, Dices, Zap, ArrowRight, RefreshCw, Volume2, Layers } from 'lucide-vue-next';
+import { BookOpen, Target, RotateCcw, ImagePlus, Eye, Dices, Zap, ArrowRight, RefreshCw, Volume2, Layers, Boxes } from 'lucide-vue-next';
 
 const practiceOptions = [
   {
@@ -67,6 +67,12 @@ const practiceOptions = [
     route: { name: 'practice-mode-set-study' },
     icon: Layers,
     description: 'Study vocabulary from downloaded sets with customizable new word limits'
+  },
+  {
+    name: 'Component Clusters',
+    route: { name: 'practice-mode-component-clusters' },
+    icon: Boxes,
+    description: 'Practice component vocab, then all vocab containing them'
   }
 ];
 </script>

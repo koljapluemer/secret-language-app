@@ -105,6 +105,10 @@ export interface VocabRepoContract {
   getRandomUnseenVocabFromSet(setId: string, count: number, vocabBlockList?: string[]): Promise<VocabData[]>;
   getUnseenVocabCountFromSet(setId: string): Promise<number>;
 
+  // Component Clusters operations
+  getRandomDueOrUnseenVocabContainedInMultiple(languages: string[], minContainers: number, vocabBlockList?: string[]): Promise<VocabData | null>;
+  getDueOrUnseenVocabContainingVocabId(vocabId: string, vocabBlockList?: string[]): Promise<VocabData[]>;
+
   // Merge operations
   getUncheckedVocab(limit: number): Promise<VocabData[]>;
   getVocabByOrigins(setIds: string[]): Promise<VocabData[]>;
