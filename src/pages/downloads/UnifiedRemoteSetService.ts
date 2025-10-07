@@ -464,7 +464,9 @@ export class UnifiedRemoteSetService {
 
     for (const fileName of possibleFiles) {
       try {
-        const response = await fetch(`${this.baseUrl}/${languageCode}/${setName}/${fileName}.jsonl`);
+        const response = await fetch(`${this.baseUrl}/${languageCode}/${setName}/${fileName}.jsonl`, {
+          cache: 'no-store'
+        });
         if (!response.ok) {
           if (response.status === 404) {
             continue;
