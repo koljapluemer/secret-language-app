@@ -6,7 +6,7 @@ import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesConte
 import type { TranslationData } from '@/entities/translations/TranslationData';
 import type { NoteData } from '@/entities/notes/NoteData';
 import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
-import LinkDisplayMini from '@/shared/links/LinkDisplayMini.vue';
+import LinkDisplayCompact from '@/shared/links/LinkDisplayCompact.vue';
 
 interface Props {
   task: Task;
@@ -172,8 +172,8 @@ onMounted(loadVocab);
     </div>
 
     <!-- Links -->
-    <div v-if="vocab.links && vocab.links.length > 0" class="space-y-2 mb-6">
-      <LinkDisplayMini
+    <div v-if="vocab.links && vocab.links.length > 0" class="flex flex-wrap gap-2 mb-6">
+      <LinkDisplayCompact
         v-for="(link, index) in vocab.links"
         :key="index"
         :link="link"

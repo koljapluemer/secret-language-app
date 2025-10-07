@@ -8,7 +8,7 @@ import type { Rating } from 'ts-fsrs';
 import SpacedRepetitionRating from '@/pages/practice/tasks/ui/SpacedRepetitionRating.vue';
 import type { NoteData } from '@/entities/notes/NoteData';
 import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
-import LinkDisplayMini from '@/shared/links/LinkDisplayMini.vue';
+import LinkDisplayCompact from '@/shared/links/LinkDisplayCompact.vue';
 import { useToast } from '@/shared/toasts';
 
 interface Props {
@@ -151,8 +151,8 @@ onMounted(loadVocab);
       </div>
       
       <!-- Links -->
-      <div v-if="vocab?.links && vocab.links.length > 0" class="space-y-2 mt-6">
-        <LinkDisplayMini
+      <div v-if="vocab?.links && vocab.links.length > 0" class="flex flex-wrap gap-2 mt-6 justify-center">
+        <LinkDisplayCompact
           v-for="(link, index) in vocab.links"
           :key="index"
           :link="link"

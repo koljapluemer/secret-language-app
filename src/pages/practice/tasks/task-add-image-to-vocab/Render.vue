@@ -8,7 +8,7 @@ import VocabImageManager from '@/features/vocab-image-management/VocabImageManag
 import TaskSkipDisableDone from '@/pages/practice/tasks/ui/TaskSkipDisableDone.vue';
 import type { NoteData } from '@/entities/notes/NoteData';
 import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
-import LinkDisplayMini from '@/shared/links/LinkDisplayMini.vue';
+import LinkDisplayCompact from '@/shared/links/LinkDisplayCompact.vue';
 import { useToast } from '@/shared/toasts';
 
 interface Props {
@@ -144,7 +144,7 @@ onMounted(loadVocab);
     
     <!-- Links -->
     <div v-if="vocab.links && vocab.links.length > 0" class="flex flex-wrap gap-2 mb-6">
-      <LinkDisplayMini
+      <LinkDisplayCompact
         v-for="(link, index) in vocab.links"
         :key="index"
         :link="link"

@@ -42,8 +42,8 @@
     </div>
 
     <!-- Links -->
-    <div v-if="vocab?.links && vocab.links.length > 0" class="space-y-2 mb-4">
-      <LinkDisplayMini
+    <div v-if="vocab?.links && vocab.links.length > 0" class="flex flex-wrap gap-2 mb-4 justify-center">
+      <LinkDisplayCompact
         v-for="(link, index) in vocab.links"
         :key="index"
         :link="link"
@@ -77,7 +77,7 @@ import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesConte
 import VocabImageDisplay from '@/shared/ui/VocabImage.vue';
 import SoundPlayer from '@/shared/ui/SoundPlayer.vue';
 import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
-import LinkDisplayMini from '@/shared/links/LinkDisplayMini.vue';
+import LinkDisplayCompact from '@/shared/links/LinkDisplayCompact.vue';
 import { Rating } from 'ts-fsrs';
 import { useToast } from '@/shared/toasts';
 
