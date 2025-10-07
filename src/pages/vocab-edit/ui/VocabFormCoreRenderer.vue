@@ -137,6 +137,7 @@ import { Plus, Edit, X, Check } from 'lucide-vue-next';
 import InlineInput from '@/shared/ui/InlineInput.vue';
 import type { TranslationData } from '@/entities/translations/TranslationData';
 import type { NoteData } from '@/entities/notes/NoteData';
+import type { Link } from '@/shared/links/Link';
 import LanguageDropdown from '@/entities/languages/LanguageDropdown.vue';
 
 interface VocabFormData {
@@ -150,10 +151,7 @@ interface VocabFormData {
   priority?: number;
   doNotPractice?: boolean;
   notes: (NoteData | Omit<NoteData, 'id'>)[];
-  links: Array<{
-    label: string;
-    url: string;
-  }>;
+  links: Link[];
 }
 
 defineProps<{

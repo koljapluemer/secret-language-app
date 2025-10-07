@@ -349,6 +349,7 @@ export class UnifiedRemoteSetService {
         reportProgress('Processing fact cards', i, setFiles.factCards.length);
 
         const noteIds = this.resolveReferences(factCardData.notes || [], noteMap);
+        const links = this.resolveLinks(factCardData.links || [], linkMap);
 
         const localFactCard: Omit<FactCardData, "id" | 'progress'> = {
           language: factCardData.language,
@@ -357,7 +358,7 @@ export class UnifiedRemoteSetService {
           priority: factCardData.priority || 1,
           doNotPractice: false,
           notes: noteIds,
-          links: [],
+          links: links,
           origins: [localSet.id],
           _mergeChecked: false // Mark for background merge
         };
