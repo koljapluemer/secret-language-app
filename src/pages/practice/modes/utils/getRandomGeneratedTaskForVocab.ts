@@ -37,7 +37,7 @@ export async function getRandomGeneratedTaskForVocab(
   const eligibleTasks: TaskGenerator[] = [];
 
   // Unseen vocab (level -1)
-  if (level === -1 && !isSentenceVocab) {
+  if (level === -1 && !isSentenceVocab && hasTranslations) {
     eligibleTasks.push(() => generateVocabTryToRemember(vocab));
   }
   if (level === -1 && isSentenceVocab && hasTranslations) {
