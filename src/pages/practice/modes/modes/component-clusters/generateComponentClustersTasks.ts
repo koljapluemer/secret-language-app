@@ -9,13 +9,17 @@ interface ComponentClustersState {
   currentComponent: VocabData | null;
   containerVocabQueue: VocabData[];
   phase: 'component-task' | 'container-tasks';
+  lastPracticedVocabId: string | null;
+  lastPracticedOrigins: string[];
 }
 
 // Global state for the component clusters mode
 let clusterState: ComponentClustersState = {
   currentComponent: null,
   containerVocabQueue: [],
-  phase: 'component-task'
+  phase: 'component-task',
+  lastPracticedVocabId: null,
+  lastPracticedOrigins: []
 };
 
 export async function generateComponentClustersTask(
@@ -31,6 +35,17 @@ export async function generateComponentClustersTask(
       currentComponent: clusterState.currentComponent?.id,
       phase: clusterState.phase
     });
+
+    // Opportunistically serve due vocab from the same set as the last practiced item
+    const reviewTask = await maybeGenerateSameSetReviewTask(
+      vocabRepo,
+      translationRepo,
+      blockList
+    );
+    if (reviewTask) {
+      console.log('[ComponentClusters] Serving same-set review task');
+      return reviewTask;
+    }
 
     // If we don't have a current component or need to pick a new one
     if (!clusterState.currentComponent) {
@@ -73,6 +88,7 @@ export async function generateComponentClustersTask(
         console.log('[ComponentClusters] Component task generated');
         // Move to container tasks phase after this task
         clusterState.phase = 'container-tasks';
+        recordPracticedVocab(clusterState.currentComponent);
         return task;
       }
 
@@ -191,6 +207,7 @@ async function getNextContainerVocabTask(
       return getNextContainerVocabTask(vocabRepo, translationRepo, blockList);
     }
 
+    recordPracticedVocab(vocab);
     return task;
   } catch (error) {
     const toast = useToast();
@@ -230,6 +247,87 @@ function resetClusterState(): void {
   clusterState = {
     currentComponent: null,
     containerVocabQueue: [],
-    phase: 'component-task'
+    phase: 'component-task',
+    lastPracticedVocabId: null,
+    lastPracticedOrigins: []
   };
+}
+
+function recordPracticedVocab(vocab: VocabData) {
+  clusterState.lastPracticedVocabId = vocab.id;
+  if (!Array.isArray(vocab.origins)) {
+    clusterState.lastPracticedOrigins = [];
+    return;
+  }
+
+  const filtered = vocab.origins.filter(origin => origin && origin !== 'user-added');
+  clusterState.lastPracticedOrigins = Array.from(new Set(filtered));
+}
+
+async function maybeGenerateSameSetReviewTask(
+  vocabRepo: VocabRepoContract,
+  translationRepo: TranslationRepoContract,
+  incomingBlockList: string[] | undefined
+): Promise<Task | null> {
+  if (Math.random() >= 0.25) {
+    return null;
+  }
+
+  const originSetIds = clusterState.lastPracticedOrigins;
+  if (!originSetIds.length) {
+    return null;
+  }
+
+  const eligibleSetIds = originSetIds.filter(Boolean);
+  if (!eligibleSetIds.length) {
+    return null;
+  }
+
+  const selectedSetId = eligibleSetIds[Math.floor(Math.random() * eligibleSetIds.length)];
+
+  const combinedBlockList = new Set<string>();
+  (incomingBlockList || []).forEach(id => combinedBlockList.add(id));
+  if (clusterState.lastPracticedVocabId) {
+    combinedBlockList.add(clusterState.lastPracticedVocabId);
+  }
+  if (clusterState.currentComponent) {
+    combinedBlockList.add(clusterState.currentComponent.id);
+  }
+  clusterState.containerVocabQueue.forEach(v => combinedBlockList.add(v.id));
+
+  const dueCandidates = await vocabRepo.getRandomDueVocabFromSet(
+    selectedSetId,
+    10,
+    Array.from(combinedBlockList)
+  );
+
+  const now = Date.now();
+  const filteredCandidate = dueCandidates.find(candidate => {
+    if (!candidate.progress.due) {
+      return false;
+    }
+
+    const dueSource = candidate.progress.due;
+    const dueTime = dueSource instanceof Date ? dueSource.getTime() : new Date(dueSource).getTime();
+    if (Number.isNaN(dueTime)) {
+      return false;
+    }
+
+    return candidate.progress.level > -1 &&
+      dueTime <= now &&
+      candidate.id !== clusterState.lastPracticedVocabId;
+  });
+
+  if (!filteredCandidate) {
+    return null;
+  }
+
+  const translations = await translationRepo.getTranslationsByIds(filteredCandidate.translations || []);
+  const task = await getRandomGeneratedTaskForVocab(filteredCandidate, translations, vocabRepo);
+  if (!task) {
+    return null;
+  }
+
+  recordPracticedVocab(filteredCandidate);
+  return task;
 }
