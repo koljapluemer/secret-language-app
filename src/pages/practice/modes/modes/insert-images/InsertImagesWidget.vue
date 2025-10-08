@@ -38,6 +38,7 @@ const {
   setTask,
   setEmpty,
   setError,
+  completeCurrentTask,
   cleanup
 } = useQueueState();
 
@@ -106,45 +107,10 @@ async function initializeQueue() {
   }
 }
 
-// Complete current task
-async function completeCurrentTask() {
-  if (state.value.status !== 'task') {
-    
-    return;
-  }
-
-  const currentState = state.value;
-  
-  // Track the completed task's vocab UID
-  const vocabId = currentState.currentTask.associatedVocab?.[0];
+function onTaskTransition(newCurrentTask: Task) {
+  const vocabId = newCurrentTask.associatedVocab?.[0];
   if (vocabId) {
     lastUsedVocabId.value = vocabId;
-  }
-  
-  // If we have a next task ready, use it
-  if (currentState.nextTask) {
-    // Show the preloaded next task
-    state.value = {
-      status: 'task',
-      currentTask: currentState.nextTask,
-      nextTask: null
-    };
-    
-    // Generate new next task for preloading
-    try {
-      const newNextTask = await generateNextTask();
-      if (newNextTask && state.value.status === 'task') {
-        state.value.nextTask = newNextTask;
-      }
-    } catch {
-      toast.error('Error generating next task');
-    }
-  } else {
-    // No next task ready, need to generate one
-    const success = await tryTransitionToTask();
-    if (!success) {
-      setEmpty('Excellent work! All vocabulary has been processed.');
-    }
   }
 }
 
@@ -164,7 +130,12 @@ onUnmounted(() => {
 
 // Handle task completion
 const handleTaskFinished = async () => {
-  await completeCurrentTask();
+  await completeCurrentTask(
+    generateNextTask,
+    onTaskTransition,
+    tryTransitionToTask,
+    'Excellent work! All vocabulary has been processed.'
+  );
 };
 </script>
 

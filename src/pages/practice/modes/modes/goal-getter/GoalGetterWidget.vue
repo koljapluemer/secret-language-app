@@ -29,6 +29,7 @@ const {
   setTask,
   setEmpty,
   setError,
+  completeCurrentTask,
   cleanup
 } = useQueueState();
 
@@ -92,42 +93,6 @@ async function initializeQueue() {
   }
 }
 
-// Complete current task
-async function completeCurrentTask() {
-  if (state.value.status !== 'task') {
-    
-    return;
-  }
-
-  const currentState = state.value;
-  
-  // If we have a next task ready, use it
-  if (currentState.nextTask) {
-    // Show the preloaded next task
-    state.value = {
-      status: 'task',
-      currentTask: currentState.nextTask,
-      nextTask: null
-    };
-    
-    // Generate new next task for preloading
-    try {
-      const newNextTask = await generateNextTask();
-      if (newNextTask && state.value.status === 'task') {
-        state.value.nextTask = newNextTask;
-      }
-    } catch {
-      toast.error('Error generating next task');
-    }
-  } else {
-    // No next task ready, need to generate one
-    const success = await tryTransitionToTask();
-    if (!success) {
-      setEmpty('Excellent work! No more goal tasks are currently available.');
-    }
-  }
-}
-
 // Retry on error
 async function retry() {
   await initializeQueue();
@@ -144,7 +109,12 @@ onUnmounted(() => {
 
 // Handle task completion
 const handleTaskFinished = async () => {
-  await completeCurrentTask();
+  await completeCurrentTask(
+    generateNextTask,
+    undefined,
+    tryTransitionToTask,
+    'Excellent work! No more goal tasks are currently available.'
+  );
 };
 </script>
 

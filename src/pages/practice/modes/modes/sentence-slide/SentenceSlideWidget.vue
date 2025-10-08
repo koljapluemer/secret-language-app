@@ -38,6 +38,7 @@ const {
   setTask,
   setEmpty,
   setError,
+  completeCurrentTask,
   cleanup
 } = useQueueState();
 
@@ -142,45 +143,10 @@ async function initializeQueue() {
   }
 }
 
-// Complete current task
-async function completeCurrentTask() {
-  if (state.value.status !== 'task') {
-    
-    return;
-  }
-
-  const currentState = state.value;
-  
-  // If we have a next task ready, use it
-  if (currentState.nextTask) {
-    // Show the preloaded next task
-    state.value = {
-      status: 'task',
-      currentTask: currentState.nextTask,
-      nextTask: null
-    };
-    
-    // Generate new next task for preloading
-    try {
-      const newNextTask = await generateNextTask();
-      if (newNextTask && state.value.status === 'task') {
-        state.value.nextTask = newNextTask;
-      }
-
-      // Update progress after task completion
-      updateProgress();
-    } catch {
-      toast.error('Error generating next task');
-    }
-  } else {
-    // No next task ready, need to generate one
-    const success = await tryTransitionToTask();
-    if (!success) {
-      setEmpty('Sentence slide complete! All sentences have been mastered.');
-    } else {
-      // Update progress after task transition
-      updateProgress();
-    }
+function onTaskTransition(newCurrentTask: Task) {
+  const vocabId = newCurrentTask.associatedVocab?.[0];
+  if (vocabId) {
+    lastUsedContentId.value = vocabId;
   }
 }
 
@@ -206,13 +172,18 @@ const handleTaskFinished = async () => {
     const vocabId = currentTask.associatedVocab?.[0];
     
     if (vocabId) {
-      lastUsedContentId.value = vocabId;
       // Check if this vocab should be removed from connected queue
       await removeVocabIfNotDue(vocabId, vocabRepo!);
     }
   }
-  
-  await completeCurrentTask();
+
+  await completeCurrentTask(
+    generateNextTask,
+    onTaskTransition,
+    tryTransitionToTask,
+    'Sentence slide complete! All sentences have been mastered.'
+  );
+  updateProgress();
 };
 </script>
 

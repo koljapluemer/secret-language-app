@@ -39,6 +39,7 @@ const {
   setTask,
   setEmpty,
   setError,
+  completeCurrentTask,
   cleanup
 } = useQueueState();
 
@@ -113,40 +114,8 @@ async function initializeQueue() {
   }
 }
 
-// Complete current task
-async function completeCurrentTask() {
-  if (state.value.status !== 'task') {
-    
-    return;
-  }
-
-  const currentState = state.value;
-  
-  // If we have a next task ready, use it
-  if (currentState.nextTask) {
-    // Show the preloaded next task
-    state.value = {
-      status: 'task',
-      currentTask: currentState.nextTask,
-      nextTask: null
-    };
-    
-    // Generate new next task for preloading
-    try {
-      const newNextTask = await generateNextTask();
-      if (newNextTask && state.value.status === 'task') {
-        state.value.nextTask = newNextTask;
-      }
-    } catch (error) {
-      toast.error(`Error generating next task: ${String(error)}`);
-    }
-  } else {
-    // No next task ready, need to generate one
-    const success = await tryTransitionToTask();
-    if (!success) {
-      setEmpty('Maximum randomness achieved! No more tasks available at the moment.');
-    }
-  }
+function onTaskTransition(newCurrentTask: Task) {
+  lastUsedTaskType.value = newCurrentTask.taskType;
 }
 
 // Retry on error
@@ -165,13 +134,12 @@ onUnmounted(() => {
 
 // Handle task completion
 const handleTaskFinished = async () => {
-  // Track the task type before completing the task
-  if (state.value.status === 'task') {
-    const currentTask = state.value.currentTask;
-    lastUsedTaskType.value = currentTask.taskType;
-  }
-  
-  await completeCurrentTask();
+  await completeCurrentTask(
+    generateNextTask,
+    onTaskTransition,
+    tryTransitionToTask,
+    'Maximum randomness achieved! No more tasks available at the moment.'
+  );
 };
 </script>
 

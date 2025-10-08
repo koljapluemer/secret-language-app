@@ -84,7 +84,7 @@ export async function generateComponentClustersTask(
     // Phase 2: Work through container vocabulary
     if (clusterState.phase === 'container-tasks') {
       console.log('[ComponentClusters] In container-tasks phase');
-      const task = await getNextContainerVocabTask(vocabRepo, translationRepo);
+      const task = await getNextContainerVocabTask(vocabRepo, translationRepo, blockList);
       if (task) {
         console.log('[ComponentClusters] Container task generated');
         return task;
@@ -152,7 +152,8 @@ async function initializeContainerVocabQueue(
 
 async function getNextContainerVocabTask(
   vocabRepo: VocabRepoContract,
-  translationRepo: TranslationRepoContract
+  translationRepo: TranslationRepoContract,
+  blockList?: string[]
 ): Promise<Task | null> {
   try {
     // Check if we have any container vocab left
@@ -161,9 +162,19 @@ async function getNextContainerVocabTask(
       return null;
     }
 
-    // Pick random vocab from container list
-    const randomIndex = Math.floor(Math.random() * clusterState.containerVocabQueue.length);
-    const vocab = clusterState.containerVocabQueue[randomIndex];
+    // Filter out vocab in the block list when possible to avoid immediate repeats
+    let candidates = clusterState.containerVocabQueue;
+    if (blockList?.length) {
+      const filtered = clusterState.containerVocabQueue.filter(v => !blockList.includes(v.id));
+      if (filtered.length > 0) {
+        candidates = filtered;
+      }
+    }
+
+    // Pick random vocab from candidate list
+    const randomIndex = Math.floor(Math.random() * candidates.length);
+    const vocab = candidates[randomIndex];
+    const originalIndex = clusterState.containerVocabQueue.findIndex(v => v.id === vocab.id);
 
     console.log('[ComponentClusters] Generating task for container vocab:', vocab.id);
 
@@ -174,8 +185,10 @@ async function getNextContainerVocabTask(
     if (!task) {
       // If we couldn't generate a task, remove this vocab from queue and try again
       console.log('[ComponentClusters] Failed to generate task, removing vocab and retrying');
-      clusterState.containerVocabQueue.splice(randomIndex, 1);
-      return getNextContainerVocabTask(vocabRepo, translationRepo);
+      if (originalIndex !== -1) {
+        clusterState.containerVocabQueue.splice(originalIndex, 1);
+      }
+      return getNextContainerVocabTask(vocabRepo, translationRepo, blockList);
     }
 
     return task;

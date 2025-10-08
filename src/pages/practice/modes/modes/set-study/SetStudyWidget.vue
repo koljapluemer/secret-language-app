@@ -42,6 +42,7 @@ const {
   setTask,
   setEmpty,
   setError,
+  completeCurrentTask,
   cleanup
 } = useQueueState();
 
@@ -179,46 +180,6 @@ async function initializeQueue() {
   }
 }
 
-// Complete current task
-async function completeCurrentTask() {
-  if (state.value.status !== 'task') {
-    
-    return;
-  }
-
-  const currentState = state.value;
-
-  // If we have a next task ready, use it
-  if (currentState.nextTask) {
-    // Show the preloaded next task
-    state.value = {
-      status: 'task',
-      currentTask: currentState.nextTask,
-      nextTask: null
-    };
-
-    // Generate new next task for preloading
-    try {
-      const newNextTask = await generateNextTask();
-      if (newNextTask && state.value.status === 'task') {
-        state.value.nextTask = newNextTask;
-      }
-    } catch {
-      toast.error('Error generating next task');
-    }
-  } else {
-    // No next task ready, need to generate one
-    const success = await tryTransitionToTask();
-    if (!success) {
-      if (selectedSet.value) {
-        setEmpty(`Great progress! You've completed the available vocabulary in "${selectedSet.value.name}".`);
-      } else {
-        setEmpty('Study session completed.');
-      }
-    }
-  }
-}
-
 // Retry on error
 async function retry() {
   await initializeQueue();
@@ -241,6 +202,26 @@ function goBackToSettings() {
   cleanup();
 }
 
+function onTaskTransition(newCurrentTask: Task) {
+  const vocabId = newCurrentTask.associatedVocab?.[0];
+  if (!vocabId) {
+    return;
+  }
+
+  addUsedVocab(vocabId);
+
+  void (async () => {
+    try {
+      const vocab = await vocabRepo!.getVocabByUID(vocabId);
+      if (vocab && vocab.progress.level === -1) {
+        currentNewVocabCount.value++;
+      }
+    } catch {
+      toast.error('Error tracking new vocab count');
+    }
+  })();
+}
+
 onMounted(() => {
   loadAvailableSets();
 });
@@ -251,26 +232,14 @@ onUnmounted(() => {
 
 // Handle task completion
 const handleTaskFinished = async () => {
-  // Track the vocab UID before completing the task
-  if (state.value.status === 'task') {
-    const currentTask = state.value.currentTask;
-    const vocabId = currentTask.associatedVocab?.[0];
-    if (vocabId) {
-      addUsedVocab(vocabId);
-
-      // Check if this was new vocab (unseen)
-      try {
-        const vocab = await vocabRepo!.getVocabByUID(vocabId);
-        if (vocab && vocab.progress.level === 0) { // Just became seen (was level -1, now level 0 after first completion)
-          currentNewVocabCount.value++;
-        }
-      } catch {
-        toast.error('Error tracking new vocab count');
-      }
-    }
-  }
-
-  await completeCurrentTask();
+  await completeCurrentTask(
+    generateNextTask,
+    onTaskTransition,
+    tryTransitionToTask,
+    selectedSet.value
+      ? `Great progress! You've completed the available vocabulary in "${selectedSet.value.name}".`
+      : 'Study session completed.'
+  );
 };
 </script>
 

@@ -64,22 +64,72 @@ export function useQueueState() {
     }
   }
 
+  // Complete current task and transition to next task
+  async function completeCurrentTask(
+    generateNextTask: () => Promise<Task | null>,
+    onTaskTransition?: (newCurrentTask: Task) => void,
+    tryTransitionToTask?: () => Promise<boolean>,
+    emptyMessage?: string
+  ): Promise<void> {
+    if (state.value.status !== 'task') {
+      return;
+    }
+
+    const currentState = state.value;
+
+    // If we have a next task ready, use it
+    if (currentState.nextTask) {
+      // Show the preloaded next task
+      state.value = {
+        status: 'task',
+        currentTask: currentState.nextTask,
+        nextTask: null
+      };
+
+      // Call the transition callback with the NEW current task (fixes the bug)
+      if (onTaskTransition) {
+        onTaskTransition(currentState.nextTask);
+      }
+
+      // Generate new next task for preloading (now with correct blockList)
+      try {
+        const newNextTask = await generateNextTask();
+        if (newNextTask && state.value.status === 'task') {
+          state.value.nextTask = newNextTask;
+        }
+      } catch {
+        // Error generating next task - continue with current task
+      }
+    } else {
+      // No next task ready, need to generate one
+      if (tryTransitionToTask) {
+        const success = await tryTransitionToTask();
+        if (!success) {
+          setEmpty(emptyMessage || 'No more tasks available.');
+        }
+      }
+    }
+  }
+
   return {
     // State
     state,
     showLoadingUI,
-    
+
     // Loading UI helpers
     startDelayedLoading,
     clearDelayedLoading,
-    
+
     // State setters
     setInitializing,
     setLoading,
     setTask,
     setEmpty,
     setError,
-    
+
+    // Task completion
+    completeCurrentTask,
+
     // Cleanup
     cleanup
   };
