@@ -178,13 +178,13 @@ async function getNextContainerVocabTask(
       return null;
     }
 
-    // Filter out vocab in the block list when possible to avoid immediate repeats
-    let candidates = clusterState.containerVocabQueue;
-    if (blockList?.length) {
-      const filtered = clusterState.containerVocabQueue.filter(v => !blockList.includes(v.id));
-      if (filtered.length > 0) {
-        candidates = filtered;
-      }
+    // Build strict block list so we never repeat the last vocab
+    const combinedBlockList = buildGlobalBlockList(blockList);
+    const candidates = clusterState.containerVocabQueue.filter(v => !combinedBlockList.has(v.id));
+
+    if (candidates.length === 0) {
+      console.log('[ComponentClusters] No container vocab available after applying block list');
+      return null;
     }
 
     // Pick random vocab from candidate list
@@ -285,15 +285,7 @@ async function maybeGenerateSameSetReviewTask(
 
   const selectedSetId = eligibleSetIds[Math.floor(Math.random() * eligibleSetIds.length)];
 
-  const combinedBlockList = new Set<string>();
-  (incomingBlockList || []).forEach(id => combinedBlockList.add(id));
-  if (clusterState.lastPracticedVocabId) {
-    combinedBlockList.add(clusterState.lastPracticedVocabId);
-  }
-  if (clusterState.currentComponent) {
-    combinedBlockList.add(clusterState.currentComponent.id);
-  }
-  clusterState.containerVocabQueue.forEach(v => combinedBlockList.add(v.id));
+  const combinedBlockList = buildGlobalBlockList(incomingBlockList);
 
   const dueCandidates = await vocabRepo.getRandomDueVocabFromSet(
     selectedSetId,
@@ -330,4 +322,20 @@ async function maybeGenerateSameSetReviewTask(
 
   recordPracticedVocab(filteredCandidate);
   return task;
+}
+
+function buildGlobalBlockList(incoming?: string[]): Set<string> {
+  const set = new Set<string>();
+  (incoming || []).forEach(id => {
+    if (id) {
+      set.add(id);
+    }
+  });
+  if (clusterState.lastPracticedVocabId) {
+    set.add(clusterState.lastPracticedVocabId);
+  }
+  if (clusterState.currentComponent) {
+    set.add(clusterState.currentComponent.id);
+  }
+  return set;
 }
