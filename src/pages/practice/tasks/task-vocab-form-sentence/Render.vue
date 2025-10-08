@@ -146,6 +146,13 @@ const handleDone = async () => {
   if (!isDoneEnabled.value || vocabItems.value.length === 0) return;
 
   try {
+    console.debug('[FormSentence] handleDone start', {
+      activeTab: activeTab.value,
+      vocabCount: vocabItems.value.length,
+      vocabIds: vocabItems.value.map(v => v.id),
+      sentenceLength: sentence.value.trim().length
+    });
+
     if (activeTab.value === 'text') {
       // Create note with the sentence
       const noteData = {
@@ -153,15 +160,26 @@ const handleDone = async () => {
         noteType: 'example sentence task',
         showBeforeExercise: false
       };
+      console.debug('[FormSentence] Saving note', noteData);
       const savedNote = await noteRepo.saveNote(toRaw(noteData));
+      console.debug('[FormSentence] Note saved', savedNote);
 
       // Attach note to both vocab items
       for (const vocab of vocabItems.value) {
+        const freshVocab = await vocabRepo.getVocabByUID(vocab.id);
+        if (!freshVocab) {
+          console.warn('[FormSentence] Vocab not found while attaching note', vocab.id);
+          continue;
+        }
         const updatedVocab = {
-          ...vocab,
-          notes: [...vocab.notes, savedNote.id]
+          ...freshVocab,
+          notes: [...(freshVocab.notes || []), savedNote.id]
         };
-        await vocabRepo.updateVocab(toRaw(updatedVocab));
+        console.debug('[FormSentence] Updating vocab with note', {
+          vocabId: vocab.id,
+          newNotesLength: updatedVocab.notes.length
+        });
+        await vocabRepo.updateVocab(updatedVocab);
       }
     } else if (activeTab.value === 'audio' && audioRecording.value) {
       // Create VocabSound from the audio recording
@@ -178,17 +196,28 @@ const handleDone = async () => {
 
       // Attach sound to both vocab items
       for (const vocab of vocabItems.value) {
+        const freshVocab = await vocabRepo.getVocabByUID(vocab.id);
+        if (!freshVocab) {
+          console.warn('[FormSentence] Vocab not found while attaching sound', vocab.id);
+          continue;
+        }
         const updatedVocab = {
-          ...vocab,
-          sounds: [...(vocab.sounds || []), vocabSound]
+          ...freshVocab,
+          sounds: [...(freshVocab.sounds || []), vocabSound]
         };
-        await vocabRepo.updateVocab(toRaw(updatedVocab));
+        console.debug('[FormSentence] Updating vocab with recorded sound', {
+          vocabId: vocab.id,
+          newSoundsLength: updatedVocab.sounds.length
+        });
+        await vocabRepo.updateVocab(updatedVocab);
       }
     }
 
+    console.debug('[FormSentence] Task completion');
     await handleTaskCompletion();
     emit('finished', 'neutral');
-  } catch {
+  } catch (error) {
+    console.error('[FormSentence] Failed to save sentence', error);
     toast.error('Failed to save sentence');
     await handleTaskCompletion();
     emit('finished', 'neutral');
