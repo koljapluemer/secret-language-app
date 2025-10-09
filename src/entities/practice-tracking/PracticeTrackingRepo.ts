@@ -4,8 +4,6 @@ import type { MotivationSettingsData } from './MotivationSettingsData';
 import { db } from '@/shared/database/db';
 import { useToast } from '@/shared/toasts';
 
-const SETTINGS_ID = 'motivation-settings';
-
 export class PracticeTrackingRepo implements PracticeTrackingRepoContract {
   private toast = useToast();
 
@@ -82,22 +80,21 @@ export class PracticeTrackingRepo implements PracticeTrackingRepoContract {
 
   // Motivation settings
   async getSettings(): Promise<MotivationSettingsData> {
-    const settings = await db.motivationSettings.get(SETTINGS_ID);
+    // Get the first (and only) settings record
+    const allSettings = await db.motivationSettings.toArray();
 
-    if (!settings) {
-      // Return default settings
-      const defaultSettings: MotivationSettingsData = {
-        id: SETTINGS_ID,
+    if (allSettings.length === 0) {
+      // Create default settings and let Dexie generate the ID
+      const defaultSettings: Omit<MotivationSettingsData, 'id'> = {
         dailyGoalMinutes: 30,
         weeklyGoalMinutes: 180
       };
 
-      // Save defaults to DB
-      await db.motivationSettings.add(defaultSettings);
-      return defaultSettings;
+      const id = await db.motivationSettings.add(defaultSettings as MotivationSettingsData);
+      return { ...defaultSettings, id } as MotivationSettingsData;
     }
 
-    return settings;
+    return allSettings[0];
   }
 
   async updateSettings(settings: Partial<Omit<MotivationSettingsData, 'id'>>): Promise<MotivationSettingsData> {

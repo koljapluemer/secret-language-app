@@ -84,12 +84,14 @@ function getAverageMinutes(events: TaskCompletionData[], days: number): number {
 
 // Grid item computations
 const allEvents = ref<TaskCompletionData[]>([]);
+const isLoading = ref(true);
 
 onMounted(async () => {
   const settings = await repo.getSettings();
   dailyGoalMinutes.value = settings.dailyGoalMinutes;
   weeklyGoalMinutes.value = settings.weeklyGoalMinutes;
   allEvents.value = await tracking.getAllCompletionEvents();
+  isLoading.value = false;
 });
 
 // 1. Practiced longer than yesterday
@@ -212,7 +214,11 @@ const longerThisWeekThanLastWeek = computed(() => {
   <div class="container mx-auto p-4 md:p-8">
     <h1 class="text-3xl font-bold mb-6">{{ t('motivation.title') }}</h1>
 
-    <div v-if="allEvents.length === 0" class="alert alert-info">
+    <div v-if="isLoading" class="flex justify-center items-center min-h-96">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
+
+    <div v-else-if="allEvents.length === 0" class="alert alert-info">
       <p>{{ t('motivation.noDataYet') }}</p>
     </div>
 
