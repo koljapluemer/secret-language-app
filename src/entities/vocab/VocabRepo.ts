@@ -495,6 +495,9 @@ export class VocabRepo implements VocabRepoContract {
         vocab.progress.due && new Date(vocab.progress.due) <= new Date() &&
         !vocab.doNotPractice &&
         vocab.consideredSentence !== true && // Exclude sentence vocab
+        !!vocab.content &&
+        Array.isArray(vocab.translations) &&
+        vocab.translations.length > 0 &&
         (!vocabBlockList || !vocabBlockList.includes(vocab.id))
       )
       .toArray();

@@ -74,29 +74,36 @@
                 <div v-if="isDownloading(`${set.language}-${set.name}`)" class="flex flex-col gap-1">
                   <div class="text-xs text-base-content/70">{{ getDownloadProgress(`${set.language}-${set.name}`)?.phase || 'Downloading...' }}</div>
                   <div class="flex items-center gap-1">
-                    <progress 
-                      class="progress progress-primary w-16" 
-                      :value="getDownloadProgress(`${set.language}-${set.name}`)?.percentage || 0" 
+                    <progress
+                      class="progress progress-primary w-16"
+                      :value="getDownloadProgress(`${set.language}-${set.name}`)?.percentage || 0"
                       max="100"
                     ></progress>
                     <span class="text-xs font-mono w-8 text-right">{{ (getDownloadProgress(`${set.language}-${set.name}`)?.percentage || 0) + '%' }}</span>
                   </div>
                 </div>
                 <div v-else class="flex items-center gap-1">
-                  <button 
+                  <button
+                    @click="openLicenseModal(set.name, set.language)"
+                    class="btn btn-xs btn-ghost"
+                    :title="'License information'"
+                  >
+                    <FileText class="w-3 h-3" />
+                  </button>
+                  <button
                     v-if="isDownloaded(`${set.language}-${set.name}`)"
-                    @click="quickDownload(set.name, set.language)" 
-                    class="btn btn-xs btn-outline" 
-                    :disabled="isDownloading(`${set.language}-${set.name}`)" 
+                    @click="quickDownload(set.name, set.language)"
+                    class="btn btn-xs btn-outline"
+                    :disabled="isDownloading(`${set.language}-${set.name}`)"
                     :title="$t('downloads.redownload')"
                   >
                     <RefreshCw class="w-3 h-3" />
                   </button>
-                  <button 
+                  <button
                     v-else
-                    @click="quickDownload(set.name, set.language)" 
-                    class="btn btn-xs btn-outline" 
-                    :disabled="isDownloading(`${set.language}-${set.name}`)" 
+                    @click="quickDownload(set.name, set.language)"
+                    class="btn btn-xs btn-outline"
+                    :disabled="isDownloading(`${set.language}-${set.name}`)"
                     :title="$t('downloads.quickDownload')"
                   >
                     <Download class="w-3 h-3" />
@@ -115,6 +122,33 @@
         <p class="text-light">{{ $t('downloads.states.noItems') }}</p>
       </div>
     </div>
+
+    <!-- License Modal -->
+    <dialog :class="['modal', { 'modal-open': showLicenseModal }]">
+      <div class="modal-box max-w-2xl">
+        <h3 class="font-bold text-lg mb-4">
+          License Information
+          <span v-if="currentLicenseSet" class="text-sm font-normal text-base-content/60">
+            - {{ currentLicenseSet.name }}
+          </span>
+        </h3>
+
+        <div v-if="licenseLoading" class="flex items-center justify-center py-8">
+          <span class="loading loading-spinner loading-md"></span>
+        </div>
+
+        <div v-else class="whitespace-pre-wrap font-mono text-sm bg-base-200 p-4 rounded max-h-96 overflow-y-auto">
+          {{ licenseContent }}
+        </div>
+
+        <div class="modal-action">
+          <button @click="closeLicenseModal" class="btn">Close</button>
+        </div>
+      </div>
+      <form method="dialog" class="modal-backdrop" @click="closeLicenseModal">
+        <button>close</button>
+      </form>
+    </dialog>
   </div>
 </template>
 
@@ -122,7 +156,7 @@
 import { ref, inject, onMounted, watch, computed } from 'vue';
 import { useRouter, useRoute, type LocationQueryValue } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { Download, Play, RefreshCw } from 'lucide-vue-next';
+import { Download, Play, RefreshCw, FileText } from 'lucide-vue-next';
 import { UnifiedRemoteSetService, type RemoteSetInfo, type DownloadProgress } from '@/pages/downloads/UnifiedRemoteSetService';
 import { DownloadAndPracticeService } from '@/pages/downloads/DownloadAndPracticeService';
 import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
@@ -187,6 +221,12 @@ const error = ref<string | null>(null);
 // Progress tracking per set
 const downloadProgress = ref<Map<string, DownloadProgress>>(new Map());
 const downloadingSets = ref<Set<string>>(new Set());
+
+// License modal state
+const showLicenseModal = ref(false);
+const licenseContent = ref<string>('');
+const licenseLoading = ref(false);
+const currentLicenseSet = ref<{ name: string; language: string } | null>(null);
 
 // Filters and search - initialized from URL parameters
 const searchQuery = ref(route.query.search as string || '');
@@ -400,6 +440,35 @@ function isDownloading(key: string): boolean {
 
 function getDownloadProgress(key: string): DownloadProgress | undefined {
   return downloadProgress.value.get(key);
+}
+
+async function openLicenseModal(setName: string, language: string) {
+  currentLicenseSet.value = { name: setName, language };
+  showLicenseModal.value = true;
+  licenseLoading.value = true;
+  licenseContent.value = '';
+
+  try {
+    const baseUrl = import.meta.env.VITE_SETS_BASE_URL || '/sets';
+    const licenseUrl = `${baseUrl}/${language}/${setName}/license.txt`;
+
+    const response = await fetch(licenseUrl);
+
+    if (response.ok) {
+      licenseContent.value = await response.text();
+    } else {
+      licenseContent.value = 'No special license information';
+    }
+  } catch {
+    licenseContent.value = 'No special license information';
+  } finally {
+    licenseLoading.value = false;
+  }
+}
+
+function closeLicenseModal() {
+  showLicenseModal.value = false;
+  currentLicenseSet.value = null;
 }
 
 // Watch for URL parameter changes from browser navigation
