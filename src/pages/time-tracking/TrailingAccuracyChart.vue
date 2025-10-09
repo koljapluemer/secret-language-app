@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useDetailedPracticeTracking } from '@/features/track/useDetailedPracticeTracking';
 import type { TaskCompletionData } from '@/entities/practice-tracking/TaskCompletionData';
@@ -25,9 +25,12 @@ const maxTasksToShow = ref(50); // How many recent tasks to show on X-axis
 
 // Accuracy data processing
 const allCompletionEvents = computed(() => {
-  return allEventsRaw.value
+  const filtered = allEventsRaw.value
     .filter(event => event.correctness !== 'neutral')
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+  console.log('[TrailingAccuracy] Total events:', allEventsRaw.value.length, 'Non-neutral:', filtered.length);
+  console.log('[TrailingAccuracy] Sample events:', allEventsRaw.value.slice(0, 3));
+  return filtered;
 });
 
 // Get unique values for filters
@@ -48,21 +51,21 @@ const availableTaskTypes = computed(() => {
 
 // Initialize filters with all available options
 const initializeFilters = () => {
-  if (selectedLanguages.value.length === 0) {
+  if (selectedLanguages.value.length === 0 && availableLanguages.value.length > 0) {
     selectedLanguages.value = [...availableLanguages.value];
   }
-  if (selectedModes.value.length === 0) {
+  if (selectedModes.value.length === 0 && availableModes.value.length > 0) {
     selectedModes.value = [...availableModes.value];
   }
-  if (selectedTaskTypes.value.length === 0) {
+  if (selectedTaskTypes.value.length === 0 && availableTaskTypes.value.length > 0) {
     selectedTaskTypes.value = [...availableTaskTypes.value];
   }
 };
 
 // Watch for data changes and initialize filters
-if (availableLanguages.value.length > 0) {
+watch([availableLanguages, availableModes, availableTaskTypes], () => {
   initializeFilters();
-}
+}, { immediate: true });
 
 // Filter events based on user selection
 const filteredEvents = computed(() => {

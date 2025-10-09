@@ -12,16 +12,21 @@ export class PracticeTrackingRepo implements PracticeTrackingRepoContract {
   // Task completion events
   async saveCompletionEvent(event: Omit<TaskCompletionData, 'id'>): Promise<TaskCompletionData> {
     try {
+      console.log('[PracticeTrackingRepo] Saving event:', event);
       const id = await db.taskCompletions.add(event as TaskCompletionData);
+      console.log('[PracticeTrackingRepo] Event saved with ID:', id);
       return { ...event, id } as TaskCompletionData;
     } catch (error) {
+      console.error('[PracticeTrackingRepo] Save failed:', error);
       this.toast.error(`PracticeTrackingRepo: Failed to save completion event: ${String(error)}`);
       throw error;
     }
   }
 
   async getAllCompletionEvents(): Promise<TaskCompletionData[]> {
-    return await db.taskCompletions.toArray();
+    const events = await db.taskCompletions.toArray();
+    console.log('[PracticeTrackingRepo] Retrieved events count:', events.length);
+    return events;
   }
 
   async getEventsByDateRange(startDate: Date, endDate: Date): Promise<TaskCompletionData[]> {

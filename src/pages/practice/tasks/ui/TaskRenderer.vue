@@ -113,13 +113,26 @@ async function handleTaskFinished(correctness: TaskCorrectness = 'neutral') {
   }
 
   // Record task completion
-  tracking.recordTaskCompletion(
+  console.log('[TaskRenderer] Recording completion:', {
     setId,
-    props.task.language,
-    props.practiceContext.practiceMode,
-    props.task.taskType,
+    language: props.task.language,
+    practiceMode: props.practiceContext.practiceMode,
+    taskType: props.task.taskType,
     correctness
-  );
+  });
+
+  try {
+    await tracking.recordTaskCompletion(
+      setId,
+      props.task.language,
+      props.practiceContext.practiceMode,
+      props.task.taskType,
+      correctness
+    );
+    console.log('[TaskRenderer] Completion recorded successfully');
+  } catch (error) {
+    console.error('[TaskRenderer] Failed to record task completion:', error);
+  }
 
   emit('finished', correctness);
 }
