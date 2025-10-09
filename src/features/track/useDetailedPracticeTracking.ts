@@ -1,6 +1,5 @@
 import { ref, onMounted, onUnmounted, inject } from 'vue'
-import type { TaskCorrectness } from './types'
-import type { TaskCompletionData } from '@/entities/practice-tracking/TaskCompletionData'
+import type { TaskCorrectness, TaskCompletionData } from '@/entities/practice-tracking/TaskCompletionData'
 import type { PracticeTrackingRepoContract } from '@/entities/practice-tracking/PracticeTrackingRepoContract'
 import { TRACKING_CONFIG } from './trackingConfig'
 import { createActivityTracker } from '@/shared/utils/activityDetection'

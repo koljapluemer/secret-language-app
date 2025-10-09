@@ -31,7 +31,13 @@ import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract';
 import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract';
 import LanguageDisplay from '@/entities/languages/LanguageDisplay.vue';
 import { useDetailedPracticeTracking } from '@/features/track/useDetailedPracticeTracking';
-import type { PracticeContext, TaskCorrectness } from '@/features/track/types';
+import type { TaskCorrectness } from '@/entities/practice-tracking/TaskCompletionData';
+
+interface PracticeContext {
+  practiceMode: string;
+  setId?: string | null;
+  [key: string]: unknown;
+}
 
 interface Props {
   task: Task;
