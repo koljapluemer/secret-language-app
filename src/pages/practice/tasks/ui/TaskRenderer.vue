@@ -129,9 +129,9 @@ async function handleTaskFinished(correctness: TaskCorrectness = 'neutral') {
       props.task.taskType,
       correctness
     );
-    console.log('[TaskRenderer] Completion recorded successfully');
+    
   } catch (error) {
-    console.error('[TaskRenderer] Failed to record task completion:', error);
+    
   }
 
   emit('finished', correctness);

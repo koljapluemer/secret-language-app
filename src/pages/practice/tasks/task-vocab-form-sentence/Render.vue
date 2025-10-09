@@ -160,15 +160,15 @@ const handleDone = async () => {
         noteType: 'example sentence task',
         showBeforeExercise: false
       };
-      console.debug('[FormSentence] Saving note', noteData);
+      
       const savedNote = await noteRepo.saveNote(toRaw(noteData));
-      console.debug('[FormSentence] Note saved', savedNote);
+      
 
       // Attach note to both vocab items
       for (const vocab of vocabItems.value) {
         const freshVocab = await vocabRepo.getVocabByUID(vocab.id);
         if (!freshVocab) {
-          console.warn('[FormSentence] Vocab not found while attaching note', vocab.id);
+          
           continue;
         }
         const updatedVocab = {
@@ -198,7 +198,7 @@ const handleDone = async () => {
       for (const vocab of vocabItems.value) {
         const freshVocab = await vocabRepo.getVocabByUID(vocab.id);
         if (!freshVocab) {
-          console.warn('[FormSentence] Vocab not found while attaching sound', vocab.id);
+          
           continue;
         }
         const updatedVocab = {
@@ -213,11 +213,11 @@ const handleDone = async () => {
       }
     }
 
-    console.debug('[FormSentence] Task completion');
+    
     await handleTaskCompletion();
     emit('finished', 'neutral');
   } catch (error) {
-    console.error('[FormSentence] Failed to save sentence', error);
+    
     toast.error('Failed to save sentence');
     await handleTaskCompletion();
     emit('finished', 'neutral');

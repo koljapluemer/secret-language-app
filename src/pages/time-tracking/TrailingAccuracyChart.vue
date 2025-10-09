@@ -28,7 +28,7 @@ const allCompletionEvents = computed(() => {
   const filtered = allEventsRaw.value
     .filter(event => event.correctness !== 'neutral')
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-  console.log('[TrailingAccuracy] Total events:', allEventsRaw.value.length, 'Non-neutral:', filtered.length);
+  
   console.log('[TrailingAccuracy] Sample events:', allEventsRaw.value.slice(0, 3));
   return filtered;
 });
