@@ -6,5 +6,6 @@ export const factCardSchema = z.object({
     front: z.string(),
     back: z.string(),
     notes: z.array(z.string()).optional(),
+    links: z.array(z.string()).optional(),
     priority: z.number().optional()
 })
