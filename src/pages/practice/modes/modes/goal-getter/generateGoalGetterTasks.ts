@@ -25,12 +25,18 @@ const goalTaskGenerators = [
 
 export async function generateGoalTask(
   goalRepo: GoalRepoContract,
-  languageCodes: string[]
+  languageCodes: string[],
+  excludeTaskType?: string
 ): Promise<Task | null> {
   const toast = useToast();
   try {
+    // Filter out the excluded task type to prevent duplicates
+    let availableGenerators = excludeTaskType
+      ? goalTaskGenerators.filter(gen => gen.name !== excludeTaskType)
+      : goalTaskGenerators;
+
     // Shuffle the goal task generators for random cycling
-    const shuffledGenerators = [...goalTaskGenerators].sort(() => Math.random() - 0.5);
+    const shuffledGenerators = [...availableGenerators].sort(() => Math.random() - 0.5);
 
     // Try each task type until we find one that works
     for (const taskType of shuffledGenerators) {
@@ -52,17 +58,16 @@ export async function generateGoalTask(
       }
     }
 
-    // If we get here, no goals need work - check if any goals exist at all
-    const allGoals = await goalRepo.getGoalsByLanguages(languageCodes);
-    if (allGoals.length === 0) {
-      // No goals exist - suggest creating one
+    // If we get here, no other tasks are available
+    // Allow creating a new goal if we didn't just create one
+    if (excludeTaskType !== 'create-new-goal') {
       const randomLanguage = randomFromArray(languageCodes);
       if (randomLanguage) {
         return generateCreateNewGoal(randomLanguage);
       }
     }
 
-    // Goals exist but don't need work right now
+    // Just created a goal, no other tasks available yet
     return null;
   } catch (error) {
     toast.error(`Error generating goal task: ${String(error)}`);

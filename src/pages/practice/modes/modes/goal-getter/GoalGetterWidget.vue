@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, onMounted, onUnmounted } from 'vue';
+import { inject, onMounted, onUnmounted, ref } from 'vue';
 import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract';
 import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
 import type { Task } from '@/pages/practice/Task';
@@ -16,6 +16,9 @@ const toast = useToast();
 if (!goalRepo || !languageRepo) {
   throw new Error('Required repositories not available');
 }
+
+// Track last task type to prevent duplicates
+const lastTaskType = ref<string | undefined>(undefined);
 
 // Create repositories object for TaskRenderer
 
@@ -38,12 +41,19 @@ async function generateNextTask(): Promise<Task | null> {
   try {
     const languages = await languageRepo!.getActiveTargetLanguages();
     const languageCodes = languages.map(lang => lang.code);
-    
+
     if (languageCodes.length === 0) {
       return null;
     }
 
-    return await generateGoalTask(goalRepo!, languageCodes);
+    const task = await generateGoalTask(goalRepo!, languageCodes, lastTaskType.value);
+
+    // Update lastTaskType if we got a task
+    if (task) {
+      lastTaskType.value = task.taskType;
+    }
+
+    return task;
   } catch {
     toast.error('Error generating goal task');
     return null;
