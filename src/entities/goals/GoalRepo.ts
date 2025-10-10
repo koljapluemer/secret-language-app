@@ -49,6 +49,13 @@ export class GoalRepo implements GoalRepoContract {
     return allGoals; // All goals are considered active since isActive was removed
   }
 
+  async getGoalsByLanguages(languages: string[]): Promise<GoalData[]> {
+    return await db.goals
+      .where('language')
+      .anyOf(languages)
+      .toArray();
+  }
+
   async getGoalsNeedingVocab(languages: string[]): Promise<GoalData[]> {
     const allGoals = await db.goals.toArray();
     return allGoals.filter(goal =>

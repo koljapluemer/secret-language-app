@@ -52,13 +52,17 @@ export async function generateGoalTask(
       }
     }
 
-    // If we get here, no goals are available - suggest creating a new one
-    // Pick a random language from the available languages
-    const randomLanguage = randomFromArray(languageCodes);
-    if (randomLanguage) {
-      return generateCreateNewGoal(randomLanguage);
+    // If we get here, no goals need work - check if any goals exist at all
+    const allGoals = await goalRepo.getGoalsByLanguages(languageCodes);
+    if (allGoals.length === 0) {
+      // No goals exist - suggest creating one
+      const randomLanguage = randomFromArray(languageCodes);
+      if (randomLanguage) {
+        return generateCreateNewGoal(randomLanguage);
+      }
     }
 
+    // Goals exist but don't need work right now
     return null;
   } catch (error) {
     toast.error(`Error generating goal task: ${String(error)}`);

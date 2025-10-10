@@ -16,6 +16,7 @@ export interface GoalRepoContract {
   // Existence check operations
   getGoalByTitleAndLanguage(title: string, language: string): Promise<GoalData | undefined>;
   getIncompleteGoals(): Promise<GoalData[]>;
+  getGoalsByLanguages(languages: string[]): Promise<GoalData[]>;
   getGoalsNeedingVocab(languages: string[]): Promise<GoalData[]>;
   getGoalsNeedingSubGoals(languages: string[]): Promise<GoalData[]>;
   getSubGoals(parentId: string): Promise<GoalData[]>;
