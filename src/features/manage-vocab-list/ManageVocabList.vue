@@ -387,6 +387,7 @@ async function createNewVocab() {
 
   let vocab: VocabData;
   let translationIds: string[] = [];
+  let existingVocab: VocabData | undefined;
 
   // Create translation if needed
   if (creationMode.value === 'translation-only' || creationMode.value === 'vocab-and-translation') {
@@ -398,8 +399,19 @@ async function createNewVocab() {
     translationIds.push(translation.id);
   }
 
-  // Check if vocab with these translations already exists
-  const existingVocab = await vocabRepo.findVocabByTranslationIds(props.language, translationIds);
+  // Check for existing vocab based on mode
+  if (creationMode.value === 'vocab-only' || creationMode.value === 'vocab-and-translation') {
+    // Check by language + content first
+    existingVocab = await vocabRepo.getVocabByLanguageAndContent(
+      props.language,
+      newVocabContent.value.trim()
+    );
+  }
+
+  // If not found by content, check by translations (for translation-only mode)
+  if (!existingVocab && translationIds.length > 0) {
+    existingVocab = await vocabRepo.findVocabByTranslationIds(props.language, translationIds);
+  }
 
   if (existingVocab) {
     // Use existing vocab instead of creating new one
