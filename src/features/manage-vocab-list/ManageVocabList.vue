@@ -390,7 +390,7 @@ async function createNewVocab() {
 
   // Create translation if needed
   if (creationMode.value === 'translation-only' || creationMode.value === 'vocab-and-translation') {
-    const translation = await translationRepo.saveTranslation(toRaw({
+    const translation = await translationRepo.saveOrGetExistingTranslation(toRaw({
       content: newTranslationContent.value.trim(),
       priority: 1,
       notes: []
@@ -398,22 +398,35 @@ async function createNewVocab() {
     translationIds.push(translation.id);
   }
 
-  // Create vocabulary
-  vocab = await vocabRepo.saveVocab(toRaw({
-    language: props.language,
-    content: creationMode.value === 'translation-only' ? undefined : newVocabContent.value.trim(),
-    length: 'unspecified',
-    translations: translationIds,
-    notes: [],
-    links: [],
-    origins: ['user-added'],
-    relatedVocab: [],
-    notRelatedVocab: [],
-    contains: []
-  }));
+  // Check if vocab with these translations already exists
+  const existingVocab = await vocabRepo.findVocabByTranslationIds(props.language, translationIds);
 
-  // Add the new vocab to the local state
-  vocabItems.value.push(vocab);
+  if (existingVocab) {
+    // Use existing vocab instead of creating new one
+    vocab = existingVocab;
+
+    // Add to local state if not already there
+    if (!vocabItems.value.some(v => v.id === vocab.id)) {
+      vocabItems.value.push(vocab);
+    }
+  } else {
+    // Create vocabulary
+    vocab = await vocabRepo.saveVocab(toRaw({
+      language: props.language,
+      content: creationMode.value === 'translation-only' ? undefined : newVocabContent.value.trim(),
+      length: 'unspecified',
+      translations: translationIds,
+      notes: [],
+      links: [],
+      origins: ['user-added'],
+      relatedVocab: [],
+      notRelatedVocab: [],
+      contains: []
+    }));
+
+    // Add the new vocab to the local state
+    vocabItems.value.push(vocab);
+  }
 
   // Add translation to translations map if it exists
   if (translationIds.length > 0 && creationMode.value !== 'vocab-only') {
