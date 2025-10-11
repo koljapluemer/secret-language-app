@@ -19,9 +19,9 @@ const showMaterialSubmenu = ref(false);
 
 // Navigation state computations
 const isOnPracticePage = computed(() => {
-  return route.path.startsWith('/practice') || 
-         route.name === 'practice-overview' ||
-         (route.name as string)?.startsWith('practice-mode-');
+  return route.path.startsWith('/practice') ||
+    route.name === 'practice-overview' ||
+    (route.name as string)?.startsWith('practice-mode-');
 });
 
 const isOnMyMaterialOverviewPage = computed(() => route.name === 'my-material');
@@ -29,9 +29,9 @@ const isOnMyMaterialOverviewPage = computed(() => route.name === 'my-material');
 const isOnMaterialPage = computed(() => {
   const materialPages = ['vocab-list', 'fact-cards-list', 'resources-list', 'goals-list'];
   const materialEditPages = ['vocab-edit', 'vocab-new', 'fact-cards-edit', 'fact-cards-new', 'resources-edit', 'resources-new', 'goals-edit', 'goals-add'];
-  return materialPages.includes(route.name as string) || 
-         materialEditPages.includes(route.name as string) ||
-         isOnMyMaterialOverviewPage.value;
+  return materialPages.includes(route.name as string) ||
+    materialEditPages.includes(route.name as string) ||
+    isOnMyMaterialOverviewPage.value;
 });
 
 const isOnSettingsPage = computed(() => {
@@ -44,8 +44,8 @@ const isOnStatsPage = computed(() => {
 
 const isOnDownloadsPage = computed(() => {
   return route.path.startsWith('/downloads') ||
-         route.name === 'downloads' ||
-         route.name === 'set-overview';
+    route.name === 'downloads' ||
+    route.name === 'set-overview';
 });
 
 const isOnMotivationPage = computed(() => {
@@ -66,83 +66,57 @@ const toggleMaterialSubmenu = () => {
 </script>
 
 <template>
-    <header class="flex justify-between items-center p-4 border-b-1 border-gray-300">
-      <img src="@/assets/logo.png" alt="Logo The ~~Secret~~ Language App" class="h-10">
-      <nav class="flex gap-2 justify-center">
-        <router-link 
-          :to="{ name: 'practice-overview' }" 
-          class="btn btn-ghost btn-sm"
-          :class="{ 'btn-active': isOnPracticePage }"
-        >
-          <Play :size="16" />
-          <span class="hidden md:inline ml-2">{{ t('navigation.practice') }}</span>
-        </router-link>
-        
-        <!-- My Material (navigates to overview page or toggles submenu) -->
-        <router-link
-          v-if="!isOnMyMaterialOverviewPage"
-          :to="{ name: 'my-material' }"
-          class="btn btn-ghost btn-sm"
-          :class="{ 'btn-active': isOnMaterialPage }"
-        >
-          <FolderOpen :size="16" />
-          <span class="hidden md:inline ml-2">{{ t('navigation.myMaterial') }}</span>
-        </router-link>
-        <button 
-          v-else
-          @click="toggleMaterialSubmenu"
-          class="btn btn-ghost btn-sm"
-          :class="{ 'btn-active': isOnMaterialPage || showMaterialSubmenu }"
-        >
-          <FolderOpen :size="16" />
-          <span class="hidden md:inline ml-2">{{ t('navigation.myMaterial') }}</span>
-        </button>
-        
-        <!-- Settings -->
-        <router-link 
-          :to="{ name: 'settings' }" 
-          class="btn btn-ghost btn-sm"
-          :class="{ 'btn-active': isOnSettingsPage }"
-        >
-          <Settings :size="16" />
-          <span class="hidden md:inline ml-2">{{ t('navigation.settings') }}</span>
-        </router-link>
-        
-        <!-- Stats -->
-        <router-link
-          :to="{ name: 'stats' }"
-          class="btn btn-ghost btn-sm"
-          :class="{ 'btn-active': isOnStatsPage }"
-        >
-          <Clock :size="16" />
-          <span class="hidden md:inline ml-2">{{ t('navigation.stats') }}</span>
-        </router-link>
+  <header class="flex justify-between items-center p-4 border-b-1 border-gray-300">
+    <router-link to="/">
+      <img src="@/assets/logo.webp" alt="Logo The ~~Secret~~ Language App" class="h-10">
+    </router-link>
+    <nav class="flex gap-2 justify-center">
+      <router-link :to="{ name: 'practice-overview' }" class="btn btn-ghost btn-sm"
+        :class="{ 'btn-active': isOnPracticePage }">
+        <Play :size="16" />
+        <span class="hidden md:inline ml-2">{{ t('navigation.practice') }}</span>
+      </router-link>
 
-        <!-- Motivation -->
-        <router-link
-          :to="{ name: 'motivation' }"
-          class="btn btn-ghost btn-sm"
-          :class="{ 'btn-active': isOnMotivationPage }"
-        >
-          <TrendingUp :size="16" />
-          <span class="hidden md:inline ml-2">{{ t('navigation.motivation') }}</span>
-        </router-link>
+      <!-- My Material (navigates to overview page or toggles submenu) -->
+      <router-link v-if="!isOnMyMaterialOverviewPage" :to="{ name: 'my-material' }" class="btn btn-ghost btn-sm"
+        :class="{ 'btn-active': isOnMaterialPage }">
+        <FolderOpen :size="16" />
+        <span class="hidden md:inline ml-2">{{ t('navigation.myMaterial') }}</span>
+      </router-link>
+      <button v-else @click="toggleMaterialSubmenu" class="btn btn-ghost btn-sm"
+        :class="{ 'btn-active': isOnMaterialPage || showMaterialSubmenu }">
+        <FolderOpen :size="16" />
+        <span class="hidden md:inline ml-2">{{ t('navigation.myMaterial') }}</span>
+      </button>
 
-        <!-- Downloads -->
-        <router-link
-          :to="{ name: 'downloads' }"
-          class="btn btn-ghost btn-sm"
-          :class="{ 'btn-active': isOnDownloadsPage }"
-        >
-          <Download :size="16" />
-          <span class="hidden md:inline ml-2">{{ t('navigation.downloads') }}</span>
-        </router-link>
-      </nav>
-    </header>
-    
-    <!-- Material Submenu -->
-    <MyMaterialSubmenu 
-      :show="shouldShowSubmenu" 
-      @close="showMaterialSubmenu = false"
-    />
+      <!-- Settings -->
+      <router-link :to="{ name: 'settings' }" class="btn btn-ghost btn-sm" :class="{ 'btn-active': isOnSettingsPage }">
+        <Settings :size="16" />
+        <span class="hidden md:inline ml-2">{{ t('navigation.settings') }}</span>
+      </router-link>
+
+      <!-- Stats -->
+      <router-link :to="{ name: 'stats' }" class="btn btn-ghost btn-sm" :class="{ 'btn-active': isOnStatsPage }">
+        <Clock :size="16" />
+        <span class="hidden md:inline ml-2">{{ t('navigation.stats') }}</span>
+      </router-link>
+
+      <!-- Motivation -->
+      <router-link :to="{ name: 'motivation' }" class="btn btn-ghost btn-sm"
+        :class="{ 'btn-active': isOnMotivationPage }">
+        <TrendingUp :size="16" />
+        <span class="hidden md:inline ml-2">{{ t('navigation.motivation') }}</span>
+      </router-link>
+
+      <!-- Downloads -->
+      <router-link :to="{ name: 'downloads' }" class="btn btn-ghost btn-sm"
+        :class="{ 'btn-active': isOnDownloadsPage }">
+        <Download :size="16" />
+        <span class="hidden md:inline ml-2">{{ t('navigation.downloads') }}</span>
+      </router-link>
+    </nav>
+  </header>
+
+  <!-- Material Submenu -->
+  <MyMaterialSubmenu :show="shouldShowSubmenu" @close="showMaterialSubmenu = false" />
 </template>
