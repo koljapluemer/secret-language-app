@@ -1,8 +1,5 @@
 import type { Router } from 'vue-router';
 import { UnifiedRemoteSetService, type DownloadProgress } from './UnifiedRemoteSetService';
-import { remoteSetMetaDataSchema } from '@/entities/remote-sets/remoteSetMetaData';
-import { useToast } from '@/shared/toasts';
-import { z } from 'zod';
 
 export interface DownloadAndPracticeOptions {
   language: string;
@@ -14,8 +11,6 @@ export interface DownloadAndPracticeOptions {
 }
 
 export class DownloadAndPracticeService {
-  private toast = useToast();
-
   constructor(
     private remoteSetService: UnifiedRemoteSetService,
     private router: Router
@@ -26,13 +21,13 @@ export class DownloadAndPracticeService {
    */
   async downloadAndStartPractice(options: DownloadAndPracticeOptions): Promise<void> {
     const { language, setName, onDownloadStart, onDownloadProgress, onDownloadComplete, onError } = options;
-    
+
     try {
       onDownloadStart?.();
 
       // Check if already downloaded
       const isAlreadyDownloaded = await this.remoteSetService.isSetDownloaded(setName);
-      
+
       if (!isAlreadyDownloaded) {
         await this.remoteSetService.downloadSet(language, setName, {
           onProgress: onDownloadProgress
@@ -40,8 +35,8 @@ export class DownloadAndPracticeService {
       }
 
       // Load metadata to get preferred practice mode
-      const metadata = await this.loadSetMetadata(language, setName);
-      
+      const metadata = await this.remoteSetService.getSetMetadata(language, setName);
+
       onDownloadComplete?.();
 
       // Navigate to preferred practice mode or default
@@ -74,16 +69,4 @@ export class DownloadAndPracticeService {
     }
   }
 
-  private async loadSetMetadata(language: string, setName: string): Promise<z.infer<typeof remoteSetMetaDataSchema> | null> {
-    try {
-      const response = await fetch(`/sets/${language}/${setName}/metadata.json`);
-      if (!response.ok) return null;
-      
-      const data = await response.json();
-      return remoteSetMetaDataSchema.parse(data);
-    } catch (error) {
-      this.toast.error(`Failed to load set metadata: ${String(error)}`);
-      return null;
-    }
-  }
 }
