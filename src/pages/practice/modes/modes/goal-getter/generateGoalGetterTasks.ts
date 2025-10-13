@@ -31,7 +31,7 @@ export async function generateGoalTask(
   const toast = useToast();
   try {
     // Filter out the excluded task type to prevent duplicates
-    let availableGenerators = excludeTaskType
+    const availableGenerators = excludeTaskType
       ? goalTaskGenerators.filter(gen => gen.name !== excludeTaskType)
       : goalTaskGenerators;
 

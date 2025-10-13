@@ -19,7 +19,7 @@
         <div class="card-body">
           <h1>{{ metadata?.title || setName }}</h1>
           <p class="text-base-content/60 mb-6">
-            <span class="badge badge-outline">{{ language.toUpperCase() }}</span>
+            <span class=" ">{{ language.toUpperCase() }}</span>
           </p>
 
           <div class="divider"></div>

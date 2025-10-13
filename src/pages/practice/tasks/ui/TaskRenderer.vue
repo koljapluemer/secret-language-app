@@ -2,7 +2,7 @@
   <div class="flex flex-col gap-4">
     <div class="card shadow">
       <div class="card-body">
-        <div class="badge">
+        <div class="">
           <LanguageDisplay v-if="languageData" :language="languageData" />
         </div>
         <h2>
@@ -32,6 +32,7 @@ import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract';
 import LanguageDisplay from '@/entities/languages/LanguageDisplay.vue';
 import { useDetailedPracticeTracking } from '@/features/track/useDetailedPracticeTracking';
 import type { TaskCorrectness } from '@/entities/practice-tracking/TaskCompletionData';
+import { useToast } from '@/shared/toasts';
 
 interface PracticeContext {
   practiceMode: string;
@@ -112,15 +113,6 @@ async function handleTaskFinished(correctness: TaskCorrectness = 'neutral') {
     }
   }
 
-  // Record task completion
-  console.log('[TaskRenderer] Recording completion:', {
-    setId,
-    language: props.task.language,
-    practiceMode: props.practiceContext.practiceMode,
-    taskType: props.task.taskType,
-    correctness
-  });
-
   try {
     await tracking.recordTaskCompletion(
       setId,
@@ -129,9 +121,10 @@ async function handleTaskFinished(correctness: TaskCorrectness = 'neutral') {
       props.task.taskType,
       correctness
     );
-    
+
   } catch (error) {
-    
+    const toast = useToast();
+    toast.error(`Error recording task completion: ${error}`)
   }
 
   emit('finished', correctness);

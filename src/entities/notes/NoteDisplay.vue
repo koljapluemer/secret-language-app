@@ -6,7 +6,7 @@
           <div class="whitespace-pre-wrap  flex-1">
             {{ note.content || '(Empty note)' }}
           </div>
-          <div v-if="note.noteType" class="badge badge-outline badge-sm">
+          <div v-if="note.noteType" class="  ">
             {{ note.noteType }}
           </div>
         </div>

@@ -106,7 +106,6 @@
                 <span 
                   v-for="(completed, milestone) in goal.milestones" 
                   :key="milestone"
-                  :class="['badge badge-sm', completed ? 'badge-success' : 'badge-outline']"
                 >
                   {{ milestone }}
                 </span>
@@ -119,19 +118,19 @@
               </div>
             </td>
             <td>
-              <span class="badge badge-outline">{{ goal.subGoals.length }}</span>
+              <span class=" ">{{ goal.subGoals.length }}</span>
             </td>
             <td>
               <div class="flex items-center gap-2">
-                <span class="badge badge-outline">{{ goal.vocab.length }}</span>
-                <span v-if="vocabStats[goal.id]" class="badge badge-success">
+                <span class=" ">{{ goal.vocab.length }}</span>
+                <span v-if="vocabStats[goal.id]">
                   {{ Math.round(vocabStats[goal.id].topOfMindPercentage) }}{{ $t('goals.stats.vocabMastered') }}
                 </span>
               </div>
             </td>
             <td>
               <div class="flex flex-wrap gap-1">
-                <span v-for="origin in goal.origins" :key="origin" class="badge badge-outline badge-sm">
+                <span v-for="origin in goal.origins" :key="origin" class="  ">
                   {{ getOriginDisplayName(origin) }}
                 </span>
               </div>

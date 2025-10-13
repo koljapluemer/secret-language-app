@@ -116,7 +116,7 @@
             </td>
             <td>
               <div class="flex flex-wrap gap-1">
-                <span v-for="origin in resource.origins" :key="origin" class="badge badge-outline badge-sm">
+                <span v-for="origin in resource.origins" :key="origin" class="  ">
                   {{ getOriginDisplayName(origin) }}
                 </span>
               </div>

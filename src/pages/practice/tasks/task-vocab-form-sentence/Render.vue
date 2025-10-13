@@ -146,12 +146,6 @@ const handleDone = async () => {
   if (!isDoneEnabled.value || vocabItems.value.length === 0) return;
 
   try {
-    console.debug('[FormSentence] handleDone start', {
-      activeTab: activeTab.value,
-      vocabCount: vocabItems.value.length,
-      vocabIds: vocabItems.value.map(v => v.id),
-      sentenceLength: sentence.value.trim().length
-    });
 
     if (activeTab.value === 'text') {
       // Create note with the sentence
@@ -175,10 +169,6 @@ const handleDone = async () => {
           ...freshVocab,
           notes: [...(freshVocab.notes || []), savedNote.id]
         };
-        console.debug('[FormSentence] Updating vocab with note', {
-          vocabId: vocab.id,
-          newNotesLength: updatedVocab.notes.length
-        });
         await vocabRepo.updateVocab(updatedVocab);
       }
     } else if (activeTab.value === 'audio' && audioRecording.value) {
@@ -205,10 +195,6 @@ const handleDone = async () => {
           ...freshVocab,
           sounds: [...(freshVocab.sounds || []), vocabSound]
         };
-        console.debug('[FormSentence] Updating vocab with recorded sound', {
-          vocabId: vocab.id,
-          newSoundsLength: updatedVocab.sounds.length
-        });
         await vocabRepo.updateVocab(updatedVocab);
       }
     }
@@ -218,7 +204,7 @@ const handleDone = async () => {
     emit('finished', 'neutral');
   } catch (error) {
     
-    toast.error('Failed to save sentence');
+    toast.error(`Failed to save sentence: ${error}`);
     await handleTaskCompletion();
     emit('finished', 'neutral');
   }

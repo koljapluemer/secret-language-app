@@ -29,7 +29,6 @@ const allCompletionEvents = computed(() => {
     .filter(event => event.correctness !== 'neutral')
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
   
-  console.log('[DailyAccuracy] Sample events:', allEventsRaw.value.slice(0, 3));
   return filtered;
 });
 

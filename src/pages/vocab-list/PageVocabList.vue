@@ -104,7 +104,7 @@
                 <span 
                   v-for="translation in vocabTranslations[vocab.id] || []" 
                   :key="translation"
-                  class="badge badge-sm"
+                  class=" "
                 >
                   {{ translation }}
                 </span>
@@ -118,7 +118,7 @@
             </td>
             <td>
               <div class="flex flex-wrap gap-1">
-                <span v-for="origin in vocab.origins" :key="origin" class="badge badge-outline badge-sm">
+                <span v-for="origin in vocab.origins" :key="origin" class="  ">
                   {{ getOriginDisplayName(origin) }}
                 </span>
               </div>
