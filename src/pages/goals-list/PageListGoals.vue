@@ -103,8 +103,8 @@
             </td>
             <td>
               <div class="flex flex-wrap gap-1">
-                <span 
-                  v-for="(completed, milestone) in goal.milestones" 
+                <span
+                  v-for="milestone in Object.keys(goal.milestones || {})"
                   :key="milestone"
                 >
                   {{ milestone }}

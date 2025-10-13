@@ -1,65 +1,39 @@
 <script setup lang="ts">
-import { inject, onMounted, onUnmounted, ref, computed } from 'vue';
+import { inject, ref, computed, onMounted } from 'vue';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
-import type { FactCardRepoContract } from '@/entities/fact-cards/FactCardRepoContract';
 import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
-import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoContract';
-import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract';
-import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract';
 import type { LocalSetRepoContract } from '@/entities/local-sets/LocalSetRepoContract';
 import type { LocalSetData } from '@/entities/local-sets/LocalSetData';
 import type { Task } from '@/pages/practice/Task';
-import TaskRenderer from '@/pages/practice/tasks/ui/TaskRenderer.vue';
-import { useQueueState } from '@/pages/practice/modes/utils/useQueueState';
-import { generateSetStudyTask, getSetStudyProgress, type SetStudyOptions } from './generateSetStudyTasks';
+import { usePracticeMode } from '@/pages/practice/modes/composables/usePracticeMode';
+import PracticeModeLayout from '@/pages/practice/modes/components/PracticeModeLayout.vue';
+import { generateSetStudyTask, type SetStudyOptions } from './generateSetStudyTasks';
+import { useUsedVocabTracker } from '@/features/track/useUsedVocabTracker';
 import { BookOpen } from 'lucide-vue-next';
 import { useToast } from '@/shared/toasts';
-import { useUsedVocabTracker } from '@/features/track/useUsedVocabTracker';
 
 // Inject repositories
 const vocabRepo = inject<VocabRepoContract>('vocabRepo');
 const translationRepo = inject<TranslationRepoContract>('translationRepo');
-const factCardRepo = inject<FactCardRepoContract>('factCardRepo');
 const languageRepo = inject<LanguageRepoContract>('languageRepo');
-const resourceRepo = inject<ResourceRepoContract>('resourceRepo');
-const goalRepo = inject<GoalRepoContract>('goalRepo');
-const noteRepo = inject<NoteRepoContract>('noteRepo');
 const localSetRepo = inject<LocalSetRepoContract>('localSetRepo');
 const toast = useToast();
 
-if (!vocabRepo || !translationRepo || !factCardRepo || !languageRepo || !resourceRepo || !goalRepo || !noteRepo || !localSetRepo) {
+if (!vocabRepo || !translationRepo || !languageRepo || !localSetRepo) {
   throw new Error('Required repositories not available');
 }
 
-// Queue state
-const {
-  state,
-  showLoadingUI,
-  startDelayedLoading,
-  clearDelayedLoading,
-  setLoading,
-  setTask,
-  setEmpty,
-  setError,
-  completeCurrentTask,
-  cleanup
-} = useQueueState();
-
 const { addUsedVocab, getLastUsedVocabId } = useUsedVocabTracker();
 
-// Settings screen state
+// Settings
 const showSettings = ref(true);
 const availableSets = ref<LocalSetData[]>([]);
 const selectedSetId = ref<string>('');
 const maxNewVocab = ref<number>(10);
+const currentNewVocabCount = ref<number>(0);
 const loadingSets = ref(false);
 
-// Session tracking
-const currentNewVocabCount = ref<number>(0);
-const sessionProgress = ref<{ totalUnseen: number; totalDue: number }>({ totalUnseen: 0, totalDue: 0 });
-
-// Computed
 const selectedSet = computed(() => {
   return availableSets.value.find(set => set.id === selectedSetId.value);
 });
@@ -75,7 +49,6 @@ async function loadAvailableSets() {
     const sets = await localSetRepo!.getAllLocalSets();
     availableSets.value = sets;
 
-    // Pre-select the most recent set (latest lastDownloadedAt)
     if (sets.length > 0) {
       const latestSet = sets.reduce((latest, current) => {
         return current.lastDownloadedAt > latest.lastDownloadedAt ? current : latest;
@@ -89,295 +62,136 @@ async function loadAvailableSets() {
   }
 }
 
-// Generate a single set study task
-async function generateNextTask(): Promise<Task | null> {
-  if (!selectedSetId.value) return null;
+// Practice mode configuration
+const mode = usePracticeMode({
+  modeId: 'set-study',
+  generateTask: async () => {
+    if (!selectedSetId.value) return null;
 
-  try {
     const options: SetStudyOptions = {
       setId: selectedSetId.value,
       maxNewVocab: maxNewVocab.value,
       currentNewVocabCount: currentNewVocabCount.value
     };
 
-    // Create block list with last used vocab
     const lastVocabId = getLastUsedVocabId();
     const blockList = lastVocabId ? [lastVocabId] : undefined;
 
     return await generateSetStudyTask(
-      vocabRepo!,
-      translationRepo!,
+      vocabRepo,
+      translationRepo,
       options,
       blockList
     );
-  } catch {
-    toast.error('Error generating set study task');
-    return null;
-  }
-}
+  },
+  onTaskTransition: (newCurrentTask: Task) => {
+    const vocabId = newCurrentTask.associatedVocab?.[0];
+    if (!vocabId) return;
 
-// Try to transition to task state
-async function tryTransitionToTask(): Promise<boolean> {
-  setLoading('Preparing set study exercise...');
-  startDelayedLoading();
+    addUsedVocab(vocabId);
 
-  try {
-    const currentTask = await generateNextTask();
-
-    if (currentTask) {
-      // Generate next task for preloading
-      const nextTask = await generateNextTask();
-
-      clearDelayedLoading();
-      setTask(currentTask, nextTask);
-      return true;
-    }
-  } catch {
-    toast.error('Task generation failed');
-  }
-
-  clearDelayedLoading();
-
-  // Check if we've completed the set
-  if (selectedSet.value) {
-    const progress = await getSetStudyProgress(vocabRepo!, selectedSetId.value);
-    if (progress.totalDue === 0 && (currentNewVocabCount.value >= maxNewVocab.value || progress.totalUnseen === 0)) {
-      setEmpty(`Excellent work! You've completed studying "${selectedSet.value.name}". All vocabulary is learned and no new items remain within your limit.`);
-    } else {
-      setEmpty(`No more vocabulary available from "${selectedSet.value.name}" at this time.`);
-    }
-  } else {
-    setEmpty('Unable to load set study exercises.');
-  }
-
-  return false;
-}
-
-// Initialize queue
-async function initializeQueue() {
-  setLoading('Loading set study exercises...');
-  showLoadingUI.value = true;
-
-  try {
-    // Load progress for selected set
-    if (selectedSetId.value) {
-      sessionProgress.value = await getSetStudyProgress(vocabRepo!, selectedSetId.value);
-    }
-
-    const success = await tryTransitionToTask();
-    if (!success) {
-      clearDelayedLoading();
-      if (selectedSet.value) {
-        setEmpty(`No vocabulary available for practice in "${selectedSet.value.name}".`);
-      } else {
-        setEmpty('No set selected for study.');
+    void (async () => {
+      try {
+        const vocab = await vocabRepo.getVocabByUID(vocabId);
+        if (vocab && vocab.progress.level === -1) {
+          currentNewVocabCount.value++;
+        }
+      } catch {
+        toast.error('Error tracking new vocab count');
       }
-    }
-  } catch {
-    toast.error('Initialization failed');
-    clearDelayedLoading();
-    setError('Failed to initialize set study session. Please try again.');
+    })();
+  },
+  messages: {
+    loading: 'Loading set study exercises...',
+    empty: selectedSet.value
+      ? `No vocabulary available for practice in "${selectedSet.value.name}".`
+      : 'No set selected for study.',
+    error: 'Failed to initialize set study session. Please try again.'
   }
-}
+});
 
-// Retry on error
-async function retry() {
-  await initializeQueue();
-}
-
-// Settings screen functions
 async function startSetStudy() {
   if (!canStartStudy.value) return;
 
-  // Reset session counters
   currentNewVocabCount.value = 0;
-
   showSettings.value = false;
-  await initializeQueue();
-}
-
-function goBackToSettings() {
-  showSettings.value = true;
-  currentNewVocabCount.value = 0;
-  cleanup();
-}
-
-function onTaskTransition(newCurrentTask: Task) {
-  const vocabId = newCurrentTask.associatedVocab?.[0];
-  if (!vocabId) {
-    return;
-  }
-
-  addUsedVocab(vocabId);
-
-  void (async () => {
-    try {
-      const vocab = await vocabRepo!.getVocabByUID(vocabId);
-      if (vocab && vocab.progress.level === -1) {
-        currentNewVocabCount.value++;
-      }
-    } catch {
-      toast.error('Error tracking new vocab count');
-    }
-  })();
+  await mode.initialize();
 }
 
 onMounted(() => {
   loadAvailableSets();
 });
-
-onUnmounted(() => {
-  cleanup();
-});
-
-// Handle task completion
-const handleTaskFinished = async () => {
-  await completeCurrentTask(
-    generateNextTask,
-    onTaskTransition,
-    tryTransitionToTask,
-    selectedSet.value
-      ? `Great progress! You've completed the available vocabulary in "${selectedSet.value.name}".`
-      : 'Study session completed.'
-  );
-};
 </script>
 
 <template>
   <!-- Settings Screen -->
-  <Transition enter-active-class="transition-opacity duration-[50ms]"
-    leave-active-class="transition-opacity duration-[50ms]" enter-from-class="opacity-0" leave-to-class="opacity-0">
-    <div v-if="showSettings" class="hero min-h-96">
-      <div class="hero-content text-center">
-        <div class="max-w-md">
-          <div class="flex justify-center mb-4">
-            <BookOpen :size="48" />
-          </div>
-          <h1 class="text-2xl font-bold mb-4">{{ $t('practice.modes.setStudy.setup.title') }}</h1>
-          <p class="mb-6">{{ $t('practice.modes.setStudy.setup.description') }}</p>
-
-          <!-- Set Selection -->
-          <div class="form-control w-full mb-4">
-            <label class="label">
-              <span class="label-text">{{ $t('practice.modes.setStudy.setup.selectSet') }}</span>
-            </label>
-            <select v-model="selectedSetId" class="select select-bordered w-full" :disabled="loadingSets">
-              <option value="" disabled>
-                {{ loadingSets ? $t('common.loading') : $t('practice.modes.setStudy.setup.chooseSet') }}
-              </option>
-              <option v-for="set in availableSets" :key="set.id" :value="set.id">
-                {{ set.name }} {{ $t('practice.modes.setStudy.setup.setLanguagePrefix') }}{{ set.language }}{{ $t('practice.modes.setStudy.setup.setLanguageSuffix') }}
-              </option>
-            </select>
-            <label class="label" v-if="availableSets.length === 0 && !loadingSets">
-              <span class="label-text-alt text-warning">{{ $t('practice.modes.setStudy.setup.noSetsAvailable') }}</span>
-            </label>
-          </div>
-
-          <!-- Max New Vocab -->
-          <div class="form-control w-full mb-6">
-            <label class="label">
-              <span class="label-text">{{ $t('practice.modes.setStudy.setup.maxNewVocab') }}</span>
-            </label>
-            <input v-model.number="maxNewVocab" type="number" min="0" max="100" class="input input-bordered w-full"
-              :placeholder="$t('practice.modes.setStudy.setup.maxNewVocabPlaceholder')" />
-          </div>
-
-          <button @click="startSetStudy" class="btn btn-primary btn-lg w-full"
-            :disabled="!canStartStudy || loadingSets">
-            {{ $t('practice.modes.setStudy.setup.startStudying') }}
-          </button>
-
+  <div v-if="showSettings" class="hero min-h-96">
+    <div class="hero-content text-center">
+      <div class="max-w-md">
+        <div class="flex justify-center mb-4">
+          <BookOpen :size="48" />
         </div>
-      </div>
-    </div>
-  </Transition>
+        <h1 class="text-2xl font-bold mb-4">{{ $t('practice.modes.setStudy.setup.title') }}</h1>
+        <p class="mb-6">{{ $t('practice.modes.setStudy.setup.description') }}</p>
 
-  <!-- Loading State -->
-  <Transition enter-active-class="transition-opacity duration-[50ms]"
-    leave-active-class="transition-opacity duration-[50ms]" enter-from-class="opacity-0" leave-to-class="opacity-0">
-    <div v-if="!showSettings && (state.status === 'initializing' || showLoadingUI)"
-      class="flex justify-center items-center min-h-96">
-      <div class="text-center">
-        <span class="loading loading-spinner loading-lg"></span>
-        <p class="mt-4 text-lg">
-          {{ state.status === 'loading' && state.message ? state.message : $t('common.loading') }}
-        </p>
-      </div>
-    </div>
-  </Transition>
-
-  <!-- Error State -->
-  <Transition enter-active-class="transition-opacity duration-[50ms]"
-    leave-active-class="transition-opacity duration-[50ms]" enter-from-class="opacity-0" leave-to-class="opacity-0">
-    <div v-if="!showSettings && state.status === 'error'" class="alert alert-error">
-      <span>{{ state.message }}</span>
-      <div class="flex gap-2">
-        <button class="btn btn-sm" @click="retry">
-          {{ $t('practice.widgets.tryAgain') }}
-        </button>
-        <button class="btn btn-sm btn-outline" @click="goBackToSettings">
-          {{ $t('common.backToSettings') }}
-        </button>
-      </div>
-    </div>
-  </Transition>
-
-  <!-- No Content Available -->
-  <Transition enter-active-class="transition-opacity duration-[50ms]"
-    leave-active-class="transition-opacity duration-[50ms]" enter-from-class="opacity-0" leave-to-class="opacity-0">
-    <div v-if="!showSettings && state.status === 'empty'" class="hero min-h-96">
-      <div class="hero-content text-center">
-        <div class="max-w-md">
-          <h1>{{ $t('practice.widgets.allDone') }}</h1>
-          <p class="py-6">{{ state.message }}</p>
-          <div class="flex gap-2 justify-center">
-            <button class="btn btn-primary" @click="initializeQueue">
-              {{ $t('practice.widgets.checkAgain') }}
-            </button>
-            <button class="btn btn-outline" @click="goBackToSettings">
-              {{ $t('common.backToSettings') }}
-            </button>
-          </div>
+        <!-- Set Selection -->
+        <div class="form-control w-full mb-4">
+          <label class="label">
+            <span class="label-text">{{ $t('practice.modes.setStudy.setup.selectSet') }}</span>
+          </label>
+          <select v-model="selectedSetId" class="select select-bordered w-full" :disabled="loadingSets">
+            <option value="" disabled>
+              {{ loadingSets ? $t('common.loading') : $t('practice.modes.setStudy.setup.chooseSet') }}
+            </option>
+            <option v-for="set in availableSets" :key="set.id" :value="set.id">
+              {{ set.name }} {{ $t('practice.modes.setStudy.setup.setLanguagePrefix') }}{{ set.language }}{{ $t('practice.modes.setStudy.setup.setLanguageSuffix') }}
+            </option>
+          </select>
+          <label class="label" v-if="availableSets.length === 0 && !loadingSets">
+            <span class="label-text-alt text-warning">{{ $t('practice.modes.setStudy.setup.noSetsAvailable') }}</span>
+          </label>
         </div>
-      </div>
-    </div>
-  </Transition>
 
-  <!-- Progress Info -->
-  <div v-if="!showSettings && state.status === 'task'" class="mb-4 text-center">
-    <div class="stats stats-horizontal shadow">
-      <div class="stat">
-        <div class="stat-title">{{ $t('common.currentSet') }}</div>
-        <div class="stat-value text-sm">{{ selectedSet?.name }}</div>
-      </div>
-      <div class="stat">
-        <div class="stat-title">{{ $t('common.newVocabProgress') }}</div>
-        <div class="stat-value text-sm">{{ currentNewVocabCount }} {{ $t('common.of') }} {{ maxNewVocab }}</div>
+        <!-- Max New Vocab -->
+        <div class="form-control w-full mb-6">
+          <label class="label">
+            <span class="label-text">{{ $t('practice.modes.setStudy.setup.maxNewVocab') }}</span>
+          </label>
+          <input v-model.number="maxNewVocab" type="number" min="0" max="100" class="input input-bordered w-full"
+            :placeholder="$t('practice.modes.setStudy.setup.maxNewVocabPlaceholder')" />
+        </div>
+
+        <button @click="startSetStudy" class="btn btn-primary btn-lg w-full"
+          :disabled="!canStartStudy || loadingSets">
+          {{ $t('practice.modes.setStudy.setup.startStudying') }}
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- Task -->
-  <div v-if="!showSettings && state.status === 'task' && !showLoadingUI">
-    <Transition mode="out-in" enter-active-class="transition-opacity duration-[50ms] ease-out"
-      leave-active-class="transition-opacity duration-[50ms] ease-in" enter-from-class="opacity-0"
-      enter-to-class="opacity-100" leave-from-class="opacity-100" leave-to-class="opacity-0">
-      <TaskRenderer :key="state.currentTask.id" :task="state.currentTask"
-        :practice-context="{ practiceMode: 'set-study', setId: selectedSetId }"
-        @finished="handleTaskFinished" />
-    </Transition>
-  </div>
-
-  <!-- Fallback -->
-  <Transition enter-active-class="transition-opacity duration-[50ms]"
-    leave-active-class="transition-opacity duration-[50ms]" enter-from-class="opacity-0" leave-to-class="opacity-0">
-    <div v-if="!showSettings && !['initializing', 'loading', 'task', 'empty', 'error'].includes(state.status)"
-      class="alert alert-warning">
-      <span>{{ $t('practice.widgets.unknownQueueState') }}</span>
-      <button class="btn btn-sm" @click="initializeQueue">
-        {{ $t('practice.widgets.refresh') }}
-      </button>
+  <!-- Practice Mode Layout with Progress Info -->
+  <template v-if="!showSettings">
+    <!-- Progress Info -->
+    <div v-if="mode.state.value.status === 'task'" class="mb-4 text-center">
+      <div class="stats stats-horizontal shadow">
+        <div class="stat">
+          <div class="stat-title">{{ $t('common.currentSet') }}</div>
+          <div class="stat-value text-sm">{{ selectedSet?.name }}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-title">{{ $t('common.newVocabProgress') }}</div>
+          <div class="stat-value text-sm">{{ currentNewVocabCount }} {{ $t('common.of') }} {{ maxNewVocab }}</div>
+        </div>
+      </div>
     </div>
-  </Transition>
+
+    <PracticeModeLayout
+      :state="mode.state.value"
+      :showLoadingUI="mode.showLoadingUI.value"
+      modeId="set-study"
+      :retry="mode.retry"
+      :initialize="mode.initialize"
+      :onTaskFinished="mode.handleTaskFinished"
+    />
+  </template>
 </template>
