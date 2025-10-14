@@ -7,6 +7,7 @@ import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoCont
 import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoContract';
 import type { Task } from '@/pages/practice/Task';
 import { usePracticeMode } from '@/pages/practice/modes/composables/usePracticeMode';
+import { usePracticeFilters } from '@/pages/practice/composables/usePracticeFilters';
 import PracticeModeLayout from '@/pages/practice/modes/components/PracticeModeLayout.vue';
 import { generateIllegalImmersionTask } from './generateIllegalImmersionTasks';
 
@@ -21,14 +22,14 @@ if (!vocabRepo || !translationRepo || !factCardRepo || !languageRepo || !resourc
   throw new Error('Required repositories not available');
 }
 
+const { selectedLanguages } = usePracticeFilters();
 const lastUsedContentId = ref<string | null>(null);
 
 // Practice mode configuration
 const mode = usePracticeMode({
   modeId: 'illegal-immersion',
   generateTask: async () => {
-    const languages = await languageRepo.getActiveTargetLanguages();
-    const languageCodes = languages.map(lang => lang.code);
+    const languageCodes = selectedLanguages.value;
 
     if (languageCodes.length === 0) return null;
 

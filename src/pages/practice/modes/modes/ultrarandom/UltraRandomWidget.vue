@@ -9,6 +9,7 @@ import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract';
 import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract';
 import type { Task } from '@/pages/practice/Task';
 import { usePracticeMode } from '@/pages/practice/modes/composables/usePracticeMode';
+import { usePracticeFilters } from '@/pages/practice/composables/usePracticeFilters';
 import PracticeModeLayout from '@/pages/practice/modes/components/PracticeModeLayout.vue';
 import { generateUltraRandomTask } from './generateUltraRandomTasks';
 
@@ -25,14 +26,14 @@ if (!vocabRepo || !translationRepo || !factCardRepo || !languageRepo || !resourc
   throw new Error('Required repositories not available');
 }
 
+const { selectedLanguages, setsToAvoid } = usePracticeFilters();
 const lastUsedTaskType = ref<string | null>(null);
 
 // Practice mode configuration
 const mode = usePracticeMode({
   modeId: 'ultrarandom',
   generateTask: async () => {
-    const languages = await languageRepo.getActiveTargetLanguages();
-    const languageCodes = languages.map(lang => lang.code);
+    const languageCodes = selectedLanguages.value;
 
     if (languageCodes.length === 0) return null;
 
@@ -44,7 +45,8 @@ const mode = usePracticeMode({
       goalRepo,
       noteRepo,
       languageCodes,
-      lastUsedTaskType.value
+      lastUsedTaskType.value,
+      setsToAvoid.value
     );
   },
   onTaskTransition: (newCurrentTask: Task) => {

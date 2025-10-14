@@ -14,6 +14,7 @@ export async function generateEyesAndEars(
   vocabRepo: VocabRepoContract,
   languageCodes: string[],
   vocabBlockList?: string[],
+  setsToAvoid?: string[],
   options: EyesAndEarsOptions = {}
 ): Promise<Task | null> {
   const toast = useToast();
@@ -36,21 +37,21 @@ export async function generateEyesAndEars(
       
       if (preferDueVocab) {
         // Try to get a due vocab with sound and images
-        const dueVocab = await vocabRepo.getRandomDueVocabWithSoundAndImages(languageCodes, vocabBlockList);
+        const dueVocab = await vocabRepo.getRandomDueVocabWithSoundAndImages(languageCodes, vocabBlockList, setsToAvoid);
         if (dueVocab) {
           return generateVocabChooseImageBySound(dueVocab);
         }
       }
-      
+
       // Try to get an unseen vocab with sound and images
-      const unseenVocab = await vocabRepo.getRandomUnseenVocabWithSoundAndImages(languageCodes, vocabBlockList);
+      const unseenVocab = await vocabRepo.getRandomUnseenVocabWithSoundAndImages(languageCodes, vocabBlockList, setsToAvoid);
       if (unseenVocab) {
         return generateVocabChooseImageBySound(unseenVocab);
       }
-      
+
       // Fallback: if we wanted unseen but none available, try due vocab
       if (!preferDueVocab) {
-        const dueVocab = await vocabRepo.getRandomDueVocabWithSoundAndImages(languageCodes, vocabBlockList);
+        const dueVocab = await vocabRepo.getRandomDueVocabWithSoundAndImages(languageCodes, vocabBlockList, setsToAvoid);
         if (dueVocab) {
           return generateVocabChooseImageBySound(dueVocab);
         }
@@ -68,16 +69,16 @@ export async function generateEyesAndEars(
       // Get eligible vocab using repository methods
       let eligibleVocab: VocabData[] = [];
       if (preferDueVocab) {
-        eligibleVocab = await vocabRepo.getDueVocabWithSoundAndImages(languageCodes, vocabBlockList);
+        eligibleVocab = await vocabRepo.getDueVocabWithSoundAndImages(languageCodes, vocabBlockList, setsToAvoid);
         // If no due vocab available, try unseen
         if (eligibleVocab.length === 0) {
-          eligibleVocab = await vocabRepo.getUnseenVocabWithSoundAndImages(languageCodes, vocabBlockList);
+          eligibleVocab = await vocabRepo.getUnseenVocabWithSoundAndImages(languageCodes, vocabBlockList, setsToAvoid);
         }
       } else {
-        eligibleVocab = await vocabRepo.getUnseenVocabWithSoundAndImages(languageCodes, vocabBlockList);
+        eligibleVocab = await vocabRepo.getUnseenVocabWithSoundAndImages(languageCodes, vocabBlockList, setsToAvoid);
         // If no unseen vocab available, try due
         if (eligibleVocab.length === 0) {
-          eligibleVocab = await vocabRepo.getDueVocabWithSoundAndImages(languageCodes, vocabBlockList);
+          eligibleVocab = await vocabRepo.getDueVocabWithSoundAndImages(languageCodes, vocabBlockList, setsToAvoid);
         }
       }
 

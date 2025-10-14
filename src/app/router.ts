@@ -11,7 +11,6 @@ import IllegalImmersionWidget from '@/pages/practice/modes/modes/illegal-immersi
 import SentenceSlideWidget from '@/pages/practice/modes/modes/sentence-slide/SentenceSlideWidget.vue';
 import ResourceRotationWidget from '@/pages/practice/modes/modes/resource-rotation/ResourceRotationWidget.vue';
 import MinimalPairsWidget from '@/pages/practice/modes/modes/minimal-pairs/MinimalPairsWidget.vue';
-import SetStudyWidget from '@/pages/practice/modes/modes/set-study/SetStudyWidget.vue';
 import ComponentClustersWidget from '@/pages/practice/modes/modes/component-clusters/ComponentClustersWidget.vue';
 import PageVocabList from '@/pages/vocab-list/PageVocabList.vue';
 import PageVocabEdit from '@/pages/vocab-edit/PageVocabEdit.vue';
@@ -97,11 +96,6 @@ const router = createRouter({
           path: 'minimal-pairs',
           name: 'practice-mode-minimal-pairs',
           component: MinimalPairsWidget
-        },
-        {
-          path: 'set-study',
-          name: 'practice-mode-set-study',
-          component: SetStudyWidget
         },
         {
           path: 'component-clusters',

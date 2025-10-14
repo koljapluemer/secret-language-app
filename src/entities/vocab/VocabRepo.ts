@@ -60,7 +60,7 @@ export class VocabRepo implements VocabRepoContract {
     return vocab ? this.ensureVocabFields(vocab) : undefined;
   }
 
-  async getRandomAlreadySeenDueVocab(count: number, languages: string[], vocabBlockList?: string[]): Promise<VocabData[]> {
+  async getRandomAlreadySeenDueVocab(count: number, languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData[]> {
     const vocab = await db.vocab
       .where('language')
       .anyOf(languages)
@@ -68,30 +68,33 @@ export class VocabRepo implements VocabRepoContract {
         vocab.progress.level >= 0 &&
         vocab.progress.due && new Date(vocab.progress.due) <= new Date() &&
         !vocab.doNotPractice &&
-        (!vocabBlockList || !vocabBlockList.includes(vocab.id))
+        (!vocabBlockList || !vocabBlockList.includes(vocab.id)) &&
+        (!setsToAvoid || !vocab.origins.some(origin => setsToAvoid.includes(origin)))
       )
       .toArray();
 
     return pickRandom(vocab, count).map(v => this.ensureVocabFields(v));
   }
 
-  async getRandomUnseenVocab(count: number, languages: string[], vocabBlockList?: string[]): Promise<VocabData[]> {
+  async getRandomUnseenVocab(count: number, languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData[]> {
     const vocab = await db.vocab
       .where('language')
       .anyOf(languages)
       .filter(vocab => {
-        if (!vocab.progress) {
-          
-          return !vocab.doNotPractice && (!vocabBlockList || !vocabBlockList.includes(vocab.id));
-        }
-        return isUnseen(vocab) && !vocab.doNotPractice && (!vocabBlockList || !vocabBlockList.includes(vocab.id));
+        // Check if unseen
+        const unseenCheck = !vocab.progress ? true : isUnseen(vocab);
+
+        return unseenCheck &&
+          !vocab.doNotPractice &&
+          (!vocabBlockList || !vocabBlockList.includes(vocab.id)) &&
+          (!setsToAvoid || !vocab.origins.some(origin => setsToAvoid.includes(origin)));
       })
       .toArray();
 
     return pickRandom(vocab, count).map(v => this.ensureVocabFields(v));
   }
 
-  async getRandomUnseenSentenceVocab(count: number, languages: string[], vocabBlockList?: string[]): Promise<VocabData[]> {
+  async getRandomUnseenSentenceVocab(count: number, languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData[]> {
     const vocab = await db.vocab
       .where('language')
       .anyOf(languages)
@@ -100,17 +103,19 @@ export class VocabRepo implements VocabRepoContract {
         if (vocab.consideredSentence !== true) {
           return false;
         }
-        
+
         // Must have content and at least one translation
         if (!vocab.content || !vocab.translations || vocab.translations.length === 0) {
           return false;
         }
 
-        if (!vocab.progress) {
-          
-          return !vocab.doNotPractice && (!vocabBlockList || !vocabBlockList.includes(vocab.id));
-        }
-        return isUnseen(vocab) && !vocab.doNotPractice && (!vocabBlockList || !vocabBlockList.includes(vocab.id));
+        // Check if unseen
+        const unseenCheck = !vocab.progress ? true : isUnseen(vocab);
+
+        return unseenCheck &&
+          !vocab.doNotPractice &&
+          (!vocabBlockList || !vocabBlockList.includes(vocab.id)) &&
+          (!setsToAvoid || !vocab.origins.some(origin => setsToAvoid.includes(origin)));
       })
       .toArray();
 
@@ -240,27 +245,23 @@ export class VocabRepo implements VocabRepoContract {
     return false;
   }
 
-  async getRandomVocabWithMissingPronunciation(languages: string[], vocabBlockList?: string[]): Promise<VocabData | null> {
+  async getRandomVocabWithMissingPronunciation(languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData | null> {
     const vocab = await db.vocab
       .where('language')
       .anyOf(languages)
-      .and(vocab => 
+      .filter(vocab =>
         vocab.consideredSentence !== true &&
         !vocab.doNotPractice &&
-        (vocab.priority ?? 1) >= 2
+        (vocab.priority ?? 1) >= 2 &&
+        (!vocabBlockList || !vocabBlockList.includes(vocab.id)) &&
+        (!setsToAvoid || !vocab.origins.some(origin => setsToAvoid.includes(origin)))
       )
       .toArray();
 
-    const withoutPronunciation = vocab.filter(vocab => {
-      // Since pronunciation is now handled as notes, we'll check for pronunciation notes
-      // For now, assume all vocab needs pronunciation (to be refined later)
-      const hasNoPronunciation = true; // TODO: Check if vocab has pronunciation notes
-      const isNotBlocked = !vocabBlockList || !vocabBlockList.includes(vocab.id);
-      return hasNoPronunciation && isNotBlocked;
-    });
-
-    if (withoutPronunciation.length === 0) return null;
-    return pickRandom(withoutPronunciation, 1)[0];
+    // Since pronunciation is now handled as notes, we'll check for pronunciation notes
+    // For now, assume all vocab needs pronunciation (to be refined later)
+    if (vocab.length === 0) return null;
+    return pickRandom(vocab, 1)[0];
   }
 
   async getVocabPaginated(cursor?: string, limit: number = 20, filters?: VocabListFilters): Promise<VocabPaginationResult> {
@@ -805,20 +806,20 @@ export class VocabRepo implements VocabRepoContract {
     }
   }
 
-  async getDueSentenceVocabWithMaxLevel(languages: string[], maxLevel: number, vocabBlockList?: string[]): Promise<VocabData[]> {
+  async getDueSentenceVocabWithMaxLevel(languages: string[], maxLevel: number, vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData[]> {
     const now = new Date();
-    let query = db.vocab
+    const results = await db.vocab
       .where('language').anyOf(languages)
-      .and(vocab => vocab.consideredSentence === true)
-      .and(vocab => vocab.progress.level >= 0)
-      .and(vocab => vocab.progress.level <= maxLevel)
-      .and(vocab => vocab.progress.due && new Date(vocab.progress.due) <= now);
+      .filter(vocab =>
+        vocab.consideredSentence === true &&
+        vocab.progress.level >= 0 &&
+        vocab.progress.level <= maxLevel &&
+        vocab.progress.due && new Date(vocab.progress.due) <= now &&
+        (!vocabBlockList || !vocabBlockList.includes(vocab.id)) &&
+        (!setsToAvoid || !vocab.origins.some(origin => setsToAvoid.includes(origin)))
+      )
+      .toArray();
 
-    if (vocabBlockList && vocabBlockList.length > 0) {
-      query = query.and(vocab => !vocabBlockList.includes(vocab.id));
-    }
-
-    const results = await query.toArray();
     return results.map(vocab => this.ensureVocabFields(vocab));
   }
 
@@ -914,38 +915,18 @@ export class VocabRepo implements VocabRepoContract {
     await db.vocab.put(toRaw(vocab));
   }
 
-  async getVocabNeedingImages(languages: string[], vocabBlockList?: string[]): Promise<VocabData[]> {
+  async getVocabNeedingImages(languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData[]> {
     const vocab = await db.vocab
       .where('language')
       .anyOf(languages)
-      .filter(vocab => {
-        // Must have content
-        if (!vocab.content || vocab.content.trim() === '') {
-          return false;
-        }
-        
-        // Must not be excluded from practice
-        if (vocab.doNotPractice) {
-          return false;
-        }
-        
-        // Must not be in block list
-        if (vocabBlockList && vocabBlockList.includes(vocab.id)) {
-          return false;
-        }
-        
-        // Must be picturable (undefined means yes, false means no)
-        if (vocab.isPicturable === false) {
-          return false;
-        }
-        
-        // Must not already have images
-        if (vocab.images && vocab.images.length > 0) {
-          return false;
-        }
-        
-        return true;
-      })
+      .filter(vocab =>
+        !!(vocab.content && vocab.content.trim() !== '' &&
+        !vocab.doNotPractice &&
+        vocab.isPicturable !== false &&
+        (!vocab.images || vocab.images.length === 0) &&
+        (!vocabBlockList || !vocabBlockList.includes(vocab.id)) &&
+        (!setsToAvoid || !vocab.origins.some(origin => setsToAvoid.includes(origin))))
+      )
       .toArray();
 
     return vocab.map(v => this.ensureVocabFields(v));
@@ -1054,16 +1035,17 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   // Eyes and Ears operations
-  async getRandomUnseenVocabWithSoundAndImages(languages: string[], vocabBlockList?: string[]): Promise<VocabData | null> {
+  async getRandomUnseenVocabWithSoundAndImages(languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData | null> {
     const vocab = await db.vocab
       .where('language')
       .anyOf(languages)
-      .filter(vocab => 
+      .filter(vocab =>
         vocab.hasSound === true &&
         vocab.hasImage === true &&
         vocab.progress.level === -1 &&
         !vocab.doNotPractice &&
-        (!vocabBlockList || !vocabBlockList.includes(vocab.id))
+        (!vocabBlockList || !vocabBlockList.includes(vocab.id)) &&
+        (!setsToAvoid || !vocab.origins.some(origin => setsToAvoid.includes(origin)))
       )
       .toArray();
 
@@ -1072,7 +1054,7 @@ export class VocabRepo implements VocabRepoContract {
     return pickRandom(ensured, 1)[0];
   }
 
-  async getRandomDueVocabWithSoundAndImages(languages: string[], vocabBlockList?: string[]): Promise<VocabData | null> {
+  async getRandomDueVocabWithSoundAndImages(languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData | null> {
     const vocab = await db.vocab
       .where('language')
       .anyOf(languages)
@@ -1082,7 +1064,8 @@ export class VocabRepo implements VocabRepoContract {
         vocab.progress.level >= 0 &&
         vocab.progress.due && new Date(vocab.progress.due) <= new Date() &&
         !vocab.doNotPractice &&
-        (!vocabBlockList || !vocabBlockList.includes(vocab.id))
+        (!vocabBlockList || !vocabBlockList.includes(vocab.id)) &&
+        (!setsToAvoid || !vocab.origins.some(origin => setsToAvoid.includes(origin)))
       )
       .toArray();
 
@@ -1091,7 +1074,7 @@ export class VocabRepo implements VocabRepoContract {
     return pickRandom(ensured, 1)[0];
   }
 
-  async getDueVocabWithSoundAndImages(languages: string[], vocabBlockList?: string[]): Promise<VocabData[]> {
+  async getDueVocabWithSoundAndImages(languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData[]> {
     const vocab = await db.vocab
       .where('language')
       .anyOf(languages)
@@ -1099,23 +1082,19 @@ export class VocabRepo implements VocabRepoContract {
         // Must have valid sound and images
         const hasPlayableSound = vocab.sounds && vocab.sounds.some(sound => !sound.disableForPractice);
         const hasImages = vocab.images && vocab.images.length > 0;
-        if (!(hasPlayableSound && hasImages)) return false;
 
-        // Must not be marked as doNotPractice
-        if (vocab.doNotPractice) return false;
-
-        // Must not be in block list
-        if (vocabBlockList && vocabBlockList.includes(vocab.id)) return false;
-
-        // Must be due vocab: level >= 0 and due <= now
-        return vocab.progress.level >= 0 && vocab.progress.due && vocab.progress.due <= new Date();
+        return !!(hasPlayableSound && hasImages &&
+          !vocab.doNotPractice &&
+          (!vocabBlockList || !vocabBlockList.includes(vocab.id)) &&
+          vocab.progress.level >= 0 && vocab.progress.due && vocab.progress.due <= new Date() &&
+          (!setsToAvoid || !vocab.origins.some(origin => setsToAvoid.includes(origin))));
       })
       .toArray();
 
     return vocab.map(v => this.ensureVocabFields(v));
   }
 
-  async getUnseenVocabWithSoundAndImages(languages: string[], vocabBlockList?: string[]): Promise<VocabData[]> {
+  async getUnseenVocabWithSoundAndImages(languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData[]> {
     const vocab = await db.vocab
       .where('language')
       .anyOf(languages)
@@ -1123,30 +1102,27 @@ export class VocabRepo implements VocabRepoContract {
         // Must have valid sound and images
         const hasPlayableSound = vocab.sounds && vocab.sounds.some(sound => !sound.disableForPractice);
         const hasImages = vocab.images && vocab.images.length > 0;
-        if (!(hasPlayableSound && hasImages)) return false;
 
-        // Must not be marked as doNotPractice
-        if (vocab.doNotPractice) return false;
-
-        // Must not be in block list
-        if (vocabBlockList && vocabBlockList.includes(vocab.id)) return false;
-
-        // Must be unseen vocab: level === -1
-        return vocab.progress.level === -1;
+        return !!(hasPlayableSound && hasImages &&
+          !vocab.doNotPractice &&
+          (!vocabBlockList || !vocabBlockList.includes(vocab.id)) &&
+          vocab.progress.level === -1 &&
+          (!setsToAvoid || !vocab.origins.some(origin => setsToAvoid.includes(origin))));
       })
       .toArray();
 
     return vocab.map(v => this.ensureVocabFields(v));
   }
 
-  async getRandomVocabWithImages(language: string, excludeVocabId: string, vocabBlockList?: string[]): Promise<VocabData | null> {
+  async getRandomVocabWithImages(language: string, excludeVocabId: string, vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData | null> {
     const vocab = await db.vocab
       .where('language')
       .equals(language)
       .filter(vocab =>
         vocab.hasImage === true &&
         vocab.id !== excludeVocabId &&
-        (!vocabBlockList || !vocabBlockList.includes(vocab.id))
+        (!vocabBlockList || !vocabBlockList.includes(vocab.id)) &&
+        (!setsToAvoid || !vocab.origins.some(origin => setsToAvoid.includes(origin)))
       )
       .toArray();
 
@@ -1155,16 +1131,17 @@ export class VocabRepo implements VocabRepoContract {
     return pickRandom(ensured, 1)[0];
   }
 
-  async getRandomUnseenSentenceVocabWithRelatedVocab(languages: string[], vocabBlockList?: string[]): Promise<VocabData | null> {
+  async getRandomUnseenSentenceVocabWithRelatedVocab(languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData | null> {
     const vocab = await db.vocab
       .where('language')
       .anyOf(languages)
-      .filter(vocab => 
+      .filter(vocab =>
         vocab.consideredSentence === true &&
         vocab.progress.level === -1 &&
         vocab.relatedVocab && vocab.relatedVocab.length >= 1 &&
         !vocab.doNotPractice &&
-        (!vocabBlockList || !vocabBlockList.includes(vocab.id))
+        (!vocabBlockList || !vocabBlockList.includes(vocab.id)) &&
+        (!setsToAvoid || !vocab.origins.some(origin => setsToAvoid.includes(origin)))
       )
       .toArray();
 
@@ -1173,36 +1150,39 @@ export class VocabRepo implements VocabRepoContract {
     return pickRandom(ensured, 1)[0];
   }
 
-  async getRandomDueOrUnseenVocabForMinimalPairs(languages: string[], vocabBlockList?: string[]): Promise<VocabData | null> {
+  async getRandomDueOrUnseenVocabForMinimalPairs(languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData | null> {
     const vocab = await db.vocab
       .where('language')
       .anyOf(languages)
       .filter(vocab => {
         // Must not be excluded from practice
         if (vocab.doNotPractice) return false;
-        
+
         // Must not be in block list
         if (vocabBlockList && vocabBlockList.includes(vocab.id)) return false;
-        
+
         // Must have content set
         if (!vocab.content) return false;
-        
+
         // Must have sounds that are not disabled for practice
         if (!vocab.sounds || vocab.sounds.length === 0) return false;
         if (!vocab.sounds.some(sound => !sound.disableForPractice)) return false;
-        
+
         // Must have similarSoundingButNotTheSame length > 0
         if (!vocab.similarSoundingButNotTheSame || vocab.similarSoundingButNotTheSame.length === 0) return false;
-        
+
+        // Filter by sets
+        if (setsToAvoid && vocab.origins.some(origin => setsToAvoid.includes(origin))) return false;
+
         // Must be either due or unseen
         if (!vocab.progress) return true; // Consider unseen if no progress
-        
+
         // Unseen: never seen before (level === -1)
         const vocabIsUnseen = vocab.progress.level === -1;
-        
+
         // Due: has been seen and is due now
         const isDue = vocab.progress.level >= 0 && vocab.progress.due && new Date(vocab.progress.due) <= new Date();
-        
+
         return vocabIsUnseen || isDue;
       })
       .toArray();
@@ -1310,7 +1290,7 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   // Component Clusters operations
-  async getRandomDueOrUnseenVocabContainedInMultiple(languages: string[], minContainers: number, vocabBlockList?: string[]): Promise<VocabData | null> {
+  async getRandomDueOrUnseenVocabContainedInMultiple(languages: string[], minContainers: number, vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData | null> {
     const now = new Date();
 
     // Get all vocab in the specified languages
@@ -1330,6 +1310,11 @@ export class VocabRepo implements VocabRepoContract {
 
       // Skip if marked as doNotPractice
       if (vocab.doNotPractice) {
+        continue;
+      }
+
+      // Filter by sets
+      if (setsToAvoid && vocab.origins.some(origin => setsToAvoid.includes(origin))) {
         continue;
       }
 
@@ -1360,7 +1345,7 @@ export class VocabRepo implements VocabRepoContract {
     return this.ensureVocabFields(potentialComponents[randomIndex]);
   }
 
-  async getDueOrUnseenVocabContainingVocabId(vocabId: string, vocabBlockList?: string[]): Promise<VocabData[]> {
+  async getDueOrUnseenVocabContainingVocabId(vocabId: string, vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData[]> {
     const now = new Date();
 
     const vocab = await db.vocab
@@ -1377,6 +1362,11 @@ export class VocabRepo implements VocabRepoContract {
 
         // Must not be marked as doNotPractice
         if (v.doNotPractice) {
+          return false;
+        }
+
+        // Filter by sets
+        if (setsToAvoid && v.origins.some(origin => setsToAvoid.includes(origin))) {
           return false;
         }
 

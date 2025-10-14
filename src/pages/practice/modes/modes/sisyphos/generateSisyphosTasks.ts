@@ -14,12 +14,13 @@ export async function generateSisyphosTask(
   translationRepo: TranslationRepoContract,
   factCardRepo: FactCardRepoContract,
   languageCodes: string[],
-  blockList?: string[]
+  blockList?: string[],
+  setsToAvoid?: string[]
 ): Promise<Task | null> {
   try {
     // Get both types of SEEN and DUE content
     const [dueVocab, dueFactCards] = await Promise.all([
-      vocabRepo.getRandomAlreadySeenDueVocab(10, languageCodes, blockList),
+      vocabRepo.getRandomAlreadySeenDueVocab(10, languageCodes, blockList, setsToAvoid),
       factCardRepo.getRandomAlreadySeenDueFactCards(10, languageCodes, blockList)
     ]);
 

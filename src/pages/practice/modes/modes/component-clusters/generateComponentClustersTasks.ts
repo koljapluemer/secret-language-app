@@ -26,7 +26,8 @@ export async function generateComponentClustersTask(
   vocabRepo: VocabRepoContract,
   translationRepo: TranslationRepoContract,
   languageCodes: string[],
-  blockList?: string[]
+  blockList?: string[],
+  setsToAvoid?: string[]
 ): Promise<Task | null> {
   try {
     console.log('[ComponentClusters] generateComponentClustersTask called with:', {
@@ -53,7 +54,8 @@ export async function generateComponentClustersTask(
       const component = await getRandomComponentVocab(
         vocabRepo,
         languageCodes,
-        blockList
+        blockList,
+        setsToAvoid
       );
 
       console.log('[ComponentClusters] Found component:', component ?
@@ -67,7 +69,7 @@ export async function generateComponentClustersTask(
       }
 
       clusterState.currentComponent = component;
-      await initializeContainerVocabQueue(component, vocabRepo, blockList);
+      await initializeContainerVocabQueue(component, vocabRepo, blockList, setsToAvoid);
       clusterState.phase = 'component-task';
       console.log('[ComponentClusters] Initialized with component, starting component-task phase');
     }
@@ -100,7 +102,7 @@ export async function generateComponentClustersTask(
     // Phase 2: Work through container vocabulary
     if (clusterState.phase === 'container-tasks') {
       console.log('[ComponentClusters] In container-tasks phase');
-      const task = await getNextContainerVocabTask(vocabRepo, translationRepo, blockList);
+      const task = await getNextContainerVocabTask(vocabRepo, translationRepo, blockList, setsToAvoid);
       if (task) {
         console.log('[ComponentClusters] Container task generated');
         return task;
@@ -128,14 +130,16 @@ export async function generateComponentClustersTask(
 async function getRandomComponentVocab(
   vocabRepo: VocabRepoContract,
   languageCodes: string[],
-  blockList?: string[]
+  blockList?: string[],
+  setsToAvoid?: string[]
 ): Promise<VocabData | null> {
   try {
     // Use the new repo method that finds vocab contained in at least 2 other vocab
     return await vocabRepo.getRandomDueOrUnseenVocabContainedInMultiple(
       languageCodes,
       2, // minContainers
-      blockList
+      blockList,
+      setsToAvoid
     );
   } catch (error) {
     const toast = useToast();
@@ -147,13 +151,15 @@ async function getRandomComponentVocab(
 async function initializeContainerVocabQueue(
   component: VocabData,
   vocabRepo: VocabRepoContract,
-  blockList?: string[]
+  blockList?: string[],
+  setsToAvoid?: string[]
 ): Promise<void> {
   try {
     // Get all vocab that contain this component
     const containerVocab = await vocabRepo.getDueOrUnseenVocabContainingVocabId(
       component.id,
-      blockList
+      blockList,
+      setsToAvoid
     );
 
     // Store in state
@@ -169,7 +175,8 @@ async function initializeContainerVocabQueue(
 async function getNextContainerVocabTask(
   vocabRepo: VocabRepoContract,
   translationRepo: TranslationRepoContract,
-  blockList?: string[]
+  blockList?: string[],
+  setsToAvoid?: string[]
 ): Promise<Task | null> {
   try {
     // Check if we have any container vocab left
@@ -204,7 +211,7 @@ async function getNextContainerVocabTask(
       if (originalIndex !== -1) {
         clusterState.containerVocabQueue.splice(originalIndex, 1);
       }
-      return getNextContainerVocabTask(vocabRepo, translationRepo, blockList);
+      return getNextContainerVocabTask(vocabRepo, translationRepo, blockList, setsToAvoid);
     }
 
     recordPracticedVocab(vocab);
@@ -267,7 +274,7 @@ function recordPracticedVocab(vocab: VocabData) {
 async function maybeGenerateSameSetReviewTask(
   vocabRepo: VocabRepoContract,
   translationRepo: TranslationRepoContract,
-  incomingBlockList: string[] | undefined
+  incomingBlockList: string[] | undefined,
 ): Promise<Task | null> {
   if (Math.random() >= 0.25) {
     return null;

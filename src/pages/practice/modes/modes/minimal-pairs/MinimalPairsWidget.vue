@@ -4,6 +4,7 @@ import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
 import type { Task } from '@/pages/practice/Task';
 import { usePracticeMode } from '@/pages/practice/modes/composables/usePracticeMode';
+import { usePracticeFilters } from '@/pages/practice/composables/usePracticeFilters';
 import PracticeModeLayout from '@/pages/practice/modes/components/PracticeModeLayout.vue';
 import { generateMinimalPairsTask } from './generateMinimalPairsTasks';
 
@@ -15,20 +16,20 @@ if (!vocabRepo || !languageRepo) {
   throw new Error('Required repositories not available');
 }
 
+const { selectedLanguages, setsToAvoid } = usePracticeFilters();
 const lastUsedVocabId = ref<string | null>(null);
 
 // Practice mode configuration
 const mode = usePracticeMode({
   modeId: 'minimal-pairs',
   generateTask: async () => {
-    const languages = await languageRepo.getActiveTargetLanguages();
-    const languageCodes = languages.map(lang => lang.code);
+    const languageCodes = selectedLanguages.value;
 
     if (languageCodes.length === 0) return null;
 
     const blockList = lastUsedVocabId.value ? [lastUsedVocabId.value] : undefined;
 
-    return await generateMinimalPairsTask(vocabRepo, languageCodes, blockList);
+    return await generateMinimalPairsTask(vocabRepo, languageCodes, blockList, setsToAvoid.value);
   },
   onTaskTransition: (newCurrentTask: Task) => {
     const vocabId = newCurrentTask.associatedVocab?.[0];

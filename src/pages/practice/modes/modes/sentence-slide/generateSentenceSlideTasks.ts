@@ -25,7 +25,8 @@ export async function generateSentenceSlideTask(
   vocabRepo: VocabRepoContract,
   translationRepo: TranslationRepoContract,
   languageCodes: string[],
-  blockList?: string[]
+  blockList?: string[],
+  setsToAvoid?: string[]
 ): Promise<Task | null> {
   try {
     console.log('[SentenceSlide] generateSentenceSlideTask called with:', { 
@@ -41,7 +42,8 @@ export async function generateSentenceSlideTask(
       const sentence = await getRandomUnseenSentenceWithRelatedVocab(
         vocabRepo,
         languageCodes,
-        blockList
+        blockList,
+        setsToAvoid
       );
       
       console.log('[SentenceSlide] Found sentence:', sentence ?
@@ -102,11 +104,12 @@ export async function generateSentenceSlideTask(
 async function getRandomUnseenSentenceWithRelatedVocab(
   vocabRepo: VocabRepoContract,
   languageCodes: string[],
-  blockList?: string[]
+  blockList?: string[],
+  setsToAvoid?: string[]
 ): Promise<VocabData | null> {
   try {
     // Use the new repo method that does DB-level filtering
-    return await vocabRepo.getRandomUnseenSentenceVocabWithRelatedVocab(languageCodes, blockList);
+    return await vocabRepo.getRandomUnseenSentenceVocabWithRelatedVocab(languageCodes, blockList, setsToAvoid);
   } catch (error) {
     const toast = useToast();
     toast.error(`Error getting random unseen sentence: ${String(error)}`);

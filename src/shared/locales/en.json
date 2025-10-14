@@ -179,6 +179,7 @@
       }
     },
     "widgets": {
+      "loading": "Loading...",
       "loadingEyesAndEars": "Loading Eyes and Ears...",
       "loadingFactCards": "Loading fact cards...",
       "loadingGoalTasks": "Loading goal tasks...",

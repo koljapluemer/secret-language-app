@@ -20,10 +20,10 @@ export interface VocabRepoContract {
   getVocabByUID(id: string): Promise<VocabData | undefined>;
   getVocabByUIDs(Ids: string[]): Promise<VocabData[]>;
   getVocabByLanguageAndContent(language: string, content: string): Promise<VocabData | undefined>;
-  getRandomAlreadySeenDueVocab(count: number, languages: string[], vocabBlockList?: string[]): Promise<VocabData[]>;
-  getRandomUnseenVocab(count: number, languages: string[], vocabBlockList?: string[]): Promise<VocabData[]>;
-  getRandomUnseenSentenceVocab(count: number, languages: string[], vocabBlockList?: string[]): Promise<VocabData[]>;
-  getDueSentenceVocabWithMaxLevel(languages: string[], maxLevel: number, vocabBlockList?: string[]): Promise<VocabData[]>;
+  getRandomAlreadySeenDueVocab(count: number, languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData[]>;
+  getRandomUnseenVocab(count: number, languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData[]>;
+  getRandomUnseenSentenceVocab(count: number, languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData[]>;
+  getDueSentenceVocabWithMaxLevel(languages: string[], maxLevel: number, vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData[]>;
   getDueOrUnseenVocabFromIds(Ids: string[]): Promise<VocabData[]>;
   
   // Pagination operations
@@ -45,7 +45,7 @@ export interface VocabRepoContract {
   // Pronunciation operations
   addPronunciationToVocab(id: string, pronunciation: string): Promise<void>;
   hasPronunciation(id: string): Promise<boolean>;
-  getRandomVocabWithMissingPronunciation(languages: string[], vocabBlockList?: string[]): Promise<VocabData | null>;
+  getRandomVocabWithMissingPronunciation(languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData | null>;
   
   // Related vocab operations
   addRelatedVocab(id: string, relatedVocabId: string): Promise<void>;
@@ -79,7 +79,7 @@ export interface VocabRepoContract {
   addImageFromUrl(vocabId: string, imageUrl: string, alt?: string): Promise<void>;
   addImageFromFile(vocabId: string, file: File, alt?: string): Promise<void>;
   removeImageFromVocab(vocabId: string, imageId: string): Promise<void>;
-  getVocabNeedingImages(languages: string[], vocabBlockList?: string[]): Promise<VocabData[]>;
+  getVocabNeedingImages(languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData[]>;
   markVocabNotPicturable(vocabId: string): Promise<void>;
 
   // Sound operations
@@ -88,17 +88,17 @@ export interface VocabRepoContract {
   removeSoundFromVocab(vocabId: string, soundId: string): Promise<void>;
 
   // Eyes and Ears operations
-  getRandomUnseenVocabWithSoundAndImages(languages: string[], vocabBlockList?: string[]): Promise<VocabData | null>;
-  getRandomDueVocabWithSoundAndImages(languages: string[], vocabBlockList?: string[]): Promise<VocabData | null>;
-  getRandomVocabWithImages(language: string, excludeVocabId: string, vocabBlockList?: string[]): Promise<VocabData | null>;
-  getDueVocabWithSoundAndImages(languages: string[], vocabBlockList?: string[]): Promise<VocabData[]>;
-  getUnseenVocabWithSoundAndImages(languages: string[], vocabBlockList?: string[]): Promise<VocabData[]>;
+  getRandomUnseenVocabWithSoundAndImages(languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData | null>;
+  getRandomDueVocabWithSoundAndImages(languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData | null>;
+  getRandomVocabWithImages(language: string, excludeVocabId: string, vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData | null>;
+  getDueVocabWithSoundAndImages(languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData[]>;
+  getUnseenVocabWithSoundAndImages(languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData[]>;
 
   // Sentence Slide operations
-  getRandomUnseenSentenceVocabWithRelatedVocab(languages: string[], vocabBlockList?: string[]): Promise<VocabData | null>;
+  getRandomUnseenSentenceVocabWithRelatedVocab(languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData | null>;
 
   // Minimal Pairs operations
-  getRandomDueOrUnseenVocabForMinimalPairs(languages: string[], vocabBlockList?: string[]): Promise<VocabData | null>;
+  getRandomDueOrUnseenVocabForMinimalPairs(languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData | null>;
 
   // Set Study operations
   getRandomDueVocabFromSet(setId: string, count: number, vocabBlockList?: string[]): Promise<VocabData[]>;
@@ -106,8 +106,8 @@ export interface VocabRepoContract {
   getUnseenVocabCountFromSet(setId: string): Promise<number>;
 
   // Component Clusters operations
-  getRandomDueOrUnseenVocabContainedInMultiple(languages: string[], minContainers: number, vocabBlockList?: string[]): Promise<VocabData | null>;
-  getDueOrUnseenVocabContainingVocabId(vocabId: string, vocabBlockList?: string[]): Promise<VocabData[]>;
+  getRandomDueOrUnseenVocabContainedInMultiple(languages: string[], minContainers: number, vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData | null>;
+  getDueOrUnseenVocabContainingVocabId(vocabId: string, vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData[]>;
 
   // Merge operations
   getUncheckedVocab(limit: number): Promise<VocabData[]>;

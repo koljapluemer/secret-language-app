@@ -4,6 +4,7 @@ import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
 import type { Task } from '@/pages/practice/Task';
 import { usePracticeMode } from '@/pages/practice/modes/composables/usePracticeMode';
+import { usePracticeFilters } from '@/pages/practice/composables/usePracticeFilters';
 import PracticeModeLayout from '@/pages/practice/modes/components/PracticeModeLayout.vue';
 import { generateEyesAndEars, type EyesAndEarsOptions } from './generateEyesAndEarsTasks';
 
@@ -15,6 +16,7 @@ if (!vocabRepo || !languageRepo) {
   throw new Error('Required repositories not available');
 }
 
+const { selectedLanguages, setsToAvoid } = usePracticeFilters();
 const lastUsedVocabId = ref<string | null>(null);
 const showSettings = ref(true);
 const exerciseOptions = ref<EyesAndEarsOptions>({
@@ -25,14 +27,13 @@ const exerciseOptions = ref<EyesAndEarsOptions>({
 const mode = usePracticeMode({
   modeId: 'eyes-and-ears',
   generateTask: async () => {
-    const languages = await languageRepo.getActiveTargetLanguages();
-    const languageCodes = languages.map(lang => lang.code);
+    const languageCodes = selectedLanguages.value;
 
     if (languageCodes.length === 0) return null;
 
     const blockList = lastUsedVocabId.value ? [lastUsedVocabId.value] : undefined;
 
-    return await generateEyesAndEars(vocabRepo, languageCodes, blockList, exerciseOptions.value);
+    return await generateEyesAndEars(vocabRepo, languageCodes, blockList, setsToAvoid.value, exerciseOptions.value);
   },
   onTaskTransition: (newCurrentTask: Task) => {
     const vocabId = newCurrentTask.associatedVocab?.[0];

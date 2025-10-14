@@ -7,17 +7,18 @@ import { useToast } from '@/shared/toasts';
 export async function generateMinimalPairsTask(
   vocabRepo: VocabRepoContract,
   languageCodes: string[],
-  blockList?: string[]
+  blockList?: string[],
+  setsToAvoid?: string[]
 ): Promise<Task | null> {
   try {
     const { getLastUsedVocabId, addUsedVocab } = useUsedVocabTracker();
-    
+
     // Only block the last used vocab
     const lastUsed = getLastUsedVocabId();
     const combinedBlockList = lastUsed ? [...(blockList || []), lastUsed] : (blockList || []);
-    
+
     // Get a random vocab that meets minimal pairs criteria and wasn't just used
-    const vocab = await vocabRepo.getRandomDueOrUnseenVocabForMinimalPairs(languageCodes, combinedBlockList);
+    const vocab = await vocabRepo.getRandomDueOrUnseenVocabForMinimalPairs(languageCodes, combinedBlockList, setsToAvoid);
     
     if (!vocab) {
       return null;

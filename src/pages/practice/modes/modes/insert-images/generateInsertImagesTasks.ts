@@ -6,12 +6,13 @@ import { generateAddImageToVocab } from '@/pages/practice/tasks/task-add-image-t
 export async function generateInsertImagesTask(
   vocabRepo: VocabRepoContract,
   languageCodes: string[],
-  blockList?: string[]
+  blockList?: string[],
+  setsToAvoid?: string[]
 ): Promise<Task | null> {
   const toast = useToast();
   try {
     // Get vocab that needs images
-    const vocabList = await vocabRepo.getVocabNeedingImages(languageCodes, blockList);
+    const vocabList = await vocabRepo.getVocabNeedingImages(languageCodes, blockList, setsToAvoid);
     
     if (vocabList.length === 0) {
       return null;

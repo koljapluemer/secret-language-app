@@ -53,19 +53,21 @@ export async function generateUltraRandomTask(
   goalRepo: GoalRepoContract,
   noteRepo: NoteRepoContract,
   languageCodes: string[],
-  lastUsedTaskType?: string | null
+  lastUsedTaskType?: string | null,
+  setsToAvoid?: string[]
 ): Promise<Task | null> {
   const toast = useToast();
   try {
     // Create unified context for all generators
-    const context: RepositoriesContext & { languageCodes: string[] } = {
+    const context: RepositoriesContext & { languageCodes: string[]; setsToAvoid?: string[] } = {
       vocabRepo,
       translationRepo,
       factCardRepo,
       resourceRepo,
       goalRepo,
       noteRepo,
-      languageCodes
+      languageCodes,
+      setsToAvoid
     };
 
     // Get all available task types
