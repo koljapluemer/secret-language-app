@@ -13,7 +13,10 @@
           :available-languages="availableLanguages"
           :selected-languages="selectedLanguages"
           title="Languages"
+          :open="true"
           @toggle="toggleLanguage"
+          @select-all="selectAllLanguages"
+          @deselect-all="deselectAllLanguages"
         />
 
         <!-- Set Filter -->
@@ -21,15 +24,15 @@
           :available-sets="availableSets"
           :selected-sets="selectedSets"
           title="Sets"
+          :open="true"
           @toggle="toggleSet"
+          @select-all="selectAllSets"
+          @deselect-all="deselectAllSets"
         />
       </div>
 
       <!-- Actions -->
       <div class="modal-action">
-        <button @click="resetFilters" class="btn btn-ghost">
-          Reset to All
-        </button>
         <label :for="modalId" class="btn btn-primary">
           Apply Filters
         </label>
@@ -60,7 +63,10 @@ defineProps<Props>();
 const emit = defineEmits<{
   'toggle-language': [languageCode: string];
   'toggle-set': [setId: string];
-  'reset': [];
+  'select-all-languages': [];
+  'deselect-all-languages': [];
+  'select-all-sets': [];
+  'deselect-all-sets': [];
 }>();
 
 const isOpen = defineModel<boolean>('isOpen', { default: false });
@@ -73,7 +79,19 @@ function toggleSet(setId: string) {
   emit('toggle-set', setId);
 }
 
-function resetFilters() {
-  emit('reset');
+function selectAllLanguages() {
+  emit('select-all-languages');
+}
+
+function deselectAllLanguages() {
+  emit('deselect-all-languages');
+}
+
+function selectAllSets() {
+  emit('select-all-sets');
+}
+
+function deselectAllSets() {
+  emit('deselect-all-sets');
 }
 </script>

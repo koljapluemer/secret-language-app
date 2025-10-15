@@ -14,7 +14,10 @@ const {
   loadOptions,
   toggleLanguage,
   toggleSet,
-  resetFilters
+  selectAllLanguages,
+  deselectAllLanguages,
+  selectAllSets,
+  deselectAllSets
 } = usePracticeFilters();
 
 onMounted(() => {
@@ -43,7 +46,10 @@ onMounted(() => {
       :selected-sets="selectedSets"
       @toggle-language="toggleLanguage"
       @toggle-set="toggleSet"
-      @reset="resetFilters"
+      @select-all-languages="selectAllLanguages"
+      @deselect-all-languages="deselectAllLanguages"
+      @select-all-sets="selectAllSets"
+      @deselect-all-sets="deselectAllSets"
     />
   </div>
 </template>

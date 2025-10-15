@@ -72,6 +72,26 @@ export function usePracticeFilters() {
     selectedSets.value = ['user-added', ...availableSets.value.map(s => s.id)];
   }
 
+  // Select all languages
+  function selectAllLanguages() {
+    selectedLanguages.value = availableLanguages.value.map(l => l.code);
+  }
+
+  // Deselect all languages
+  function deselectAllLanguages() {
+    selectedLanguages.value = [];
+  }
+
+  // Select all sets
+  function selectAllSets() {
+    selectedSets.value = ['user-added', ...availableSets.value.map(s => s.id)];
+  }
+
+  // Deselect all sets
+  function deselectAllSets() {
+    selectedSets.value = [];
+  }
+
   return {
     selectedLanguages,
     selectedSets,
@@ -82,6 +102,10 @@ export function usePracticeFilters() {
     loadOptions,
     toggleLanguage,
     toggleSet,
-    resetFilters
+    resetFilters,
+    selectAllLanguages,
+    deselectAllLanguages,
+    selectAllSets,
+    deselectAllSets
   };
 }
