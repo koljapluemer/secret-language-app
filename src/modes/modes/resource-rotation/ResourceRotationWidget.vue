@@ -5,7 +5,7 @@ import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoCont
 import { usePracticeMode } from '@/modes/composables/usePracticeMode';
 import { usePracticeFilters } from '@/pages/practice/composables/usePracticeFilters';
 import PracticeModeLayout from '@/modes/components/PracticeModeLayout.vue';
-import { getRandomExtractKnowledgeTask } from '@/tasks/task-resource-extract-knowledge/getRandom';
+import { generateResourceRotationTask } from './generateResourceRotationTasks';
 
 // Inject repositories
 const resourceRepo = inject<ResourceRepoContract>('resourceRepo');
@@ -25,10 +25,7 @@ const mode = usePracticeMode({
 
     if (languageCodes.length === 0) return null;
 
-    return await getRandomExtractKnowledgeTask({
-      resourceRepo,
-      languageCodes
-    });
+    return await generateResourceRotationTask(resourceRepo, languageCodes);
   },
   messages: {
     loading: 'Finding resources to extract knowledge from...',

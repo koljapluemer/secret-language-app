@@ -6,7 +6,6 @@ import GoalGetterWidget from '@/modes/modes/goal-getter/GoalGetterWidget.vue';
 import SisyphosWidget from '@/modes/modes/sisyphos/SisyphosWidget.vue';
 import InsertImagesWidget from '@/modes/modes/insert-images/InsertImagesWidget.vue';
 import EyesAndEarsWidget from '@/modes/modes/eyes-and-ears/EyesAndEarsWidget.vue';
-import UltraRandomWidget from '@/modes/modes/ultrarandom/UltraRandomWidget.vue';
 import IllegalImmersionWidget from '@/modes/modes/illegal-immersion/IllegalImmersionWidget.vue';
 import SentenceSlideWidget from '@/modes/modes/sentence-slide/SentenceSlideWidget.vue';
 import ResourceRotationWidget from '@/modes/modes/resource-rotation/ResourceRotationWidget.vue';
@@ -71,11 +70,6 @@ const router = createRouter({
           path: 'eyes-and-ears',
           name: 'practice-mode-eyes-and-ears',
           component: EyesAndEarsWidget
-        },
-        {
-          path: 'ultrarandom',
-          name: 'practice-mode-ultrarandom',
-          component: UltraRandomWidget
         },
         {
           path: 'illegal-immersion',
