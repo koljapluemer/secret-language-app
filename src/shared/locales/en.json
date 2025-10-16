@@ -91,10 +91,6 @@
           "hint": "Generation exercises include sentence formation, while recall exercises focus on recognition."
         }
       },
-      "ultrarandom": {
-        "name": "Ultrarandom",
-        "description": "Completely random practice tasks"
-      },
       "illegalImmersion": {
         "name": "Illegal Immersion",
         "description": "Immersion content comprehension"
@@ -189,7 +185,6 @@
       "preparingResourceRotation": "Preparing resource rotation...",
       "preparingSentenceSlide": "Preparing sentence slide...",
       "preparingEternalReview": "Preparing your eternal review session...",
-      "preparingUltraRandom": "Preparing ultra random tasks...",
       "allDone": "All Done!",
       "allPairsMastered": "All Pairs Mastered",
       "resourcePoolEmpty": "Resource Pool Empty",
@@ -216,14 +211,7 @@
       "resetSlide": "Reset Slide",
       "resetBoulder": "Reset Boulder",
       "resetRandom": "Reset Random",
-      "addResource": "Add Resource",
-      "illegalImmersionIcon": "🚫📚",
-      "insertImagesIcon": "🖼️",
-      "minimalPairsIcon": "🎯",
-      "resourceRotationIcon": "📚",
-      "sentenceSlideIcon": "📚✨",
-      "sisyphosIcon": "🗿",
-      "ultraRandomIcon": "🎲"
+      "addResource": "Add Resource"
     }
   },
   "material": {

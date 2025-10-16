@@ -71,7 +71,6 @@ const mode = usePracticeMode({
     :initialize="mode.initialize"
     :onTaskFinished="mode.handleTaskFinished"
     :loadingFallback="$t('practice.widgets.startingIllegalImmersion')"
-    :emptyTitle="$t('practice.widgets.illegalImmersionIcon')"
     :checkAgainLabel="$t('practice.widgets.checkForMoreContent')"
   />
 </template>

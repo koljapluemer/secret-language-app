@@ -54,6 +54,5 @@ const mode = usePracticeMode({
     :initialize="mode.initialize"
     :onTaskFinished="mode.handleTaskFinished"
     :loadingFallback="$t('practice.widgets.preparingImageInsertion')"
-    :emptyTitle="$t('practice.widgets.insertImagesIcon')"
   />
 </template>

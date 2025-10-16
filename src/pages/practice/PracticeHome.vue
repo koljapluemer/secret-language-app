@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BookOpen, Target, RotateCcw, ImagePlus, Eye, Dices, Zap, ArrowRight, RefreshCw, Volume2, Boxes } from 'lucide-vue-next';
+import { BookOpen, Target, RotateCcw, ImagePlus, Eye, Zap, ArrowRight, RefreshCw, Volume2, Boxes } from 'lucide-vue-next';
 
 const practiceOptions = [
   {
@@ -31,12 +31,6 @@ const practiceOptions = [
     route: { name: 'practice-mode-eyes-and-ears' },
     icon: Eye,
     description: 'Match sounds to images for vocab with audio and visuals'
-  },
-  {
-    name: 'Ultrarandom',
-    route: { name: 'practice-mode-ultrarandom' },
-    icon: Dices,
-    description: 'Completely random tasks'
   },
   {
     name: 'Illegal Immersion',

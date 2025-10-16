@@ -40,7 +40,7 @@ export class DownloadAndPracticeService {
       onDownloadComplete?.();
 
       // Navigate to preferred practice mode or default
-      const practiceMode = metadata?.preferredMode || 'practice-mode-ultrarandom';
+      const practiceMode = metadata?.preferredMode || 'practice-mode-sisyphos';
       this.router.push({ name: practiceMode });
 
     } catch (err) {

@@ -54,6 +54,5 @@ const mode = usePracticeMode({
     :initialize="mode.initialize"
     :onTaskFinished="mode.handleTaskFinished"
     :loadingFallback="$t('practice.widgets.loadingMinimalPairs')"
-    :emptyTitle="$t('practice.widgets.minimalPairsIcon')"
   />
 </template>

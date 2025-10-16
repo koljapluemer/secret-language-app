@@ -76,7 +76,6 @@ async function handleTaskFinished() {
     :initialize="mode.initialize"
     :onTaskFinished="handleTaskFinished"
     :loadingFallback="$t('practice.widgets.preparingSentenceSlide')"
-    :emptyTitle="$t('practice.widgets.sentenceSlideIcon')"
     :checkAgainLabel="$t('practice.widgets.checkForMoreSentences')"
     :fallbackLabel="$t('practice.widgets.resetSlide')"
   />

@@ -44,6 +44,5 @@ const mode = usePracticeMode({
     :initialize="mode.initialize"
     :onTaskFinished="mode.handleTaskFinished"
     :loadingFallback="$t('practice.widgets.preparingResourceRotation')"
-    :emptyTitle="$t('practice.widgets.resourceRotationIcon')"
   />
 </template>
