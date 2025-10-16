@@ -30,6 +30,7 @@ import PageMyMaterial from '@/pages/my-material/PageMyMaterial.vue';
 import PageSettings from '@/pages/settings/PageSettings.vue';
 import PageMotivation from '@/pages/motivation/PageMotivation.vue';
 import SelfTestHome from '@/pages/self-test/SelfTestHome.vue';
+import MinimalPairsTest from '@/modes/modes/minimal-pairs/MinimalPairsTest.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -203,6 +204,11 @@ const router = createRouter({
       path: '/self-test',
       name: 'self-test',
       component: SelfTestHome
+    },
+    {
+      path: '/self-test/minimal-pairs',
+      name: 'test-mode-minimal-pairs',
+      component: MinimalPairsTest
     }
   ]
 });

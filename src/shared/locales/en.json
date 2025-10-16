@@ -757,6 +757,19 @@
   },
   "selfTest": {
     "title": "Self-Test",
-    "overview": "Self-Test Overview"
+    "overview": "Self-Test Overview",
+    "loadingTest": "Loading test...",
+    "progress": "Task {current} of {total}",
+    "testSeenVocab": "Test Seen Vocab",
+    "testAllVocab": "Test All Vocab",
+    "selectSet": "Select a Set",
+    "testingSeenVocab": "Testing vocab you've already practiced",
+    "testingAllVocab": "Testing all vocab from this set",
+    "noSetsAvailable": "No sets available. Please download sets first.",
+    "resultsTitle": "Test Complete!",
+    "score": "Score",
+    "correct": "Correct",
+    "tryAgain": "Try Again",
+    "returnToTests": "Return to Self-Test"
   }
 }
