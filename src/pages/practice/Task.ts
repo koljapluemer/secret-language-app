@@ -1,4 +1,4 @@
-import type { taskRegistry } from "@/pages/practice/tasks/ui/taskRegistry";
+import type { taskRegistry } from "@/tasks/ui/taskRegistry";
 
 export interface Task {
   id: string;

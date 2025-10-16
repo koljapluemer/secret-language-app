@@ -1,0 +1,296 @@
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
+import type { Task } from '@/pages/practice/Task';
+import type { VocabData } from '@/entities/vocab/VocabData';
+import type { TranslationData } from '@/entities/translations/TranslationData';
+import type { NoteData } from '@/entities/notes/NoteData';
+import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
+import { shuffleArray } from '@/shared/utils/arrayUtils';
+import { Rating } from 'ts-fsrs';
+import { generateClozeFromText, isRTLText, type ClozeData } from '@/tasks/utils/clozeUtils';
+import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
+import LinkDisplayMini from '@/shared/links/LinkDisplayMini.vue';
+import { useToast } from '@/shared/toasts';
+
+interface AnswerOption {
+  content: string;
+  isCorrect: boolean;
+}
+
+interface Props {
+  task: Task;
+  repositories: RepositoriesContextStrict;
+  modeContext?: {
+    setWrongVocabDueAgainImmediately?: boolean;
+  };
+}
+
+const emit = defineEmits<{
+  finished: [correctness?: 'correct' | 'incorrect' | 'neutral'];
+}>();
+
+const toast = useToast();
+
+const props = defineProps<Props>();
+
+const vocabRepo = props.repositories.vocabRepo;
+const translationRepo = props.repositories.translationRepo;
+const noteRepo = props.repositories.noteRepo;
+
+const selectedIndex = ref<number | null>(null);
+const isAnswered = ref(false);
+const firstAttemptWrong = ref(false);
+const answerOptions = ref<AnswerOption[]>([]);
+const vocab = ref<VocabData | null>(null);
+const translations = ref<TranslationData[]>([]);
+const vocabNotes = ref<NoteData[]>([]);
+const translationNotes = ref<NoteData[]>([]);
+const loading = ref(true);
+const clozeData = ref<ClozeData | null>(null);
+
+const vocabId = computed(() => {
+  return props.task.associatedVocab?.[0];
+});
+
+
+const isReverse = computed(() => {
+  // Sentence/phrase cloze only goes content→translation
+  if (vocab.value?.consideredSentence === true || vocab.value?.consideredWord !== false) {
+    return false;
+  }
+  // Vocab-based cloze can go both ways
+  return props.task.taskType.includes('native-to-target');
+});
+
+const optionCount = computed(() => {
+  return props.task.taskType.includes('four') ? 4 : 2;
+});
+
+const isRTL = computed(() => {
+  if (!vocab.value?.content) return false;
+  return isRTLText(vocab.value.content);
+});
+
+const secondaryContent = computed(() => {
+  if (!vocab.value || translations.value.length === 0) return '';
+
+  if (isReverse.value) {
+    // Show vocab content as secondary when translation is primary (cloze)
+    return vocab.value.content || '';
+  } else {
+    // Show translation as secondary when vocab is primary (cloze)
+    const randomTranslation = translations.value[Math.floor(Math.random() * translations.value.length)];
+    return randomTranslation?.content || '';
+  }
+});
+
+async function loadVocabData() {
+  if (!vocabId.value) {
+    loading.value = false;
+    return;
+  }
+
+  try {
+    const vocabData = await vocabRepo.getVocabByUID(vocabId.value);
+    if (!vocabData) {
+      loading.value = false;
+      return;
+    }
+
+    vocab.value = vocabData;
+    translations.value = await translationRepo.getTranslationsByIds(vocabData.translations);
+    
+    // Load vocab notes
+    if (vocabData.notes && vocabData.notes.length > 0) {
+      vocabNotes.value = await noteRepo.getNotesByUIDs(vocabData.notes);
+    }
+    
+    // Load translation notes
+    const allTranslationNoteIds: string[] = [];
+    translations.value.forEach(translation => {
+      if (translation.notes && translation.notes.length > 0) {
+        allTranslationNoteIds.push(...translation.notes);
+      }
+    });
+    if (allTranslationNoteIds.length > 0) {
+      translationNotes.value = await noteRepo.getNotesByUIDs(allTranslationNoteIds);
+    }
+
+    await generateClozeOptions();
+  } catch {
+    toast.error('Failed to load vocabulary data');
+  } finally {
+    loading.value = false;
+  }
+}
+
+
+async function generateClozeOptions() {
+  if (!vocab.value || translations.value.length === 0) return;
+
+  const sourceText = isReverse.value 
+    ? translations.value[Math.floor(Math.random() * translations.value.length)].content
+    : vocab.value.content || '';
+  
+  clozeData.value = generateClozeFromText(sourceText, vocab.value.progress.level);
+  const correctAnswer = clozeData.value.hiddenWord;
+  
+  const options: AnswerOption[] = [];
+  options.push({ content: correctAnswer, isCorrect: true });
+  
+  const wrongCount = optionCount.value - 1;
+  const wrongAnswers = isReverse.value
+    ? await translationRepo.generateWrongTranslations(correctAnswer, wrongCount)
+    : await vocabRepo.generateWrongVocabs(vocab.value.language, correctAnswer, wrongCount);
+
+  wrongAnswers.forEach(wrong => {
+    options.push({ content: wrong, isCorrect: false });
+  });
+
+  answerOptions.value = shuffleArray(options);
+}
+
+async function selectOption(index: number) {
+  if (isAnswered.value) return;
+
+  selectedIndex.value = index;
+  const isCorrect = answerOptions.value[index].isCorrect;
+
+  if (isCorrect) {
+    isAnswered.value = true;
+    await handleCompletion();
+  } else {
+    firstAttemptWrong.value = true;
+  }
+}
+
+function getButtonClass(index: number): string {
+  const isCorrect = answerOptions.value[index].isCorrect;
+  const isSelected = index === selectedIndex.value;
+
+  if (isCorrect && isSelected) {
+    return 'btn-success';
+  }
+
+  if (!isCorrect && isSelected) {
+    return 'btn-error';
+  }
+
+  if (isAnswered.value && isCorrect) {
+    return 'btn-success';
+  }
+
+  if (isAnswered.value && !isCorrect) {
+    return 'btn-outline opacity-50';
+  }
+
+  return 'btn-outline';
+}
+
+function isButtonDisabled(index: number): boolean {
+  const isCorrect = answerOptions.value[index].isCorrect;
+  const isSelected = index === selectedIndex.value;
+
+  if (isAnswered.value) return true;
+  if (!isCorrect && isSelected) return true;
+
+  return false;
+}
+
+const handleCompletion = async () => {
+  if (!vocab.value) return;
+  
+  try {
+    const rating = firstAttemptWrong.value ? Rating.Again : Rating.Good;
+    const immediateDue = props.modeContext?.setWrongVocabDueAgainImmediately || false;
+    await vocabRepo.scoreVocab(vocab.value.id, rating, immediateDue);
+    await vocabRepo.updateLastReview(vocab.value.id);
+    
+    const correctness = firstAttemptWrong.value ? 'incorrect' : 'correct';
+    setTimeout(() => emit('finished', correctness), 750);
+  } catch {
+    toast.error('Failed to save vocabulary progress');
+    emit('finished', 'neutral');
+  }
+};
+
+onMounted(loadVocabData);
+</script>
+
+<template>
+  <div v-if="loading">
+    <span class="loading loading-spinner loading-lg"></span>
+  </div>
+
+  <div v-else-if="vocab && answerOptions.length > 0 && clozeData" class="text-center">
+    <!-- Cloze section with potential notes sidebar -->
+    <div class="flex gap-4 mb-8">
+      <div class="flex-1">
+        <div class="text-3xl mb-4" :dir="isRTL ? 'rtl' : 'ltr'">
+          <span v-if="clozeData.beforeWord" class="me-2">{{ clozeData.beforeWord }}</span>
+          <span class="inline-block bg-gray-300  text-transparent rounded px-2 py-1 mx-1 select-none" 
+                :style="{ width: Math.max(clozeData.hiddenWord.length * 0.6, 3) + 'em' }">
+            {{ clozeData.hiddenWord }}
+          </span>
+          <span v-if="clozeData.afterWord" class="ms-2">{{ clozeData.afterWord }}</span>
+        </div>
+        <div v-if="secondaryContent" class="text-2xl text-light" >
+          {{ secondaryContent }}
+        </div>
+      </div>
+      
+      <!-- Notes sidebar -->
+      <div v-if="vocabNotes.filter(note => note.showBeforeExercise).length > 0 || translationNotes.filter(note => note.showBeforeExercise).length > 0" class="w-64 space-y-3">
+        <!-- Vocab notes -->
+        <div v-if="vocabNotes.filter(note => note.showBeforeExercise).length > 0" class="space-y-2">
+          <NoteDisplayMini 
+            v-for="note in vocabNotes.filter(note => note.showBeforeExercise)" 
+            :key="note.id"
+            :note="note"
+          />
+        </div>
+        
+        <!-- Translation notes -->
+        <div v-if="translationNotes.filter(note => note.showBeforeExercise).length > 0" class="space-y-2">
+          
+          <NoteDisplayMini 
+            v-for="note in translationNotes.filter(note => note.showBeforeExercise)" 
+            :key="note.id"
+            :note="note"
+          />
+        </div>
+      </div>
+    </div>
+    
+    <div v-if="!isAnswered" class="flex flex-col md:flex-row gap-2 mb-6">
+      <button v-for="(option, index) in answerOptions" :key="index" :class="getButtonClass(index)"
+        :disabled="isButtonDisabled(index)" @click="selectOption(index)" class="btn btn-lg flex-1">
+        {{ option.content }}
+      </button>
+    </div>
+
+    <div v-if="isAnswered" class="mb-6">
+      <div class="text-3xl mb-4" :dir="isRTL ? 'rtl' : 'ltr'">
+        <span v-if="clozeData.beforeWord" class="me-2">{{ clozeData.beforeWord }}</span>
+        <span class="text-green-600 font-bold mx-1">{{ clozeData.hiddenWord }}</span>
+        <span v-if="clozeData.afterWord" class="ms-2">{{ clozeData.afterWord }}</span>
+      </div>
+      <div v-if="secondaryContent" class="text-2xl text-light">
+        {{ secondaryContent }}
+      </div>
+    </div>
+    
+    <!-- Links -->
+    <div v-if="vocab?.links && vocab.links.length > 0" class="space-y-2 mt-6">
+      <LinkDisplayMini
+        v-for="(link, index) in vocab.links"
+        :key="index"
+        :link="link"
+      />
+    </div>
+  </div>
+
+  <div v-else>
+    <span>{{ $t('practice.tasks.failedToLoad') }}</span>
+  </div>
+</template>

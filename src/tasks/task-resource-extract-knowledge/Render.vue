@@ -1,0 +1,179 @@
+<script setup lang="ts">
+import { computed, ref, onMounted } from 'vue';
+import type { Task } from '@/pages/practice/Task';
+import ManageResourceVocab from '@/widgets/manage-resource-vocab/ManageResourceVocab.vue';
+import ManageResourceFactCards from '@/widgets/manage-resource-fact-cards/ManageResourceFactCards.vue';
+import type { ResourceData } from '@/entities/resources/ResourceData';
+import type { RepositoriesContext } from '@/shared/types/RepositoriesContext';
+import LinkDisplayAsButton from '@/shared/links/LinkDisplayAsButton.vue';
+import TaskDecideWhetherToDoAgain from '@/tasks/ui/TaskDecideWhetherToDoAgain.vue';
+import TaskSkipDisableDone from '@/tasks/ui/TaskSkipDisableDone.vue';
+import { useToast } from '@/shared/toasts';
+
+interface Props {
+  task: Task;
+  repositories: RepositoriesContext;
+}
+
+const props = defineProps<Props>();
+const emit = defineEmits<{
+  finished: [];
+}>();
+
+const toast = useToast();
+
+// Get the resource ID from associated resources
+const resourceId = computed(() => {
+  return props.task.associatedResources?.[0];
+});
+
+// Resource data and loading
+const resourceRepo = props.repositories.resourceRepo!;
+const resource = ref<ResourceData | null>(null);
+
+// Active tab state
+const activeTab = ref<'vocab' | 'facts'>('vocab');
+const hasChanges = ref(false);
+const showDoneSection = ref(false);
+
+const loadResource = async () => {
+  if (!resourceId.value) return;
+
+  try {
+    const resourceData = await resourceRepo.getResourceById(resourceId.value);
+    resource.value = resourceData || null;
+  } catch {
+    toast.error('Failed to load resource');
+  }
+};
+
+function handleResourceUpdate(updatedResource: ResourceData) {
+  resource.value = updatedResource;
+  hasChanges.value = true;
+}
+
+
+const handleSkip = async () => {
+  if (!resource.value) return;
+  
+  try {
+    // Update lastShownAt
+    const updatedResource = {
+      ...resource.value,
+      lastShownAt: new Date()
+    };
+    await resourceRepo.updateResource(JSON.parse(JSON.stringify(updatedResource)));
+
+    emit('finished');
+  } catch {
+    toast.error('Failed to skip resource');
+    emit('finished');
+  }
+};
+
+const handleSkipAndDisable = async () => {
+  if (!resource.value) return;
+  
+  try {
+    // Set finishedExtracting to true
+    const updatedResource = {
+      ...resource.value,
+      finishedExtracting: true,
+      lastShownAt: new Date()
+    };
+    await resourceRepo.updateResource(JSON.parse(JSON.stringify(updatedResource)));
+
+    emit('finished');
+  } catch {
+    toast.error('Failed to disable resource');
+    emit('finished');
+  }
+};
+
+const handleDone = () => {
+  showDoneSection.value = true;
+};
+
+const handleFinishDecision = async (wantToDoAgain: boolean) => {
+  if (!resource.value) return;
+  
+  try {
+    const updatedResource = {
+      ...resource.value,
+      finishedExtracting: !wantToDoAgain,
+      lastShownAt: new Date()
+    };
+    await resourceRepo.updateResource(JSON.parse(JSON.stringify(updatedResource)));
+
+    emit('finished');
+  } catch {
+    toast.error('Failed to complete resource');
+    emit('finished');
+  }
+};
+
+onMounted(() => {
+  loadResource();
+});
+</script>
+
+<template>
+  <div v-if="resource">
+    <div class="flex items-center justify-between mb-6">
+      <h2>{{ resource.title }}</h2>
+      <LinkDisplayAsButton v-if="resource.link" :link="resource.link" />
+    </div>
+
+    <div class="tabs tabs-boxed mb-4">
+      <button 
+        class="tab"
+        :class="{ 'tab-active': activeTab === 'vocab' }"
+        @click="activeTab = 'vocab'"
+      >
+        {{ $t('practice.tasks.vocabulary') }}
+      </button>
+      <button 
+        class="tab"
+        :class="{ 'tab-active': activeTab === 'facts' }"
+        @click="activeTab = 'facts'"
+      >
+        {{ $t('practice.tasks.factCards') }}
+      </button>
+    </div>
+
+    <div v-if="activeTab === 'vocab'" class="mb-6">
+      <ManageResourceVocab
+        v-if="resource"
+        :resource="resource"
+        @resource-updated="handleResourceUpdate"
+      />
+    </div>
+
+    <div v-if="activeTab === 'facts'" class="mb-6">
+      <ManageResourceFactCards
+        v-if="resource"
+        :resource="resource"
+        @resource-updated="handleResourceUpdate"
+      />
+    </div>
+
+    <TaskSkipDisableDone 
+      v-if="!showDoneSection"
+      :done-disabled="!hasChanges"
+      @skip="handleSkip"
+      @skip-and-disable="handleSkipAndDisable"
+      @done="handleDone"
+    />
+
+    <div v-if="showDoneSection">
+      <TaskDecideWhetherToDoAgain 
+        question="Do you want to extract more knowledge from this resource in the future?"
+        @decision="handleFinishDecision" 
+      />
+    </div>
+  </div>
+  
+  <div v-else>
+    <span class="loading loading-spinner loading-lg"></span>
+  </div>
+</template>

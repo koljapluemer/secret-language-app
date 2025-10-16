@@ -1,0 +1,116 @@
+import type { VocabData } from '@/entities/vocab/VocabData';
+import type { TranslationData } from '@/entities/translations/TranslationData';
+import type { Task } from '@/pages/practice/Task';
+import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
+import { randomFromArray } from '@/shared/utils/arrayUtils';
+import { useToast } from '@/shared/toasts';
+
+// Import all task generators
+import { generateAddTranslation } from '@/tasks/task-vocab-add-translation/generate';
+import { generateVocabTryToRemember } from '@/tasks/task-vocab-try-to-remember/generate';
+import { generateGuessWhatSentenceMeans } from '@/tasks/task-guess-what-sentence-means/generate';
+import { generateVocabRevealTargetToNative } from '@/tasks/task-vocab-reveal/generate';
+import { generateVocabRevealNativeToTarget } from '@/tasks/task-vocab-reveal/generate';
+import { generateVocabChoiceFromTwoTargetToNative } from '@/tasks/task-vocab-single-choice/generate';
+import { generateVocabChoiceFromTwoNativeToTarget } from '@/tasks/task-vocab-single-choice/generate';
+import { generateVocabChoiceFromFourTargetToNative } from '@/tasks/task-vocab-single-choice/generate';
+import { generateVocabChoiceFromFourNativeToTarget } from '@/tasks/task-vocab-single-choice/generate';
+import { generateClozeChoiceFromTwo } from '@/tasks/task-cloze-choice/generate';
+import { generateClozeChoiceFromFour } from '@/tasks/task-cloze-choice/generate';
+import { generateClozeReveal } from '@/tasks/task-cloze-reveal/generate';
+import { generateTaskFormSentenceFromTwoVocab, generateFormSentenceTaskFromSingleVocab } from '@/tasks/task-vocab-form-sentence/generate';
+
+type TaskGenerator = () => Task | Promise<Task>;
+
+
+export async function getRandomGeneratedTaskForVocab(
+  vocab: VocabData,
+  translations: TranslationData[] = [],
+  vocabRepo?: VocabRepoContract
+): Promise<Task | null> {
+  const toast = useToast();
+  const level = vocab.progress.level;
+  const isSentenceVocab = vocab.consideredSentence === true;
+  const hasTranslations = translations.length > 0;
+  const hasContent = !!vocab.content;
+
+  const eligibleTasks: TaskGenerator[] = [];
+
+  // Unseen vocab (level -1)
+  if (level === -1 && !isSentenceVocab && hasTranslations) {
+    eligibleTasks.push(() => generateVocabTryToRemember(vocab));
+  }
+  if (level === -1 && isSentenceVocab && hasTranslations) {
+    eligibleTasks.push(() => generateGuessWhatSentenceMeans(vocab));
+  }
+
+  // Word/unspecified choice tasks
+  if (!isSentenceVocab && hasTranslations && (level === 0 || level === 1)) {
+    eligibleTasks.push(() => generateVocabChoiceFromTwoTargetToNative(vocab));
+  }
+  if (!isSentenceVocab && hasTranslations && (level === 1 || level === 2)) {
+    eligibleTasks.push(() => generateVocabChoiceFromFourTargetToNative(vocab));
+  }
+  if (!isSentenceVocab && hasTranslations && (level === 1 || level === 2)) {
+    eligibleTasks.push(() => generateVocabChoiceFromTwoNativeToTarget(vocab));
+  }
+  if (!isSentenceVocab && hasTranslations && (level === 2 || level === 3)) {
+    eligibleTasks.push(() => generateVocabChoiceFromFourNativeToTarget(vocab));
+  }
+
+  // Word/unspecified reveal tasks
+  if (!isSentenceVocab && hasTranslations && level >= 3) {
+    eligibleTasks.push(() => generateVocabRevealTargetToNative(vocab));
+  }
+  if (!isSentenceVocab && hasTranslations && level >= 4) {
+    eligibleTasks.push(() => generateVocabRevealNativeToTarget(vocab));
+  }
+
+  // Sentence cloze tasks (levels 0-5)
+  if (isSentenceVocab && hasTranslations && level >= 0 && level <= 5) {
+    eligibleTasks.push(() => generateClozeChoiceFromTwo(vocab));
+    eligibleTasks.push(() => generateClozeChoiceFromFour(vocab));
+    eligibleTasks.push(() => generateClozeReveal(vocab));
+  }
+
+  // Sentence reveal tasks (level 6+)
+  if (isSentenceVocab && hasTranslations && level > 6) {
+    eligibleTasks.push(() => generateVocabRevealTargetToNative(vocab));
+    eligibleTasks.push(() => generateVocabRevealNativeToTarget(vocab));
+  }
+
+  // Form sentence tasks for non-sentence vocab (level 0+)
+  if (!isSentenceVocab && hasContent && level >= 0 && vocabRepo) {
+    // Single vocab form sentence task
+    eligibleTasks.push(() => generateFormSentenceTaskFromSingleVocab(vocab));
+    
+    // Two vocab form sentence task (async - find another vocab)
+    eligibleTasks.push(async () => {
+      try {
+        const otherVocabs = await vocabRepo.getDueNonSentenceVocabInLanguage(vocab.language);
+        const otherVocab = otherVocabs.find(v => v.id !== vocab.id);
+        if (otherVocab) {
+          return generateTaskFormSentenceFromTwoVocab(vocab, otherVocab);
+        }
+        // Fallback to single vocab if no other vocab found
+        return generateFormSentenceTaskFromSingleVocab(vocab);
+      } catch (error) {
+        toast.error(`Error finding second vocab for form sentence task: ${String(error)}`);
+        return generateFormSentenceTaskFromSingleVocab(vocab);
+      }
+    });
+  }
+
+  // Content enhancement tasks
+  if (hasContent && !hasTranslations && !vocab.notInterestedInAddingTranslations) {
+    eligibleTasks.push(() => generateAddTranslation(vocab));
+  }
+
+  if (eligibleTasks.length === 0) {
+    return null;
+  }
+
+  // Randomly pick one task from all eligible tasks
+  const selectedTaskGenerator = randomFromArray(eligibleTasks);
+  return selectedTaskGenerator ? await selectedTaskGenerator() : null;
+}
