@@ -1,6 +1,14 @@
 <script setup lang="ts">
-import type { QueueState } from '@/modes/useQueueState';
+import type { Task } from '@/tasks/Task';
 import TaskRenderer from '@/tasks/ui/TaskRenderer.vue';
+
+// Local type definition - no composable dependency
+type QueueState =
+  | { status: 'initializing' }
+  | { status: 'loading', message?: string }
+  | { status: 'task', currentTask: Task, nextTask: Task | null }
+  | { status: 'empty', message: string }
+  | { status: 'error', message: string };
 
 interface Props {
   state: QueueState;
