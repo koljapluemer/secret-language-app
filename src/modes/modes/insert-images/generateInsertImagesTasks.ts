@@ -1,6 +1,6 @@
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import { useToast } from '@/shared/toasts';
-import type { Task } from '@/pages/practice/Task';
+import type { Task } from '@/tasks/Task';
 import { generateAddImageToVocab } from '@/tasks/task-add-image-to-vocab/generate';
 
 export async function generateInsertImagesTask(

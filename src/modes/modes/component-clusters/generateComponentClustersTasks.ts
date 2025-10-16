@@ -1,7 +1,7 @@
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
 import type { VocabData } from '@/entities/vocab/VocabData';
-import type { Task } from '@/pages/practice/Task';
+import type { Task } from '@/tasks/Task';
 import { getRandomGeneratedTaskForVocab } from '@/modes/utils/getRandomGeneratedTaskForVocab';
 import { useToast } from '@/shared/toasts';
 

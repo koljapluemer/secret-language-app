@@ -6,7 +6,7 @@ import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoCont
 import type { VocabData } from '@/entities/vocab/VocabData';
 import type { FactCardData } from '@/entities/fact-cards/FactCardData';
 import type { ResourceData } from '@/entities/resources/ResourceData';
-import type { Task } from '@/pages/practice/Task';
+import type { Task } from '@/tasks/Task';
 import { getRandomGeneratedTaskForVocab } from '@/modes/utils/getRandomGeneratedTaskForVocab';
 import { getRandomGeneratedTaskForFactCard } from '@/modes/utils/getRandomGeneratedTaskForFactCard';
 import { generateConsumeImmersionContent } from '@/tasks/task-consume-immersion-content/generate';

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue';
-import type { Task } from '@/pages/practice/Task';
+import type { Task } from '@/tasks/Task';
 import ManageResourceVocab from '@/widgets/manage-resource-vocab/ManageResourceVocab.vue';
 import ManageResourceFactCards from '@/widgets/manage-resource-fact-cards/ManageResourceFactCards.vue';
 import type { ResourceData } from '@/entities/resources/ResourceData';

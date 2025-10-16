@@ -31,7 +31,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import type { GoalData } from '@/entities/goals/GoalData';
-import type { Task } from '@/pages/practice/Task';
+import type { Task } from '@/tasks/Task';
 import type { RepositoriesContext } from '@/shared/types/RepositoriesContext';
 import ManageGoalVocab from '@/widgets/manage-goal-vocab/ManageGoalVocab.vue';
 import TaskDecideWhetherToDoAgain from '@/tasks/ui/TaskDecideWhetherToDoAgain.vue';

@@ -1,5 +1,5 @@
 import { onMounted, onUnmounted } from 'vue';
-import type { Task } from '@/pages/practice/Task';
+import type { Task } from '@/tasks/Task';
 import { useQueueState } from '@/modes/useQueueState';
 import { useToast } from '@/shared/toasts';
 

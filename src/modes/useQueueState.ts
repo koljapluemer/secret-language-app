@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import type { Task } from '@/pages/practice/Task';
+import type { Task } from '@/tasks/Task';
 
 // Queue state types
 export type QueueState =

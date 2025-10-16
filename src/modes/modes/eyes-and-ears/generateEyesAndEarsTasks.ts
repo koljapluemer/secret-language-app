@@ -1,5 +1,5 @@
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
-import type { Task } from '@/pages/practice/Task';
+import type { Task } from '@/tasks/Task';
 import type { VocabData } from '@/entities/vocab/VocabData';
 import { generateVocabChooseImageBySound } from '@/tasks/task-vocab-choose-image-by-sound/generate';
 import { generateRecordSentenceTaskFromTwoVocab, generateRecordSentenceTaskFromSingleVocab } from '@/tasks/task-vocab-form-sentence/generate';

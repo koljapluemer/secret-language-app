@@ -1,6 +1,6 @@
 import type { VocabData } from '@/entities/vocab/VocabData';
 import type { TranslationData } from '@/entities/translations/TranslationData';
-import type { Task } from '@/pages/practice/Task';
+import type { Task } from '@/tasks/Task';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import { randomFromArray } from '@/shared/utils/arrayUtils';
 import { useToast } from '@/shared/toasts';

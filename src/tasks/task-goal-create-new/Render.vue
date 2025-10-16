@@ -56,7 +56,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import type { Task } from '@/pages/practice/Task';
+import type { Task } from '@/tasks/Task';
 import type { RepositoriesContext } from '@/shared/types/RepositoriesContext';
 import LanguageDropdown from '@/entities/languages/LanguageDropdown.vue';
 import { useToast } from '@/shared/toasts';

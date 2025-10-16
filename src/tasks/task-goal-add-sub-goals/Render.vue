@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import type { Task } from '@/pages/practice/Task';
+import type { Task } from '@/tasks/Task';
 import type { RepositoriesContext } from '@/shared/types/RepositoriesContext';
 import type { GoalData } from '@/entities/goals/GoalData';
 import ManageSubGoalsWidget from '@/features/goal-manage-its-sub-goals/ManageSubGoalsWidget.vue';

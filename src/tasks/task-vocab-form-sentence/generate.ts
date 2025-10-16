@@ -1,5 +1,5 @@
 import type { VocabData } from '@/entities/vocab/VocabData';
-import type { Task } from '@/pages/practice/Task';
+import type { Task } from '@/tasks/Task';
 
 export function generateTaskFormSentenceFromTwoVocab(vocab1: VocabData, vocab2: VocabData): Task {
   const id = `vocab-form-sentence-${vocab1.id}-${vocab2.id}-${Date.now()}`;

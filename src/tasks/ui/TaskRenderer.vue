@@ -18,7 +18,7 @@
 
 <script setup lang="ts">
 import { taskRegistry } from './taskRegistry';
-import type { Task } from '@/pages/practice/Task';
+import type { Task } from '@/tasks/Task';
 import { inject, onMounted, onUnmounted, ref } from 'vue';
 import type { LanguageData } from '@/entities/languages/LanguageData';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';

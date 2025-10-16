@@ -1,5 +1,5 @@
 import type { FactCardRepoContract } from '@/entities/fact-cards/FactCardRepoContract';
-import type { Task } from '@/pages/practice/Task';
+import type { Task } from '@/tasks/Task';
 import { generateFactCardTryToRemember } from '@/tasks/task-fact-card-try-to-remember/generate';
 import { generateFactCardReveal } from '@/tasks/task-fact-card-reveal/generate';
 import { useToast } from '@/shared/toasts';

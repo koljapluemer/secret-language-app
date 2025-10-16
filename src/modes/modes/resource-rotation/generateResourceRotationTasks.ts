@@ -1,5 +1,5 @@
 import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoContract';
-import type { Task } from '@/pages/practice/Task';
+import type { Task } from '@/tasks/Task';
 import { generateExtractKnowledgeFromResource } from '@/tasks/task-resource-extract-knowledge/generate';
 import { useToast } from '@/shared/toasts';
 import { randomFromArray } from '@/shared/utils/arrayUtils';

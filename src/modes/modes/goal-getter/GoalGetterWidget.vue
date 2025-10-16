@@ -2,7 +2,7 @@
 import { inject, ref } from 'vue';
 import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract';
 import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
-import type { Task } from '@/pages/practice/Task';
+import type { Task } from '@/tasks/Task';
 import { usePracticeMode } from '@/modes/utils/usePracticeMode';
 import { usePracticeFilters } from '@/features/filter-practice-sets-and-languages/usePracticeFilters';
 import PracticeModeLayout from '@/modes/Layout.vue';

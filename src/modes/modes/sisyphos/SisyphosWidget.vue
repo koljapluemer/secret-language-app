@@ -4,7 +4,7 @@ import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
 import type { FactCardRepoContract } from '@/entities/fact-cards/FactCardRepoContract';
 import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
-import type { Task } from '@/pages/practice/Task';
+import type { Task } from '@/tasks/Task';
 import { usePracticeMode } from '@/modes/utils/usePracticeMode';
 import { usePracticeFilters } from '@/features/filter-practice-sets-and-languages/usePracticeFilters';
 import PracticeModeLayout from '@/modes/Layout.vue';

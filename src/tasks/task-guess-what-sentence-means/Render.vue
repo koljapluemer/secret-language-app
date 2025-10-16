@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { createEmptyCard } from 'ts-fsrs';
-import type { Task } from '@/pages/practice/Task';
+import type { Task } from '@/tasks/Task';
 import type { VocabData } from '@/entities/vocab/VocabData';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
 import type { NoteData } from '@/entities/notes/NoteData';

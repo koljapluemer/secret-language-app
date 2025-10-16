@@ -70,7 +70,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import type { Task } from '@/pages/practice/Task';
+import type { Task } from '@/tasks/Task';
 import type { VocabData, VocabImage, VocabSound } from '@/entities/vocab/VocabData';
 import type { NoteData } from '@/entities/notes/NoteData';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';

@@ -1,5 +1,5 @@
 import type { ResourceData } from '@/entities/resources/ResourceData';
-import type { Task } from '@/pages/practice/Task';
+import type { Task } from '@/tasks/Task';
 
 export function generateConsumeImmersionContent(resource: ResourceData): Task {
   const id = `consume-immersion-content-${resource.id}-${Date.now()}`;

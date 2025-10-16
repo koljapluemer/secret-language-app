@@ -1,5 +1,5 @@
 import type { VocabData } from '@/entities/vocab/VocabData';
-import type { Task } from '@/pages/practice/Task';
+import type { Task } from '@/tasks/Task';
 
 export function generateClozeChoiceFromFour(vocab: VocabData): Task {
   const id = `cloze-choose-from-four-${vocab.id}-${Date.now()}`;
