@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { QueueState } from '@/modes/utils/useQueueState';
+import type { QueueState } from '@/modes/useQueueState';
 import TaskRenderer from '@/tasks/ui/TaskRenderer.vue';
 
 interface Props {

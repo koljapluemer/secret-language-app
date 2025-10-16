@@ -2,9 +2,9 @@
 import { inject } from 'vue';
 import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoContract';
 import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
-import { usePracticeMode } from '@/modes/composables/usePracticeMode';
+import { usePracticeMode } from '@/modes/utils/usePracticeMode';
 import { usePracticeFilters } from '@/features/filter-practice-sets-and-languages/usePracticeFilters';
-import PracticeModeLayout from '@/modes/components/PracticeModeLayout.vue';
+import PracticeModeLayout from '@/modes/Layout.vue';
 import { generateResourceRotationTask } from './generateResourceRotationTasks';
 
 // Inject repositories
