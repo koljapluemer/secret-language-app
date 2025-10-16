@@ -7,7 +7,7 @@ import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoCont
 import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoContract';
 import type { Task } from '@/pages/practice/Task';
 import { usePracticeMode } from '@/modes/composables/usePracticeMode';
-import { usePracticeFilters } from '@/pages/practice/composables/usePracticeFilters';
+import { usePracticeFilters } from '@/features/filter-practice-sets-and-languages/usePracticeFilters';
 import PracticeModeLayout from '@/modes/components/PracticeModeLayout.vue';
 import { generateIllegalImmersionTask } from './generateIllegalImmersionTasks';
 

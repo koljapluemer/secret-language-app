@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { Filter } from 'lucide-vue-next';
 import PracticeFilterModal from './PracticeFilterModal.vue';
-import { usePracticeFilters } from './composables/usePracticeFilters';
+import { usePracticeFilters } from '@/features/filter-practice-sets-and-languages/usePracticeFilters';
 
 const filterModalOpen = ref(false);
 

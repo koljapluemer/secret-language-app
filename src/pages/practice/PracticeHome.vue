@@ -53,6 +53,7 @@ const practiceOptions = [
   {
     name: 'Minimal Pairs',
     route: { name: 'practice-mode-minimal-pairs' },
+    test: { name: 'test-mode-minimal-pairs' },
     icon: Volume2,
     description: 'Distinguish similar-sounding characters by listening and choosing'
   },
