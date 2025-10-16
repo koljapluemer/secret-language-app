@@ -29,6 +29,7 @@ import PageStats from '@/pages/time-tracking/PageTimeTracking.vue';
 import PageMyMaterial from '@/pages/my-material/PageMyMaterial.vue';
 import PageSettings from '@/pages/settings/PageSettings.vue';
 import PageMotivation from '@/pages/motivation/PageMotivation.vue';
+import SelfTestHome from '@/pages/self-test/SelfTestHome.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -197,6 +198,11 @@ const router = createRouter({
       path: '/motivation',
       name: 'motivation',
       component: PageMotivation
+    },
+    {
+      path: '/self-test',
+      name: 'self-test',
+      component: SelfTestHome
     }
   ]
 });

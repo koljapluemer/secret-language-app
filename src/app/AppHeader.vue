@@ -8,7 +8,8 @@ import {
   Clock,
   Download,
   FolderOpen,
-  TrendingUp
+  TrendingUp,
+  ClipboardCheck
 } from 'lucide-vue-next';
 import MyMaterialSubmenu from './MyMaterialSubmenu.vue';
 
@@ -52,6 +53,10 @@ const isOnMotivationPage = computed(() => {
   return route.path.startsWith('/motivation') || route.name === 'motivation';
 });
 
+const isOnSelfTestPage = computed(() => {
+  return route.path.startsWith('/self-test') || route.name === 'self-test';
+});
+
 const shouldShowSubmenu = computed(() => isOnMaterialPage.value && !isOnMyMaterialOverviewPage.value);
 
 const toggleMaterialSubmenu = () => {
@@ -75,6 +80,13 @@ const toggleMaterialSubmenu = () => {
         :class="{ 'btn-active': isOnPracticePage }">
         <Play :size="16" />
         <span class="hidden md:inline ml-2">{{ t('navigation.practice') }}</span>
+      </router-link>
+
+      <!-- Self-Test -->
+      <router-link :to="{ name: 'self-test' }" class="btn btn-ghost btn-sm"
+        :class="{ 'btn-active': isOnSelfTestPage }">
+        <ClipboardCheck :size="16" />
+        <span class="hidden md:inline ml-2">{{ t('navigation.selfTest') }}</span>
       </router-link>
 
       <!-- My Material (navigates to overview page or toggles submenu) -->

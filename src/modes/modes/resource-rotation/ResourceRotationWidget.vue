@@ -4,7 +4,7 @@ import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoCont
 import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
 import { usePracticeMode } from '@/modes/utils/usePracticeMode';
 import { usePracticeFilters } from '@/features/filter-practice-sets-and-languages/usePracticeFilters';
-import PracticeModeLayout from '@/modes/Layout.vue';
+import PracticeModeLayout from '@/modes/utils/Layout.vue';
 import { generateResourceRotationTask } from './generateResourceRotationTasks';
 
 // Inject repositories

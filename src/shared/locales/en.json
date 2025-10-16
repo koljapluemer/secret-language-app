@@ -58,7 +58,9 @@
     "vocabulary": "Vocabulary",
     "factCards": "Fact Cards",
     "resources": "Resources",
-    "goals": "Goals"
+    "goals": "Goals",
+    "timeTracking": "Time Tracking",
+    "selfTest": "Self-Test"
   },
   "practice": {
     "title": "Practice",
@@ -752,5 +754,9 @@
     },
     "noDataYet": "No practice data available yet. Start practicing to track your progress!",
     "noGoalSet": "No goal set"
+  },
+  "selfTest": {
+    "title": "Self-Test",
+    "overview": "Self-Test Overview"
   }
 }

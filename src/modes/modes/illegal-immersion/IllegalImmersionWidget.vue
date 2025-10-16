@@ -8,7 +8,7 @@ import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoCont
 import type { Task } from '@/tasks/Task';
 import { usePracticeMode } from '@/modes/utils/usePracticeMode';
 import { usePracticeFilters } from '@/features/filter-practice-sets-and-languages/usePracticeFilters';
-import PracticeModeLayout from '@/modes/Layout.vue';
+import PracticeModeLayout from '@/modes/utils/Layout.vue';
 import { generateIllegalImmersionTask } from './generateIllegalImmersionTasks';
 
 // Inject repositories
