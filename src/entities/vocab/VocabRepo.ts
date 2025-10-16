@@ -1266,6 +1266,61 @@ export class VocabRepo implements VocabRepoContract {
     return null;
   }
 
+  async getShuffledVocabForMinimalPairsFromSet(setId: string, count: number, includeOnlySeen: boolean): Promise<VocabData[]> {
+    // Get all eligible vocab from set
+    const vocab = await db.vocab
+      .where('origins')
+      .equals(setId)
+      .filter(vocab => {
+        // Must not be excluded from practice
+        if (vocab.doNotPractice) return false;
+
+        // Must be in this set
+        if (!vocab.origins.includes(setId)) return false;
+
+        // Must have content set
+        if (!vocab.content) return false;
+
+        // Must have sounds that are not disabled for practice
+        if (!vocab.sounds || vocab.sounds.length === 0) return false;
+        if (!vocab.sounds.some(sound => !sound.disableForPractice)) return false;
+
+        // Must have similarSoundingButNotTheSame length > 0
+        if (!vocab.similarSoundingButNotTheSame || vocab.similarSoundingButNotTheSame.length === 0) return false;
+
+        // Filter by seen/unseen if required
+        if (includeOnlySeen) {
+          // Only seen vocab (level >= 0)
+          return vocab.progress && vocab.progress.level >= 0;
+        }
+
+        // Include all vocab (both seen and unseen)
+        return true;
+      })
+      .toArray();
+
+    if (vocab.length === 0) return [];
+
+    // Validate each vocab has at least one valid related vocab
+    const validVocab: VocabData[] = [];
+
+    for (const candidate of vocab) {
+      // Get similar sounding vocab and check if at least one meets criteria
+      const relatedVocabList = await db.vocab.where('id').anyOf(candidate.similarSoundingButNotTheSame!).toArray();
+      const validRelatedVocab = relatedVocabList.filter(v =>
+        v.content &&
+        v.sounds && v.sounds.some(s => !s.disableForPractice)
+      );
+
+      if (validRelatedVocab.length > 0) {
+        validVocab.push(this.ensureVocabFields(candidate));
+      }
+    }
+
+    // Use pickRandom to shuffle and return requested count
+    return pickRandom(validVocab, count);
+  }
+
   // Set Study operations
   async getRandomDueVocabFromSet(setId: string, count: number, vocabBlockList?: string[]): Promise<VocabData[]> {
     const now = new Date();

@@ -100,6 +100,7 @@ export interface VocabRepoContract {
   // Minimal Pairs operations
   getRandomDueOrUnseenVocabForMinimalPairs(languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData | null>;
   getRandomVocabForMinimalPairsFromSet(setId: string, includeOnlySeen: boolean, vocabBlockList?: string[]): Promise<VocabData | null>;
+  getShuffledVocabForMinimalPairsFromSet(setId: string, count: number, includeOnlySeen: boolean): Promise<VocabData[]>;
 
   // Set Study operations
   getRandomDueVocabFromSet(setId: string, count: number, vocabBlockList?: string[]): Promise<VocabData[]>;

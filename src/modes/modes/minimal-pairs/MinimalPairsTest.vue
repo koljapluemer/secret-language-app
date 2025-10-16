@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { inject, ref, computed } from 'vue';
+import { inject, ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { Task } from '@/tasks/Task';
-import type { TestResult } from '@/modes/utils/useTestMode';
-import { useTestMode } from '@/modes/utils/useTestMode';
-import TestLayout from '@/modes/utils/TestLayout.vue';
-import { generateMinimalPairsTestTask } from './generateMinimalPairsTestTask';
+import { generateVocabChooseFromSound } from '@/tasks/task-vocab-choose-from-sound/generate';
+import TaskRenderer from '@/tasks/ui/TaskRenderer.vue';
+import TestResults from '@/widgets/test/TestResults.vue';
+import type { TaskCorrectness } from '@/entities/practice-tracking/TaskCompletionData';
 
 // Inject repositories
 const vocabRepo = inject<VocabRepoContract>('vocabRepo');
@@ -16,71 +16,127 @@ if (!vocabRepo) {
 }
 
 const route = useRoute();
-const lastUsedVocabId = ref<string | null>(null);
 
 // Get query params
 const setId = computed(() => route.query.set as string);
 const testType = computed(() => (route.query.type as 'seen' | 'all') || 'all');
 
-// Test mode configuration
-const mode = useTestMode({
-  modeId: 'minimal-pairs',
-  totalTasks: 20, // 20 tasks per test
-  generateTask: async () => {
+// Simple state
+const tasks = ref<Task[]>([]);
+const currentIndex = ref(0);
+const results = ref<Array<{ taskId: string; vocabIds: string[]; correct: boolean }>>([]);
+const isLoading = ref(true);
+const error = ref<string | null>(null);
+
+// Computed
+const currentTask = computed(() => tasks.value[currentIndex.value] || null);
+const isComplete = computed(() => currentIndex.value >= tasks.value.length && tasks.value.length > 0);
+const currentTaskNumber = computed(() => currentIndex.value + 1);
+const totalTasks = computed(() => tasks.value.length);
+
+// Load tasks
+async function loadTasks() {
+  try {
+    isLoading.value = true;
+    error.value = null;
+
     if (!setId.value) {
-      return null;
+      error.value = 'No set ID provided';
+      isLoading.value = false;
+      return;
     }
 
-    const blockList = lastUsedVocabId.value ? [lastUsedVocabId.value] : undefined;
+    // Guard check
+    if (!vocabRepo) {
+      error.value = 'Repository not available';
+      isLoading.value = false;
+      return;
+    }
 
-    return await generateMinimalPairsTestTask(
-      vocabRepo,
+    // Fetch 20 shuffled vocab
+    const includeOnlySeen = testType.value === 'seen';
+    const vocabList = await vocabRepo.getShuffledVocabForMinimalPairsFromSet(
       setId.value,
-      testType.value,
-      blockList
+      20,
+      includeOnlySeen
     );
-  },
-  onTaskTransition: (newCurrentTask: Task) => {
-    const vocabId = newCurrentTask.associatedVocab?.[0];
-    if (vocabId) {
-      lastUsedVocabId.value = vocabId;
+
+    if (vocabList.length === 0) {
+      error.value = 'No vocab available for this test. Try a different set or test type.';
+      isLoading.value = false;
+      return;
     }
-  },
-  messages: {
-    loading: 'Loading test...',
-    empty: 'No vocab available for this test. Try a different set or test type.',
-    error: 'Failed to load Minimal Pairs test. Please try again.'
+
+    // Generate tasks
+    tasks.value = vocabList.map(vocab => generateVocabChooseFromSound(vocab));
+    isLoading.value = false;
+  } catch {
+    error.value = 'Failed to load test. Please try again.';
+    isLoading.value = false;
   }
-});
+}
 
-// Handle task completion - extract result from task event
-async function handleTaskFinished() {
-  if (mode.state.value.status !== 'task') {
-    return;
-  }
+// Load on mount
+onMounted(loadTasks);
 
-  const currentTask = mode.state.value.currentTask;
+// Handle task completion
+function handleTaskFinished(correctness: TaskCorrectness = 'neutral') {
+  if (!currentTask.value) return;
 
-  // Create test result
-  const result: TestResult = {
-    taskId: currentTask.id,
-    vocabIds: currentTask.associatedVocab || [],
-    correct: true // For now, assume correct. Task components should track this
-  };
+  // Save result
+  results.value.push({
+    taskId: currentTask.value.id,
+    vocabIds: currentTask.value.associatedVocab || [],
+    correct: correctness === 'correct'
+  });
 
-  await mode.handleTaskFinished(result);
+  // Move to next task
+  currentIndex.value++;
+}
+
+// Retry
+function retry() {
+  currentIndex.value = 0;
+  results.value = [];
+  loadTasks();
 }
 </script>
 
 <template>
-  <TestLayout
-    :state="mode.state.value"
-    :showLoadingUI="mode.showLoadingUI.value"
-    :current-task-number="mode.currentTaskNumber.value"
-    :total-tasks="mode.totalTasks"
-    modeId="minimal-pairs"
-    :retry="mode.retry"
-    :onTaskFinished="handleTaskFinished"
-    :loadingFallback="$t('selfTest.loadingTest')"
-  />
+  <!-- Loading -->
+  <div v-if="isLoading" class="flex justify-center items-center min-h-96">
+    <div class="text-center">
+      <span class="loading loading-spinner loading-lg"></span>
+      <p class="mt-4 text-lg">{{ $t('selfTest.loadingTest') }}</p>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div v-else-if="error" class="alert alert-error">
+    <span>{{ error }}</span>
+    <button class="btn btn-sm" @click="retry">
+      {{ $t('practice.widgets.tryAgain') }}
+    </button>
+  </div>
+
+  <!-- Completed -->
+  <div v-else-if="isComplete">
+    <TestResults :results="results" mode-id="minimal-pairs" />
+  </div>
+
+  <!-- Task -->
+  <div v-else-if="currentTask">
+    <div class="mb-4 text-center">
+      <p class="text-lg font-semibold">
+        {{ $t('selfTest.progress', { current: currentTaskNumber, total: totalTasks }) }}
+      </p>
+      <progress class="progress progress-primary w-full max-w-md" :value="currentTaskNumber" :max="totalTasks"></progress>
+    </div>
+    <TaskRenderer
+      :key="currentTask.id"
+      :task="currentTask"
+      :practice-context="{ practiceMode: 'minimal-pairs', isTest: true }"
+      @finished="handleTaskFinished"
+    />
+  </div>
 </template>

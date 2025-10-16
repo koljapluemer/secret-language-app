@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
-import type { TestResult } from '@/modes/utils/useTestMode';
+
+interface TestResult {
+  taskId: string;
+  vocabIds: string[];
+  correct: boolean;
+}
 
 interface Props {
   results: TestResult[];
