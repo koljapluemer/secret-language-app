@@ -762,14 +762,21 @@
     "progress": "Task {current} of {total}",
     "testSeenVocab": "Test Seen Vocab",
     "testAllVocab": "Test All Vocab",
+    "startTest": "Start Test",
     "selectSet": "Select a Set",
+    "selectResource": "Select a Resource",
     "testingSeenVocab": "Testing vocab you've already practiced",
     "testingAllVocab": "Testing all vocab from this set",
     "noSetsAvailable": "No sets available. Please download sets first.",
+    "noResourcesAvailable": "No immersion content resources available.",
+    "onlyImmersionContent": "Only immersion content resources are available for testing",
     "resultsTitle": "Test Complete!",
     "score": "Score",
     "correct": "Correct",
     "tryAgain": "Try Again",
-    "returnToTests": "Return to Self-Test"
+    "returnToTests": "Return to Self-Test",
+    "consumeResourceComplete": "Resource Consumed!",
+    "consumeResourceCompleteMessage": "You've completed consuming this resource. Great job!",
+    "consumeResourceInstructions": "Consume this immersion content and reflect on your understanding."
   }
 }

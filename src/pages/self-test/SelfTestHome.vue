@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import { modes } from '@/modes/modes';
 import SetSelectionModal from '@/widgets/test/SetSelectionModal.vue';
+import ResourceSelectionModal from '@/widgets/test/ResourceSelectionModal.vue';
 
 // Filter modes that have the "test" property
 const testModes = computed(() =>
@@ -11,18 +12,32 @@ const testModes = computed(() =>
 );
 
 // Modal state
-const showModal = ref(false);
+const showSetModal = ref(false);
+const showResourceModal = ref(false);
 const selectedMode = ref<string>('');
 const selectedTestType = ref<'seen' | 'all'>('all');
 
-function openModal(modeName: string, testType: 'seen' | 'all') {
+function openSetModal(modeName: string, testType: 'seen' | 'all') {
   selectedMode.value = modeName;
   selectedTestType.value = testType;
-  showModal.value = true;
+  showSetModal.value = true;
 }
 
-function closeModal() {
-  showModal.value = false;
+function openResourceModal(modeName: string) {
+  selectedMode.value = modeName;
+  showResourceModal.value = true;
+}
+
+function closeSetModal() {
+  showSetModal.value = false;
+}
+
+function closeResourceModal() {
+  showResourceModal.value = false;
+}
+
+function isResourceBasedTest(modeName: string): boolean {
+  return modeName === 'Consume Resource';
 }
 </script>
 
@@ -39,16 +54,27 @@ function closeModal() {
           <h2>{{ option.name }}</h2>
           <p class="text-light mb-4">{{ option.description }}</p>
 
-          <div class="flex flex-col gap-2">
+          <!-- Resource-based test (single button) -->
+          <div v-if="isResourceBasedTest(option.name)" class="flex flex-col gap-2">
             <button
               class="btn btn-sm"
-              @click="openModal(option.test.name.replace('test-mode-', ''), 'seen')"
+              @click="openResourceModal(option.test.name.replace('test-mode-', ''))"
+            >
+              {{ $t('selfTest.startTest') }}
+            </button>
+          </div>
+
+          <!-- Vocab-based test (two buttons) -->
+          <div v-else class="flex flex-col gap-2">
+            <button
+              class="btn btn-sm"
+              @click="openSetModal(option.test.name.replace('test-mode-', ''), 'seen')"
             >
               {{ $t('selfTest.testSeenVocab') }}
             </button>
             <button
               class="btn btn-sm"
-              @click="openModal(option.test.name.replace('test-mode-', ''), 'all')"
+              @click="openSetModal(option.test.name.replace('test-mode-', ''), 'all')"
             >
               {{ $t('selfTest.testAllVocab') }}
             </button>
@@ -59,10 +85,17 @@ function closeModal() {
 
     <!-- Set Selection Modal -->
     <SetSelectionModal
-      :show="showModal"
+      :show="showSetModal"
       :mode-id="selectedMode"
       :test-type="selectedTestType"
-      @close="closeModal"
+      @close="closeSetModal"
+    />
+
+    <!-- Resource Selection Modal -->
+    <ResourceSelectionModal
+      :show="showResourceModal"
+      :mode-id="selectedMode"
+      @close="closeResourceModal"
     />
   </div>
 </template>

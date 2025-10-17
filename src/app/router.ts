@@ -31,6 +31,7 @@ import PageSettings from '@/pages/settings/PageSettings.vue';
 import PageMotivation from '@/pages/motivation/PageMotivation.vue';
 import SelfTestHome from '@/pages/self-test/SelfTestHome.vue';
 import MinimalPairsTest from '@/modes/modes/minimal-pairs/MinimalPairsTest.vue';
+import ConsumeResourceTest from '@/modes/modes/consume-resource/ConsumeResourceTest.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -209,6 +210,11 @@ const router = createRouter({
       path: '/self-test/minimal-pairs',
       name: 'test-mode-minimal-pairs',
       component: MinimalPairsTest
+    },
+    {
+      path: '/self-test/consume-resource',
+      name: 'test-mode-consume-resource',
+      component: ConsumeResourceTest
     }
   ]
 });

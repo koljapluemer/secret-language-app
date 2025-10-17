@@ -1,4 +1,4 @@
-import { BookOpen, Target, RotateCcw, ImagePlus, Eye, Zap, ArrowRight, RefreshCw, Volume2, Boxes } from 'lucide-vue-next';
+import { BookOpen, Target, RotateCcw, ImagePlus, Eye, Zap, ArrowRight, RefreshCw, Volume2, Boxes, BookText } from 'lucide-vue-next';
 
 export const modes = [
   {
@@ -61,5 +61,11 @@ export const modes = [
     route: { name: 'practice-mode-component-clusters' },
     icon: Boxes,
     description: 'Practice component vocab, then all vocab containing them'
+  },
+  {
+    name: 'Consume Resource',
+    test: { name: 'test-mode-consume-resource' },
+    icon: BookText,
+    description: 'Watch or read immersion content and test your understanding'
   }
 ];
