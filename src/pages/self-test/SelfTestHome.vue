@@ -1,8 +1,21 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, inject, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { modes } from '@/modes/modes';
 import SetSelectionModal from '@/widgets/test/SetSelectionModal.vue';
 import ResourceSelectionModal from '@/widgets/test/ResourceSelectionModal.vue';
+import type { TestResultRepoContract } from '@/entities/test-results/TestResultRepoContract';
+import type { TestResultData } from '@/entities/test-results/TestResultData';
+import { useToast } from '@/shared/toasts';
+
+// Inject repositories
+const testResultRepo = inject<TestResultRepoContract>('testResultRepo');
+const router = useRouter();
+const toast = useToast();
+
+if (!testResultRepo) {
+  throw new Error('TestResultRepo not available');
+}
 
 // Filter modes that have the "test" property
 const testModes = computed(() =>
@@ -39,6 +52,128 @@ function closeResourceModal() {
 function isResourceBasedTest(modeName: string): boolean {
   return modeName === 'Consume Resource';
 }
+
+// Test history state
+const testHistory = ref<TestResultData[]>([]);
+const currentPage = ref(1);
+const pageSize = 10;
+const totalResults = ref(0);
+const isLoadingHistory = ref(false);
+
+const totalPages = computed(() => Math.ceil(totalResults.value / pageSize));
+const showPagination = computed(() => totalPages.value > 1);
+
+// Load test history
+async function loadTestHistory() {
+  if (!testResultRepo) return;
+
+  try {
+    isLoadingHistory.value = true;
+    const offset = (currentPage.value - 1) * pageSize;
+
+    const [results, total] = await Promise.all([
+      testResultRepo.getTestResultsPaginated(offset, pageSize),
+      testResultRepo.getTotalTestResultsCount()
+    ]);
+
+    testHistory.value = results;
+    totalResults.value = total;
+  } catch (err) {
+    toast.error(`Failed to load test history: ${String(err)}`);
+  } finally {
+    isLoadingHistory.value = false;
+  }
+}
+
+// Pagination handlers
+function goToPage(page: number) {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+    loadTestHistory();
+  }
+}
+
+function nextPage() {
+  goToPage(currentPage.value + 1);
+}
+
+function prevPage() {
+  goToPage(currentPage.value - 1);
+}
+
+// Rerun test with same conditions
+function rerunTest(result: TestResultData) {
+  const config = result.testConfig;
+
+  if (config.type === 'vocab-based') {
+    router.push({
+      name: `test-mode-${config.mode}`,
+      query: {
+        set: config.setId,
+        type: config.testType
+      }
+    });
+  } else if (config.type === 'resource-based') {
+    router.push({
+      name: `test-mode-${config.mode}`,
+      query: {
+        resource: config.resourceId
+      }
+    });
+  }
+}
+
+// Delete test result
+async function deleteTestResult(id: string) {
+  if (!testResultRepo) return;
+
+  try {
+    await testResultRepo.deleteTestResult(id);
+    toast.success('Test result deleted');
+    await loadTestHistory();
+  } catch (err) {
+    toast.error(`Failed to delete test result: ${String(err)}`);
+  }
+}
+
+// Format date
+function formatDate(date: Date): string {
+  return new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+// Format duration
+function formatDuration(ms?: number): string {
+  if (!ms) return '-';
+  const seconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+
+  if (minutes > 0) {
+    return `${minutes}m ${remainingSeconds}s`;
+  }
+  return `${seconds}s`;
+}
+
+// Get score from results
+function getScore(result: TestResultData): string {
+  if (result.testConfig.type === 'vocab-based' && Array.isArray(result.results)) {
+    const correct = result.results.filter(r => r.correct).length;
+    const total = result.results.length;
+    return `${correct}/${total}`;
+  }
+  return '-';
+}
+
+// Load history on mount
+onMounted(() => {
+  loadTestHistory();
+});
 </script>
 
 <template>
@@ -97,5 +232,84 @@ function isResourceBasedTest(modeName: string): boolean {
       :mode-id="selectedMode"
       @close="closeResourceModal"
     />
+
+    <!-- Test History Section -->
+    <div class="mt-12 max-w-6xl mx-auto">
+      <h2 class="text-2xl font-bold mb-6">{{ $t('selfTest.history.title') }}</h2>
+
+      <!-- Loading -->
+      <div v-if="isLoadingHistory" class="flex justify-center py-8">
+        <span class="loading loading-spinner loading-lg"></span>
+      </div>
+
+      <!-- Empty state -->
+      <div v-else-if="testHistory.length === 0" class="text-center py-8 text-base-content/70">
+        <p>{{ $t('selfTest.history.empty') }}</p>
+      </div>
+
+      <!-- Test history table -->
+      <div v-else class="overflow-x-auto">
+        <table class="table table-zebra">
+          <thead>
+            <tr>
+              <th>{{ $t('selfTest.history.date') }}</th>
+              <th>{{ $t('selfTest.history.mode') }}</th>
+              <th>{{ $t('selfTest.history.score') }}</th>
+              <th>{{ $t('selfTest.history.duration') }}</th>
+              <th>{{ $t('selfTest.history.actions') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="result in testHistory" :key="result.id">
+              <td>{{ formatDate(result.completedAt) }}</td>
+              <td class="capitalize">{{ result.testMode.replace('-', ' ') }}</td>
+              <td>{{ getScore(result) }}</td>
+              <td>{{ formatDuration(result.durationMs) }}</td>
+              <td>
+                <div class="flex gap-2">
+                  <button
+                    class="btn btn-xs btn-primary"
+                    @click="rerunTest(result)"
+                    :title="$t('selfTest.history.rerun')"
+                  >
+                    {{ $t('selfTest.history.rerun') }}
+                  </button>
+                  <button
+                    class="btn btn-xs btn-error"
+                    @click="deleteTestResult(result.id)"
+                    :title="$t('selfTest.history.delete')"
+                  >
+                    {{ $t('selfTest.history.delete') }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div v-if="showPagination" class="flex justify-center gap-2 mt-6">
+          <button
+            class="btn btn-sm"
+            :disabled="currentPage === 1"
+            @click="prevPage"
+          >
+            {{ $t('selfTest.history.previous') }}
+          </button>
+
+          <span class="flex items-center px-4">
+            {{ $t('selfTest.history.pageInfo', { current: currentPage, total: totalPages }) }}
+          </span>
+
+          <button
+            class="btn btn-sm"
+            :disabled="currentPage === totalPages"
+            @click="nextPage"
+          >
+            {{ $t('selfTest.history.next') }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>

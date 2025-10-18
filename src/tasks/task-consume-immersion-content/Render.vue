@@ -17,7 +17,7 @@ interface Props {
 
 const props = defineProps<Props>();
 const emit = defineEmits<{
-  finished: [];
+  finished: [experienceNote?: string];
 }>();
 
 const toast = useToast();
@@ -55,42 +55,44 @@ function handleResourceUpdate(updatedResource: ResourceData) {
 
 const handleSkip = async () => {
   if (!resource.value) return;
-  
+
   // Update lastShownAt when skipping
   const updatedResource: ResourceData = {
     ...toRaw(resource.value),
     lastShownAt: new Date()
   };
-  
+
   try {
     await resourceRepo.updateResource(updatedResource);
-    emit('finished');
+    emit('finished', undefined);
   } catch {
     toast.error('Failed to update resource');
-    emit('finished');
+    emit('finished', undefined);
   }
 };
 
 const handleDone = async () => {
   if (!resource.value) return;
 
+  const experienceNote = experienceComment.value.trim() || undefined;
+
   try {
     // Save the experience comment as a note if provided
-    if (experienceComment.value.trim()) {
+    if (experienceNote) {
       const noteData: Omit<NoteData, "id"> = {
-        content: experienceComment.value.trim(),
+        content: experienceNote,
         noteType: 'immersion-experience'
       };
-      
+
       const note = await noteRepo.saveNote(noteData);
-      
+
       // Add the note to the resource
       const updatedResource: ResourceData = {
         ...toRaw(resource.value),
         notes: [...resource.value.notes, note.id],
         lastShownAt: new Date()
       };
-      
+
       await resourceRepo.updateResource(updatedResource);
     } else {
       // Just update lastShownAt
@@ -98,14 +100,14 @@ const handleDone = async () => {
         ...toRaw(resource.value),
         lastShownAt: new Date()
       };
-      
+
       await resourceRepo.updateResource(updatedResource);
     }
 
-    emit('finished');
+    emit('finished', experienceNote);
   } catch {
     toast.error('Failed to save experience data');
-    emit('finished');
+    emit('finished', experienceNote);
   }
 };
 

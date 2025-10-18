@@ -8,6 +8,7 @@ import { LanguageRepo } from '@/entities/languages/LanguageRepo';
 import { LocalSetRepo } from '@/entities/local-sets/LocalSetRepo';
 import { MergeQueueRepo } from '@/features/merge/MergeQueueRepo';
 import { PracticeTrackingRepo } from '@/entities/practice-tracking/PracticeTrackingRepo';
+import { TestResultRepo } from '@/entities/test-results/TestResultRepo';
 
 export function setupRepositories() {
   // Create repository instances
@@ -21,6 +22,7 @@ export function setupRepositories() {
   const localSetRepo = new LocalSetRepo();
   const mergeQueueRepo = new MergeQueueRepo();
   const practiceTrackingRepo = new PracticeTrackingRepo();
+  const testResultRepo = new TestResultRepo();
 
   return {
     vocabRepo,
@@ -32,12 +34,13 @@ export function setupRepositories() {
     languageRepo,
     localSetRepo,
     mergeQueueRepo,
-    practiceTrackingRepo
+    practiceTrackingRepo,
+    testResultRepo
   };
 }
 
 export function provideRepositories(app: { provide: (key: string | symbol, value: unknown) => void }) {
-  const { vocabRepo, translationRepo, goalRepo, noteRepo, factCardRepo, resourceRepo, languageRepo, localSetRepo, mergeQueueRepo, practiceTrackingRepo } = setupRepositories();
+  const { vocabRepo, translationRepo, goalRepo, noteRepo, factCardRepo, resourceRepo, languageRepo, localSetRepo, mergeQueueRepo, practiceTrackingRepo, testResultRepo } = setupRepositories();
 
   app.provide('vocabRepo', vocabRepo);
   app.provide('translationRepo', translationRepo);
@@ -49,6 +52,7 @@ export function provideRepositories(app: { provide: (key: string | symbol, value
   app.provide('localSetRepo', localSetRepo);
   app.provide('mergeQueueRepo', mergeQueueRepo);
   app.provide('practiceTrackingRepo', practiceTrackingRepo);
+  app.provide('testResultRepo', testResultRepo);
 
-  return { vocabRepo, translationRepo, goalRepo, noteRepo, factCardRepo, resourceRepo, languageRepo, localSetRepo, mergeQueueRepo, practiceTrackingRepo };
+  return { vocabRepo, translationRepo, goalRepo, noteRepo, factCardRepo, resourceRepo, languageRepo, localSetRepo, mergeQueueRepo, practiceTrackingRepo, testResultRepo };
 }

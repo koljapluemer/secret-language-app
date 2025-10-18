@@ -2,20 +2,24 @@
 import { inject, ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
+import type { TestResultRepoContract } from '@/entities/test-results/TestResultRepoContract';
 import type { Task } from '@/tasks/Task';
 import { generateVocabChooseFromSound } from '@/tasks/task-vocab-choose-from-sound/generate';
 import TaskRenderer from '@/tasks/ui/TaskRenderer.vue';
 import TestResults from '@/widgets/test/TestResults.vue';
 import type { TaskCorrectness } from '@/entities/practice-tracking/TaskCompletionData';
+import { useToast } from '@/shared/toasts';
 
 // Inject repositories
 const vocabRepo = inject<VocabRepoContract>('vocabRepo');
+const testResultRepo = inject<TestResultRepoContract>('testResultRepo');
 
-if (!vocabRepo) {
+if (!vocabRepo || !testResultRepo) {
   throw new Error('Required repositories not available');
 }
 
 const route = useRoute();
+const toast = useToast();
 
 // Get query params
 const setId = computed(() => route.query.set as string);
@@ -27,6 +31,7 @@ const currentIndex = ref(0);
 const results = ref<Array<{ taskId: string; vocabIds: string[]; correct: boolean }>>([]);
 const isLoading = ref(true);
 const error = ref<string | null>(null);
+const testStartTime = ref<number>(0);
 
 // Computed
 const currentTask = computed(() => tasks.value[currentIndex.value] || null);
@@ -77,10 +82,13 @@ async function loadTasks() {
 }
 
 // Load on mount
-onMounted(loadTasks);
+onMounted(() => {
+  testStartTime.value = Date.now();
+  loadTasks();
+});
 
 // Handle task completion
-function handleTaskFinished(correctness: TaskCorrectness = 'neutral') {
+async function handleTaskFinished(correctness: TaskCorrectness = 'neutral') {
   if (!currentTask.value) return;
 
   // Save result
@@ -92,6 +100,38 @@ function handleTaskFinished(correctness: TaskCorrectness = 'neutral') {
 
   // Move to next task
   currentIndex.value++;
+
+  // If test is complete, save to repository
+  if (currentIndex.value >= tasks.value.length && tasks.value.length > 0) {
+    await saveTestResult();
+  }
+}
+
+// Save test result to repository
+async function saveTestResult() {
+  if (!testResultRepo || !setId.value) return;
+
+  try {
+    const durationMs = Date.now() - testStartTime.value;
+
+    // Deep clone to strip all Vue reactivity
+    const testResultData = JSON.parse(JSON.stringify({
+      testMode: 'minimal-pairs',
+      completedAt: new Date(),
+      durationMs,
+      testConfig: {
+        type: 'vocab-based',
+        setId: setId.value,
+        testType: testType.value,
+        mode: 'minimal-pairs'
+      },
+      results: results.value
+    }));
+
+    await testResultRepo.saveTestResult(testResultData);
+  } catch (err) {
+    toast.error(`Failed to save test result: ${String(err)}`);
+  }
 }
 
 // Retry

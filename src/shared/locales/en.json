@@ -777,6 +777,20 @@
     "returnToTests": "Return to Self-Test",
     "consumeResourceComplete": "Resource Consumed!",
     "consumeResourceCompleteMessage": "You've completed consuming this resource. Great job!",
-    "consumeResourceInstructions": "Consume this immersion content and reflect on your understanding."
+    "consumeResourceInstructions": "Consume this immersion content and reflect on your understanding.",
+    "history": {
+      "title": "Test History",
+      "empty": "No test results yet. Complete some tests to see your history here!",
+      "date": "Date",
+      "mode": "Mode",
+      "score": "Score",
+      "duration": "Duration",
+      "actions": "Actions",
+      "rerun": "Rerun",
+      "delete": "Delete",
+      "previous": "Previous",
+      "next": "Next",
+      "pageInfo": "Page {current} of {total}"
+    }
   }
 }

@@ -1,22 +1,25 @@
 <script setup lang="ts">
 import { inject, ref, computed, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoContract';
+import type { TestResultRepoContract } from '@/entities/test-results/TestResultRepoContract';
 import type { ResourceData } from '@/entities/resources/ResourceData';
 import type { Task } from '@/tasks/Task';
 import { generateConsumeImmersionContent } from '@/tasks/task-consume-immersion-content/generate';
 import TaskRenderer from '@/tasks/ui/TaskRenderer.vue';
-import { useRouter } from 'vue-router';
+import { useToast } from '@/shared/toasts';
 
 // Inject repositories
 const resourceRepo = inject<ResourceRepoContract>('resourceRepo');
+const testResultRepo = inject<TestResultRepoContract>('testResultRepo');
 
-if (!resourceRepo) {
+if (!resourceRepo || !testResultRepo) {
   throw new Error('Required repositories not available');
 }
 
 const route = useRoute();
 const router = useRouter();
+const toast = useToast();
 
 // Get query param
 const resourceId = computed(() => route.query.resource as string);
@@ -27,6 +30,8 @@ const task = ref<Task | null>(null);
 const isLoading = ref(true);
 const error = ref<string | null>(null);
 const isComplete = ref(false);
+const testStartTime = ref<number>(0);
+const experienceNote = ref<string | undefined>(undefined);
 
 // Load resource and generate task
 async function loadTask() {
@@ -73,11 +78,45 @@ async function loadTask() {
 }
 
 // Load on mount
-onMounted(loadTask);
+onMounted(() => {
+  testStartTime.value = Date.now();
+  loadTask();
+});
 
 // Handle task completion
-function handleTaskFinished() {
+async function handleTaskFinished(note?: string) {
+  experienceNote.value = note;
+  await saveTestResult();
   isComplete.value = true;
+}
+
+// Save test result to repository
+async function saveTestResult() {
+  if (!testResultRepo || !resourceId.value || !resource.value) return;
+
+  try {
+    const durationMs = Date.now() - testStartTime.value;
+
+    // Deep clone to strip all Vue reactivity
+    const testResultData = JSON.parse(JSON.stringify({
+      testMode: 'consume-resource',
+      completedAt: new Date(),
+      durationMs,
+      testConfig: {
+        type: 'resource-based',
+        resourceId: resourceId.value,
+        mode: 'consume-resource'
+      },
+      results: {
+        resourceId: resourceId.value,
+        experienceNote: experienceNote.value
+      }
+    }));
+
+    await testResultRepo.saveTestResult(testResultData);
+  } catch (err) {
+    toast.error(`Failed to save test result: ${String(err)}`);
+  }
 }
 
 // Return to self-test home
