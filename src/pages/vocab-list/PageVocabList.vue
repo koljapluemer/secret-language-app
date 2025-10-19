@@ -124,14 +124,14 @@
               </div>
             </td>
             <td>
-              <button @click="deleteVocab(vocab.id)" class="btn btn-sm btn-ghost">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3 6h18" />
-                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                  <path d="M8 6V4c0-1 1-2 2-2h4c0 1 1 2 2 2v2" />
-                </svg>
-              </button>
+              <div class="flex gap-2">
+                <button @click="openModal(vocab)" class="btn btn-sm btn-ghost" aria-label="View vocabulary">
+                  <Eye :size="16" />
+                </button>
+                <button @click="deleteVocab(vocab.id)" class="btn btn-sm btn-ghost" aria-label="Delete vocabulary">
+                  <Trash2 :size="16" />
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -156,6 +156,19 @@
       </router-link>
     </div>
   </div>
+
+  <!-- Modal -->
+  <dialog :class="['modal', { 'modal-open': showModal }]">
+    <div class="modal-box">
+      <form method="dialog">
+        <button @click="closeModal" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+      </form>
+      <Display v-if="selectedVocab" :vocab="selectedVocab" showLanguage />
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button @click="closeModal">close</button>
+    </form>
+  </dialog>
 </template>
 
 <script setup lang="ts">
@@ -170,6 +183,8 @@ import type { TranslationRepoContract } from '@/entities/translations/Translatio
 import Pagination from '@/shared/ui/Pagination.vue';
 import { useRoute, useRouter, type LocationQueryValue } from 'vue-router';
 import { useToast } from '@/shared/toasts';
+import { Eye, Trash2 } from 'lucide-vue-next';
+import Display from '@/features/vocab-view/Display.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -188,6 +203,20 @@ const error = ref<string | null>(null);
 
 // Translation data for current page
 const vocabTranslations = ref<Record<string, string[]>>({});
+
+// Modal state
+const selectedVocab = ref<VocabData | null>(null);
+const showModal = ref(false);
+
+function openModal(vocab: VocabData) {
+  selectedVocab.value = vocab;
+  showModal.value = true;
+}
+
+function closeModal() {
+  showModal.value = false;
+  selectedVocab.value = null;
+}
 
 // URL parameter initialization
 function parseArrayParam(value: LocationQueryValue | LocationQueryValue[]): string[] {
