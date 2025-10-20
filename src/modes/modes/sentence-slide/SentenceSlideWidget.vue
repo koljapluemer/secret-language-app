@@ -178,13 +178,23 @@ async function updatePoolAfterTask(vocabId: string): Promise<void> {
   const poolItem = state.value.vocabPool.get(vocabId);
   if (!poolItem) return;
 
+  // Get fresh vocab data to check current level (after scoring)
+  const freshVocab = await vocabRepo.getVocabByUID(vocabId);
+  if (!freshVocab) {
+    state.value.vocabPool.delete(vocabId);
+    return;
+  }
+
   // Increment times shown
   poolItem.timesShown++;
 
-  // Check if vocab was unseen when we started
-  const wasUnseen = poolItem.vocab.progress.level === -1;
+  // Check if vocab was unseen INITIALLY (when we added it to pool)
+  const wasInitiallyUnseen = poolItem.vocab.progress.level === -1;
 
-  if (wasUnseen) {
+  // Update the pool item with fresh vocab data for next time
+  poolItem.vocab = freshVocab;
+
+  if (wasInitiallyUnseen) {
     // Unseen vocab: remove only after showing twice
     if (poolItem.timesShown >= 2) {
       state.value.vocabPool.delete(vocabId);
