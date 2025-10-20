@@ -385,8 +385,9 @@ async function initiateDelete(set: LocalSetData) {
 
   try {
     deleteStats.value = await deleteService.calculateDeleteImpact(set.id);
-  } catch {
-    toast.error('Failed to calculate delete impact');
+  } catch (err) {
+    console.error('Delete impact calculation error:', err);
+    toast.error(`Failed to calculate delete impact: ${err instanceof Error ? err.message : String(err)}`);
     closeDeleteModal();
   } finally {
     deleteImpactLoading.value = false;

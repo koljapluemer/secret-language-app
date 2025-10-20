@@ -86,6 +86,22 @@ class LinguanodonDatabase extends Dexie {
       motivationSettings: '@id',
       testResults: 'id, testMode, completedAt'
     });
+
+    // Version 5: Add origins index to resources, factCards, and goals for efficient set deletion
+    this.version(5).stores({
+      vocab: '@id, language, content, *origins, [language+content], progress.due, hasImage, hasSound',
+      translations: '@id, content, *origins',
+      goals: '@id, language, *origins, taskType, title, isActive, parentGoal, lastShownAt, *subGoals, *vocab, *examples, *factCards, *notes',
+      notes: '@id',
+      factCards: '@id, language, *origins',
+      resources: '@id, language, *origins',
+      languages: '@id, &code',
+      localSets: '@id, &[name+language], lastDownloadedAt',
+      mergeQueue: '@id',
+      taskCompletions: '@id, timestamp, language_code, practice_mode, session_id',
+      motivationSettings: '@id',
+      testResults: 'id, testMode, completedAt'
+    });
   }
 }
 
