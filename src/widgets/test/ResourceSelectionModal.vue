@@ -259,7 +259,7 @@ watch(() => props.show, (isShown) => {
                     <span
                       v-for="origin in resource.origins"
                       :key="origin"
-                      class="badge badge-sm badge-ghost"
+                      class="border rounded-md border-base-200 p-1"
                     >
                       {{ getOriginDisplayName(origin) }}
                     </span>
