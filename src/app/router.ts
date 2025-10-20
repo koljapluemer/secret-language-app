@@ -23,6 +23,7 @@ import PageResourceEdit from '@/pages/resource-edit/PageResourceEdit.vue';
 import PageListGoals from '@/pages/goals-list/PageListGoals.vue';
 import PageGoalAdd from '@/pages/goal-add/PageGoalAdd.vue';
 import PageGoalEdit from '@/pages/goal-edit/PageGoalEdit.vue';
+import PageListSets from '@/pages/sets-list/PageListSets.vue';
 import PageDownloads from '@/pages/downloads/PageDownloads.vue';
 import DownloadsHome from '@/pages/downloads/DownloadsHome.vue';
 import PageStats from '@/pages/time-tracking/PageTimeTracking.vue';
@@ -165,6 +166,11 @@ const router = createRouter({
       path: '/goals/:id/edit',
       name: 'goals-edit',
       component: PageGoalEdit
+    },
+    {
+      path: '/sets',
+      name: 'sets-list',
+      component: PageListSets
     },
     {
       path: '/downloads',

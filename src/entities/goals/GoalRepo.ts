@@ -159,4 +159,11 @@ export class GoalRepo implements GoalRepoContract {
     const filtered = this.applyFilters(allGoals, filters);
     return filtered.length;
   }
+
+  async getGoalsByOrigins(setIds: string[]): Promise<GoalData[]> {
+    const allGoals = await db.goals.toArray();
+    return allGoals.filter(goal =>
+      goal.origins.some(origin => setIds.includes(origin))
+    );
+  }
 }

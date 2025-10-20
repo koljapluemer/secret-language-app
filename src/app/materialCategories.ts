@@ -1,8 +1,9 @@
-import { 
-  BookOpen, 
-  FileText, 
-  Archive, 
-  Target
+import {
+  BookOpen,
+  FileText,
+  Archive,
+  Target,
+  Package2
 } from 'lucide-vue-next';
 import type { Component } from 'vue';
 
@@ -32,11 +33,16 @@ export const materialCategories: MaterialCategory[] = [
     icon: Archive,
     route: { name: 'resources-list' },
   },
-
   {
     name: 'Goals',
     description: 'Learning objectives and milestones',
     icon: Target,
     route: { name: 'goals-list' },
+  },
+  {
+    name: 'Sets',
+    description: 'Downloaded content sets and collections',
+    icon: Package2,
+    route: { name: 'sets-list' },
   }
 ];
