@@ -21,7 +21,6 @@ export interface TextInputControl {
   id: string;
   value: string;
   placeholder?: string;
-  showDoneButton?: boolean;
   position: ActionControlPosition;
 }
 

@@ -44,22 +44,14 @@
         >
           <img :src="control.imageUrl" :alt="control.alt" class="w-full h-full object-cover" />
         </button>
-        <div v-else-if="control.type === 'text-input'" class="flex gap-2 items-center">
-          <input
-            type="text"
-            :value="control.value"
-            @input="emit('action', control.id, ($event.target as HTMLInputElement).value)"
-            :placeholder="control.placeholder"
-            class="input input-bordered input-lg"
-          />
-          <button
-            v-if="control.showDoneButton"
-            @click="emit('action', `${control.id}-done`)"
-            class="btn btn-primary btn-lg"
-          >
-            Done
-          </button>
-        </div>
+        <input
+          v-else-if="control.type === 'text-input'"
+          type="text"
+          :value="control.value"
+          @input="emit('action', control.id, ($event.target as HTMLInputElement).value)"
+          :placeholder="control.placeholder"
+          class="input input-bordered input-lg"
+        />
         <button
           v-else-if="control.type === 'icon-button'"
           @click="emit('action', control.id)"

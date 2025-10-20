@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, inject, watch } from 'vue';
 import type { Task } from '@/tasks/Task';
 import type { VocabData } from '@/entities/vocab/VocabData';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
-import type { TranslationData } from '@/entities/translations/TranslationData';
+import type { ActionControl } from '@/tasks/ui/ActionControl';
 import type { NoteData } from '@/entities/notes/NoteData';
 import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
 import LinkDisplayCompact from '@/shared/links/LinkDisplayCompact.vue';
+import { useI18n } from 'vue-i18n';
 
 interface Props {
   task: Task;
@@ -16,15 +17,18 @@ interface Props {
 const props = defineProps<Props>();
 const emit = defineEmits<{ finished: [correctness?: 'correct' | 'incorrect' | 'neutral'] }>();
 
+const { t } = useI18n();
 const vocabRepo = props.repositories.vocabRepo;
 const translationRepo = props.repositories.translationRepo;
 const noteRepo = props.repositories.noteRepo;
 
 const vocab = ref<VocabData | null>(null);
-const newTranslationContent = ref('');
-const translations = ref<(TranslationData | Omit<TranslationData, 'id'>)[]>([]);
+const translationInputValue = ref('');
 const vocabNotes = ref<NoteData[]>([]);
 const translationNotes = ref<NoteData[]>([]);
+
+const registerActionHandler = inject<(controlId: string, handler: (data?: string) => void) => void>('registerActionHandler');
+const registerActionControls = inject<(controls: ActionControl[]) => void>('registerActionControls');
 
 async function loadVocab() {
   const vocabId = props.task.associatedVocab?.[0];
@@ -33,13 +37,12 @@ async function loadVocab() {
   vocab.value = data || null;
   if (vocab.value) {
     const existing = await translationRepo.getTranslationsByIds(vocab.value.translations);
-    translations.value = existing;
-    
+
     // Load vocab notes
     if (vocab.value.notes && vocab.value.notes.length > 0) {
       vocabNotes.value = await noteRepo.getNotesByUIDs(vocab.value.notes);
     }
-    
+
     // Load translation notes
     const allTranslationNoteIds: string[] = [];
     existing.forEach(translation => {
@@ -53,49 +56,60 @@ async function loadVocab() {
   }
 }
 
-function canAdd(): boolean {
-  return newTranslationContent.value.trim().length > 0;
-}
+function updateActionControls() {
+  if (!registerActionControls) return;
 
-function addLocalTranslation() {
-  if (!canAdd()) return;
-  // Don't add an ID - let Dexie generate it when saved
-  const entry: Omit<TranslationData, 'id'> = {
-    content: newTranslationContent.value.trim(),
-    priority: 1,
-    notes: [],
-    origins: ['user-added']
-  };
-  translations.value.push(entry);
-  newTranslationContent.value = '';
-}
+  const controls: ActionControl[] = [
+    {
+      type: 'button',
+      id: 'skip',
+      label: t('practice.tasks.skipDisable'),
+      position: 'secondary-left'
+    },
+    {
+      type: 'text-input',
+      id: 'translation-input',
+      value: translationInputValue.value,
+      placeholder: 'Add translation...',
+      position: 'central'
+    }
+  ];
 
-function removeLocalTranslation(index: number) {
-  translations.value.splice(index, 1);
+  // Add done button only if input has content
+  if (translationInputValue.value.trim().length > 0) {
+    controls.push({
+      type: 'button',
+      id: 'done',
+      label: t('common.done'),
+      position: 'central'
+    });
+  }
+
+  registerActionControls(controls);
 }
 
 async function handleDone() {
   if (!vocab.value) return;
-  if (translations.value.length === 0) return;
+  const trimmed = translationInputValue.value.trim();
+  if (!trimmed) return;
 
-  // Persist translations, then update vocab to link them
-  const savedIds: string[] = [];
-  const plainTranslations = JSON.parse(JSON.stringify(translations.value));
-  for (const t of plainTranslations) {
-    const saved = await translationRepo.saveTranslation({
-      content: t.content,
-      priority: t.priority,
-      notes: t.notes
-    });
-    savedIds.push(saved.id);
-  }
+  // Save the single translation
+  const saved = await translationRepo.saveTranslation({
+    content: trimmed,
+    priority: 1,
+    notes: []
+  });
 
   const updatedVocab: VocabData = {
     ...JSON.parse(JSON.stringify(vocab.value)),
-    translations: [...vocab.value.translations, ...savedIds]
+    translations: [...vocab.value.translations, saved.id]
   };
   await vocabRepo.updateVocab(updatedVocab);
   emit('finished', 'neutral');
+}
+
+function handleTranslationInput(value?: string) {
+  translationInputValue.value = value || '';
 }
 
 async function handleSkipAndDisable() {
@@ -109,7 +123,24 @@ async function handleSkipAndDisable() {
   emit('finished', 'neutral');
 }
 
-onMounted(loadVocab);
+// Watch for input changes to update controls
+watch(translationInputValue, () => {
+  updateActionControls();
+});
+
+onMounted(() => {
+  loadVocab();
+
+  // Register action handlers
+  if (registerActionHandler) {
+    registerActionHandler('translation-input', handleTranslationInput);
+    registerActionHandler('done', handleDone);
+    registerActionHandler('skip', handleSkipAndDisable);
+  }
+
+  // Initial control registration
+  updateActionControls();
+});
 </script>
 
 <template>
@@ -117,57 +148,27 @@ onMounted(loadVocab);
     <!-- Vocab section -->
     <div class="flex gap-4 mb-6">
       <div class="flex-1">
-        <h2>{{ vocab.content }}</h2>
+        <h2 class="text-3xl font-bold">{{ vocab.content }}</h2>
       </div>
       <!-- Vocab notes sidebar -->
       <div v-if="vocabNotes.filter(note => note.showBeforeExercise).length > 0" class="w-64 space-y-2">
-        
-        <NoteDisplayMini 
-          v-for="note in vocabNotes.filter(note => note.showBeforeExercise)" 
+        <NoteDisplayMini
+          v-for="note in vocabNotes.filter(note => note.showBeforeExercise)"
           :key="note.id"
           :note="note"
         />
       </div>
     </div>
-    
-    <!-- Translation notes (generic since we don't have specific translations here) -->
+
+    <!-- Translation notes -->
     <div v-if="translationNotes.filter(note => note.showBeforeExercise).length > 0" class="flex gap-4 mb-4">
       <div class="flex-1"></div>
       <div class="w-64 space-y-2">
-        
-        <NoteDisplayMini 
-          v-for="note in translationNotes.filter(note => note.showBeforeExercise)" 
+        <NoteDisplayMini
+          v-for="note in translationNotes.filter(note => note.showBeforeExercise)"
           :key="note.id"
           :note="note"
         />
-      </div>
-    </div>
-    
-    <div class="space-y-3 mb-4">
-      <div
-        v-for="(t, index) in translations"
-        :key="'id' in t ? t.id : `temp-${index}`"
-        class="flex items-center gap-2"
-      >
-        <input
-          v-model="t.content"
-          type="text"
-          class="input input-bordered input-lg flex-1"
-          placeholder="Enter translation..."
-        />
-        <button type="button" class="btn btn-ghost btn-circle text-error" @click="removeLocalTranslation(index)">{{ $t('practice.tasks.removeTranslation') }}</button>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <input
-          v-model="newTranslationContent"
-          type="text"
-          class="input input-bordered input-lg flex-1"
-          placeholder="Add new translation..."
-          @keydown.enter="addLocalTranslation"
-          @blur="addLocalTranslation"
-        />
-        <div class="w-10"></div>
       </div>
     </div>
 
@@ -178,11 +179,6 @@ onMounted(loadVocab);
         :key="index"
         :link="link"
       />
-    </div>
-    
-    <div class="flex gap-2 justify-end">
-      <button class="btn btn-ghost" @click="handleSkipAndDisable">Skip & Disable</button>
-      <button class="btn btn-primary" :disabled="translations.length === 0" @click="handleDone">{{ $t('common.done') }}</button>
     </div>
   </div>
   <div v-else>
