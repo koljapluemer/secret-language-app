@@ -143,6 +143,11 @@ export class UnifiedRemoteSetService {
 
     reportProgress('Setting up language and local set', 0, 100);
 
+    // Fetch metadata to get the title and description
+    const metadata = await this.getSetMetadata(languageCode, setName);
+    const setTitle = metadata?.title || setName; // Fallback to setName if no title
+    const setDescription = metadata?.description;
+
     // Ensure language exists in the database as active (only if not already present)
     const existingLanguage = await this.languageRepo.getByCode(languageCode);
     if (!existingLanguage) {
@@ -152,8 +157,9 @@ export class UnifiedRemoteSetService {
 
     // Create or update local set entry
     const localSet = await this.localSetRepo.saveLocalSet({
-      name: setName,
+      name: setTitle,
       language: languageCode,
+      description: setDescription,
       lastDownloadedAt: new Date()
     });
 
@@ -453,7 +459,7 @@ export class UnifiedRemoteSetService {
 
     reportProgress('Download complete', 100, 100);
 
-    this.toast.success(`Successfully downloaded ${setName}`);
+    this.toast.success(`Successfully downloaded ${setTitle}`);
 
     // Task generation is now handled ad-hoc during lessons
   }
