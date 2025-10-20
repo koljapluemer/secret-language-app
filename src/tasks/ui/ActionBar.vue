@@ -1,6 +1,6 @@
 <template>
   <div
-    class="bg-primary border-t-10 border-t-secondary p-4 mt-4 text-white flex flex-row gap-4 justify-between items-center">
+    class="bg-primary border-t-10 border-t-secondary p-4 text-white flex flex-row gap-4 justify-between items-end relative">
     <div class="flex flex-row gap-2 items-center">
       <template v-for="control in secondaryLeftControls" :key="control.id">
         <button
@@ -28,7 +28,7 @@
       </template>
     </div>
 
-    <div class="flex flex-row justify-center gap-2 items-center">
+    <div class="flex flex-row justify-center gap-2 items-center absolute left-1/2 -translate-x-1/2 bottom-12">
       <template v-for="control in centralControls" :key="control.id">
         <button
           v-if="control.type === 'button'"
@@ -122,7 +122,7 @@ function getButtonClass(position: ActionControlPosition, destructive?: boolean):
 
   // Position determines size
   if (position === 'central') {
-    classes.push('btn-lg');
+    classes.push('btn-xl', 'text-xl', 'px-8', 'py-4');
   }
   // secondary-left and secondary-right use default size
 
