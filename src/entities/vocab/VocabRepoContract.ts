@@ -95,7 +95,7 @@ export interface VocabRepoContract {
   getUnseenVocabWithSoundAndImages(languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData[]>;
 
   // Sentence Slide operations
-  getRandomUnseenSentenceVocabWithRelatedVocab(languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData | null>;
+  getRandomSentenceVocabWithContains(languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData | null>;
 
   // Minimal Pairs operations
   getRandomDueOrUnseenVocabForMinimalPairs(languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData | null>;

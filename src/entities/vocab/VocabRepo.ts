@@ -1131,18 +1131,22 @@ export class VocabRepo implements VocabRepoContract {
     return pickRandom(ensured, 1)[0];
   }
 
-  async getRandomUnseenSentenceVocabWithRelatedVocab(languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData | null> {
+  async getRandomSentenceVocabWithContains(languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData | null> {
+    const now = new Date();
     const vocab = await db.vocab
       .where('language')
       .anyOf(languages)
-      .filter(vocab =>
-        vocab.consideredSentence === true &&
-        vocab.progress.level === -1 &&
-        vocab.relatedVocab && vocab.relatedVocab.length >= 1 &&
-        !vocab.doNotPractice &&
-        (!vocabBlockList || !vocabBlockList.includes(vocab.id)) &&
-        (!setsToAvoid || !vocab.origins.some(origin => setsToAvoid.includes(origin)))
-      )
+      .filter(vocab => {
+        const isDue = vocab.progress.due && vocab.progress.due <= now;
+        const isUnseen = vocab.progress.level === -1;
+
+        return vocab.consideredSentence === true &&
+          vocab.contains && vocab.contains.length > 0 &&
+          (isDue || isUnseen) &&
+          !vocab.doNotPractice &&
+          (!vocabBlockList || !vocabBlockList.includes(vocab.id)) &&
+          (!setsToAvoid || !vocab.origins.some(origin => setsToAvoid.includes(origin)));
+      })
       .toArray();
 
     if (vocab.length === 0) return null;
