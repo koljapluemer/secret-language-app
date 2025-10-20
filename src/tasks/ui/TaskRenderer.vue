@@ -1,15 +1,6 @@
 <template>
   <div class="flex flex-col gap-4">
-    <div class="card shadow">
-      <div class="card-body">
-        <div class="">
-          <LanguageDisplay v-if="languageData" :language="languageData" />
-        </div>
-        <h2>
-          {{ props.task.prompt }}
-        </h2>
-      </div>
-    </div>
+    <Instruction :language-data="languageData" :prompt="props.task.prompt"/>
 
     <component :is="getTaskComponent(props.task.taskType)" :task="props.task" :repositories="repositories"
       :mode-context="props.modeContext" @finished="handleTaskFinished" />
@@ -29,10 +20,10 @@ import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoCont
 import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoContract';
 import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract';
 import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract';
-import LanguageDisplay from '@/entities/languages/LanguageDisplay.vue';
 import { useDetailedPracticeTracking } from '@/features/track/useDetailedPracticeTracking';
 import type { TaskCorrectness } from '@/entities/practice-tracking/TaskCompletionData';
 import { useToast } from '@/shared/toasts';
+import Instruction from './Instruction.vue';
 
 interface PracticeContext {
   practiceMode: string;
