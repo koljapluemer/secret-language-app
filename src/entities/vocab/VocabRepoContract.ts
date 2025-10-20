@@ -114,4 +114,5 @@ export interface VocabRepoContract {
   // Merge operations
   getUncheckedVocab(limit: number): Promise<VocabData[]>;
   getVocabByOrigins(setIds: string[]): Promise<VocabData[]>;
+  getVocabByTranslationId(translationId: string): Promise<VocabData[]>;
 }

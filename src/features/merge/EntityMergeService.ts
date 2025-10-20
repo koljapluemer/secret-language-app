@@ -48,6 +48,39 @@ export class EntityMergeService {
   ) {}
 
   /**
+   * Remap translation references in vocab before deleting a translation
+   * This prevents broken references when merging duplicate translations
+   */
+  private async remapTranslationReferences(
+    oldTranslationId: string,
+    newTranslationId: string
+  ): Promise<void> {
+    // Find all vocab that reference the old translation
+    const affectedVocab = await this.vocabRepo.getVocabByTranslationId(oldTranslationId);
+
+    if (affectedVocab.length === 0) {
+      return;
+    }
+
+    console.log(`[Merge] Remapping ${affectedVocab.length} vocab from translation ${oldTranslationId} → ${newTranslationId}`);
+
+    // Update each vocab to point to the new translation
+    for (const vocab of affectedVocab) {
+      const updatedTranslations = vocab.translations.map(id =>
+        id === oldTranslationId ? newTranslationId : id
+      );
+
+      // Remove duplicates
+      const uniqueTranslations = [...new Set(updatedTranslations)];
+
+      await this.vocabRepo.updateVocab({
+        ...vocab,
+        translations: uniqueTranslations
+      });
+    }
+  }
+
+  /**
    * Start the background merge service
    */
   start(): void {
@@ -181,6 +214,7 @@ export class EntityMergeService {
 
     const toUpdate: TranslationData[] = []
     const toDelete: string[] = []
+    const remapOperations: Array<{ oldId: string; newId: string }> = []
 
     for (const translation of unchecked) {
       const duplicate = await findDuplicateTranslation(translation, this.translationRepo)
@@ -194,6 +228,12 @@ export class EntityMergeService {
 
         toUpdate.push(merged)
         toDelete.push(translation.id)
+
+        // Track that we need to remap vocab references
+        remapOperations.push({
+          oldId: translation.id,
+          newId: duplicate.id
+        })
       } else {
         // No duplicate - just mark as checked and deduplicate notes
         const deduplicatedNotes = await deduplicateNoteIds(translation.notes, this.noteRepo)
@@ -213,7 +253,12 @@ export class EntityMergeService {
       }
     }
 
-    // Bulk delete duplicates
+    // Remap translation references in vocab BEFORE deleting translations
+    for (const { oldId, newId } of remapOperations) {
+      await this.remapTranslationReferences(oldId, newId)
+    }
+
+    // Bulk delete duplicates (now safe because references are remapped)
     for (const id of toDelete) {
       await this.translationRepo.deleteTranslations([id])
     }

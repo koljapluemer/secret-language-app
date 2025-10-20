@@ -1496,4 +1496,13 @@ export class VocabRepo implements VocabRepoContract {
 
     return vocab.map(v => this.ensureVocabFields(v));
   }
+
+  async getVocabByTranslationId(translationId: string): Promise<VocabData[]> {
+    const allVocab = await db.vocab.toArray();
+    const matching = allVocab.filter(v =>
+      v.translations && v.translations.includes(translationId)
+    );
+
+    return matching.map(v => this.ensureVocabFields(v));
+  }
 }
