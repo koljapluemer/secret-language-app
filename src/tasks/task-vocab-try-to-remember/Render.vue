@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, inject } from 'vue';
 import { createEmptyCard } from 'ts-fsrs';
 import type { Task } from '@/tasks/Task';
 import type { VocabData } from '@/entities/vocab/VocabData';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
+import type { ActionControl } from '@/tasks/ui/ActionControl';
 import VocabWithTranslationsDisplay from '@/features/display-vocab-with-translations/VocabWithTranslationsDisplay.vue';
 import { useToast } from '@/shared/toasts';
+import { useI18n } from 'vue-i18n';
 
 interface Props {
   task: Task;
@@ -18,8 +20,12 @@ const emit = defineEmits<{
 }>();
 
 const toast = useToast();
+const { t } = useI18n();
 const vocabRepo = props.repositories.vocabRepo;
 const vocab = ref<VocabData | null>(null);
+
+const registerActionHandler = inject<(controlId: string, handler: (data?: string) => void) => void>('registerActionHandler');
+const registerActionControls = inject<(controls: ActionControl[]) => void>('registerActionControls');
 
 const loadVocab = async () => {
   const vocabId = props.task.associatedVocab?.[0];
@@ -72,7 +78,34 @@ const handleSkip = async () => {
   }
 };
 
-onMounted(loadVocab);
+onMounted(() => {
+  loadVocab();
+
+  // Register action controls
+  if (registerActionControls) {
+    const controls: ActionControl[] = [
+      {
+        type: 'button',
+        id: 'skip',
+        label: t('practice.tasks.doNotLearn'),
+        position: 'secondary-left'
+      },
+      {
+        type: 'button',
+        id: 'done',
+        label: t('common.done'),
+        position: 'central'
+      }
+    ];
+    registerActionControls(controls);
+  }
+
+  // Register action handlers
+  if (registerActionHandler) {
+    registerActionHandler('skip', handleSkip);
+    registerActionHandler('done', handleDone);
+  }
+});
 </script>
 
 <template>
@@ -81,11 +114,6 @@ onMounted(loadVocab);
       :vocab-id="task.associatedVocab?.[0] || ''"
       :repositories="repositories"
     />
-    
-    <div class="flex justify-center gap-4 mt-6">
-      <button @click="handleSkip" class="btn btn-ghost">{{ $t('practice.tasks.doNotLearn') }}</button>
-      <button @click="handleDone" class="btn btn-primary">{{ $t('common.done') }}</button>
-    </div>
   </div>
 
   <div v-else>

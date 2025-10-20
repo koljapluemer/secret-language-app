@@ -1,9 +1,17 @@
 <script setup lang="ts">
-import { getCurrentInstance, onMounted } from 'vue';
+import { getCurrentInstance, onMounted, computed } from 'vue';
+import { useRoute } from 'vue-router';
 import { provideRepositories } from './injectRepositories';
 import { startMergeService } from '../features/merge/startMergeService';
 import AppHeader from './AppHeader.vue';
 import ToastContainer from '@/shared/toasts/ToastContainer.vue';
+
+const route = useRoute();
+
+// Detect if we're on a practice mode route (but not the practice home/overview)
+const isInPracticeMode = computed(() => {
+  return route.path.startsWith('/practice/') && route.name !== 'practice-overview';
+});
 
 // Setup and provide repositories
 const app = getCurrentInstance()?.appContext.app;
@@ -27,8 +35,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <AppHeader />
-  <main class="prose mx-auto flex-1 container flex flex-col gap-4 my-2">
+  <AppHeader v-if="!isInPracticeMode" />
+  <main :class="isInPracticeMode ? 'flex-1' : 'prose mx-auto flex-1 container flex flex-col gap-4 my-2'">
     <router-view />
   </main>
   <ToastContainer />
@@ -38,8 +46,19 @@ onMounted(() => {
 @import "tailwindcss";
 
 @plugin "daisyui" {
-  themes: fantasy --default
+  themes: fantasy --default, /* you may list other themes */
+  other-theme-name;
 }
+
+@plugin "daisyui/theme" {
+  name: fantasy;
+  default: true;
+  /* override colors */
+  --color-primary: #7A29E9;
+  --color-secondary: #210B3F;
+  /* you can override more variables if needed */
+}
+
 
 @layer base {
   h1 {

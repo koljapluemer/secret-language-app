@@ -1,16 +1,31 @@
 <template>
-  <div class="flex flex-col gap-4">
-    <Instruction :language-data="languageData" :prompt="props.task.prompt"/>
+  <div class="flex flex-col h-screen">
+    <Instruction :language-data="languageData" :prompt="props.task.prompt" />
 
-    <component :is="getTaskComponent(props.task.taskType)" :task="props.task" :repositories="repositories"
-      :mode-context="props.modeContext" @finished="handleTaskFinished" />
+    <section class="flex-1 overflow-auto">
+      <div class="container mx-auto p-4">
+        <component
+          :is="getTaskComponent(props.task.taskType)"
+          :task="props.task"
+          :repositories="repositories"
+          :mode-context="props.modeContext"
+          @finished="handleTaskFinished"
+        />
+      </div>
+    </section>
+
+    <ActionBar
+      :controls="actionControls"
+      @action="handleActionEvent"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { taskRegistry } from './taskRegistry';
 import type { Task } from '@/tasks/Task';
-import { inject, onMounted, onUnmounted, ref } from 'vue';
+import { inject, onMounted, onUnmounted, ref, provide } from 'vue';
+import type { ActionControl } from './ActionControl';
 import type { LanguageData } from '@/entities/languages/LanguageData';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
@@ -24,6 +39,7 @@ import { useDetailedPracticeTracking } from '@/features/track/useDetailedPractic
 import type { TaskCorrectness } from '@/entities/practice-tracking/TaskCompletionData';
 import { useToast } from '@/shared/toasts';
 import Instruction from './Instruction.vue';
+import ActionBar from './ActionBar.vue';
 
 interface PracticeContext {
   practiceMode: string;
@@ -41,6 +57,7 @@ interface Props {
 
 const props = defineProps<Props>();
 const languageData = ref<LanguageData | null>(null);
+const actionControls = ref<ActionControl[]>([]);
 
 // Inject all repositories
 const vocabRepo = inject<VocabRepoContract>('vocabRepo');
@@ -84,9 +101,27 @@ const emit = defineEmits<{
   finished: [correctness?: TaskCorrectness];
 }>();
 
+// Provide action handler registration for task components
+const actionHandlers = ref<Map<string, (data?: string) => void>>(new Map());
+
+provide('registerActionHandler', (controlId: string, handler: (data?: string) => void) => {
+  actionHandlers.value.set(controlId, handler);
+});
+
+provide('registerActionControls', (controls: ActionControl[]) => {
+  actionControls.value = controls;
+});
+
 function getTaskComponent(taskType: keyof typeof taskRegistry) {
   const taskInfo = taskRegistry[taskType];
   return taskInfo?.component;
+}
+
+function handleActionEvent(controlId: string, data?: string) {
+  const handler = actionHandlers.value.get(controlId);
+  if (handler) {
+    handler(data);
+  }
 }
 
 async function handleTaskFinished(correctness: TaskCorrectness = 'neutral') {
