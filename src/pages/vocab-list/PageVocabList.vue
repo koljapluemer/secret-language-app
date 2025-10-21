@@ -163,7 +163,12 @@
       <form method="dialog">
         <button @click="closeModal" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
       </form>
-      <Display v-if="selectedVocab" :vocab="selectedVocab" showLanguage />
+      <Display
+        v-if="selectedVocab"
+        :vocab="selectedVocab"
+        :repos="{ languageRepo, translationRepo, noteRepo }"
+        showLanguage
+      />
     </div>
     <form method="dialog" class="modal-backdrop">
       <button @click="closeModal">close</button>
@@ -180,6 +185,7 @@ import type { LanguageData } from '@/entities/languages/LanguageData';
 import type { LocalSetRepoContract } from '@/entities/local-sets/LocalSetRepoContract';
 import type { LocalSetData } from '@/entities/local-sets/LocalSetData';
 import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
+import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract';
 import Pagination from '@/shared/ui/Pagination.vue';
 import { useRoute, useRouter, type LocationQueryValue } from 'vue-router';
 import { useToast } from '@/shared/toasts';
@@ -193,6 +199,7 @@ const vocabRepo = inject<VocabRepoContract>('vocabRepo')!;
 const languageRepo = inject<LanguageRepoContract>('languageRepo')!;
 const localSetRepo = inject<LocalSetRepoContract>('localSetRepo')!;
 const translationRepo = inject<TranslationRepoContract>('translationRepo')!;
+const noteRepo = inject<NoteRepoContract>('noteRepo')!;
 const toast = useToast();
 
 // Data

@@ -6,21 +6,15 @@
             </router-link>
         </div>
         <h2 class="text-3xl font-bold ">{{ prompt }}</h2>
-        <span class="border p-1 rounded"  v-if="languageData">
-            <LanguageDisplay :language="languageData" />
-        </span>
     </div>
 
 </template>
 
 <script setup lang="ts">
 import { LogOut } from 'lucide-vue-next';
-import type { LanguageData } from '@/entities/languages/LanguageData';
-import LanguageDisplay from '@/entities/languages/LanguageDisplay.vue';
 
 
 defineProps<{
     prompt: string;
-    languageData: LanguageData | null;
 }>();
 </script>

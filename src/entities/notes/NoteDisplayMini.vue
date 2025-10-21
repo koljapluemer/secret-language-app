@@ -3,7 +3,7 @@
     <div class="text-xs text-base-content/70 mb-1 font-medium">
       {{ note.noteType || 'Note' }}
     </div>
-    <div class="text-base-content whitespace-pre-wrap">
+    <div class="text-base-content whitespace-pre-wrap text-sm">
       {{ note.content }}
     </div>
   </div>

@@ -100,6 +100,8 @@ import {
 import { getClozeChoiceFromTwoTaskState, getClozeChoiceFromFourTaskState } from '@/tasks/task-cloze-choice/taskStateForVocab';
 import { getClozeRevealTaskState } from '@/tasks/task-cloze-reveal/taskStateForVocab';
 import { getFormSentenceTaskState } from '@/tasks/task-vocab-form-sentence/taskStateForVocab';
+import { getVocabChooseImageBySoundTaskState } from '@/tasks/task-vocab-choose-image-by-sound/taskStateForVocab';
+import { getVocabChooseFromSoundTaskState } from '@/tasks/task-vocab-choose-from-sound/taskStateForVocab';
 
 // Import task generators
 import { generateAddTranslation } from '@/tasks/task-vocab-add-translation/generate';
@@ -115,6 +117,8 @@ import {
 import { generateClozeChoiceFromTwo, generateClozeChoiceFromFour } from '@/tasks/task-cloze-choice/generate';
 import { generateClozeReveal } from '@/tasks/task-cloze-reveal/generate';
 import { generateFormSentenceTaskFromSingleVocab } from '@/tasks/task-vocab-form-sentence/generate';
+import { generateVocabChooseImageBySound } from '@/tasks/task-vocab-choose-image-by-sound/generate';
+import { generateVocabChooseFromSound } from '@/tasks/task-vocab-choose-from-sound/generate';
 
 import TaskRenderer from '@/tasks/ui/TaskRenderer.vue';
 import { useToast } from '@/shared/toasts';
@@ -263,6 +267,25 @@ const taskStates = computed<TaskStateInfo[]>(() => {
     state: formSentenceState.state,
     reason: formSentenceState.reason,
     generator: formSentenceState.state !== 'impossible' ? () => generateFormSentenceTaskFromSingleVocab(props.vocab) : undefined
+  });
+
+  // Sound-based tasks
+  const chooseImageBySoundState = getVocabChooseImageBySoundTaskState(props.vocab);
+  states.push({
+    name: 'choose-image-by-sound',
+    displayName: 'Choose Image by Sound',
+    state: chooseImageBySoundState.state,
+    reason: chooseImageBySoundState.reason,
+    generator: chooseImageBySoundState.state !== 'impossible' ? () => generateVocabChooseImageBySound(props.vocab) : undefined
+  });
+
+  const chooseFromSoundState = getVocabChooseFromSoundTaskState(props.vocab);
+  states.push({
+    name: 'choose-from-sound',
+    displayName: 'Choose from Sound (Minimal Pairs)',
+    state: chooseFromSoundState.state,
+    reason: chooseFromSoundState.reason,
+    generator: chooseFromSoundState.state !== 'impossible' ? () => generateVocabChooseFromSound(props.vocab) : undefined
   });
 
   return states;

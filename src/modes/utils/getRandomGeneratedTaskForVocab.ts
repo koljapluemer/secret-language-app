@@ -19,6 +19,8 @@ import { generateClozeChoiceFromTwo } from '@/tasks/task-cloze-choice/generate';
 import { generateClozeChoiceFromFour } from '@/tasks/task-cloze-choice/generate';
 import { generateClozeReveal } from '@/tasks/task-cloze-reveal/generate';
 import { generateTaskFormSentenceFromTwoVocab, generateFormSentenceTaskFromSingleVocab } from '@/tasks/task-vocab-form-sentence/generate';
+import { generateVocabChooseImageBySound } from '@/tasks/task-vocab-choose-image-by-sound/generate';
+import { generateVocabChooseFromSound } from '@/tasks/task-vocab-choose-from-sound/generate';
 
 // Import all task state checkers
 import { getAddTranslationTaskState } from '@/tasks/task-vocab-add-translation/taskStateForVocab';
@@ -34,6 +36,8 @@ import {
 import { getClozeChoiceFromTwoTaskState, getClozeChoiceFromFourTaskState } from '@/tasks/task-cloze-choice/taskStateForVocab';
 import { getClozeRevealTaskState } from '@/tasks/task-cloze-reveal/taskStateForVocab';
 import { getFormSentenceTaskState } from '@/tasks/task-vocab-form-sentence/taskStateForVocab';
+import { getVocabChooseImageBySoundTaskState } from '@/tasks/task-vocab-choose-image-by-sound/taskStateForVocab';
+import { getVocabChooseFromSoundTaskState } from '@/tasks/task-vocab-choose-from-sound/taskStateForVocab';
 
 type TaskGenerator = () => Task | Promise<Task>;
 
@@ -110,6 +114,14 @@ export async function getRandomGeneratedTaskForVocab(
         return generateFormSentenceTaskFromSingleVocab(vocab);
       }
     });
+  }
+
+  // Sound-based tasks
+  if (getVocabChooseImageBySoundTaskState(vocab).state === 'active') {
+    eligibleTasks.push(() => generateVocabChooseImageBySound(vocab));
+  }
+  if (getVocabChooseFromSoundTaskState(vocab).state === 'active') {
+    eligibleTasks.push(() => generateVocabChooseFromSound(vocab));
   }
 
   // Content enhancement tasks

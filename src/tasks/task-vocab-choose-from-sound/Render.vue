@@ -21,7 +21,7 @@
           :disabled="isButtonDisabled(index)">
           {{ $t('practice.tasks.iHear') }} {{ vocab.content }}
         </button>
-        <VocabWithTranslationsDisplay :vocab-id="vocab.id" :repositories="repositories"
+        <VocabRenderer :vocab="vocab" :repos="repositories"
           :showAllNotesImmediately="true" />
       </div>
     </div>
@@ -44,12 +44,12 @@ import type { Task } from '@/tasks/Task';
 import type { VocabData, VocabSound } from '@/entities/vocab/VocabData';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
 import SoundPlayer from '@/shared/ui/SoundPlayer.vue';
-import VocabWithTranslationsDisplay from '@/features/display-vocab-with-translations/VocabWithTranslationsDisplay.vue';
 import { Rating } from 'ts-fsrs';
 import { shuffleArray, randomFromArray } from '@/shared/utils/arrayUtils';
 import { useButtonWithKeyboardArrowControl } from '@/shared/composables/useButtonWithKeyboardArrowControl';
 import { useReplaySoundWithSpacebar } from '@/shared/composables/useReplaySoundWithSpacebar';
 import { useToast } from '@/shared/toasts';
+import VocabRenderer from '@/features/vocab-view/VocabRenderer.vue';
 
 interface Props {
   task: Task;

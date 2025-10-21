@@ -5,7 +5,6 @@ import type { Task } from '@/tasks/Task';
 import type { VocabData } from '@/entities/vocab/VocabData';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
 import type { ActionControl } from '@/tasks/ui/ActionControl';
-import VocabWithTranslationsDisplay from '@/features/display-vocab-with-translations/VocabWithTranslationsDisplay.vue';
 import { useToast } from '@/shared/toasts';
 import { useI18n } from 'vue-i18n';
 import VocabRenderer from '@/features/vocab-view/VocabRenderer.vue';
@@ -111,9 +110,7 @@ onMounted(() => {
 
 <template>
   <div v-if="vocab">
-    <VocabRenderer :vocab="vocab" :repos="repositories" />
-    old view:
-    <VocabWithTranslationsDisplay :vocab-id="task.associatedVocab?.[0] || ''" :repositories="repositories" />
+    <VocabRenderer :vocab="vocab" :repos="repositories" show-language />
   </div>
 
   <div v-else>
