@@ -184,7 +184,7 @@ import Pagination from '@/shared/ui/Pagination.vue';
 import { useRoute, useRouter, type LocationQueryValue } from 'vue-router';
 import { useToast } from '@/shared/toasts';
 import { Eye, Trash2 } from 'lucide-vue-next';
-import Display from '@/features/vocab-view/Display.vue';
+import Display from '@/features/vocab-view/VocabRenderer.vue';
 
 const route = useRoute();
 const router = useRouter();

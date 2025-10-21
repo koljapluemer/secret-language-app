@@ -8,6 +8,7 @@ import type { ActionControl } from '@/tasks/ui/ActionControl';
 import VocabWithTranslationsDisplay from '@/features/display-vocab-with-translations/VocabWithTranslationsDisplay.vue';
 import { useToast } from '@/shared/toasts';
 import { useI18n } from 'vue-i18n';
+import VocabRenderer from '@/features/vocab-view/VocabRenderer.vue';
 
 interface Props {
   task: Task;
@@ -62,7 +63,7 @@ const handleDone = async () => {
 
 const handleSkip = async () => {
   if (!vocab.value) return;
-  
+
   try {
     // Mark vocab as do not practice
     const updatedVocab = {
@@ -110,10 +111,9 @@ onMounted(() => {
 
 <template>
   <div v-if="vocab">
-    <VocabWithTranslationsDisplay
-      :vocab-id="task.associatedVocab?.[0] || ''"
-      :repositories="repositories"
-    />
+    <VocabRenderer :vocab="vocab" :repos="repositories" />
+    old view:
+    <VocabWithTranslationsDisplay :vocab-id="task.associatedVocab?.[0] || ''" :repositories="repositories" />
   </div>
 
   <div v-else>
