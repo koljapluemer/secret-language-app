@@ -36,6 +36,11 @@
     </div>
   </div>
 
+  <!-- Available Tasks Table -->
+  <div v-if="isEditing && currentVocab && currentTranslations" class="mt-8">
+    <VocabTaskStatesTable :vocab="currentVocab" :translations="currentTranslations" />
+  </div>
+
   <!-- Debug Vocab Progress -->
   <div v-if="isEditing && currentVocab" class="mt-8">
     <DebugVocabProgress :vocab-data="currentVocab" />
@@ -46,17 +51,22 @@
 import { computed, inject, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import VocabEditFormController from './ui/VocabEditFormController.vue';
+import VocabTaskStatesTable from './ui/VocabTaskStatesTable.vue';
 import DebugVocabProgress from '@/shared/ui/DebugVocabProgress.vue';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
+import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
 import type { VocabData } from '@/entities/vocab/VocabData';
+import type { TranslationData } from '@/entities/translations/TranslationData';
 import { calculateVocabMastery } from '@/entities/vocab/vocabMastery';
 import { useToast } from '@/shared/toasts';
 
 const route = useRoute();
 const currentVocab = ref<VocabData | null>(null);
+const currentTranslations = ref<TranslationData[]>([]);
 const toast = useToast();
 
 const vocabRepo = inject<VocabRepoContract>('vocabRepo');
+const translationRepo = inject<TranslationRepoContract>('translationRepo');
 
 const isEditing = computed(() => {
   return route.params.id && route.params.id !== 'new';
@@ -69,22 +79,31 @@ const vocabMastery = computed(() => {
 
 // Watch for vocab ID changes and load task IDs and vocab data
 watch(() => route.params.id, async (vocabId) => {
-  if (vocabId && vocabId !== 'new' && vocabRepo) {
+  if (vocabId && vocabId !== 'new' && vocabRepo && translationRepo) {
     try {
       const vocab = await vocabRepo.getVocabByUID(vocabId as string);
       currentVocab.value = vocab || null;
+
+      // Load translations
+      if (vocab && vocab.translations.length > 0) {
+        const translations = await translationRepo.getTranslationsByIds(vocab.translations);
+        currentTranslations.value = translations;
+      } else {
+        currentTranslations.value = [];
+      }
     } catch (error) {
       toast.error(`Failed to load vocab data: ${String(error)}`);
       currentVocab.value = null;
+      currentTranslations.value = [];
     }
   } else {
     currentVocab.value = null;
+    currentTranslations.value = [];
   }
 }, { immediate: true });
 
 async function handleVocabSaved(vocabId: string) {
-  if (!vocabRepo) {
-    
+  if (!vocabRepo || !translationRepo) {
     return;
   }
 
@@ -92,6 +111,14 @@ async function handleVocabSaved(vocabId: string) {
     // Reload vocab data
     const vocab = await vocabRepo.getVocabByUID(vocabId);
     currentVocab.value = vocab || null;
+
+    // Reload translations
+    if (vocab && vocab.translations.length > 0) {
+      const translations = await translationRepo.getTranslationsByIds(vocab.translations);
+      currentTranslations.value = translations;
+    } else {
+      currentTranslations.value = [];
+    }
   } catch (error) {
     toast.error(`Failed to reload vocab data: ${String(error)}`);
   }
