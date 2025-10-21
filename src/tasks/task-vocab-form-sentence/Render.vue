@@ -10,6 +10,7 @@ import type { NoteData } from '@/entities/notes/NoteData';
 import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
 import LinkDisplayMini from '@/shared/links/LinkDisplayMini.vue';
 import { useToast } from '@/shared/toasts';
+import VocabRenderer from '@/features/vocab-view/VocabRenderer.vue';
 
 interface Props {
   task: Task;
@@ -154,15 +155,15 @@ const handleDone = async () => {
         noteType: 'example sentence task',
         showBeforeExercise: false
       };
-      
+
       const savedNote = await noteRepo.saveNote(toRaw(noteData));
-      
+
 
       // Attach note to both vocab items
       for (const vocab of vocabItems.value) {
         const freshVocab = await vocabRepo.getVocabByUID(vocab.id);
         if (!freshVocab) {
-          
+
           continue;
         }
         const updatedVocab = {
@@ -188,7 +189,7 @@ const handleDone = async () => {
       for (const vocab of vocabItems.value) {
         const freshVocab = await vocabRepo.getVocabByUID(vocab.id);
         if (!freshVocab) {
-          
+
           continue;
         }
         const updatedVocab = {
@@ -199,11 +200,11 @@ const handleDone = async () => {
       }
     }
 
-    
+
     await handleTaskCompletion();
     emit('finished', 'neutral');
   } catch (error) {
-    
+
     toast.error(`Failed to save sentence: ${error}`);
     await handleTaskCompletion();
     emit('finished', 'neutral');
@@ -234,59 +235,18 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div v-if="vocabItems.length >= 1">
-    <small v-if="vocabItems.length === 1">
-      {{ $t('practice.tasks.sentenceIdea', { word: vocabItems[0].content }) }}
-    </small>
-    <!-- Vocabulary Display -->
-    <div class="mb-8">
-      <div class="grid gap-6" :class="vocabItems.length === 1 ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'">
-        <div v-for="vocab in vocabItems" :key="vocab.id" class="text-center">
-          <!-- Vocab Content and Translation -->
-          <div class="mb-4">
-            <div class="text-4xl font-bold mb-2 flex items-center justify-center gap-3">
-              {{ vocab.content }}
-              <button v-if="hasPlayableSound(vocab)" @click="playVocabSound(vocab.id)"
-                class="btn btn-circle btn-sm btn-primary" :class="{ 'loading': playingVocabId === vocab.id }"
-                :disabled="playingVocabId === vocab.id">
-                <svg v-if="playingVocabId !== vocab.id" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </button>
-            </div>
-            <div class="text-xl text-light mb-4">{{translations[vocab.id]?.map(t => t.content).join(', ')}}</div>
-
-            <!-- Vocab notes that should show before exercise -->
-            <div v-if="vocabNotes[vocab.id]?.filter(note => note.showBeforeExercise).length > 0"
-              class="space-y-2 mb-2">
-              <NoteDisplayMini v-for="note in vocabNotes[vocab.id]?.filter(note => note.showBeforeExercise)"
-                :key="note.id" :note="note" />
-            </div>
-
-            <!-- Translation notes that should show before exercise -->
-            <div v-if="translationNotes[vocab.id]?.filter(note => note.showBeforeExercise).length > 0"
-              class="space-y-2 mb-2">
-              <NoteDisplayMini v-for="note in translationNotes[vocab.id]?.filter(note => note.showBeforeExercise)"
-                :key="note.id" :note="note" />
-            </div>
-
-          </div>
-
-          <!-- Images -->
-          <div v-if="vocab.images && vocab.images.length > 0" class="mb-4">
-            <div class="grid gap-2"
-              :class="vocab.images.length === 1 ? 'grid-cols-1 max-w-xs mx-auto' : vocab.images.length === 2 ? 'grid-cols-2 max-w-md mx-auto' : 'grid-cols-2 md:grid-cols-3 max-w-lg mx-auto'">
-              <VocabImageDisplay v-for="image in vocab.images.slice(0, 6)" :key="image.id" :image="image"
-                class="rounded-lg" />
-            </div>
-            <div v-if="vocab.images.length > 6" class=" text-base-content/50 mt-2">
-              {{ $t('common.add') }}{{ vocab.images.length - 6 }} {{ $t('practice.tasks.moreImages') }}
-            </div>
-          </div>
-        </div>
+  <div v-if="vocabItems.length >= 1" class="flex flex-col gap-4">
+    <div class="chat chat-start" v-if="vocabItems.length === 1">
+      <div class="chat-bubble">
+        {{ $t('practice.tasks.sentenceIdea', { word: vocabItems[0].content }) }}
       </div>
-
-      <div class="divider mb-6"></div>
+    </div>
+    <!-- Vocabulary Display -->
+    <div class="grid gap-6" :class="vocabItems.length === 1 ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'">
+      <div v-for="vocab in vocabItems" :key="vocab.id" class="text-center">
+        <!-- Vocab Content and Translation -->
+        <VocabRenderer :vocab="vocab" :repos="repositories" show-all-notes-immediately />
+      </div>
     </div>
 
     <!-- Tabbed Interface -->

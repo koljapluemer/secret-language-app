@@ -1,16 +1,12 @@
 <template>
-  <div class="flex flex-col items-center gap-4">
-    <button @click="playSound" :disabled="!audioUrl || isPlaying" class="btn btn-circle btn-xl btn-primary">
-      <Play v-if="!isPlaying" class="w-10 h-10" />
+  <div class="flex flex-row items-center gap-2">
+    <button @click="playSound" :disabled="!audioUrl || isPlaying" class="btn btn-circle">
+      <Play v-if="!isPlaying" />
       <span v-else class="loading loading-spinner loading-lg"></span>
     </button>
 
-    <div class="flex flex-col items-center gap-2">
-      <div class="font-medium">{{ $t('media.audio.volume') }}</div>
-      <input type="range" min="0" max="1" step="0.1" v-model="volume" @input="updateVolume"
-        class="range range-primary w-32" />
-      <div class="text-xs text-base-content/60">{{ Math.round(volume * 100) }}{{ $t('resources.percent') }}</div>
-    </div>
+    <input type="range" min="0" max="1" step="0.1" v-model="volume" @input="updateVolume" class="range w-32" />
+    <div class="text-xs text-base-content/60">{{ $t('media.audio.volume') }}: {{ Math.round(volume * 100) }}{{ $t('resources.percent') }}</div>
 
     <!-- Hidden audio element -->
     <audio ref="audioElement" @loadeddata="onAudioLoaded" @ended="onAudioEnded" @error="onAudioError" />
@@ -46,7 +42,7 @@ const createAudioUrl = (sound: VocabSound | null) => {
     URL.revokeObjectURL(audioUrl.value);
     audioUrl.value = null;
   }
-  
+
   if (sound?.blob) {
     audioUrl.value = URL.createObjectURL(sound.blob);
   }
@@ -86,7 +82,7 @@ function onAudioError(error: Event) {
 // Watch for sound changes
 watch(() => props.sound, (newSound) => {
   createAudioUrl(newSound);
-  
+
   // Auto-play if enabled and we have a new sound
   if (props.autoPlay && newSound) {
     setTimeout(() => {

@@ -1,19 +1,33 @@
 <template>
     <div class="flex flex-row gap-1 w-full flex-wrap">
-        <div class="card card-xs shadow-sm flex-1">
+        <div class="card card-sm shadow-sm flex-1">
             <div class="card-body">
-                <div class="flex-1">
-
-                    <div
-                        v-if="vocab.content"
-                        class="font-bold text-center w-full"
-                        :class="{
-                            'text-8xl': vocab.consideredCharacter,
-                            'text-5xl': !vocab.consideredCharacter && !vocab.consideredSentence,
-                            'text-3xl': vocab.consideredSentence
-                        }"
-                    >
+                <div class="flex-1 flex flex-col gap-2">
+                    <div v-if="vocab.content" class="font-bold text-center w-full" :class="{
+                        'text-8xl': vocab.consideredCharacter,
+                        'text-5xl': !vocab.consideredCharacter && !vocab.consideredSentence,
+                        'text-3xl': vocab.consideredSentence
+                    }">
                         {{ vocab.content }}
+                    </div>
+                    <!-- Images -->
+                    <div v-if="vocab.images && vocab.images.length > 0" class="">
+                        <div class="grid gap-2"
+                            :class="vocab.images.length === 1 ? 'grid-cols-1 max-w-xs mx-auto' : vocab.images.length === 2 ? 'grid-cols-2 max-w-md mx-auto' : 'grid-cols-2 md:grid-cols-3 max-w-lg mx-auto'">
+                            <VocabImage v-for="image in vocab.images.slice(0, 6)" :key="image.id" :image="image"
+                                class="rounded-lg" />
+                        </div>
+                        <div v-if="vocab.images.length > 6" class=" text-base-content/50 mt-2">
+                            {{ $t('common.add') }}{{ vocab.images.length - 6 }} {{ $t('practice.tasks.moreImages') }}
+                        </div>
+                    </div>
+                    <!-- Sound -->
+                    <div v-if="vocab.sounds && vocab.sounds.length > 0" class="flex flex-wrap gap-2 justify-center">
+                        <SoundPlayer
+                            v-for="sound in vocab.sounds.filter(s => !s.disableForPractice)"
+                            :key="sound.id"
+                            :sound="sound"
+                        />
                     </div>
                 </div>
                 <div class="flex flex-col gap-1 items-start">
@@ -34,7 +48,7 @@
 
         </div>
         <div class="flex flex-col gap-2 flex-1">
-            <div class="card card-xs shadow-sm" v-for="translation in translations">
+            <div class="card card-sm shadow-sm" v-for="translation in translations">
                 <div class="card-body">
                     <div class="flex flex-row gap-1">
                         <div class="card-title text-xl flex-1 ">{{ translation.content }}</div>
@@ -62,6 +76,8 @@ import type { RepositoriesContext } from '@/shared/types/RepositoriesContext';
 import LinkDisplayCompact from '@/shared/links/LinkDisplayCompact.vue';
 import type { NoteData } from '@/entities/notes/NoteData';
 import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
+import VocabImage from '@/shared/ui/VocabImage.vue';
+import SoundPlayer from '@/shared/ui/SoundPlayer.vue';
 
 const props = defineProps<{
     vocab: VocabData
