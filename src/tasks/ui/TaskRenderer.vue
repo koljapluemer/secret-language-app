@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col h-screen">
+  <div class="flex flex-col h-full">
     <Instruction :language-data="languageData" :prompt="props.task.prompt" />
 
     <section class="flex-1 overflow-auto">

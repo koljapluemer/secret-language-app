@@ -85,7 +85,7 @@ defineProps<Props>();
   </Transition>
 
   <!-- Task State -->
-  <div v-if="state.status === 'task' && !showLoadingUI">
+  <div v-if="state.status === 'task' && !showLoadingUI" class="h-screen">
     <Transition
       mode="out-in"
       enter-active-class="transition-opacity duration-[50ms] ease-out"
