@@ -6,6 +6,7 @@ export interface ButtonControl {
   label: string;
   position: ActionControlPosition;
   destructive?: boolean; // For error/warning styling
+  disabled?: boolean;
 }
 
 export interface ImageButtonControl {

@@ -1,7 +1,36 @@
 <template>
   <div
     class="bg-primary border-t-10 border-t-secondary p-4 text-white flex flex-row gap-4 justify-between items-end relative">
+    <!-- Left Element -->
     <div class="flex flex-row gap-2 items-center">
+      <!-- Default skip button -->
+      <button
+        v-if="!hideSkipButton"
+        @click="emit('action', 'skip')"
+        class="btn btn-sm btn-ghost text-white"
+      >
+        <component :is="getIcon('skip')" :size="20" />
+      </button>
+
+      <!-- Default disable button -->
+      <button
+        v-if="!hideDisableButton"
+        @click="emit('action', 'disable')"
+        class="btn btn-sm btn-ghost text-white"
+      >
+        <component :is="getIcon('disable')" :size="20" />
+      </button>
+
+      <!-- Default jump-to button -->
+      <button
+        v-if="!hideJumpToButton"
+        @click="emit('action', 'jump-to')"
+        class="btn btn-sm btn-ghost text-white"
+      >
+        <component :is="getIcon('jump-to')" :size="20" />
+      </button>
+
+      <!-- Additional left controls -->
       <template v-for="control in secondaryLeftControls" :key="control.id">
         <button
           v-if="control.type === 'button'"
@@ -11,13 +40,6 @@
           {{ control.label }}
         </button>
         <button
-          v-else-if="control.type === 'image-button'"
-          @click="emit('action', control.id)"
-          :class="getImageButtonClass(control.position)"
-        >
-          <img :src="control.imageUrl" :alt="control.alt" class="w-full h-full object-cover" />
-        </button>
-        <button
           v-else-if="control.type === 'icon-button'"
           @click="emit('action', control.id)"
           :class="getButtonClass(control.position)"
@@ -28,41 +50,47 @@
       </template>
     </div>
 
-    <div class="flex flex-row justify-center gap-2 items-center absolute left-1/2 -translate-x-1/2 bottom-12">
-      <template v-for="control in centralControls" :key="control.id">
-        <button
-          v-if="control.type === 'button'"
-          @click="emit('action', control.id)"
-          :class="getButtonClass(control.position, control.destructive)"
-        >
-          {{ control.label }}
-        </button>
-        <button
-          v-else-if="control.type === 'image-button'"
-          @click="emit('action', control.id)"
-          :class="getImageButtonClass(control.position)"
-        >
-          <img :src="control.imageUrl" :alt="control.alt" class="w-full h-full object-cover" />
-        </button>
-        <input
-          v-else-if="control.type === 'text-input'"
-          type="text"
-          :value="control.value"
-          @input="emit('action', control.id, ($event.target as HTMLInputElement).value)"
-          :placeholder="control.placeholder"
-          class="input input-bordered input-lg"
-        />
-        <button
-          v-else-if="control.type === 'icon-button'"
-          @click="emit('action', control.id)"
-          :class="getButtonClass(control.position)"
-        >
-          <component :is="getIcon(control.icon)" />
-          <span v-if="control.label">{{ control.label }}</span>
-        </button>
-      </template>
+    <!-- Central Element with Header and Footer -->
+    <div class="flex flex-col items-center gap-2 absolute left-1/2 -translate-x-1/2 bottom-4">
+      <!-- Central controls -->
+      <div class="flex flex-row justify-center gap-2 items-center">
+        <template v-for="control in centralControls" :key="control.id">
+          <button
+            v-if="control.type === 'button'"
+            @click="emit('action', control.id)"
+            :class="getButtonClass(control.position, control.destructive)"
+            :disabled="control.disabled"
+          >
+            {{ control.label }}
+          </button>
+          <button
+            v-else-if="control.type === 'image-button'"
+            @click="emit('action', control.id)"
+            :class="getImageButtonClass(control.position)"
+          >
+            <img :src="control.imageUrl" :alt="control.alt" class="w-full h-full object-cover" />
+          </button>
+          <input
+            v-else-if="control.type === 'text-input'"
+            type="text"
+            :value="control.value"
+            @input="emit('action', control.id, ($event.target as HTMLInputElement).value)"
+            :placeholder="control.placeholder"
+            class="input input-bordered input-lg"
+          />
+          <button
+            v-else-if="control.type === 'icon-button'"
+            @click="emit('action', control.id)"
+            :class="getButtonClass(control.position)"
+          >
+            <component :is="getIcon(control.icon)" />
+            <span v-if="control.label">{{ control.label }}</span>
+          </button>
+        </template>
+      </div>
     </div>
 
+    <!-- Right Element -->
     <div class="flex flex-row gap-2 items-center">
       <template v-for="control in secondaryRightControls" :key="control.id">
         <button
@@ -71,13 +99,6 @@
           :class="getButtonClass(control.position, control.destructive)"
         >
           {{ control.label }}
-        </button>
-        <button
-          v-else-if="control.type === 'image-button'"
-          @click="emit('action', control.id)"
-          :class="getImageButtonClass(control.position)"
-        >
-          <img :src="control.imageUrl" :alt="control.alt" class="w-full h-full object-cover" />
         </button>
         <button
           v-else-if="control.type === 'icon-button'"
@@ -95,10 +116,13 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { ActionControl, ActionControlPosition } from './ActionControl';
-import { Volume2, Play } from 'lucide-vue-next';
+import { Volume2, Play, SkipForward, Ban, ExternalLink } from 'lucide-vue-next';
 
 const props = defineProps<{
   controls: ActionControl[];
+  hideSkipButton?: boolean;
+  hideDisableButton?: boolean;
+  hideJumpToButton?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -153,6 +177,9 @@ function getIcon(icon: string) {
   const iconMap: Record<string, unknown> = {
     volume: Volume2,
     play: Play,
+    skip: SkipForward,
+    disable: Ban,
+    'jump-to': ExternalLink,
   };
   return iconMap[icon] || Play;
 }
