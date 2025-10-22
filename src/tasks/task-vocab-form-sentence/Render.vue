@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, toRaw } from 'vue';
 import type { Task } from '@/tasks/Task';
-import type { VocabData, VocabSound } from '@/entities/vocab/VocabData';
+import type { VocabData } from '@/entities/vocab/VocabData';
 import type { TranslationData } from '@/entities/translations/TranslationData';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
 import AudioRecorder from './AudioRecorder.vue';
-import VocabImageDisplay from '@/shared/ui/VocabImage.vue';
 import type { NoteData } from '@/entities/notes/NoteData';
-import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
 import LinkDisplayMini from '@/shared/links/LinkDisplayMini.vue';
 import { useToast } from '@/shared/toasts';
 import VocabRenderer from '@/features/vocab-view/VocabRenderer.vue';
@@ -90,45 +88,6 @@ const handleRecordingReady = (blob: Blob, duration: number) => {
   audioRecording.value = { blob, duration };
 };
 
-// Get a random playable sound for a vocab item
-const getPlayableSound = (vocab: VocabData): VocabSound | null => {
-  if (!vocab.sounds?.length) return null;
-
-  const playableSounds = vocab.sounds.filter(sound => !sound.disableForPractice);
-  if (playableSounds.length === 0) return null;
-
-  // Return a random sound
-  return playableSounds[Math.floor(Math.random() * playableSounds.length)];
-};
-
-// Play sound for a vocab item
-const playVocabSound = (vocabId: string) => {
-  const vocab = vocabItems.value.find(v => v.id === vocabId);
-  if (!vocab) return;
-
-  const sound = getPlayableSound(vocab);
-  if (!sound || !audioElement.value) return;
-
-  // Stop any currently playing audio
-  if (playingVocabId.value) {
-    audioElement.value.pause();
-    if (audioUrl.value) {
-      URL.revokeObjectURL(audioUrl.value);
-      audioUrl.value = null;
-    }
-  }
-
-  try {
-    const url = URL.createObjectURL(sound.blob);
-    audioUrl.value = url;
-    audioElement.value.src = url;
-    audioElement.value.play();
-    playingVocabId.value = vocabId;
-  } catch {
-    toast.error('Failed to play audio');
-  }
-};
-
 // Handle audio ended
 const handleAudioEnded = () => {
   playingVocabId.value = null;
@@ -136,11 +95,6 @@ const handleAudioEnded = () => {
     URL.revokeObjectURL(audioUrl.value);
     audioUrl.value = null;
   }
-};
-
-// Check if vocab has playable sounds
-const hasPlayableSound = (vocab: VocabData): boolean => {
-  return getPlayableSound(vocab) !== null;
 };
 
 const handleDone = async () => {

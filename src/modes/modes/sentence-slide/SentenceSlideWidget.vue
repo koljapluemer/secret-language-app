@@ -3,12 +3,12 @@ import { inject, ref, onMounted } from 'vue';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
 import type { VocabData } from '@/entities/vocab/VocabData';
-import type { Task } from '@/tasks/Task';
 import { usePracticeFilters } from '@/features/filter-practice-sets-and-languages/usePracticeFilters';
-import TaskRenderer from '@/tasks/ui/TaskRenderer.vue';
+import PracticeModeLayout from '@/modes/utils/Layout.vue';
 import { getRandomGeneratedTaskForVocab } from '@/modes/utils/getRandomGeneratedTaskForVocab';
 import { generateGuessWhatSentenceMeans } from '@/tasks/task-guess-what-sentence-means/generate';
 import { pickRandom } from '@/shared/utils/arrayUtils';
+import type { QueueState } from '@/modes/utils/usePracticeMode';
 
 // Inject repositories
 const vocabRepo = inject<VocabRepoContract>('vocabRepo')!;
@@ -21,7 +21,6 @@ if (!vocabRepo || !translationRepo) {
 const { selectedLanguages, setsToAvoid } = usePracticeFilters();
 
 // State management
-type Status = 'loading' | 'error' | 'empty' | 'task';
 type Phase = 'vocab-practice' | 'sentence-meaning';
 
 interface VocabPoolItem {
@@ -29,31 +28,21 @@ interface VocabPoolItem {
   timesShown: number;
 }
 
-interface State {
-  status: Status;
-  currentTask: Task | null;
-  error: string | null;
-  currentSentence: VocabData | null;
-  vocabPool: Map<string, VocabPoolItem>;
-  phase: Phase;
-}
+// Queue state for Layout.vue
+const state = ref<QueueState>({ status: 'initializing' });
+const showLoadingUI = ref(false);
 
-const state = ref<State>({
-  status: 'loading',
-  currentTask: null,
-  error: null,
-  currentSentence: null,
-  vocabPool: new Map(),
-  phase: 'vocab-practice'
-});
-
+// Sentence-slide specific state
+const currentSentence = ref<VocabData | null>(null);
+const vocabPool = ref<Map<string, VocabPoolItem>>(new Map());
+const phase = ref<Phase>('vocab-practice');
 const lastUsedVocabId = ref<string | null>(null);
 
 // Initialize vocab pool from sentence's contains array
 async function initializeVocabPool(sentence: VocabData): Promise<void> {
   const containsIds = sentence.contains || [];
   if (containsIds.length === 0) {
-    state.value.vocabPool = new Map();
+    vocabPool.value = new Map();
     return;
   }
 
@@ -81,24 +70,25 @@ async function initializeVocabPool(sentence: VocabData): Promise<void> {
     });
   }
 
-  state.value.vocabPool = pool;
+  vocabPool.value = pool;
 }
 
 // Generate next task
 async function generateNextTask(): Promise<void> {
-  state.value.status = 'loading';
+  state.value = { status: 'loading' };
+  showLoadingUI.value = true;
 
   try {
     const languageCodes = selectedLanguages.value;
 
     if (languageCodes.length === 0) {
-      state.value.status = 'empty';
-      state.value.error = 'No languages selected for practice';
+      state.value = { status: 'empty', message: 'No languages selected for practice' };
+      showLoadingUI.value = false;
       return;
     }
 
     // If we don't have a current sentence, pick a new one
-    if (!state.value.currentSentence) {
+    if (!currentSentence.value) {
       const blockList = lastUsedVocabId.value ? [lastUsedVocabId.value] : undefined;
 
       const sentence = await vocabRepo.getRandomSentenceVocabWithContains(
@@ -108,25 +98,24 @@ async function generateNextTask(): Promise<void> {
       );
 
       if (!sentence) {
-        state.value.status = 'empty';
-        state.value.currentTask = null;
-        state.value.error = null;
+        state.value = { status: 'empty', message: 'No sentence vocabulary available for practice' };
+        showLoadingUI.value = false;
         return;
       }
 
-      state.value.currentSentence = sentence;
+      currentSentence.value = sentence;
       await initializeVocabPool(sentence);
-      state.value.phase = 'vocab-practice';
+      phase.value = 'vocab-practice';
     }
 
     // Phase 1: Work through vocab pool
-    if (state.value.phase === 'vocab-practice') {
-      if (state.value.vocabPool.size === 0) {
+    if (phase.value === 'vocab-practice') {
+      if (vocabPool.value.size === 0) {
         // Pool is empty, move to sentence meaning
-        state.value.phase = 'sentence-meaning';
+        phase.value = 'sentence-meaning';
       } else {
         // Pick random vocab from pool using proper random picker
-        const poolArray = Array.from(state.value.vocabPool.values());
+        const poolArray = Array.from(vocabPool.value.values());
         const selectedItem = pickRandom(poolArray, 1)[0];
 
         if (selectedItem) {
@@ -136,52 +125,51 @@ async function generateNextTask(): Promise<void> {
 
           if (!task) {
             // Couldn't generate task, remove from pool and try again
-            state.value.vocabPool.delete(selectedItem.vocab.id);
+            vocabPool.value.delete(selectedItem.vocab.id);
             await generateNextTask();
             return;
           }
 
-          state.value.status = 'task';
-          state.value.currentTask = task;
+          state.value = { status: 'task', currentTask: task, nextTask: null };
+          showLoadingUI.value = false;
           return;
         }
       }
     }
 
     // Phase 2: Show sentence meaning task
-    if (state.value.phase === 'sentence-meaning' && state.value.currentSentence) {
-      const task = generateGuessWhatSentenceMeans(state.value.currentSentence);
+    if (phase.value === 'sentence-meaning' && currentSentence.value) {
+      const task = generateGuessWhatSentenceMeans(currentSentence.value);
 
       // Reset for next sentence
-      state.value.currentSentence = null;
-      state.value.vocabPool = new Map();
-      state.value.phase = 'vocab-practice';
+      currentSentence.value = null;
+      vocabPool.value = new Map();
+      phase.value = 'vocab-practice';
 
-      state.value.status = 'task';
-      state.value.currentTask = task;
+      state.value = { status: 'task', currentTask: task, nextTask: null };
+      showLoadingUI.value = false;
       return;
     }
 
     // Fallback - shouldn't get here
-    state.value.status = 'empty';
-    state.value.currentTask = null;
+    state.value = { status: 'empty', message: 'No tasks available' };
+    showLoadingUI.value = false;
 
   } catch (error) {
-    state.value.status = 'error';
-    state.value.currentTask = null;
-    state.value.error = error instanceof Error ? error.message : 'Failed to generate task';
+    state.value = { status: 'error', message: error instanceof Error ? error.message : 'Failed to generate task' };
+    showLoadingUI.value = false;
   }
 }
 
 // Update pool after task completion
 async function updatePoolAfterTask(vocabId: string): Promise<void> {
-  const poolItem = state.value.vocabPool.get(vocabId);
+  const poolItem = vocabPool.value.get(vocabId);
   if (!poolItem) return;
 
   // Get fresh vocab data to check current level (after scoring)
   const freshVocab = await vocabRepo.getVocabByUID(vocabId);
   if (!freshVocab) {
-    state.value.vocabPool.delete(vocabId);
+    vocabPool.value.delete(vocabId);
     return;
   }
 
@@ -197,17 +185,17 @@ async function updatePoolAfterTask(vocabId: string): Promise<void> {
   if (wasInitiallyUnseen) {
     // Unseen vocab: remove only after showing twice
     if (poolItem.timesShown >= 2) {
-      state.value.vocabPool.delete(vocabId);
+      vocabPool.value.delete(vocabId);
     }
   } else {
     // Due vocab: remove after showing once
-    state.value.vocabPool.delete(vocabId);
+    vocabPool.value.delete(vocabId);
   }
 }
 
 // Handle task completion
 async function handleTaskFinished() {
-  if (state.value.currentTask) {
+  if (state.value.status === 'task') {
     const vocabId = state.value.currentTask.associatedVocab?.[0];
 
     if (vocabId) {
@@ -226,9 +214,9 @@ async function handleTaskFinished() {
 // Retry on error
 async function retry() {
   // Reset state
-  state.value.currentSentence = null;
-  state.value.vocabPool = new Map();
-  state.value.phase = 'vocab-practice';
+  currentSentence.value = null;
+  vocabPool.value = new Map();
+  phase.value = 'vocab-practice';
   lastUsedVocabId.value = null;
 
   await generateNextTask();
@@ -241,37 +229,15 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-col h-full">
-    <!-- Loading State -->
-    <div v-if="state.status === 'loading'" class="flex flex-col items-center justify-center h-full">
-      <span class="loading loading-spinner loading-lg"></span>
-      <p class="mt-4">{{ $t('practice.widgets.preparingSentenceSlide') }}</p>
-    </div>
-
-    <!-- Error State -->
-    <div v-else-if="state.status === 'error'" class="flex flex-col items-center justify-center h-full gap-4">
-      <div class="alert alert-error">
-        <span>{{ state.error || 'Failed to load sentence slide' }}</span>
-      </div>
-      <button @click="retry" class="btn btn-primary">
-        Try Again
-      </button>
-    </div>
-
-    <!-- Empty State -->
-    <div v-else-if="state.status === 'empty'" class="flex flex-col items-center justify-center h-full gap-4">
-      <p class="text-lg">No sentence vocabulary available for practice</p>
-      <button @click="retry" class="btn btn-primary">
-        {{ $t('practice.widgets.checkForMoreSentences') }}
-      </button>
-    </div>
-
-    <!-- Task State -->
-    <TaskRenderer
-      v-else-if="state.status === 'task' && state.currentTask"
-      :task="state.currentTask"
-      :practice-context="{ practiceMode: 'sentence-slide' }"
-      @finished="handleTaskFinished"
-    />
-  </div>
+  <PracticeModeLayout
+    :state="state"
+    :showLoadingUI="showLoadingUI"
+    modeId="sentence-slide"
+    :retry="retry"
+    :initialize="generateNextTask"
+    :onTaskFinished="handleTaskFinished"
+    :loadingFallback="$t('practice.widgets.preparingSentenceSlide')"
+    emptyTitle="No sentences"
+    :checkAgainLabel="$t('practice.widgets.checkForMoreSentences')"
+  />
 </template>

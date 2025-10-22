@@ -6,15 +6,46 @@ import type { TestResultRepoContract } from '@/entities/test-results/TestResultR
 import type { ResourceData } from '@/entities/resources/ResourceData';
 import type { Task } from '@/tasks/Task';
 import { generateConsumeImmersionContent } from '@/tasks/task-consume-immersion-content/generate';
-import TaskRenderer from '@/tasks/ui/TaskRenderer.vue';
+import { taskRegistry } from '@/tasks/ui/taskRegistry';
+import { provide } from 'vue';
+import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
+import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
+import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
+import type { FactCardRepoContract } from '@/entities/fact-cards/FactCardRepoContract';
+import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
+import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract';
+import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract';
 import { useToast } from '@/shared/toasts';
 
 // Inject repositories
 const resourceRepo = inject<ResourceRepoContract>('resourceRepo');
 const testResultRepo = inject<TestResultRepoContract>('testResultRepo');
+const vocabRepo = inject<VocabRepoContract>('vocabRepo');
+const translationRepo = inject<TranslationRepoContract>('translationRepo');
+const factCardRepo = inject<FactCardRepoContract>('factCardRepo');
+const languageRepo = inject<LanguageRepoContract>('languageRepo');
+const goalRepo = inject<GoalRepoContract>('goalRepo');
+const noteRepo = inject<NoteRepoContract>('noteRepo');
 
-if (!resourceRepo || !testResultRepo) {
+if (!resourceRepo || !testResultRepo || !vocabRepo || !translationRepo || !factCardRepo || !languageRepo || !goalRepo || !noteRepo) {
   throw new Error('Required repositories not available');
+}
+
+const repositories: RepositoriesContextStrict = {
+  vocabRepo,
+  translationRepo,
+  factCardRepo,
+  languageRepo,
+  resourceRepo,
+  goalRepo,
+  noteRepo
+};
+
+provide('repositories', repositories);
+
+function getTaskComponent(taskType: keyof typeof taskRegistry) {
+  const taskInfo = taskRegistry[taskType];
+  return taskInfo?.component;
 }
 
 const route = useRoute();
@@ -161,10 +192,12 @@ function returnToSelfTest() {
       <h2 class="text-2xl font-bold">{{ resource?.title }}</h2>
       <p class="text-sm text-base-content/70">{{ $t('selfTest.consumeResourceInstructions') }}</p>
     </div>
-    <TaskRenderer
+    <component
+      :is="getTaskComponent(task.taskType)"
       :key="task.id"
       :task="task"
-      :practice-context="{ practiceMode: 'consume-resource', isTest: true }"
+      :repositories="repositories"
+      :mode-context="{ setWrongVocabDueAgainImmediately: false }"
       @finished="handleTaskFinished"
     />
   </div>

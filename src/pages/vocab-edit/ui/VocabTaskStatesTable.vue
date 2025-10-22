@@ -65,9 +65,11 @@
         </form>
 
         <div v-if="previewingTask" class="h-full">
-          <TaskRenderer
+          <component
+            :is="getTaskComponent(previewingTask.taskType)"
             :task="previewingTask"
-            :practice-context="{ practiceMode: 'preview' }"
+            :repositories="repositories"
+            :mode-context="{ setWrongVocabDueAgainImmediately: false }"
             @finished="closePreview"
           />
         </div>
@@ -120,7 +122,16 @@ import { generateFormSentenceTaskFromSingleVocab } from '@/tasks/task-vocab-form
 import { generateVocabChooseImageBySound } from '@/tasks/task-vocab-choose-image-by-sound/generate';
 import { generateVocabChooseFromSound } from '@/tasks/task-vocab-choose-from-sound/generate';
 
-import TaskRenderer from '@/tasks/ui/TaskRenderer.vue';
+import { taskRegistry } from '@/tasks/ui/taskRegistry';
+import { inject, provide } from 'vue';
+import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
+import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
+import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
+import type { FactCardRepoContract } from '@/entities/fact-cards/FactCardRepoContract';
+import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
+import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoContract';
+import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract';
+import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract';
 import { useToast } from '@/shared/toasts';
 
 interface Props {
@@ -141,6 +152,37 @@ const toast = useToast();
 const loading = ref(false);
 const taskPreviewModal = ref<HTMLDialogElement | null>(null);
 const previewingTask = ref<Task | null>(null);
+
+// Inject all repositories
+const vocabRepo = inject<VocabRepoContract>('vocabRepo');
+const translationRepo = inject<TranslationRepoContract>('translationRepo');
+const factCardRepo = inject<FactCardRepoContract>('factCardRepo');
+const languageRepo = inject<LanguageRepoContract>('languageRepo');
+const resourceRepo = inject<ResourceRepoContract>('resourceRepo');
+const goalRepo = inject<GoalRepoContract>('goalRepo');
+const noteRepo = inject<NoteRepoContract>('noteRepo');
+
+if (!vocabRepo || !translationRepo || !factCardRepo || !languageRepo || !resourceRepo || !goalRepo || !noteRepo) {
+  throw new Error('Required repositories not available');
+}
+
+const repositories: RepositoriesContextStrict = {
+  vocabRepo,
+  translationRepo,
+  factCardRepo,
+  languageRepo,
+  resourceRepo,
+  goalRepo,
+  noteRepo
+};
+
+// Provide repositories to task components in the modal
+provide('repositories', repositories);
+
+function getTaskComponent(taskType: keyof typeof taskRegistry) {
+  const taskInfo = taskRegistry[taskType];
+  return taskInfo?.component;
+}
 
 const taskStates = computed<TaskStateInfo[]>(() => {
   const states: TaskStateInfo[] = [];

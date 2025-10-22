@@ -1,21 +1,51 @@
 <script setup lang="ts">
-import { inject, ref, computed, onMounted } from 'vue';
+import { inject, ref, computed, onMounted, provide } from 'vue';
 import { useRoute } from 'vue-router';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
+import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
+import type { FactCardRepoContract } from '@/entities/fact-cards/FactCardRepoContract';
+import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
+import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoContract';
+import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract';
+import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract';
 import type { TestResultRepoContract } from '@/entities/test-results/TestResultRepoContract';
+import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
 import type { Task } from '@/tasks/Task';
 import { generateVocabChooseFromSound } from '@/tasks/task-vocab-choose-from-sound/generate';
-import TaskRenderer from '@/tasks/ui/TaskRenderer.vue';
+import { taskRegistry } from '@/tasks/ui/taskRegistry';
 import TestResults from '@/widgets/test/TestResults.vue';
 import type { TaskCorrectness } from '@/entities/practice-tracking/TaskCompletionData';
 import { useToast } from '@/shared/toasts';
 
 // Inject repositories
 const vocabRepo = inject<VocabRepoContract>('vocabRepo');
+const translationRepo = inject<TranslationRepoContract>('translationRepo');
+const factCardRepo = inject<FactCardRepoContract>('factCardRepo');
+const languageRepo = inject<LanguageRepoContract>('languageRepo');
+const resourceRepo = inject<ResourceRepoContract>('resourceRepo');
+const goalRepo = inject<GoalRepoContract>('goalRepo');
+const noteRepo = inject<NoteRepoContract>('noteRepo');
 const testResultRepo = inject<TestResultRepoContract>('testResultRepo');
 
-if (!vocabRepo || !testResultRepo) {
+if (!vocabRepo || !translationRepo || !factCardRepo || !languageRepo || !resourceRepo || !goalRepo || !noteRepo || !testResultRepo) {
   throw new Error('Required repositories not available');
+}
+
+const repositories: RepositoriesContextStrict = {
+  vocabRepo,
+  translationRepo,
+  factCardRepo,
+  languageRepo,
+  resourceRepo,
+  goalRepo,
+  noteRepo
+};
+
+provide('repositories', repositories);
+
+function getTaskComponent(taskType: keyof typeof taskRegistry) {
+  const taskInfo = taskRegistry[taskType];
+  return taskInfo?.component;
 }
 
 const route = useRoute();
@@ -172,10 +202,12 @@ function retry() {
       </p>
       <progress class="progress progress-primary w-full max-w-md" :value="currentTaskNumber" :max="totalTasks"></progress>
     </div>
-    <TaskRenderer
+    <component
+      :is="getTaskComponent(currentTask.taskType)"
       :key="currentTask.id"
       :task="currentTask"
-      :practice-context="{ practiceMode: 'minimal-pairs', isTest: true }"
+      :repositories="repositories"
+      :mode-context="{ setWrongVocabDueAgainImmediately: false }"
       @finished="handleTaskFinished"
     />
   </div>
