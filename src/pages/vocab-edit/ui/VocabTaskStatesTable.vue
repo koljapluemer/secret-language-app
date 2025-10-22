@@ -22,21 +22,9 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="taskState in taskStates" :key="taskState.name">
+            <tr v-for="taskState in sortedTaskStates" :key="taskState.name">
               <td>{{ taskState.displayName }}</td>
-              <td>
-                <span
-                  class="badge"
-                  :class="{
-                    'badge-success': taskState.state === 'active',
-                    'badge-ghost': taskState.state === 'inactive',
-                    'badge-warning': taskState.state === 'disabled',
-                    'badge-error': taskState.state === 'impossible'
-                  }"
-                >
-                  {{ taskState.state }}
-                </span>
-              </td>
+              <td>{{ taskState.state }}</td>
               <td class="text-sm text-base-content/60">{{ taskState.reason || '-' }}</td>
               <td>
                 <button
@@ -184,11 +172,38 @@ function getTaskComponent(taskType: keyof typeof taskRegistry) {
   return taskInfo?.component;
 }
 
+// Helper function to convert vocab-type-related reasons to 'impossible' state
+function normalizeTaskState(taskState: { state: TaskState; reason?: string }): { state: TaskState; reason?: string } {
+  // If the reason is about vocab type requirements, make it impossible
+  const vocabTypeReasons = [
+    'Only for sentence vocab',
+    'Only for non-sentence vocab',
+    'Only for character vocab',
+    'Only for non-character vocab',
+    'Only for word vocab',
+    'Requires sentence',
+    'Requires character',
+    'Requires word',
+    'Not for sentence',
+    'Not for character',
+    'Not for word'
+  ];
+
+  if (taskState.reason && vocabTypeReasons.some(pattern => taskState.reason?.includes(pattern))) {
+    return {
+      state: 'impossible',
+      reason: taskState.reason
+    };
+  }
+
+  return taskState;
+}
+
 const taskStates = computed<TaskStateInfo[]>(() => {
   const states: TaskStateInfo[] = [];
 
   // Add translation task
-  const addTranslationState = getAddTranslationTaskState(props.vocab, props.translations);
+  const addTranslationState = normalizeTaskState(getAddTranslationTaskState(props.vocab, props.translations));
   states.push({
     name: 'add-translation',
     displayName: 'Add Translation',
@@ -198,7 +213,7 @@ const taskStates = computed<TaskStateInfo[]>(() => {
   });
 
   // Try to remember task
-  const tryToRememberState = getVocabTryToRememberTaskState(props.vocab, props.translations);
+  const tryToRememberState = normalizeTaskState(getVocabTryToRememberTaskState(props.vocab, props.translations));
   states.push({
     name: 'vocab-try-to-remember',
     displayName: 'Try to Remember',
@@ -208,7 +223,7 @@ const taskStates = computed<TaskStateInfo[]>(() => {
   });
 
   // Guess sentence meaning task
-  const guessSentenceState = getGuessWhatSentenceMeansTaskState(props.vocab, props.translations);
+  const guessSentenceState = normalizeTaskState(getGuessWhatSentenceMeansTaskState(props.vocab, props.translations));
   states.push({
     name: 'guess-sentence-meaning',
     displayName: 'Guess Sentence Meaning',
@@ -218,7 +233,7 @@ const taskStates = computed<TaskStateInfo[]>(() => {
   });
 
   // Choice tasks
-  const choice2TNState = getVocabChoiceFromTwoTargetToNativeTaskState(props.vocab, props.translations);
+  const choice2TNState = normalizeTaskState(getVocabChoiceFromTwoTargetToNativeTaskState(props.vocab, props.translations));
   states.push({
     name: 'choice-2-target-to-native',
     displayName: 'Choice (2) Target→Native',
@@ -227,7 +242,7 @@ const taskStates = computed<TaskStateInfo[]>(() => {
     generator: choice2TNState.state !== 'impossible' ? () => generateVocabChoiceFromTwoTargetToNative(props.vocab) : undefined
   });
 
-  const choice4TNState = getVocabChoiceFromFourTargetToNativeTaskState(props.vocab, props.translations);
+  const choice4TNState = normalizeTaskState(getVocabChoiceFromFourTargetToNativeTaskState(props.vocab, props.translations));
   states.push({
     name: 'choice-4-target-to-native',
     displayName: 'Choice (4) Target→Native',
@@ -236,7 +251,7 @@ const taskStates = computed<TaskStateInfo[]>(() => {
     generator: choice4TNState.state !== 'impossible' ? () => generateVocabChoiceFromFourTargetToNative(props.vocab) : undefined
   });
 
-  const choice2NTState = getVocabChoiceFromTwoNativeToTargetTaskState(props.vocab, props.translations);
+  const choice2NTState = normalizeTaskState(getVocabChoiceFromTwoNativeToTargetTaskState(props.vocab, props.translations));
   states.push({
     name: 'choice-2-native-to-target',
     displayName: 'Choice (2) Native→Target',
@@ -245,7 +260,7 @@ const taskStates = computed<TaskStateInfo[]>(() => {
     generator: choice2NTState.state !== 'impossible' ? () => generateVocabChoiceFromTwoNativeToTarget(props.vocab) : undefined
   });
 
-  const choice4NTState = getVocabChoiceFromFourNativeToTargetTaskState(props.vocab, props.translations);
+  const choice4NTState = normalizeTaskState(getVocabChoiceFromFourNativeToTargetTaskState(props.vocab, props.translations));
   states.push({
     name: 'choice-4-native-to-target',
     displayName: 'Choice (4) Native→Target',
@@ -255,7 +270,7 @@ const taskStates = computed<TaskStateInfo[]>(() => {
   });
 
   // Reveal tasks
-  const revealTNState = getVocabRevealTargetToNativeTaskState(props.vocab, props.translations);
+  const revealTNState = normalizeTaskState(getVocabRevealTargetToNativeTaskState(props.vocab, props.translations));
   states.push({
     name: 'reveal-target-to-native',
     displayName: 'Reveal Target→Native',
@@ -264,7 +279,7 @@ const taskStates = computed<TaskStateInfo[]>(() => {
     generator: revealTNState.state !== 'impossible' ? () => generateVocabRevealTargetToNative(props.vocab) : undefined
   });
 
-  const revealNTState = getVocabRevealNativeToTargetTaskState(props.vocab, props.translations);
+  const revealNTState = normalizeTaskState(getVocabRevealNativeToTargetTaskState(props.vocab, props.translations));
   states.push({
     name: 'reveal-native-to-target',
     displayName: 'Reveal Native→Target',
@@ -274,7 +289,7 @@ const taskStates = computed<TaskStateInfo[]>(() => {
   });
 
   // Cloze tasks
-  const cloze2State = getClozeChoiceFromTwoTaskState(props.vocab, props.translations);
+  const cloze2State = normalizeTaskState(getClozeChoiceFromTwoTaskState(props.vocab, props.translations));
   states.push({
     name: 'cloze-choice-2',
     displayName: 'Cloze Choice (2)',
@@ -283,7 +298,7 @@ const taskStates = computed<TaskStateInfo[]>(() => {
     generator: cloze2State.state !== 'impossible' ? () => generateClozeChoiceFromTwo(props.vocab) : undefined
   });
 
-  const cloze4State = getClozeChoiceFromFourTaskState(props.vocab, props.translations);
+  const cloze4State = normalizeTaskState(getClozeChoiceFromFourTaskState(props.vocab, props.translations));
   states.push({
     name: 'cloze-choice-4',
     displayName: 'Cloze Choice (4)',
@@ -292,7 +307,7 @@ const taskStates = computed<TaskStateInfo[]>(() => {
     generator: cloze4State.state !== 'impossible' ? () => generateClozeChoiceFromFour(props.vocab) : undefined
   });
 
-  const clozeRevealState = getClozeRevealTaskState(props.vocab, props.translations);
+  const clozeRevealState = normalizeTaskState(getClozeRevealTaskState(props.vocab, props.translations));
   states.push({
     name: 'cloze-reveal',
     displayName: 'Cloze Reveal',
@@ -302,7 +317,7 @@ const taskStates = computed<TaskStateInfo[]>(() => {
   });
 
   // Form sentence task
-  const formSentenceState = getFormSentenceTaskState(props.vocab);
+  const formSentenceState = normalizeTaskState(getFormSentenceTaskState(props.vocab));
   states.push({
     name: 'form-sentence',
     displayName: 'Form Sentence',
@@ -312,7 +327,7 @@ const taskStates = computed<TaskStateInfo[]>(() => {
   });
 
   // Sound-based tasks
-  const chooseImageBySoundState = getVocabChooseImageBySoundTaskState(props.vocab);
+  const chooseImageBySoundState = normalizeTaskState(getVocabChooseImageBySoundTaskState(props.vocab));
   states.push({
     name: 'choose-image-by-sound',
     displayName: 'Choose Image by Sound',
@@ -321,7 +336,7 @@ const taskStates = computed<TaskStateInfo[]>(() => {
     generator: chooseImageBySoundState.state !== 'impossible' ? () => generateVocabChooseImageBySound(props.vocab) : undefined
   });
 
-  const chooseFromSoundState = getVocabChooseFromSoundTaskState(props.vocab);
+  const chooseFromSoundState = normalizeTaskState(getVocabChooseFromSoundTaskState(props.vocab));
   states.push({
     name: 'choose-from-sound',
     displayName: 'Choose from Sound (Minimal Pairs)',
@@ -331,6 +346,20 @@ const taskStates = computed<TaskStateInfo[]>(() => {
   });
 
   return states;
+});
+
+// Sorted task states: active, inactive, disabled, impossible
+const sortedTaskStates = computed(() => {
+  const stateOrder: Record<TaskState, number> = {
+    'active': 0,
+    'inactive': 1,
+    'disabled': 2,
+    'impossible': 3
+  };
+
+  return [...taskStates.value].sort((a, b) => {
+    return stateOrder[a.state] - stateOrder[b.state];
+  });
 });
 
 async function previewTask(taskName: string) {
