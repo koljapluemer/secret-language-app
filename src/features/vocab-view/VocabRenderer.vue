@@ -3,7 +3,7 @@
         <div class="card card-sm shadow-sm flex-1">
             <div class="card-body">
                 <div class="flex-1 flex flex-col gap-2">
-                    <div v-if="vocab.content" class="font-bold text-center w-full" :class="{
+                    <div v-if="vocab.content && !hideContent" class="font-bold text-center w-full" :class="{
                         'text-8xl': vocab.consideredCharacter,
                         'text-5xl': !vocab.consideredCharacter && !vocab.consideredSentence,
                         'text-3xl': vocab.consideredSentence
@@ -47,8 +47,8 @@
             </div>
 
         </div>
-        <div class="flex flex-col gap-2 flex-1">
-            <div class="card card-sm shadow-sm" v-for="translation in translations">
+        <div class="flex flex-col gap-2 flex-1" v-if="!hideTranslations">
+            <div class="card card-sm shadow-sm" v-for="translation in displayedTranslations" :key="translation.id">
                 <div class="card-body">
                     <div class="flex flex-row gap-1">
                         <div class="card-title text-xl flex-1 ">{{ translation.content }}</div>
@@ -67,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import type { VocabData } from '../../entities/vocab/VocabData';
 import type { LanguageData } from '@/entities/languages/LanguageData';
 import type { TranslationData } from '@/entities/translations/TranslationData';
@@ -84,6 +84,9 @@ const props = defineProps<{
     repos: RepositoriesContext
     showLanguage?: boolean
     showAllNotesImmediately?: boolean
+    hideTranslations?: boolean
+    onlyShowSingleRandomTranslation?: boolean
+    hideContent?: boolean
 }>();
 
 const languageRepo = props.repos.languageRepo || undefined
@@ -94,6 +97,15 @@ const languageData = ref<LanguageData | null>(null);
 const translations = ref<TranslationData[]>([]);
 const vocabNotes = ref<NoteData[]>([]);
 const translationNotes = ref<NoteData[]>([]);
+
+// Compute displayed translations based on onlyShowSingleRandomTranslation prop
+const displayedTranslations = computed(() => {
+    if (props.onlyShowSingleRandomTranslation && translations.value.length > 0) {
+        const randomIndex = Math.floor(Math.random() * translations.value.length);
+        return [translations.value[randomIndex]];
+    }
+    return translations.value;
+});
 
 
 

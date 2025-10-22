@@ -3,14 +3,12 @@ import { ref, computed, onMounted } from 'vue';
 import type { Task } from '@/tasks/Task';
 import type { VocabData } from '@/entities/vocab/VocabData';
 import type { TranslationData } from '@/entities/translations/TranslationData';
-import type { NoteData } from '@/entities/notes/NoteData';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
 import { shuffleArray } from '@/shared/utils/arrayUtils';
 import { Rating } from 'ts-fsrs';
-import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
-import LinkDisplayCompact from '@/shared/links/LinkDisplayCompact.vue';
 import Instruction from '@/tasks/ui/Instruction.vue';
 import { useToast } from '@/shared/toasts';
+import VocabRenderer from '@/features/vocab-view/VocabRenderer.vue';
 
 interface AnswerOption {
   content: string;
@@ -36,9 +34,6 @@ const props = defineProps<Props>();
 
 const vocabRepo = props.repositories.vocabRepo;
 const translationRepo = props.repositories.translationRepo;
-const noteRepo = props.repositories.noteRepo;
-
-// Use the task state composable
 
 // Exercise state
 const selectedIndex = ref<number | null>(null);
@@ -47,8 +42,6 @@ const firstAttemptWrong = ref(false);
 const answerOptions = ref<AnswerOption[]>([]);
 const vocab = ref<VocabData | null>(null);
 const translations = ref<TranslationData[]>([]);
-const vocabNotes = ref<NoteData[]>([]);
-const translationNotes = ref<NoteData[]>([]);
 const loading = ref(true);
 
 // Get the vocab ID from associated vocab
@@ -63,21 +56,6 @@ const isReverse = computed(() => {
 
 const optionCount = computed(() => {
   return (props.task.taskType as string).includes('four') ? 4 : 2;
-});
-
-
-
-const displayContent = computed(() => {
-  if (!vocab.value) return '';
-
-  if (isReverse.value) {
-    // For translation-to-vocab, show random translation
-    const randomTranslation = translations.value[Math.floor(Math.random() * translations.value.length)];
-    return randomTranslation?.content || '';
-  } else {
-    // For vocab-to-translation, show vocab
-    return vocab.value.content || '';
-  }
 });
 
 
@@ -96,22 +74,6 @@ async function loadVocabData() {
 
     vocab.value = vocabData;
     translations.value = await translationRepo.getTranslationsByIds(vocabData.translations);
-    
-    // Load vocab notes
-    if (vocabData.notes && vocabData.notes.length > 0) {
-      vocabNotes.value = await noteRepo.getNotesByUIDs(vocabData.notes);
-    }
-    
-    // Load translation notes
-    const allTranslationNoteIds: string[] = [];
-    translations.value.forEach(translation => {
-      if (translation.notes && translation.notes.length > 0) {
-        allTranslationNoteIds.push(...translation.notes);
-      }
-    });
-    if (allTranslationNoteIds.length > 0) {
-      translationNotes.value = await noteRepo.getNotesByUIDs(allTranslationNoteIds);
-    }
 
     await generateOptions();
   } catch {
@@ -213,7 +175,7 @@ function isButtonDisabled(index: number): boolean {
 
 const handleCompletion = async () => {
   if (!vocab.value) return;
-  
+
   try {
     const rating = firstAttemptWrong.value ? Rating.Again : Rating.Good;
     const immediateDue = props.modeContext?.setWrongVocabDueAgainImmediately || false;
@@ -244,59 +206,34 @@ onMounted(loadVocabData);
 
         <!-- Exercise Content -->
         <div v-else-if="vocab && answerOptions.length > 0" class="text-center">
-    <!-- Main content with notes sidebar -->
-    <div class="flex gap-4 mb-8">
-      <div class="flex-1">
-        <div class="text-6xl font-bold">{{ displayContent }}</div>
-      </div>
-      
-      <!-- Notes sidebar -->
-      <div v-if="vocabNotes.filter(note => note.showBeforeExercise).length > 0 || translationNotes.filter(note => note.showBeforeExercise).length > 0" class="w-64 space-y-3">
-        <!-- Vocab notes -->
-        <div v-if="vocabNotes.filter(note => note.showBeforeExercise).length > 0" class="space-y-2">
-          
-          <NoteDisplayMini 
-            v-for="note in vocabNotes.filter(note => note.showBeforeExercise)" 
-            :key="note.id"
-            :note="note"
-          />
-        </div>
-        
-        <!-- Translation notes -->
-        <div v-if="translationNotes.filter(note => note.showBeforeExercise).length > 0" class="space-y-2">
-          
-          <NoteDisplayMini 
-            v-for="note in translationNotes.filter(note => note.showBeforeExercise)" 
-            :key="note.id"
-            :note="note"
-          />
-        </div>
-      </div>
-    </div>
-    
-    <!-- Answer Options - only show when not answered -->
-    <div v-if="!isAnswered" class="flex flex-col md:flex-row gap-2 mb-6">
-      <button v-for="(option, index) in answerOptions" :key="index" :class="getButtonClass(index)"
-        :disabled="isButtonDisabled(index)" @click="selectOption(index)" class="btn btn-lg flex-1">
-        {{ option.content }}
-      </button>
-    </div>
-
-    <!-- Show answer when completed -->
-    <div v-if="isAnswered" class="mb-6">
-      <!-- Show answer for regular content -->
-      <div class="text-6xl font-bold text-light mb-6">
-        {{ answerOptions.find(opt => opt.isCorrect)?.content }}
-      </div>
-    </div>
-    
-          <!-- Links -->
-          <div v-if="vocab?.links && vocab.links.length > 0" class="flex flex-wrap gap-2 mt-6 justify-center">
-            <LinkDisplayCompact
-              v-for="(link, index) in vocab.links"
-              :key="index"
-              :link="link"
+          <!-- Show vocab or translation (question) - use VocabRenderer -->
+          <div class="mb-8">
+            <VocabRenderer
+              v-if="isReverse"
+              :vocab="vocab"
+              :repos="repositories"
+              hide-content
+              only-show-single-random-translation
             />
+            <VocabRenderer
+              v-else
+              :vocab="vocab"
+              :repos="repositories"
+              hide-translations
+            />
+          </div>
+
+          <!-- Answer Options - only show when not answered -->
+          <div v-if="!isAnswered" class="flex flex-col md:flex-row gap-2 mb-6">
+            <button v-for="(option, index) in answerOptions" :key="index" :class="getButtonClass(index)"
+              :disabled="isButtonDisabled(index)" @click="selectOption(index)" class="btn btn-lg flex-1">
+              {{ option.content }}
+            </button>
+          </div>
+
+          <!-- Show full vocab with answer when completed -->
+          <div v-if="isAnswered">
+            <VocabRenderer :vocab="vocab" :repos="repositories" />
           </div>
         </div>
 
