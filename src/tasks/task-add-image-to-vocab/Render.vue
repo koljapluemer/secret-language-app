@@ -27,7 +27,6 @@ const toast = useToast();
 const vocabRepo = props.repositories.vocabRepo;
 const translationRepo = props.repositories.translationRepo;
 const noteRepo = props.repositories.noteRepo;
-const languageRepo = props.repositories.languageRepo;
 const vocab = ref<VocabData | null>(null);
 const translations = ref<TranslationData[]>([]);
 const vocabNotes = ref<NoteData[]>([]);

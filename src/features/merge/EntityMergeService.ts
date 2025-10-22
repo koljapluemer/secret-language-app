@@ -62,8 +62,6 @@ export class EntityMergeService {
       return;
     }
 
-    console.log(`[Merge] Remapping ${affectedVocab.length} vocab from translation ${oldTranslationId} → ${newTranslationId}`);
-
     // Update each vocab to point to the new translation
     for (const vocab of affectedVocab) {
       const updatedTranslations = vocab.translations.map(id =>
@@ -168,7 +166,6 @@ export class EntityMergeService {
 
         toUpdate.push(merged)
         toDelete.push(vocab.id)
-        console.log(`[Merge] Merging vocab "${vocab.content}" (${vocab.id} → ${duplicate.id})`)
       } else {
         // No duplicate - just mark as checked and deduplicate notes
         const deduplicatedNotes = await deduplicateNoteIds(vocab.notes, this.noteRepo)
@@ -296,7 +293,6 @@ export class EntityMergeService {
 
         toUpdate.push(toRaw(merged))
         toDelete.push(factCard.id)
-        console.log(`[Merge] Merging fact card "${factCard.front}" (${factCard.id} → ${duplicate.id})`)
       } else {
         // No duplicate - just mark as checked and deduplicate notes
         const deduplicatedNotes = await deduplicateNoteIds(factCard.notes, this.noteRepo)
