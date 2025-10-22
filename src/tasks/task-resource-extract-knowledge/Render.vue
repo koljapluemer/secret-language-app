@@ -8,6 +8,7 @@ import type { RepositoriesContext } from '@/shared/types/RepositoriesContext';
 import LinkDisplayAsButton from '@/shared/links/LinkDisplayAsButton.vue';
 import TaskDecideWhetherToDoAgain from '@/tasks/ui/TaskDecideWhetherToDoAgain.vue';
 import TaskSkipDisableDone from '@/tasks/ui/TaskSkipDisableDone.vue';
+import Instruction from '@/tasks/ui/Instruction.vue';
 import { useToast } from '@/shared/toasts';
 
 interface Props {
@@ -118,8 +119,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="resource">
-    <div class="flex items-center justify-between mb-6">
+  <div class="flex flex-col h-full w-full">
+    <Instruction :prompt="task.prompt" />
+
+    <div class="flex-1 overflow-auto min-h-0">
+      <div class="container mx-auto p-4">
+        <div v-if="resource">
+          <div class="flex items-center justify-between mb-6">
       <h2>{{ resource.title }}</h2>
       <LinkDisplayAsButton v-if="resource.link" :link="resource.link" />
     </div>
@@ -165,15 +171,18 @@ onMounted(() => {
       @done="handleDone"
     />
 
-    <div v-if="showDoneSection">
-      <TaskDecideWhetherToDoAgain 
-        question="Do you want to extract more knowledge from this resource in the future?"
-        @decision="handleFinishDecision" 
-      />
+          <div v-if="showDoneSection">
+            <TaskDecideWhetherToDoAgain
+              question="Do you want to extract more knowledge from this resource in the future?"
+              @decision="handleFinishDecision"
+            />
+          </div>
+        </div>
+
+        <div v-else>
+          <span class="loading loading-spinner loading-lg"></span>
+        </div>
+      </div>
     </div>
-  </div>
-  
-  <div v-else>
-    <span class="loading loading-spinner loading-lg"></span>
   </div>
 </template>

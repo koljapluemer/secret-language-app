@@ -1,6 +1,10 @@
 <template>
-  <div>
-    <form @submit.prevent="handleSubmit" class="space-y-6">
+  <div class="flex flex-col h-full w-full">
+    <Instruction :prompt="task.prompt" />
+
+    <div class="flex-1 overflow-auto min-h-0">
+      <div class="container mx-auto p-4">
+        <form @submit.prevent="handleSubmit" class="space-y-6">
       <!-- Language Selection -->
       <div class="form-control">
         <label class="label">
@@ -51,6 +55,8 @@
         </button>
       </div>
     </form>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -59,6 +65,7 @@ import { ref, computed } from 'vue';
 import type { Task } from '@/tasks/Task';
 import type { RepositoriesContext } from '@/shared/types/RepositoriesContext';
 import LanguageDropdown from '@/entities/languages/LanguageDropdown.vue';
+import Instruction from '@/tasks/ui/Instruction.vue';
 import { useToast } from '@/shared/toasts';
 
 interface GoalFormData {

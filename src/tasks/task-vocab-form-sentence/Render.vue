@@ -9,6 +9,7 @@ import type { NoteData } from '@/entities/notes/NoteData';
 import LinkDisplayMini from '@/shared/links/LinkDisplayMini.vue';
 import { useToast } from '@/shared/toasts';
 import VocabRenderer from '@/features/vocab-view/VocabRenderer.vue';
+import Instruction from '@/tasks/ui/Instruction.vue';
 
 interface Props {
   task: Task;
@@ -189,7 +190,12 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div v-if="vocabItems.length >= 1" class="flex flex-col gap-4">
+  <div class="flex flex-col h-full w-full">
+    <Instruction :prompt="task.prompt" />
+
+    <div class="flex-1 overflow-auto min-h-0">
+      <div class="container mx-auto p-4">
+        <div v-if="vocabItems.length >= 1" class="flex flex-col gap-4">
     <div class="chat chat-start" v-if="vocabItems.length === 1">
       <div class="chat-bubble">
         {{ $t('practice.tasks.sentenceIdea', { word: vocabItems[0].content }) }}
@@ -272,15 +278,18 @@ onUnmounted(() => {
         <span v-if="activeTab === 'audio' && audioRecording" class="ml-2">
           {{ $t('practice.tasks.audioIcon') }}
         </span>
-      </button>
+          </button>
+        </div>
+      </div>
+
+      <div v-else class="text-center py-12">
+        <span class="loading loading-spinner loading-lg"></span>
+        <p class="mt-4 text-light">{{ $t('practice.tasks.loadingVocabulary') }}</p>
+      </div>
+
+      <!-- Hidden audio element for sound playback -->
+      <audio ref="audioElement" @ended="handleAudioEnded" class="hidden"></audio>
+      </div>
     </div>
   </div>
-
-  <div v-else class="text-center py-12">
-    <span class="loading loading-spinner loading-lg"></span>
-    <p class="mt-4 text-light">{{ $t('practice.tasks.loadingVocabulary') }}</p>
-  </div>
-
-  <!-- Hidden audio element for sound playback -->
-  <audio ref="audioElement" @ended="handleAudioEnded" class="hidden"></audio>
 </template>

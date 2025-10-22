@@ -9,6 +9,7 @@ import SpacedRepetitionRating from '@/tasks/ui/SpacedRepetitionRating.vue';
 import type { NoteData } from '@/entities/notes/NoteData';
 import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
 import LinkDisplayCompact from '@/shared/links/LinkDisplayCompact.vue';
+import Instruction from '@/tasks/ui/Instruction.vue';
 import { useToast } from '@/shared/toasts';
 
 interface Props {
@@ -110,8 +111,13 @@ onMounted(loadVocab);
 </script>
 
 <template>
-  <div v-if="vocab">
-    <!-- Main content with notes sidebar -->
+  <div class="flex flex-col h-full w-full">
+    <Instruction :prompt="task.prompt" />
+
+    <div class="flex-1 overflow-auto min-h-0">
+      <div class="container mx-auto p-4">
+        <div v-if="vocab">
+          <!-- Main content with notes sidebar -->
     <div class="flex gap-4 mb-8">
       <div class="flex-1 text-center">
         <div :class="isSentence ? 'text-3xl' : 'text-6xl'" class="font-bold">{{ frontContent }}</div>
@@ -159,13 +165,16 @@ onMounted(loadVocab);
         />
       </div>
       
+          <div v-else>
+            <button @click="isRevealed = true" class="btn btn-primary">{{ $t('practice.tasks.reveal') }}</button>
+          </div>
+        </div>
+      </div>
+
       <div v-else>
-        <button @click="isRevealed = true" class="btn btn-primary">{{ $t('practice.tasks.reveal') }}</button>
+        <span class="loading loading-spinner loading-lg"></span>
+      </div>
       </div>
     </div>
-  </div>
-  
-  <div v-else>
-    <span class="loading loading-spinner loading-lg"></span>
   </div>
 </template>

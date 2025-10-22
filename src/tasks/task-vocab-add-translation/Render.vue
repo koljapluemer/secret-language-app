@@ -2,7 +2,6 @@
 import { ref, onMounted, watch } from 'vue';
 import type { Task } from '@/tasks/Task';
 import type { VocabData } from '@/entities/vocab/VocabData';
-import type { LanguageData } from '@/entities/languages/LanguageData';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
 import type { ActionControl } from '@/tasks/ui/ActionControl';
 import type { NoteData } from '@/entities/notes/NoteData';
@@ -24,10 +23,8 @@ const { t } = useI18n();
 const vocabRepo = props.repositories.vocabRepo;
 const translationRepo = props.repositories.translationRepo;
 const noteRepo = props.repositories.noteRepo;
-const languageRepo = props.repositories.languageRepo;
 
 const vocab = ref<VocabData | null>(null);
-const languageData = ref<LanguageData | null>(null);
 const translationInputValue = ref('');
 const vocabNotes = ref<NoteData[]>([]);
 const translationNotes = ref<NoteData[]>([]);
@@ -135,12 +132,8 @@ watch(translationInputValue, () => {
   updateActionControls();
 });
 
-onMounted(async () => {
+onMounted(() => {
   loadVocab();
-
-  // Load language data
-  const lang = await languageRepo.getByCode(props.task.language);
-  if (lang) languageData.value = lang;
 
   // Initial control registration
   updateActionControls();

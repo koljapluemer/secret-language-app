@@ -3,7 +3,6 @@ import { ref, onMounted } from 'vue';
 import { createEmptyCard } from 'ts-fsrs';
 import type { Task } from '@/tasks/Task';
 import type { VocabData } from '@/entities/vocab/VocabData';
-import type { LanguageData } from '@/entities/languages/LanguageData';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
 import type { ActionControl } from '@/tasks/ui/ActionControl';
 import { useToast } from '@/shared/toasts';
@@ -25,9 +24,7 @@ const emit = defineEmits<{
 const toast = useToast();
 const { t } = useI18n();
 const vocabRepo = props.repositories.vocabRepo;
-const languageRepo = props.repositories.languageRepo;
 const vocab = ref<VocabData | null>(null);
-const languageData = ref<LanguageData | null>(null);
 const actionControls = ref<ActionControl[]>([]);
 
 const loadVocab = async () => {
@@ -86,12 +83,8 @@ function handleAction(controlId: string) {
   else if (controlId === 'skip') handleSkip();
 }
 
-onMounted(async () => {
+onMounted(() => {
   loadVocab();
-
-  // Load language data
-  const lang = await languageRepo.getByCode(props.task.language);
-  if (lang) languageData.value = lang;
 
   // Set up action controls
   actionControls.value = [
@@ -113,7 +106,7 @@ onMounted(async () => {
 
 <template>
   <div class="flex flex-col h-full w-full">
-    <Instruction :language-data="languageData" :prompt="task.prompt" />
+    <Instruction :prompt="task.prompt" />
 
     <!-- Scrollable content area -->
     <div class="flex-1 overflow-auto min-h-0">

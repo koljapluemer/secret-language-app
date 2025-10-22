@@ -1,8 +1,13 @@
 <template>
-  <div v-if="goal">
-    <h2>{{ goal.title }}</h2>
+  <div class="flex flex-col h-full w-full">
+    <Instruction :prompt="task.prompt" />
 
-    <ManageGoalVocab 
+    <div class="flex-1 overflow-auto min-h-0">
+      <div class="container mx-auto p-4">
+        <div v-if="goal">
+          <h2>{{ goal.title }}</h2>
+
+          <ManageGoalVocab 
       :goal="goal"
       @goal-updated="handleGoalUpdate"
     />
@@ -15,16 +20,19 @@
       @done="handleDone"
     />
 
-    <div v-if="showDoneSection" class="mt-6">
-      <TaskDecideWhetherToDoAgain 
-        question="Do you want to add more vocabulary in the future?"
-        @decision="handleFinishDecision" 
-      />
-    </div>
-  </div>
+          <div v-if="showDoneSection" class="mt-6">
+            <TaskDecideWhetherToDoAgain
+              question="Do you want to add more vocabulary in the future?"
+              @decision="handleFinishDecision"
+            />
+          </div>
+        </div>
 
-  <div v-else>
-    <span class="loading loading-spinner loading-lg"></span>
+        <div v-else>
+          <span class="loading loading-spinner loading-lg"></span>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -36,6 +44,7 @@ import type { RepositoriesContext } from '@/shared/types/RepositoriesContext';
 import ManageGoalVocab from '@/widgets/manage-goal-vocab/ManageGoalVocab.vue';
 import TaskDecideWhetherToDoAgain from '@/tasks/ui/TaskDecideWhetherToDoAgain.vue';
 import TaskSkipDisableDone from '@/tasks/ui/TaskSkipDisableDone.vue';
+import Instruction from '@/tasks/ui/Instruction.vue';
 import { useToast } from '@/shared/toasts';
 
 interface Props {

@@ -8,6 +8,7 @@ import type { RepositoriesContext } from '@/shared/types/RepositoriesContext';
 import LinkDisplayAsButton from '@/shared/links/LinkDisplayAsButton.vue';
 import TaskSkipDisableDone from '@/tasks/ui/TaskSkipDisableDone.vue';
 import type { NoteData } from '@/entities/notes/NoteData';
+import Instruction from '@/tasks/ui/Instruction.vue';
 import { useToast } from '@/shared/toasts';
 
 interface Props {
@@ -117,8 +118,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="resource">
-    <div class="flex items-center justify-between mb-6">
+  <div class="flex flex-col h-full w-full">
+    <Instruction :prompt="task.prompt" />
+
+    <div class="flex-1 overflow-auto min-h-0">
+      <div class="container mx-auto p-4">
+        <div v-if="resource">
+          <div class="flex items-center justify-between mb-6">
       <h2>{{ resource.title }}</h2>
       <LinkDisplayAsButton v-if="resource.link" :link="resource.link" />
     </div>
@@ -178,14 +184,17 @@ onMounted(() => {
       </div>
     </details>
 
-    <TaskSkipDisableDone 
-      :done-disabled="false"
-      @skip="handleSkip"
-      @done="handleDone"
-    />
-  </div>
-  
-  <div v-else>
-    <span class="loading loading-spinner loading-lg"></span>
+          <TaskSkipDisableDone
+            :done-disabled="false"
+            @skip="handleSkip"
+            @done="handleDone"
+          />
+        </div>
+
+        <div v-else>
+          <span class="loading loading-spinner loading-lg"></span>
+        </div>
+      </div>
+    </div>
   </div>
 </template>

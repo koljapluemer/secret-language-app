@@ -3,7 +3,6 @@ import { ref, onMounted } from 'vue';
 import { createEmptyCard } from 'ts-fsrs';
 import type { Task } from '@/tasks/Task';
 import type { FactCardData } from '@/entities/fact-cards/FactCardData';
-import type { LanguageData } from '@/entities/languages/LanguageData';
 import type { RepositoriesContext } from '@/shared/types/RepositoriesContext';
 import type { ActionControl } from '@/tasks/ui/ActionControl';
 import MarkdownRenderer from '@/shared/ui/MarkdownRenderer.vue';
@@ -26,9 +25,7 @@ const toast = useToast();
 const { t } = useI18n();
 
 const factCardRepo = props.repositories.factCardRepo!;
-const languageRepo = props.repositories.languageRepo!;
 const factCard = ref<FactCardData | null>(null);
-const languageData = ref<LanguageData | null>(null);
 const actionControls = ref<ActionControl[]>([]);
 
 const loadFactCard = async () => {
@@ -86,12 +83,8 @@ function handleAction(controlId: string) {
   else if (controlId === 'skip') handleSkip();
 }
 
-onMounted(async () => {
+onMounted(() => {
   loadFactCard();
-
-  // Load language data
-  const lang = await languageRepo.getByCode(props.task.language);
-  if (lang) languageData.value = lang;
 
   // Set up action controls
   actionControls.value = [

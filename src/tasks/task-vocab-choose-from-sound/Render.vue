@@ -1,11 +1,16 @@
 <template>
-  <!-- Loading State -->
-  <div v-if="loading" class="text-center">
-    <span class="loading loading-spinner loading-lg"></span>
-  </div>
+  <div class="flex flex-col h-full w-full">
+    <Instruction :prompt="task.prompt" />
 
-  <!-- Exercise Content -->
-  <div v-else-if="vocab1 && vocab2 && playableSound" class="text-center">
+    <div class="flex-1 overflow-auto min-h-0">
+      <div class="container mx-auto p-4">
+        <!-- Loading State -->
+        <div v-if="loading" class="text-center">
+          <span class="loading loading-spinner loading-lg"></span>
+        </div>
+
+        <!-- Exercise Content -->
+        <div v-else-if="vocab1 && vocab2 && playableSound" class="text-center">
     <!-- Skip button -->
     <div class="flex justify-end mb-4">
       <button @click="skipTask" class="btn btn-outline btn-sm">{{ $t('practice.tasks.skipExercise') }}</button>
@@ -23,17 +28,20 @@
         </button>
         <VocabRenderer :vocab="vocab" :repos="repositories"
           :showAllNotesImmediately="true" />
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Error State -->
-  <div v-else class="text-center">
-    <div class="alert alert-error max-w-md mx-auto">
-      <span>{{ $t('practice.tasks.failedToLoad') }}</span>
-    </div>
-    <div class="mt-4">
-      <button @click="skipTask" class="btn btn-outline">{{ $t('practice.tasks.skipExercise') }}</button>
+      <!-- Error State -->
+      <div v-else class="text-center">
+        <div class="alert alert-error max-w-md mx-auto">
+          <span>{{ $t('practice.tasks.failedToLoad') }}</span>
+        </div>
+        <div class="mt-4">
+          <button @click="skipTask" class="btn btn-outline">{{ $t('practice.tasks.skipExercise') }}</button>
+        </div>
+      </div>
+      </div>
     </div>
   </div>
 </template>
@@ -50,6 +58,7 @@ import { useButtonWithKeyboardArrowControl } from '@/shared/composables/useButto
 import { useReplaySoundWithSpacebar } from '@/shared/composables/useReplaySoundWithSpacebar';
 import { useToast } from '@/shared/toasts';
 import VocabRenderer from '@/features/vocab-view/VocabRenderer.vue';
+import Instruction from '@/tasks/ui/Instruction.vue';
 
 interface Props {
   task: Task;

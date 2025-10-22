@@ -6,6 +6,7 @@ import type { RepositoriesContext } from '@/shared/types/RepositoriesContext';
 import type { Rating } from 'ts-fsrs';
 import SpacedRepetitionRating from '@/tasks/ui/SpacedRepetitionRating.vue';
 import MarkdownRenderer from '@/shared/ui/MarkdownRenderer.vue';
+import Instruction from '@/tasks/ui/Instruction.vue';
 import { useToast } from '@/shared/toasts';
 
 interface Props {
@@ -57,28 +58,36 @@ onMounted(loadFactCard);
 </script>
 
 <template>
-  <div v-if="factCard">
-    <div class="text-center mb-8">
-      <div class="text-4xl mb-6">
-        <MarkdownRenderer :content="factCard.front" />
-      </div>
-      
-      <div v-if="isRevealed">
-        <div class="divider mb-6">{{ $t('practice.tasks.answer') }}</div>
-        <div class="text-2xl text-light mb-6">
-          <MarkdownRenderer :content="factCard.back" />
+  <div class="flex flex-col h-full w-full">
+    <Instruction :prompt="task.prompt" />
+
+    <div class="flex-1 overflow-auto min-h-0">
+      <div class="container mx-auto p-4">
+        <div v-if="factCard">
+          <div class="text-center mb-8">
+            <div class="text-4xl mb-6">
+              <MarkdownRenderer :content="factCard.front" />
+            </div>
+
+            <div v-if="isRevealed">
+              <div class="divider mb-6">{{ $t('practice.tasks.answer') }}</div>
+              <div class="text-2xl text-light mb-6">
+                <MarkdownRenderer :content="factCard.back" />
+              </div>
+
+              <SpacedRepetitionRating @rating="handleRating" />
+            </div>
+
+            <div v-else>
+              <button @click="isRevealed = true" class="btn btn-primary">{{ $t('practice.tasks.reveal') }}</button>
+            </div>
+          </div>
         </div>
-        
-        <SpacedRepetitionRating @rating="handleRating" />
-      </div>
-      
-      <div v-else>
-        <button @click="isRevealed = true" class="btn btn-primary">{{ $t('practice.tasks.reveal') }}</button>
+
+        <div v-else>
+          <span class="loading loading-spinner loading-lg"></span>
+        </div>
       </div>
     </div>
-  </div>
-  
-  <div v-else>
-    <span class="loading loading-spinner loading-lg"></span>
   </div>
 </template>

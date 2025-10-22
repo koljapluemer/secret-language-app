@@ -10,6 +10,7 @@ import { generateClozeFromText, isRTLText, type ClozeData } from '@/tasks/utils/
 import type { NoteData } from '@/entities/notes/NoteData';
 import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
 import LinkDisplayMini from '@/shared/links/LinkDisplayMini.vue';
+import Instruction from '@/tasks/ui/Instruction.vue';
 import { useToast } from '@/shared/toasts';
 
 interface Props {
@@ -140,11 +141,16 @@ onMounted(loadVocabData);
 </script>
 
 <template>
-  <div v-if="loading">
-    <span class="loading loading-spinner loading-lg"></span>
-  </div>
+  <div class="flex flex-col h-full w-full">
+    <Instruction :prompt="task.prompt" />
 
-  <div v-else-if="vocab && clozeData" class="text-center">
+    <div class="flex-1 overflow-auto min-h-0">
+      <div class="container mx-auto p-4">
+        <div v-if="loading">
+          <span class="loading loading-spinner loading-lg"></span>
+        </div>
+
+        <div v-else-if="vocab && clozeData" class="text-center">
     <!-- Cloze section with potential notes sidebar -->
     <div class="flex gap-4 mb-8">
       <div class="flex-1">
@@ -205,17 +211,20 @@ onMounted(loadVocabData);
       <button @click="isRevealed = true" class="btn btn-primary">{{ $t('practice.tasks.reveal') }}</button>
     </div>
     
-    <!-- Links -->
-    <div v-if="vocab?.links && vocab.links.length > 0" class="space-y-2 mt-6">
-      <LinkDisplayMini
-        v-for="(link, index) in vocab.links"
-        :key="index"
-        :link="link"
-      />
-    </div>
-  </div>
+          <!-- Links -->
+          <div v-if="vocab?.links && vocab.links.length > 0" class="space-y-2 mt-6">
+            <LinkDisplayMini
+              v-for="(link, index) in vocab.links"
+              :key="index"
+              :link="link"
+            />
+          </div>
+        </div>
 
-  <div v-else>
-    <span>{{ $t('practice.tasks.failedToLoad') }}</span>
+        <div v-else>
+          <span>{{ $t('practice.tasks.failedToLoad') }}</span>
+        </div>
+      </div>
+    </div>
   </div>
 </template>

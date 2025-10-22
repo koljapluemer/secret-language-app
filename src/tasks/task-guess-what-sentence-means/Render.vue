@@ -7,6 +7,7 @@ import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesConte
 import type { NoteData } from '@/entities/notes/NoteData';
 import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
 import LinkDisplayMini from '@/shared/links/LinkDisplayMini.vue';
+import Instruction from '@/tasks/ui/Instruction.vue';
 import { useToast } from '@/shared/toasts';
 
 interface Props {
@@ -105,8 +106,13 @@ onMounted(loadVocab);
 </script>
 
 <template>
-  <div v-if="vocab" class="max-w-4xl mx-auto">
-    <!-- Vocab section with sidebar -->
+  <div class="flex flex-col h-full w-full">
+    <Instruction :prompt="task.prompt" />
+
+    <div class="flex-1 overflow-auto min-h-0">
+      <div class="container mx-auto p-4">
+        <div v-if="vocab" class="max-w-4xl mx-auto">
+          <!-- Vocab section with sidebar -->
     <div class="flex gap-4 mb-8">
       <div class="flex-1">
         <div class="text-3xl font-bold p-6 bg-base-200 rounded-lg">
@@ -160,11 +166,14 @@ onMounted(loadVocab);
         <button @click="handleDone" class="btn btn-primary btn-lg">
           {{ $t('common.done') }}
         </button>
+          </div>
+        </div>
+      </div>
+
+      <div v-else class="text-center">
+        <span class="loading loading-spinner loading-lg"></span>
+      </div>
       </div>
     </div>
-  </div>
-
-  <div v-else class="text-center">
-    <span class="loading loading-spinner loading-lg"></span>
   </div>
 </template>

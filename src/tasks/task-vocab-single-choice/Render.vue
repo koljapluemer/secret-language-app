@@ -9,6 +9,7 @@ import { shuffleArray } from '@/shared/utils/arrayUtils';
 import { Rating } from 'ts-fsrs';
 import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
 import LinkDisplayCompact from '@/shared/links/LinkDisplayCompact.vue';
+import Instruction from '@/tasks/ui/Instruction.vue';
 import { useToast } from '@/shared/toasts';
 
 interface AnswerOption {
@@ -231,13 +232,18 @@ onMounted(loadVocabData);
 </script>
 
 <template>
-  <!-- Loading State -->
-  <div v-if="loading">
-    <span class="loading loading-spinner loading-lg"></span>
-  </div>
+  <div class="flex flex-col h-full w-full">
+    <Instruction :prompt="task.prompt" />
 
-  <!-- Exercise Content -->
-  <div v-else-if="vocab && answerOptions.length > 0" class="text-center">
+    <div class="flex-1 overflow-auto min-h-0">
+      <div class="container mx-auto p-4">
+        <!-- Loading State -->
+        <div v-if="loading">
+          <span class="loading loading-spinner loading-lg"></span>
+        </div>
+
+        <!-- Exercise Content -->
+        <div v-else-if="vocab && answerOptions.length > 0" class="text-center">
     <!-- Main content with notes sidebar -->
     <div class="flex gap-4 mb-8">
       <div class="flex-1">
@@ -284,18 +290,21 @@ onMounted(loadVocabData);
       </div>
     </div>
     
-    <!-- Links -->
-    <div v-if="vocab?.links && vocab.links.length > 0" class="flex flex-wrap gap-2 mt-6 justify-center">
-      <LinkDisplayCompact
-        v-for="(link, index) in vocab.links"
-        :key="index"
-        :link="link"
-      />
-    </div>
-  </div>
+          <!-- Links -->
+          <div v-if="vocab?.links && vocab.links.length > 0" class="flex flex-wrap gap-2 mt-6 justify-center">
+            <LinkDisplayCompact
+              v-for="(link, index) in vocab.links"
+              :key="index"
+              :link="link"
+            />
+          </div>
+        </div>
 
-  <!-- Error State -->
-  <div v-else>
-    <span>{{ $t('practice.tasks.failedToLoad') }}</span>
+        <!-- Error State -->
+        <div v-else>
+          <span>{{ $t('practice.tasks.failedToLoad') }}</span>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
