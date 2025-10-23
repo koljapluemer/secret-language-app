@@ -4,12 +4,10 @@ import { createEmptyCard } from 'ts-fsrs';
 import type { Task } from '@/tasks/Task';
 import type { VocabData } from '@/entities/vocab/VocabData';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
-import type { NoteData } from '@/entities/notes/NoteData';
-import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
-import LinkDisplayMini from '@/shared/links/LinkDisplayMini.vue';
 import Instruction from '@/tasks/ui/Instruction.vue';
 import ActionBar from '@/tasks/ui/ActionBar.vue';
 import type { ActionControl } from '@/tasks/ui/ActionControl';
+import VocabRenderer from '@/features/vocab-view/VocabRenderer.vue';
 import { useToast } from '@/shared/toasts';
 
 interface Props {
@@ -25,11 +23,8 @@ const emit = defineEmits<{
 const toast = useToast();
 
 const vocabRepo = props.repositories.vocabRepo;
-const translationRepo = props.repositories.translationRepo;
 const noteRepo = props.repositories.noteRepo;
 const vocab = ref<VocabData | null>(null);
-const translations = ref<string[]>([]);
-const vocabNotes = ref<NoteData[]>([]);
 const userGuess = ref('');
 const showTranslation = ref(false);
 
@@ -75,13 +70,6 @@ const loadVocab = async () => {
   const vocabData = await vocabRepo.getVocabByUID(vocabId);
   if (vocabData) {
     vocab.value = vocabData;
-    const translationData = await translationRepo.getTranslationsByIds(vocabData.translations);
-    translations.value = translationData.map(t => t.content);
-    
-    // Load vocab notes
-    if (vocabData.notes && vocabData.notes.length > 0) {
-      vocabNotes.value = await noteRepo.getNotesByUIDs(vocabData.notes);
-    }
   }
 };
 
@@ -158,38 +146,17 @@ onMounted(loadVocab);
     <div class="flex-1 overflow-auto min-h-0">
       <div class="container mx-auto p-4 pb-24">
         <div v-if="vocab" class="max-w-4xl mx-auto">
-          <!-- Vocab section with sidebar -->
-          <div class="flex gap-4 mb-8">
-            <div class="flex-1">
-              <div class="text-3xl font-bold p-6 bg-base-200 rounded-lg">
-                {{ vocab.content }}
-              </div>
-            </div>
-            <!-- Vocab notes sidebar -->
-            <div v-if="vocabNotes.filter(note => note.showBeforeExercise).length > 0" class="w-64 space-y-2">
-              <NoteDisplayMini
-                v-for="note in vocabNotes.filter(note => note.showBeforeExercise)"
-                :key="note.id"
-                :note="note"
-              />
-            </div>
-          </div>
+          <VocabRenderer
+            :vocab="vocab"
+            :repos="repositories"
+            :hide-translations="!showTranslation"
+            :show-all-notes-immediately="showTranslation"
+          />
 
-          <div v-if="showTranslation">
-            <div class="mb-8">
-              <div class="divider text-lg font-medium">{{ $t('practice.tasks.translation') }}</div>
-              <div class="text-2xl font-bold text-center p-6 bg-accent/10 rounded-lg">
-                {{ translations.join(', ') }}
-              </div>
-            </div>
-
-            <!-- Links -->
-            <div v-if="vocab.links && vocab.links.length > 0" class="space-y-2 mb-6">
-              <LinkDisplayMini
-                v-for="(link, index) in vocab.links"
-                :key="index"
-                :link="link"
-              />
+          <div v-if="showTranslation && userGuess.trim()" class="mt-6">
+            <div class="divider text-lg font-medium">{{ $t('practice.tasks.yourGuess') }}</div>
+            <div class="text-xl p-4 bg-base-200 rounded-lg italic">
+              {{ userGuess }}
             </div>
           </div>
         </div>
