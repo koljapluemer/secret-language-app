@@ -1,6 +1,6 @@
 <template>
   <div
-    class="bg-primary border-t-10 border-t-secondary p-4 text-white flex flex-row gap-4 justify-between items-end relative">
+    class="bg-primary border-t-10 border-t-secondary p-4 pt-20 text-white flex flex-row gap-4 justify-between items-end relative min-h-32">
     <!-- Left Element -->
     <div class="flex flex-row gap-2 items-center">
       <!-- Default skip button -->
@@ -51,9 +51,9 @@
     </div>
 
     <!-- Central Element with Header and Footer -->
-    <div class="flex flex-col items-center gap-2 absolute left-1/2 -translate-x-1/2 bottom-4">
+    <div class="flex flex-col items-center gap-2 absolute left-1/2 -translate-x-1/2 bottom-0 pb-4">
       <!-- Central controls -->
-      <div class="flex flex-row justify-center gap-2 items-center">
+      <div class="flex flex-col justify-center gap-2 items-center">
         <template v-for="control in centralControls" :key="control.id">
           <button
             v-if="control.type === 'button'"
@@ -77,6 +77,14 @@
             @input="emit('action', control.id, ($event.target as HTMLInputElement).value)"
             :placeholder="control.placeholder"
             class="input input-bordered input-lg"
+          />
+          <textarea
+            v-else-if="control.type === 'textarea'"
+            :value="control.value"
+            @input="emit('action', control.id, ($event.target as HTMLTextAreaElement).value)"
+            :placeholder="control.placeholder"
+            :disabled="control.disabled"
+            class="textarea w-96 h-40 text-xl border-3 border-secondary bg-primary text-white placeholder-white/60 resize-none"
           />
           <button
             v-else-if="control.type === 'icon-button'"

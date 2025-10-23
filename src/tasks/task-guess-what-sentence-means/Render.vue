@@ -8,6 +8,8 @@ import type { NoteData } from '@/entities/notes/NoteData';
 import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
 import LinkDisplayMini from '@/shared/links/LinkDisplayMini.vue';
 import Instruction from '@/tasks/ui/Instruction.vue';
+import ActionBar from '@/tasks/ui/ActionBar.vue';
+import type { ActionControl } from '@/tasks/ui/ActionControl';
 import { useToast } from '@/shared/toasts';
 
 interface Props {
@@ -35,6 +37,37 @@ const canReveal = computed(() => {
   return userGuess.value.trim().length > 0;
 });
 
+const actionBarControls = computed<ActionControl[]>(() => {
+  if (!showTranslation.value) {
+    return [
+      {
+        id: 'user-guess-input',
+        type: 'textarea',
+        value: userGuess.value,
+        placeholder: 'Type what you think this sentence means...',
+        position: 'central',
+        disabled: false
+      },
+      {
+        id: 'reveal',
+        type: 'button',
+        label: 'Reveal Translation',
+        position: 'central',
+        disabled: !canReveal.value
+      }
+    ];
+  } else {
+    return [
+      {
+        id: 'done',
+        type: 'button',
+        label: 'Done',
+        position: 'central'
+      }
+    ];
+  }
+});
+
 const loadVocab = async () => {
   const vocabId = props.task.associatedVocab?.[0];
   if (!vocabId) return;
@@ -52,8 +85,21 @@ const loadVocab = async () => {
   }
 };
 
-const handleReveal = () => {
-  showTranslation.value = true;
+const handleAction = async (actionId: string, data?: string) => {
+  if (actionId === 'user-guess-input') {
+    userGuess.value = data || '';
+  } else if (actionId === 'reveal') {
+    showTranslation.value = true;
+  } else if (actionId === 'done') {
+    await handleDone();
+  } else if (actionId === 'skip') {
+    emit('finished');
+  } else if (actionId === 'disable') {
+    // TODO: Implement disable functionality
+    emit('finished');
+  } else if (actionId === 'jump-to') {
+    // TODO: Implement jump-to functionality (open vocab edit page)
+  }
 };
 
 const handleDone = async () => {
@@ -110,70 +156,53 @@ onMounted(loadVocab);
     <Instruction :prompt="task.prompt" />
 
     <div class="flex-1 overflow-auto min-h-0">
-      <div class="container mx-auto p-4">
+      <div class="container mx-auto p-4 pb-24">
         <div v-if="vocab" class="max-w-4xl mx-auto">
           <!-- Vocab section with sidebar -->
-    <div class="flex gap-4 mb-8">
-      <div class="flex-1">
-        <div class="text-3xl font-bold p-6 bg-base-200 rounded-lg">
-          {{ vocab.content }}
-        </div>
-      </div>
-      <!-- Vocab notes sidebar -->
-      <div v-if="vocabNotes.filter(note => note.showBeforeExercise).length > 0" class="w-64 space-y-2">
-        
-        <NoteDisplayMini 
-          v-for="note in vocabNotes.filter(note => note.showBeforeExercise)" 
-          :key="note.id"
-          :note="note"
-        />
-      </div>
-    </div>
+          <div class="flex gap-4 mb-8">
+            <div class="flex-1">
+              <div class="text-3xl font-bold p-6 bg-base-200 rounded-lg">
+                {{ vocab.content }}
+              </div>
+            </div>
+            <!-- Vocab notes sidebar -->
+            <div v-if="vocabNotes.filter(note => note.showBeforeExercise).length > 0" class="w-64 space-y-2">
+              <NoteDisplayMini
+                v-for="note in vocabNotes.filter(note => note.showBeforeExercise)"
+                :key="note.id"
+                :note="note"
+              />
+            </div>
+          </div>
 
-    <div class="mb-8">
-      <label for="user-guess" class="block text-lg font-medium mb-4">
-        {{ $t('practice.tasks.yourGuess') }}
-      </label>
-      <textarea id="user-guess" v-model="userGuess" :disabled="showTranslation"
-        class="textarea textarea-bordered textarea-lg w-full h-32 text-lg"
-        placeholder="Type what you think this sentence means..."></textarea>
-    </div>
+          <div v-if="showTranslation">
+            <div class="mb-8">
+              <div class="divider text-lg font-medium">{{ $t('practice.tasks.translation') }}</div>
+              <div class="text-2xl font-bold text-center p-6 bg-accent/10 rounded-lg">
+                {{ translations.join(', ') }}
+              </div>
+            </div>
 
-    <div v-if="!showTranslation" class="text-center">
-      <button @click="handleReveal" :disabled="!canReveal" class="btn btn-primary btn-lg">
-        {{ $t('practice.tasks.revealTranslation') }}
-      </button>
-    </div>
-
-    <div v-if="showTranslation">
-      <div class="mb-8">
-        <div class="divider text-lg font-medium">{{ $t('practice.tasks.translation') }}</div>
-        <div class="text-2xl font-bold text-center p-6 bg-accent/10 rounded-lg">
-          {{ translations.join(', ') }}
-        </div>
-      </div>
-
-      <!-- Links -->
-      <div v-if="vocab.links && vocab.links.length > 0" class="space-y-2 mb-6">
-        <LinkDisplayMini
-          v-for="(link, index) in vocab.links"
-          :key="index"
-          :link="link"
-        />
-      </div>
-      
-      <div class="text-center">
-        <button @click="handleDone" class="btn btn-primary btn-lg">
-          {{ $t('common.done') }}
-        </button>
+            <!-- Links -->
+            <div v-if="vocab.links && vocab.links.length > 0" class="space-y-2 mb-6">
+              <LinkDisplayMini
+                v-for="(link, index) in vocab.links"
+                :key="index"
+                :link="link"
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      <div v-else class="text-center">
-        <span class="loading loading-spinner loading-lg"></span>
-      </div>
+        <div v-else class="text-center">
+          <span class="loading loading-spinner loading-lg"></span>
+        </div>
       </div>
     </div>
+
+    <ActionBar
+      :controls="actionBarControls"
+      @action="handleAction"
+    />
   </div>
 </template>

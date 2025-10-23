@@ -25,6 +25,15 @@ export interface TextInputControl {
   position: ActionControlPosition;
 }
 
+export interface TextareaControl {
+  type: 'textarea';
+  id: string;
+  value: string;
+  placeholder?: string;
+  position: ActionControlPosition;
+  disabled?: boolean;
+}
+
 export interface IconButtonControl {
   type: 'icon-button';
   id: string;
@@ -37,4 +46,5 @@ export type ActionControl =
   | ButtonControl
   | ImageButtonControl
   | TextInputControl
+  | TextareaControl
   | IconButtonControl;
