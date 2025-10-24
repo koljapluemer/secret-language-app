@@ -54,7 +54,7 @@
             <tr>
               <th>{{ $t('downloads.setName') }}</th>
               <th>{{ $t('common.language') }}</th>
-              <th>{{ $t('common.actions') }}</th>
+              <th class="w-72">{{ $t('common.actions') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -70,9 +70,11 @@
                   {{ getLanguageName(set.language) }}
                 </span>
               </td>
-              <td>
+              <td class="w-72">
                 <div v-if="isDownloading(`${set.language}-${set.name}`)" class="flex flex-col gap-1">
-                  <div class="text-xs text-base-content/70">{{ getDownloadProgress(`${set.language}-${set.name}`)?.phase || 'Downloading...' }}</div>
+                  <div class="text-xs text-base-content/70 min-h-4 truncate" :title="getDownloadProgress(`${set.language}-${set.name}`)?.phase || 'Downloading...'">
+                    {{ getDownloadProgress(`${set.language}-${set.name}`)?.phase || 'Downloading...' }}
+                  </div>
                   <div class="flex items-center gap-1">
                     <progress
                       class="progress progress-primary w-16"
