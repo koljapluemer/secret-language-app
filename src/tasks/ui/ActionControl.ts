@@ -1,4 +1,4 @@
-export type ActionControlPosition = 'central' | 'secondary-left' | 'secondary-right';
+export type ActionControlPosition = 'central-header' | 'central' | 'central-footer' | 'secondary-left' | 'secondary-right';
 
 export interface ButtonControl {
   type: 'button';
@@ -42,9 +42,41 @@ export interface IconButtonControl {
   position: ActionControlPosition;
 }
 
+export interface ToggleButtonOption {
+  id: string;
+  icon?: string; // Lucide icon name
+  label?: string;
+}
+
+export interface ToggleButtonGroupControl {
+  type: 'toggle-button-group';
+  id: string;
+  position: 'central-header';
+  options: ToggleButtonOption[];
+  selectedId: string;
+}
+
+export interface RecordButtonControl {
+  type: 'record-button';
+  id: string;
+  position: 'central';
+  isRecording: boolean;
+}
+
+export interface AudioPlayerControl {
+  type: 'audio-player';
+  id: string;
+  position: 'central';
+  audioBlob: Blob;
+  duration: number;
+}
+
 export type ActionControl =
   | ButtonControl
   | ImageButtonControl
   | TextInputControl
   | TextareaControl
-  | IconButtonControl;
+  | IconButtonControl
+  | ToggleButtonGroupControl
+  | RecordButtonControl
+  | AudioPlayerControl;

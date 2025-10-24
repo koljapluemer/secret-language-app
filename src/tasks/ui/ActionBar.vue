@@ -1,5 +1,29 @@
 <template>
   <div class="relative">
+    <!-- Central Header - toggle buttons above central element -->
+    <div v-if="centralHeaderControls.length > 0" class="flex justify-center px-4 pb-2 relative z-10">
+      <template v-for="control in centralHeaderControls" :key="control.id">
+        <div v-if="control.type === 'toggle-button-group'" class="join">
+          <button
+            v-for="option in control.options"
+            :key="option.id"
+            @click="emit('action', control.id, option.id)"
+            :class="[
+              'join-item',
+              'btn',
+              'btn-sm',
+              'border-3',
+              'border-secondary',
+              option.id === control.selectedId ? 'btn-primary' : 'btn-ghost'
+            ]"
+          >
+            <component v-if="option.icon" :is="getIcon(option.icon)" :size="20" />
+            <span v-if="option.label">{{ option.label }}</span>
+          </button>
+        </div>
+      </template>
+    </div>
+
     <!-- Central controls - positioned at top, naturally sized -->
     <div class="flex flex-col md:flex-row justify-center gap-2 px-4 relative z-10">
       <template v-for="control in centralControls" :key="control.id">
@@ -34,6 +58,59 @@
           :disabled="control.disabled"
           class="textarea w-96 h-40 text-xl border-3 border-secondary bg-primary text-white placeholder-white/60 resize-none"
         />
+        <button
+          v-else-if="control.type === 'icon-button'"
+          @click="emit('action', control.id)"
+          :class="getButtonClass(control.position)"
+        >
+          <component :is="getIcon(control.icon)" />
+          <span v-if="control.label">{{ control.label }}</span>
+        </button>
+        <button
+          v-else-if="control.type === 'record-button'"
+          @click="emit('action', control.id)"
+          :class="[
+            'btn',
+            'btn-circle',
+            'btn-xl',
+            'border-3',
+            'border-secondary',
+            control.isRecording ? 'btn-error' : 'btn-primary'
+          ]"
+        >
+          <component :is="control.isRecording ? getIcon('stop') : getIcon('microphone')" :size="48" />
+        </button>
+        <div v-else-if="control.type === 'audio-player'" class="flex flex-col items-center gap-2">
+          <button
+            @click="playAudio(control)"
+            :class="[
+              'btn',
+              'btn-circle',
+              'btn-xl',
+              'border-3',
+              'border-secondary',
+              'btn-primary'
+            ]"
+            :disabled="isPlayingAudio"
+          >
+            <component v-if="!isPlayingAudio" :is="getIcon('play')" :size="48" />
+            <span v-else class="loading loading-spinner loading-lg"></span>
+          </button>
+        </div>
+      </template>
+    </div>
+
+    <!-- Central Footer - buttons below central element -->
+    <div v-if="centralFooterControls.length > 0" class="flex justify-center gap-2 px-4 pt-2 relative z-10">
+      <template v-for="control in centralFooterControls" :key="control.id">
+        <button
+          v-if="control.type === 'button'"
+          @click="emit('action', control.id)"
+          :class="getButtonClass(control.position, control.destructive)"
+          :disabled="control.disabled"
+        >
+          {{ control.label }}
+        </button>
         <button
           v-else-if="control.type === 'icon-button'"
           @click="emit('action', control.id)"
@@ -123,9 +200,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import type { ActionControl, ActionControlPosition } from './ActionControl';
-import { Volume2, Play, SkipForward, Ban, ExternalLink } from 'lucide-vue-next';
+import { computed, ref, onUnmounted } from 'vue';
+import type { ActionControl, ActionControlPosition, AudioPlayerControl } from './ActionControl';
+import { Volume2, Play, SkipForward, Ban, ExternalLink, Mic, Square, Pencil } from 'lucide-vue-next';
 
 const props = defineProps<{
   controls: ActionControl[];
@@ -138,6 +215,10 @@ const emit = defineEmits<{
   action: [controlId: string, data?: string];
 }>();
 
+const centralHeaderControls = computed(() =>
+  props.controls.filter((c) => c.position === 'central-header')
+);
+
 const secondaryLeftControls = computed(() =>
   props.controls.filter((c) => c.position === 'secondary-left')
 );
@@ -146,9 +227,65 @@ const centralControls = computed(() =>
   props.controls.filter((c) => c.position === 'central')
 );
 
+const centralFooterControls = computed(() =>
+  props.controls.filter((c) => c.position === 'central-footer')
+);
+
 const secondaryRightControls = computed(() =>
   props.controls.filter((c) => c.position === 'secondary-right')
 );
+
+// Audio playback state
+const isPlayingAudio = ref(false);
+const audioElement = ref<HTMLAudioElement>();
+const audioUrl = ref<string | null>(null);
+
+const playAudio = async (control: AudioPlayerControl) => {
+  if (isPlayingAudio.value) return;
+
+  // Clean up any existing audio URL
+  if (audioUrl.value) {
+    URL.revokeObjectURL(audioUrl.value);
+  }
+
+  // Create new audio URL from blob
+  audioUrl.value = URL.createObjectURL(control.audioBlob);
+
+  // Create audio element if not exists
+  if (!audioElement.value) {
+    audioElement.value = new Audio();
+    audioElement.value.addEventListener('ended', () => {
+      isPlayingAudio.value = false;
+    });
+  }
+
+  audioElement.value.src = audioUrl.value;
+  isPlayingAudio.value = true;
+
+  try {
+    await audioElement.value.play();
+  } catch {
+    // Audio play failed
+    isPlayingAudio.value = false;
+  }
+};
+
+const formatDuration = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+};
+
+// Cleanup on unmount
+onUnmounted(() => {
+  if (audioUrl.value) {
+    URL.revokeObjectURL(audioUrl.value);
+  }
+  if (audioElement.value) {
+    audioElement.value.pause();
+    audioElement.value.src = '';
+  }
+});
 
 function getButtonClass(position: ActionControlPosition, destructive?: boolean): string {
   const classes = ['btn', 'border-3', 'border-secondary'];
@@ -189,6 +326,9 @@ function getIcon(icon: string) {
     skip: SkipForward,
     disable: Ban,
     'jump-to': ExternalLink,
+    microphone: Mic,
+    stop: Square,
+    pencil: Pencil,
   };
   return iconMap[icon] || Play;
 }

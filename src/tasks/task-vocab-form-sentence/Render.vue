@@ -4,12 +4,13 @@ import type { Task } from '@/tasks/Task';
 import type { VocabData } from '@/entities/vocab/VocabData';
 import type { TranslationData } from '@/entities/translations/TranslationData';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
-import AudioRecorder from './AudioRecorder.vue';
 import type { NoteData } from '@/entities/notes/NoteData';
+import type { ActionControl } from '@/tasks/ui/ActionControl';
 import LinkDisplayMini from '@/shared/links/LinkDisplayMini.vue';
 import { useToast } from '@/shared/toasts';
 import VocabRenderer from '@/features/vocab-view/VocabRenderer.vue';
 import Instruction from '@/tasks/ui/Instruction.vue';
+import ActionBar from '@/tasks/ui/ActionBar.vue';
 
 interface Props {
   task: Task;
@@ -32,14 +33,17 @@ const translations = ref<{ [vocabId: string]: TranslationData[] }>({});
 const vocabNotes = ref<{ [vocabId: string]: NoteData[] }>({});
 const translationNotes = ref<{ [vocabId: string]: NoteData[] }>({});
 const sentence = ref('');
+
+// Recording state
+const isRecording = ref(false);
+const canRecord = ref(false);
+const recordingDuration = ref(0);
+const mediaRecorder = ref<MediaRecorder | null>(null);
+const recordingTimer = ref<ReturnType<typeof setInterval> | null>(null);
+const audioChunks = ref<Blob[]>([]);
 const isRecordTask = props.task.taskType === 'vocab-record-sentence' || props.task.taskType === 'vocab-record-sentence-single';
 const activeTab = ref<'text' | 'audio'>(isRecordTask ? 'audio' : 'text');
 const audioRecording = ref<{ blob: Blob; duration: number } | null>(null);
-
-// Audio playback state
-const playingVocabId = ref<string | null>(null);
-const audioElement = ref<HTMLAudioElement>();
-const audioUrl = ref<string | null>(null);
 
 const isDoneEnabled = computed(() => {
   if (activeTab.value === 'text') {
@@ -47,6 +51,89 @@ const isDoneEnabled = computed(() => {
   } else {
     return audioRecording.value !== null;
   }
+});
+
+// ActionBar controls
+const actionBarControls = computed<ActionControl[]>(() => {
+  const controls: ActionControl[] = [];
+
+  // Central Header: Mode toggle (only for non-record tasks)
+  if (!isRecordTask) {
+    controls.push({
+      type: 'toggle-button-group',
+      id: 'mode-toggle',
+      position: 'central-header',
+      options: [
+        { id: 'text', icon: 'pencil', label: 'Write' },
+        { id: 'audio', icon: 'microphone', label: 'Record' }
+      ],
+      selectedId: activeTab.value
+    });
+  }
+
+  // Central Element: Text mode
+  if (activeTab.value === 'text') {
+    controls.push({
+      type: 'textarea',
+      id: 'sentence-input',
+      position: 'central',
+      value: sentence.value,
+      placeholder: vocabItems.value.length === 1
+        ? 'Form a sentence using this word...'
+        : 'Form a sentence using both words...'
+    });
+
+    // Central Footer: Done button (enabled when sentence has 3+ chars)
+    if (sentence.value.trim().length >= 3) {
+      controls.push({
+        type: 'button',
+        id: 'done',
+        label: 'Done',
+        position: 'central-footer',
+        disabled: false
+      });
+    }
+  }
+
+  // Central Element: Audio mode
+  if (activeTab.value === 'audio') {
+    if (!audioRecording.value) {
+      // Show record button
+      controls.push({
+        type: 'record-button',
+        id: 'record',
+        position: 'central',
+        isRecording: isRecording.value
+      });
+    } else {
+      // Show audio player
+      controls.push({
+        type: 'audio-player',
+        id: 'play-recording',
+        position: 'central',
+        audioBlob: audioRecording.value.blob,
+        duration: audioRecording.value.duration
+      });
+
+      // Central Footer: Re-record and Done buttons
+      controls.push({
+        type: 'button',
+        id: 're-record',
+        label: 'Re-record',
+        position: 'central-footer',
+        destructive: false
+      });
+      controls.push({
+        type: 'button',
+        id: 'done',
+        label: 'Done',
+        position: 'central-footer',
+        disabled: false
+      });
+    }
+  }
+
+  return controls;
 });
 
 const loadVocab = async () => {
@@ -80,23 +167,125 @@ const loadVocab = async () => {
   }
 };
 
+// Recording functions
+async function startRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        sampleRate: 44100
+      }
+    });
+
+    canRecord.value = true;
+
+    audioChunks.value = [];
+    mediaRecorder.value = new MediaRecorder(stream, {
+      mimeType: 'audio/webm;codecs=opus'
+    });
+
+    mediaRecorder.value.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        audioChunks.value.push(event.data);
+      }
+    };
+
+    mediaRecorder.value.onstop = () => {
+      stream.getTracks().forEach(track => track.stop());
+
+      if (audioChunks.value.length > 0) {
+        const blob = new Blob(audioChunks.value, { type: 'audio/webm;codecs=opus' });
+        audioRecording.value = { blob, duration: recordingDuration.value };
+      }
+    };
+
+    isRecording.value = true;
+    recordingDuration.value = 0;
+    mediaRecorder.value.start();
+
+    // Start timer
+    recordingTimer.value = setInterval(() => {
+      recordingDuration.value += 1;
+
+      // Auto-stop after 60 seconds
+      if (recordingDuration.value >= 60) {
+        stopRecording();
+      }
+    }, 1000);
+  } catch (error) {
+    toast.error(`Failed to start recording: ${error}`);
+  }
+}
+
+function stopRecording() {
+  if (mediaRecorder.value && mediaRecorder.value.state === 'recording') {
+    mediaRecorder.value.stop();
+  }
+
+  if (recordingTimer.value) {
+    clearInterval(recordingTimer.value);
+    recordingTimer.value = null;
+  }
+
+  isRecording.value = false;
+}
+
+function clearRecording() {
+  audioRecording.value = null;
+  recordingDuration.value = 0;
+}
+
+
+// Action handler for ActionBar
+const handleAction = (controlId: string, data?: string) => {
+  switch (controlId) {
+    case 'mode-toggle':
+      if (data === 'text' || data === 'audio') {
+        activeTab.value = data;
+      }
+      break;
+    case 'sentence-input':
+      sentence.value = data || '';
+      break;
+    case 'record':
+      if (isRecording.value) {
+        stopRecording();
+      } else {
+        startRecording();
+      }
+      break;
+    case 're-record':
+      clearRecording();
+      break;
+    case 'done':
+      handleDone();
+      break;
+    case 'skip':
+      handleSkip();
+      break;
+    case 'disable':
+      // Handle disable action
+      break;
+    case 'jump-to':
+      handleJumpTo();
+      break;
+  }
+};
+
+const handleJumpTo = () => {
+  if (vocabItems.value.length > 0) {
+    const vocabId = vocabItems.value[0].id;
+    // Navigate to vocab edit page
+    window.location.href = `#/vocab/${vocabId}`;
+  }
+};
+
 const handleSkip = async () => {
   await handleTaskCompletion();
   emit('finished', 'neutral');
 };
 
-const handleRecordingReady = (blob: Blob, duration: number) => {
-  audioRecording.value = { blob, duration };
-};
-
-// Handle audio ended
-const handleAudioEnded = () => {
-  playingVocabId.value = null;
-  if (audioUrl.value) {
-    URL.revokeObjectURL(audioUrl.value);
-    audioUrl.value = null;
-  }
-};
 
 const handleDone = async () => {
   if (!isDoneEnabled.value || vocabItems.value.length === 0) return;
@@ -179,12 +368,38 @@ const handleTaskCompletion = async () => {
   }
 };
 
-onMounted(loadVocab);
+onMounted(async () => {
+  await loadVocab();
 
-// Cleanup audio URLs on unmount
+  // Initialize microphone access for audio mode
+  if (isRecordTask || activeTab.value === 'audio') {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          sampleRate: 44100
+        }
+      });
+
+      canRecord.value = true;
+
+      // Stop the stream for now, we'll restart when recording
+      stream.getTracks().forEach(track => track.stop());
+    } catch {
+      toast.error('Failed to access microphone');
+      canRecord.value = false;
+    }
+  }
+});
+
+// Cleanup on unmount
 onUnmounted(() => {
-  if (audioUrl.value) {
-    URL.revokeObjectURL(audioUrl.value);
+  if (recordingTimer.value) {
+    clearInterval(recordingTimer.value);
+  }
+  if (mediaRecorder.value && mediaRecorder.value.state === 'recording') {
+    mediaRecorder.value.stop();
   }
 });
 </script>
@@ -199,11 +414,11 @@ onUnmounted(() => {
           <!-- Vocabulary Display -->
           <div class="grid gap-6" :class="vocabItems.length === 1 ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'">
             <div v-for="vocab in vocabItems" :key="vocab.id" class="text-center">
-              <!-- Vocab Content and Translation -->
               <VocabRenderer :vocab="vocab" :repos="repositories" show-all-notes-immediately />
             </div>
           </div>
 
+          <!-- Helper messages -->
           <div class="chat chat-start" v-if="vocabItems.length === 1">
             <div class="chat-bubble">
               {{ $t('practice.tasks.sentenceIdea', { word: vocabItems[0].content }) }}
@@ -216,53 +431,6 @@ onUnmounted(() => {
             </div>
           </div>
 
-          <!-- Tabbed Interface -->
-          <div class="w-full max-w-4xl mx-auto mb-8">
-            <!-- Tab Headers (only show for non-record tasks) -->
-            <div v-if="!isRecordTask" class="tabs tabs-bordered w-full justify-center mb-6">
-              <button @click="activeTab = 'text'"
-                :class="['tab', 'tab-bordered', { 'tab-active': activeTab === 'text' }]">
-                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                  <path
-                    d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
-                </svg>
-                {{ $t('practice.tasks.writeText') }}
-              </button>
-
-              <button @click="activeTab = 'audio'"
-                :class="['tab', 'tab-bordered', { 'tab-active': activeTab === 'audio' }]">
-                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
-                  <path
-                    d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
-                </svg>
-                {{ $t('practice.tasks.recordAudio') }}
-              </button>
-            </div>
-
-            <!-- Tab Content -->
-            <div class="min-h-[300px] flex items-center justify-center">
-              <!-- Text Tab -->
-              <div v-if="activeTab === 'text' && !isRecordTask" class="w-full max-w-2xl">
-
-
-                <textarea v-model="sentence" class="textarea textarea-bordered w-full text-lg" rows="6"
-                  :placeholder="vocabItems.length === 1 ? 'Form a sentence using this word...' : 'Form a sentence using both words...'"></textarea>
-
-                <div class="text-right mt-2">
-                  <span class=" text-base-content/50">
-                    {{ sentence.trim().length }} {{ $t('practice.tasks.characters') }}
-                  </span>
-                </div>
-              </div>
-
-              <!-- Audio Tab -->
-              <div v-if="activeTab === 'audio' || isRecordTask" class="w-full max-w-2xl">
-                <AudioRecorder :vocab-count="vocabItems.length" @recording-ready="handleRecordingReady" />
-              </div>
-            </div>
-          </div>
-
           <!-- Links -->
           <div class="space-y-2 mb-6">
             <template v-for="vocabItem in vocabItems" :key="vocabItem.id">
@@ -270,30 +438,16 @@ onUnmounted(() => {
                 :link="link" />
             </template>
           </div>
-
-          <!-- Action Buttons -->
-          <div class="flex justify-center gap-4">
-            <button @click="handleSkip" class="btn btn-ghost">{{ $t('common.skip') }}</button>
-            <button @click="handleDone" class="btn btn-primary" :disabled="!isDoneEnabled">
-              {{ $t('common.done') }}
-              <span v-if="activeTab === 'text' && sentence.trim().length >= 3" class="ml-2">
-                {{ $t('practice.tasks.textIcon') }}
-              </span>
-              <span v-if="activeTab === 'audio' && audioRecording" class="ml-2">
-                {{ $t('practice.tasks.audioIcon') }}
-              </span>
-            </button>
-          </div>
         </div>
 
         <div v-else class="text-center py-12">
           <span class="loading loading-spinner loading-lg"></span>
           <p class="mt-4 text-light">{{ $t('practice.tasks.loadingVocabulary') }}</p>
         </div>
-
-        <!-- Hidden audio element for sound playback -->
-        <audio ref="audioElement" @ended="handleAudioEnded" class="hidden"></audio>
       </div>
     </div>
+
+    <!-- ActionBar -->
+    <ActionBar v-if="vocabItems.length >= 1" :controls="actionBarControls" @action="handleAction" />
   </div>
 </template>
