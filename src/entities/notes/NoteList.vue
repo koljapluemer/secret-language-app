@@ -17,7 +17,7 @@
         @update:note="(updatedNote) => updateNote(updatedNote)" @close="editingIndex = null" />
       <div v-else class="flex items-start justify-between gap-4">
         <div class="flex-1">
-          <NoteDisplay :note="note" />
+          <NoteDisplayMini :note="note" :show-before-exercise-info="true" />
         </div>
         <div class="flex items-center gap-2">
           <button type="button" @click="editingIndex = index" class="btn btn-sm btn-ghost">
@@ -43,7 +43,7 @@
 import { ref } from 'vue';
 import { Plus, Edit, X } from 'lucide-vue-next';
 import NoteEdit from './NoteEdit.vue';
-import NoteDisplay from './NoteDisplay.vue';
+import NoteDisplayMini from './NoteDisplayMini.vue';
 import type { NoteData } from './NoteData';
 
 defineProps<{

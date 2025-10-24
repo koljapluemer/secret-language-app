@@ -6,7 +6,6 @@ import type { TranslationData } from '@/entities/translations/TranslationData';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
 import type { NoteData } from '@/entities/notes/NoteData';
 import type { ActionControl } from '@/tasks/ui/ActionControl';
-import LinkDisplayMini from '@/shared/links/LinkDisplayMini.vue';
 import { useToast } from '@/shared/toasts';
 import VocabRenderer from '@/features/vocab-view/VocabRenderer.vue';
 import Instruction from '@/tasks/ui/Instruction.vue';
@@ -428,14 +427,6 @@ onUnmounted(() => {
               If you are not confident to form a full sentence, make a sentence in your native language and mix in
               target language vocabulary.
             </div>
-          </div>
-
-          <!-- Links -->
-          <div class="space-y-2 mb-6">
-            <template v-for="vocabItem in vocabItems" :key="vocabItem.id">
-              <LinkDisplayMini v-for="(link, index) in vocabItem.links || []" :key="`${vocabItem.id}-${index}`"
-                :link="link" />
-            </template>
           </div>
         </div>
 

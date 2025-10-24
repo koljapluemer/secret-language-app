@@ -1,8 +1,14 @@
 <template>
-    <div class="flex flex-row gap-1 w-full flex-wrap">
-        <div class="card card-sm shadow-sm flex-1">
-            <div class="card-body">
-                <div class="flex-1 flex flex-col gap-2">
+    <div class="flex flex-col gap-2 w-full">
+        <!-- Global notes (full width, above everything) -->
+        <div v-if="globalNotes.length > 0" class="flex flex-row gap-1 flex-wrap w-full">
+            <NoteDisplayMini v-for="note in globalNotes" :key="note.id" :note="note" />
+        </div>
+
+        <div class="flex flex-row gap-1 w-full flex-wrap">
+            <div class="card card-sm shadow-sm flex-1">
+                <div class="card-body">
+                    <div class="flex-1 flex flex-col gap-4">
                     <!-- Cloze rendering -->
                     <div v-if="clozeData" class="text-3xl text-center w-full" :dir="isRTL ? 'rtl' : 'ltr'">
                         <span v-if="clozeData.beforeWord">{{ clozeData.beforeWord }} </span>
@@ -57,15 +63,13 @@
                         />
                     </div>
                 </div>
-                <div class="flex flex-col gap-1 items-start">
+                <div class="flex flex-col gap-2 items-start">
                     <div v-if="languageData && showLanguage" class="border rounded-md border-base-200 p-1">{{
                         renderLanguage(languageData) }}
                     </div>
-                    <div v-if="props.showAllNotesImmediately || vocabNotes.filter(note => note.showBeforeExercise).length > 0"
-                        class="flex flex-row gap-1 flex-wrap">
-                        <NoteDisplayMini
-                            v-for="note in vocabNotes.filter(note => note.showBeforeExercise || props.showAllNotesImmediately)"
-                            :key="note.id" :note="note" />
+                    <!-- Vocab-only notes (not global) -->
+                    <div v-if="vocabOnlyNotes.length > 0" class="flex flex-row gap-1 flex-wrap">
+                        <NoteDisplayMini v-for="note in vocabOnlyNotes" :key="note.id" :note="note" />
                     </div>
                 </div>
                 <div v-if="vocab.links && vocab.links.length > 0" class="flex flex-wrap gap-2 w-full">
@@ -73,19 +77,26 @@
                 </div>
             </div>
 
-        </div>
-        <div class="flex flex-col gap-2 flex-1" v-if="!hideTranslations">
-            <div class="card card-sm shadow-sm" v-for="translation in displayedTranslations" :key="translation.id">
-                <div class="card-body">
-                    <div class="flex flex-row gap-1">
-                        <div class="card-title text-xl flex-1 ">{{ translation.content }}</div>
-                        <div class="flex flex-col gap-1 flex-1">
-                            <NoteDisplayMini
-                                v-for="note in translationNotes.filter(note => props.showAllNotesImmediately || note.showBeforeExercise && translation.notes?.includes(note.id))"
-                                :key="note.id" :note="note" />
+            </div>
+            <div class="flex flex-col gap-2 flex-1" v-if="!hideTranslations">
+                <!-- Translation-shared notes (above all translation cards) -->
+                <div v-if="translationSharedNotes.length > 0" class="flex flex-row gap-1 flex-wrap">
+                    <NoteDisplayMini v-for="note in translationSharedNotes" :key="note.id" :note="note" />
+                </div>
+
+                <!-- Individual translation cards -->
+                <div class="card card-sm shadow-sm" v-for="translation in displayedTranslations" :key="translation.id">
+                    <div class="card-body">
+                        <div class="flex flex-row gap-1">
+                            <div class="card-title text-xl flex-1 ">{{ translation.content }}</div>
+                            <!-- Translation-specific notes only -->
+                            <div class="flex flex-col gap-1 flex-1 items-end" v-if="getTranslationSpecificNotes(translation).length > 0">
+                                <NoteDisplayMini
+                                    v-for="note in getTranslationSpecificNotes(translation)"
+                                    :key="note.id" :note="note" />
+                            </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -145,6 +156,90 @@ const displayedTranslations = computed(() => {
     }
     return translations.value;
 });
+
+// Helper: Create unique key for note deduplication
+const getNoteKey = (note: NoteData): string => {
+    return `${note.content}|${note.noteType || ''}`;
+};
+
+// Helper: Filter notes by showBeforeExercise or showAllNotesImmediately
+const shouldShowNote = (note: NoteData): boolean => {
+    return props.showAllNotesImmediately || !!note.showBeforeExercise;
+};
+
+// Compute note categories for deduplication
+const globalNotes = computed(() => {
+    // Notes that appear on vocab AND all translations
+    const visibleVocabNotes = vocabNotes.value.filter(shouldShowNote);
+    if (visibleVocabNotes.length === 0 || displayedTranslations.value.length === 0) return [];
+
+    return visibleVocabNotes.filter(note => {
+        const key = getNoteKey(note);
+        // Check if this note appears in ALL translations
+        return displayedTranslations.value.every(translation => {
+            const translationNoteIds = translation.notes || [];
+            const translationNotesForThis = translationNotes.value.filter(n =>
+                translationNoteIds.includes(n.id) && shouldShowNote(n)
+            );
+            return translationNotesForThis.some(tn => getNoteKey(tn) === key);
+        });
+    });
+});
+
+const translationSharedNotes = computed(() => {
+    // Notes that appear in ALL translations but NOT in vocab
+    if (displayedTranslations.value.length === 0) return [];
+
+    const globalNoteKeys = new Set(globalNotes.value.map(getNoteKey));
+
+    // Get notes from first translation
+    const firstTranslation = displayedTranslations.value[0];
+    const firstTranslationNoteIds = firstTranslation.notes || [];
+    const firstTranslationNotes = translationNotes.value.filter(n =>
+        firstTranslationNoteIds.includes(n.id) && shouldShowNote(n)
+    );
+
+    return firstTranslationNotes.filter(note => {
+        const key = getNoteKey(note);
+        // Skip if it's a global note
+        if (globalNoteKeys.has(key)) return false;
+
+        // Check if this note appears in ALL translations
+        return displayedTranslations.value.every(translation => {
+            const translationNoteIds = translation.notes || [];
+            const translationNotesForThis = translationNotes.value.filter(n =>
+                translationNoteIds.includes(n.id) && shouldShowNote(n)
+            );
+            return translationNotesForThis.some(tn => getNoteKey(tn) === key);
+        });
+    });
+});
+
+const vocabOnlyNotes = computed(() => {
+    // Notes unique to vocab (excluding global notes)
+    const globalNoteKeys = new Set(globalNotes.value.map(getNoteKey));
+    return vocabNotes.value.filter(note => {
+        if (!shouldShowNote(note)) return false;
+        const key = getNoteKey(note);
+        return !globalNoteKeys.has(key);
+    });
+});
+
+const getTranslationSpecificNotes = (translation: TranslationData): NoteData[] => {
+    // Notes unique to this specific translation
+    const globalNoteKeys = new Set(globalNotes.value.map(getNoteKey));
+    const sharedNoteKeys = new Set(translationSharedNotes.value.map(getNoteKey));
+
+    const translationNoteIds = translation.notes || [];
+    const notesForThisTranslation = translationNotes.value.filter(n =>
+        translationNoteIds.includes(n.id) && shouldShowNote(n)
+    );
+
+    return notesForThisTranslation.filter(note => {
+        const key = getNoteKey(note);
+        return !globalNoteKeys.has(key) && !sharedNoteKeys.has(key);
+    });
+};
 
 
 

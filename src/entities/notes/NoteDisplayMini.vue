@@ -1,11 +1,15 @@
 <template>
-  <div v-if="note" class="bg-base-200 rounded-lg px-3 py-2 text-sm border-l-4 border-info">
-    <div class="text-xs text-base-content/70 mb-1 font-medium">
+  <div v-if="note" class="join">
+    <div class="join-item border rounded-l p-1 text-xs bg-base-200  border-base-300">
       {{ note.noteType || 'Note' }}
     </div>
-    <div class="text-base-content whitespace-pre-wrap text-sm">
+    <div class="join-item border rounded-r p-1 text-xs border-base-300">
       {{ note.content }}
+      <div v-if="showBeforeExerciseInfo && note.showBeforeExercise" class="text-xs text-blue-600 mt-2">
+        {{ $t('notes.types.beforeExercise') }}
+      </div>
     </div>
+
   </div>
 </template>
 
@@ -14,7 +18,10 @@ import type { NoteData } from './NoteData';
 
 interface Props {
   note: NoteData | null | undefined;
+  showBeforeExerciseInfo?: boolean;
 }
 
-defineProps<Props>();
+withDefaults(defineProps<Props>(), {
+  showBeforeExerciseInfo: false
+});
 </script>

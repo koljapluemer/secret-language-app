@@ -48,7 +48,7 @@
           :value="control.value"
           @input="emit('action', control.id, ($event.target as HTMLInputElement).value)"
           :placeholder="control.placeholder"
-          class="input input-lg w-96 border-3 border-secondary bg-base-100 text-base-content placeholder-base-content/40 focus:bg-base-100 focus:border-primary focus:outline-none"
+          class="input input-lg w-full max-w-96 border-3 border-secondary bg-base-100 text-base-content placeholder-base-content/40 focus:bg-base-100 focus:border-primary focus:outline-none"
         />
         <textarea
           v-else-if="control.type === 'textarea'"
@@ -56,7 +56,7 @@
           @input="emit('action', control.id, ($event.target as HTMLTextAreaElement).value)"
           :placeholder="control.placeholder"
           :disabled="control.disabled"
-          class="textarea w-96 h-40 text-xl border-3 border-secondary bg-base-100 text-base-content placeholder-base-content/40 resize-none focus:bg-base-100 focus:border-primary focus:outline-none"
+          class="textarea w-full max-w-96 h-40 text-xl border-3 border-secondary bg-base-100 text-base-content placeholder-base-content/40 resize-none focus:bg-base-100 focus:border-primary focus:outline-none"
         />
         <button
           v-else-if="control.type === 'icon-button'"
