@@ -167,7 +167,7 @@ import type { LanguageData } from '@/entities/languages/LanguageData';
 import type { LocalSetRepoContract } from '@/entities/local-sets/LocalSetRepoContract';
 import type { LocalSetData } from '@/entities/local-sets/LocalSetData';
 import Pagination from '@/shared/ui/Pagination.vue';
-import LinkDisplayMini from '@/shared/links/LinkDisplayMini.vue';
+import LinkDisplayCompact from '@/shared/links/LinkDisplayCompact.vue';
 import { useToast } from '@/shared/toasts';
 
 const { t } = useI18n();

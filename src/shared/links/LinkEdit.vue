@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { Check, X } from 'lucide-vue-next';
-import LinkDisplayAsButton from './LinkDisplayAsButton.vue';
+import LinkDisplayCompact from './LinkDisplayCompact.vue';
 import type { Link } from '@/shared/links/Link';
 
 interface Props {
@@ -148,7 +148,7 @@ function cancelEdit() {
     <div v-if="hasValidUrl" class="mt-4">
       <div class=" font-medium mb-2">{{ $t('links.preview') }}</div>
       <div class="p-3 bg-base-200 rounded">
-        <LinkDisplayAsButton :link="tempLink" />
+        <LinkDisplayCompact :link="tempLink" :show-big-link="true" />
       </div>
     </div>
   </div>

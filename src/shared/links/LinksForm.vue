@@ -32,7 +32,7 @@
           @close="editingIndex = null"
         />
         <div v-else class="flex items-center justify-between">
-          <LinkDisplayAsButton :link="link" />
+          <LinkDisplayCompact :link="link" :show-big-link="true" />
           <div class="flex items-center gap-2">
             <button
               type="button"
@@ -69,7 +69,7 @@
 import { ref } from 'vue';
 import { Plus, X, Edit } from 'lucide-vue-next';
 import LinkEdit from './LinkEdit.vue';
-import LinkDisplayAsButton from './LinkDisplayAsButton.vue';
+import LinkDisplayCompact from './LinkDisplayCompact.vue';
 import type { Link } from './Link';
 
 interface Props {

@@ -5,7 +5,7 @@ import ManageResourceVocab from '@/widgets/manage-resource-vocab/ManageResourceV
 import ManageResourceFactCards from '@/widgets/manage-resource-fact-cards/ManageResourceFactCards.vue';
 import type { ResourceData } from '@/entities/resources/ResourceData';
 import type { RepositoriesContext } from '@/shared/types/RepositoriesContext';
-import LinkDisplayAsButton from '@/shared/links/LinkDisplayAsButton.vue';
+import LinkDisplayCompact from '@/shared/links/LinkDisplayCompact.vue';
 import TaskSkipDisableDone from '@/tasks/ui/TaskSkipDisableDone.vue';
 import type { NoteData } from '@/entities/notes/NoteData';
 import Instruction from '@/tasks/ui/Instruction.vue';
@@ -126,7 +126,7 @@ onMounted(() => {
         <div v-if="resource">
           <div class="flex items-center justify-between mb-6">
       <h2>{{ resource.title }}</h2>
-      <LinkDisplayAsButton v-if="resource.link" :link="resource.link" />
+      <LinkDisplayCompact v-if="resource.link" :link="resource.link" :show-big-link="true" />
     </div>
 
     <div class="mb-6">
