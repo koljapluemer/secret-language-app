@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, toRaw } from 'vue';
 import { createEmptyCard } from 'ts-fsrs';
 import type { Task } from '@/tasks/Task';
 import type { VocabData } from '@/entities/vocab/VocabData';
@@ -44,7 +44,7 @@ const handleDone = async () => {
     const emptyCard = createEmptyCard();
 
     const updatedVocab = {
-      ...vocab.value,
+      ...toRaw(vocab.value),
       progress: {
         ...vocab.value.progress,
         level: 0,
@@ -52,7 +52,7 @@ const handleDone = async () => {
       }
     };
 
-    await vocabRepo.updateVocab(JSON.parse(JSON.stringify(updatedVocab)));
+    await vocabRepo.updateVocab(updatedVocab);
     emit('finished', 'neutral');
   } catch {
     toast.error('Failed to initialize vocabulary');
@@ -61,15 +61,19 @@ const handleDone = async () => {
 };
 
 const handleSkip = async () => {
+  emit('finished', 'neutral');
+};
+
+const handleDisable = async () => {
   if (!vocab.value) return;
 
   try {
     // Mark vocab as do not practice
     const updatedVocab = {
-      ...vocab.value,
+      ...toRaw(vocab.value),
       doNotPractice: true
     };
-    await vocabRepo.updateVocab(JSON.parse(JSON.stringify(updatedVocab)));
+    await vocabRepo.updateVocab(updatedVocab);
 
     emit('finished', 'neutral');
   } catch {
@@ -78,9 +82,17 @@ const handleSkip = async () => {
   }
 };
 
+const handleJumpTo = () => {
+  if (vocab.value) {
+    window.location.href = `#/vocab/${vocab.value.id}`;
+  }
+};
+
 function handleAction(controlId: string) {
   if (controlId === 'done') handleDone();
   else if (controlId === 'skip') handleSkip();
+  else if (controlId === 'disable') handleDisable();
+  else if (controlId === 'jump-to') handleJumpTo();
 }
 
 onMounted(() => {
@@ -88,12 +100,6 @@ onMounted(() => {
 
   // Set up action controls
   actionControls.value = [
-    {
-      type: 'button',
-      id: 'skip',
-      label: t('practice.tasks.doNotLearn'),
-      position: 'secondary-left'
-    },
     {
       type: 'button',
       id: 'done',
