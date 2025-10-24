@@ -120,8 +120,7 @@ const actionBarControls = computed<ActionControl[]>(() => {
         type: 'button',
         id: 're-record',
         label: 'Re-record',
-        position: 'central-footer',
-        destructive: false
+        position: 'central-footer'
       });
       controls.push({
         type: 'button',

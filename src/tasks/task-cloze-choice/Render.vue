@@ -97,8 +97,7 @@ const actionBarControls = computed<ActionControl[]>(() => {
         id: `option-${index}`,
         label: option.content,
         position: 'central',
-        disabled: !isCorrect && isSelected,
-        destructive: !isCorrect && isSelected
+        disabled: !isCorrect && isSelected
       });
     });
   }

@@ -34,20 +34,6 @@ const isRevealed = ref(false);
 
 const isNativeToTarget = computed(() => props.task.taskType === 'vocab-reveal-native-to-target');
 
-const isSentence = computed(() => {
-  return vocab.value?.consideredSentence === true;
-});
-
-const solution = computed(() => {
-  if (!vocab.value || translations.value.length === 0) return '';
-
-  if (isNativeToTarget.value) {
-    return vocab.value.content; // Show vocab as solution
-  } else {
-    return translations.value.map(t => t.content).join(', '); // Show translations as solution
-  }
-});
-
 // ActionBar controls
 const actionBarControls = computed<ActionControl[]>(() => {
   const controls: ActionControl[] = [];
