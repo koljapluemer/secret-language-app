@@ -55,6 +55,7 @@
         <div v-if="previewingTask" class="h-full">
           <component
             :is="getTaskComponent(previewingTask.taskType)"
+            :key="previewingTask.id"
             :task="previewingTask"
             :repositories="repositories"
             :mode-context="{ setWrongVocabDueAgainImmediately: false }"

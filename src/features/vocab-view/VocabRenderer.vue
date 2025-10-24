@@ -10,6 +10,13 @@
                     }">
                         {{ vocab.content }}
                     </div>
+                         <div v-if="hideContent && showQuestionMarks" class="font-bold text-center w-full" :class="{
+                        'text-8xl': vocab.consideredCharacter,
+                        'text-5xl': !vocab.consideredCharacter && !vocab.consideredSentence,
+                        'text-3xl': vocab.consideredSentence
+                    }">
+                        ???
+                    </div>
                     <!-- Images -->
                     <div v-if="vocab.images && vocab.images.length > 0" class="">
                         <div class="grid gap-2"
@@ -87,6 +94,7 @@ const props = defineProps<{
     hideTranslations?: boolean
     onlyShowSingleRandomTranslation?: boolean
     hideContent?: boolean
+    showQuestionMarks?: boolean
 }>();
 
 const languageRepo = props.repos.languageRepo || undefined

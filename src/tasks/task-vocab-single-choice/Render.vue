@@ -225,6 +225,7 @@ onMounted(loadVocabData);
               :vocab="vocab"
               :repos="repositories"
               hide-content
+              show-question-marks
               only-show-single-random-translation
             />
             <VocabRenderer

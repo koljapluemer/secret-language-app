@@ -53,7 +53,7 @@
     <!-- Central Element with Header and Footer -->
     <div class="flex flex-col items-center gap-2 absolute left-1/2 -translate-x-1/2 bottom-0 pb-4">
       <!-- Central controls -->
-      <div class="flex flex-col justify-center gap-2 items-center">
+      <div class="flex flex-row flex-wrap justify-center gap-2 items-center">
         <template v-for="control in centralControls" :key="control.id">
           <button
             v-if="control.type === 'button'"
