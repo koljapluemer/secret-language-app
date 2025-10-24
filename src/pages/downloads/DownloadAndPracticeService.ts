@@ -1,5 +1,7 @@
 import type { Router } from 'vue-router';
 import { UnifiedRemoteSetService, type DownloadProgress } from './UnifiedRemoteSetService';
+import type { LocalSetRepoContract } from '@/entities/local-sets/LocalSetRepoContract';
+import { selectedLanguages, selectedSets } from '@/features/filter-practice-sets-and-languages/usePracticeFilters';
 
 export interface DownloadAndPracticeOptions {
   language: string;
@@ -13,6 +15,7 @@ export interface DownloadAndPracticeOptions {
 export class DownloadAndPracticeService {
   constructor(
     private remoteSetService: UnifiedRemoteSetService,
+    private localSetRepo: LocalSetRepoContract,
     private router: Router
   ) {}
 
@@ -38,6 +41,15 @@ export class DownloadAndPracticeService {
       const metadata = await this.remoteSetService.getSetMetadata(language, setName);
 
       onDownloadComplete?.();
+
+      // Set practice filters to only this specific set and language
+      const localSets = await this.localSetRepo.getAllLocalSets();
+      const targetSet = localSets.find(s => s.name === (metadata?.title || setName));
+
+      if (targetSet) {
+        selectedSets.value = [targetSet.id];
+        selectedLanguages.value = [language];
+      }
 
       // Navigate to preferred practice mode or default
       const practiceMode = metadata?.preferredMode || 'practice-mode-sisyphos';

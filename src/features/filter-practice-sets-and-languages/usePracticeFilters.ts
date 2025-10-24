@@ -4,13 +4,14 @@ import type { LocalSetRepoContract } from '@/entities/local-sets/LocalSetRepoCon
 import type { LanguageData } from '@/entities/languages/LanguageData';
 import type { LocalSetData } from '@/entities/local-sets/LocalSetData';
 
-// Shared state across all practice pages
-const selectedLanguages = ref<string[]>([]);
-const selectedSets = ref<string[]>([]);
-const availableLanguages = ref<LanguageData[]>([]);
-const availableSets = ref<LocalSetData[]>([]);
+// Shared state across all practice pages (exported for direct access)
+export const selectedLanguages = ref<string[]>([]);
+export const selectedSets = ref<string[]>([]);
+export const availableLanguages = ref<LanguageData[]>([]);
+export const availableSets = ref<LocalSetData[]>([]);
 const loading = ref(false);
 const initialized = ref(false);
+let initializationPromise: Promise<void> | null = null;
 
 export function usePracticeFilters() {
   const languageRepo = inject<LanguageRepoContract>('languageRepo');
@@ -26,24 +27,34 @@ export function usePracticeFilters() {
     return allSetIds.filter(id => !selectedSets.value.includes(id));
   });
 
-  // Load available options (only once)
+  // Load available options (only once, but waits if already in progress)
   async function loadOptions() {
+    // If already initialized, return immediately
     if (initialized.value) return;
 
-    loading.value = true;
-    try {
-      [availableLanguages.value, availableSets.value] = await Promise.all([
-        languageRepo!.getAll(),
-        localSetRepo!.getAllLocalSets()
-      ]);
+    // If initialization is in progress, wait for it
+    if (initializationPromise) return initializationPromise;
 
-      // Initialize with all selected
-      selectedLanguages.value = availableLanguages.value.map(l => l.code);
-      selectedSets.value = ['user-added', ...availableSets.value.map(s => s.id)];
-      initialized.value = true;
-    } finally {
-      loading.value = false;
-    }
+    // Start new initialization
+    loading.value = true;
+    initializationPromise = (async () => {
+      try {
+        [availableLanguages.value, availableSets.value] = await Promise.all([
+          languageRepo!.getAll(),
+          localSetRepo!.getAllLocalSets()
+        ]);
+
+        // Initialize with all selected
+        selectedLanguages.value = availableLanguages.value.map(l => l.code);
+        selectedSets.value = ['user-added', ...availableSets.value.map(s => s.id)];
+        initialized.value = true;
+      } finally {
+        loading.value = false;
+        initializationPromise = null;
+      }
+    })();
+
+    return initializationPromise;
   }
 
   // Toggle language

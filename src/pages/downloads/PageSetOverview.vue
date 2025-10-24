@@ -113,7 +113,7 @@ const remoteSetService = new UnifiedRemoteSetService(
   languageRepo
 );
 
-const downloadAndPracticeService = new DownloadAndPracticeService(remoteSetService, router);
+const downloadAndPracticeService = new DownloadAndPracticeService(remoteSetService, localSetRepo, router);
 
 async function loadSetInfo() {
   loading.value = true;

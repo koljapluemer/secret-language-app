@@ -195,7 +195,7 @@ const remoteSetService = new UnifiedRemoteSetService(
   languageRepo
 );
 
-const downloadAndPracticeService = new DownloadAndPracticeService(remoteSetService, router);
+const downloadAndPracticeService = new DownloadAndPracticeService(remoteSetService, localSetRepo, router);
 
 // URL parameter initialization
 function parseArrayParam(value: LocationQueryValue | LocationQueryValue[]): string[] {

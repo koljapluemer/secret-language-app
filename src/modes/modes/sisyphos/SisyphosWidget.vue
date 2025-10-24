@@ -20,13 +20,16 @@ if (!vocabRepo || !translationRepo || !factCardRepo || !languageRepo) {
   throw new Error('Required repositories not available');
 }
 
-const { selectedLanguages, setsToAvoid } = usePracticeFilters();
+const { selectedLanguages, setsToAvoid, loadOptions } = usePracticeFilters();
 const lastUsedContentId = ref<string | null>(null);
 
 // Practice mode configuration
 const mode = usePracticeMode({
   modeId: 'sisyphos',
   generateTask: async () => {
+    // Ensure filters are loaded before proceeding
+    await loadOptions();
+
     const languageCodes = selectedLanguages.value;
 
     if (languageCodes.length === 0) return null;

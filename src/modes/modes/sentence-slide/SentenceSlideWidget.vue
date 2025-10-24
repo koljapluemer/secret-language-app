@@ -20,7 +20,7 @@ if (!vocabRepo || !translationRepo) {
   throw new Error('Required repositories not available');
 }
 
-const { selectedLanguages, setsToAvoid } = usePracticeFilters();
+const { selectedLanguages, setsToAvoid, loadOptions } = usePracticeFilters();
 const { addUsedVocab, getLastUsedVocabId } = useUsedVocabTracker();
 
 // State management
@@ -114,6 +114,9 @@ async function generateNextTask(): Promise<void> {
   showLoadingUI.value = true;
 
   try {
+    // Ensure filters are loaded before proceeding
+    await loadOptions();
+
     // 20% chance to show a review task instead of normal flow
     if (Math.random() < 0.2) {
       const reviewTask = await generateReviewTask();

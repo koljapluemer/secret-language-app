@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { Task } from '@/tasks/Task';
 import { taskRegistry } from '@/tasks/ui/taskRegistry';
-import { inject, onMounted, onUnmounted, ref, provide } from 'vue';
+import { inject, onMounted, onUnmounted, ref, provide, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
@@ -38,6 +39,17 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const router = useRouter();
+const toast = useToast();
+
+// Watch for empty state and redirect
+watch(() => props.state, (newState) => {
+  if (newState.status === 'empty') {
+    toast.warning(newState.message);
+    router.push({ name: 'practice-overview' });
+  }
+}, { immediate: true });
 
 // Inject all repositories
 const vocabRepo = inject<VocabRepoContract>('vocabRepo');
@@ -154,22 +166,6 @@ function startTimingIfNeeded() {
         <button class="btn btn-sm" @click="retry">
           {{ retryLabel || $t('practice.widgets.tryAgain') }}
         </button>
-      </div>
-    </Transition>
-
-    <!-- Empty State -->
-    <Transition enter-active-class="transition-opacity duration-[50ms]"
-      leave-active-class="transition-opacity duration-[50ms]" enter-from-class="opacity-0" leave-to-class="opacity-0">
-      <div v-if="state.status === 'empty'" class="hero min-h-96">
-        <div class="hero-content text-center">
-          <div class="max-w-md">
-            <h1>{{ emptyTitle || $t('practice.widgets.allDone') }}</h1>
-            <p class="py-6">{{ state.message }}</p>
-            <button class="btn btn-primary" @click="initialize">
-              {{ checkAgainLabel || $t('practice.widgets.checkAgain') }}
-            </button>
-          </div>
-        </div>
       </div>
     </Transition>
 
