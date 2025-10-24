@@ -325,9 +325,12 @@ export class UnifiedRemoteSetService {
       }
 
       if (vocabToUpdate.length > 0) {
-        for (const vocab of vocabToUpdate) {
-          await this.vocabRepo.updateVocab(vocab);
-        }
+        reportProgress('Finalizing vocabulary relationships', 0, vocabToUpdate.length);
+
+        // Batch update all vocab with relationships in one transaction
+        await this.vocabRepo.bulkUpdateVocab(vocabToUpdate);
+
+        reportProgress('Finalizing vocabulary relationships', vocabToUpdate.length, vocabToUpdate.length);
       }
 
       reportProgress('Processing vocabulary', setFiles.vocab.length, setFiles.vocab.length);

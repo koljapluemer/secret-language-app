@@ -413,12 +413,24 @@ export class VocabRepo implements VocabRepoContract {
   }
 
   async updateVocab(vocab: VocabData): Promise<void> {
-    
+
     // Set hasImage and hasSound based on actual data
     vocab.hasImage = vocab.images && vocab.images.length > 0;
     vocab.hasSound = vocab.sounds && vocab.sounds.some(sound => !sound.disableForPractice);
-    
+
     await db.vocab.put(vocab);
+  }
+
+  async bulkUpdateVocab(vocabs: VocabData[]): Promise<void> {
+    // Update hasImage and hasSound for all vocab
+    const vocabsToUpdate = vocabs.map(vocab => ({
+      ...vocab,
+      hasImage: vocab.images && vocab.images.length > 0,
+      hasSound: vocab.sounds && vocab.sounds.some(sound => !sound.disableForPractice)
+    }));
+
+    // Batch update in one transaction
+    await db.vocab.bulkPut(vocabsToUpdate);
   }
 
   async deleteVocab(id: string): Promise<void> {

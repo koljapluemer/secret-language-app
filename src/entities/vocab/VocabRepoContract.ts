@@ -37,6 +37,7 @@ export interface VocabRepoContract {
 
   // Batch operations
   bulkCreateVocab(vocab: Omit<VocabData, 'id' | 'progress'>[]): Promise<VocabData[]>;
+  bulkUpdateVocab(vocabs: VocabData[]): Promise<void>;
   
   // Progress operations
   scoreVocab(vocabId: string, rating: Rating, setWrongVocabDueAgainImmediately?: boolean): Promise<void>;
