@@ -142,7 +142,7 @@ onMounted(() => {
 
 <template>
   <div class="flex flex-col h-full w-full">
-    <Instruction :language-data="languageData" :prompt="task.prompt" />
+    <Instruction :prompt="task.prompt" />
 
     <!-- Scrollable content area -->
     <div class="flex-1 overflow-auto min-h-0">
