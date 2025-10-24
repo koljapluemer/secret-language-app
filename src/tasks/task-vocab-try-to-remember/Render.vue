@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, toRaw } from 'vue';
+import { useRouter } from 'vue-router';
 import { createEmptyCard } from 'ts-fsrs';
 import type { Task } from '@/tasks/Task';
 import type { VocabData } from '@/entities/vocab/VocabData';
@@ -23,6 +24,7 @@ const emit = defineEmits<{
 
 const toast = useToast();
 const { t } = useI18n();
+const router = useRouter();
 const vocabRepo = props.repositories.vocabRepo;
 const vocab = ref<VocabData | null>(null);
 const actionControls = ref<ActionControl[]>([]);
@@ -84,7 +86,7 @@ const handleDisable = async () => {
 
 const handleJumpTo = () => {
   if (vocab.value) {
-    window.location.href = `#/vocab/${vocab.value.id}`;
+    router.push(`/vocab/${vocab.value.id}/edit`);
   }
 };
 

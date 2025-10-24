@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import type { Task } from '@/tasks/Task';
 import type { VocabData } from '@/entities/vocab/VocabData';
 import type { TranslationData } from '@/entities/translations/TranslationData';
@@ -31,6 +32,7 @@ const emit = defineEmits<{
 }>();
 
 const toast = useToast();
+const router = useRouter();
 
 const props = defineProps<Props>();
 
@@ -170,7 +172,7 @@ function handleAction(controlId: string) {
     emit('finished', 'neutral');
   } else if (controlId === 'jump-to') {
     if (vocab.value) {
-      window.location.href = `#/vocab/${vocab.value.id}`;
+      router.push(`/vocab/${vocab.value.id}/edit`);
     }
   }
 }
