@@ -33,34 +33,37 @@ const canReveal = computed(() => {
 });
 
 const actionBarControls = computed<ActionControl[]>(() => {
+  const controls: ActionControl[] = [];
+
   if (!showTranslation.value) {
-    return [
-      {
-        id: 'user-guess-input',
-        type: 'textarea',
-        value: userGuess.value,
-        placeholder: 'Type what you think this sentence means...',
-        position: 'central',
-        disabled: false
-      },
-      {
+    controls.push({
+      id: 'user-guess-input',
+      type: 'textarea',
+      value: userGuess.value,
+      placeholder: 'Type what you think this sentence means...',
+      position: 'central',
+      disabled: false
+    });
+
+    if (canReveal.value) {
+      controls.push({
         id: 'reveal',
         type: 'button',
         label: 'Reveal Translation',
-        position: 'central',
-        disabled: !canReveal.value
-      }
-    ];
+        position: 'central-footer',
+        disabled: false
+      });
+    }
   } else {
-    return [
-      {
-        id: 'done',
-        type: 'button',
-        label: 'Done',
-        position: 'central'
-      }
-    ];
+    controls.push({
+      id: 'done',
+      type: 'button',
+      label: 'Done',
+      position: 'central'
+    });
   }
+
+  return controls;
 });
 
 const loadVocab = async () => {
