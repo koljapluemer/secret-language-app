@@ -17,7 +17,7 @@
 import type { NoteData } from './NoteData';
 
 interface Props {
-  note: NoteData | null | undefined;
+  note: NoteData | Omit<NoteData, 'id'> | null | undefined;
   showBeforeExerciseInfo?: boolean;
 }
 
