@@ -1,68 +1,73 @@
 <template>
-    <div class="mb-6">
-      <router-link to="/downloads" class="btn btn-ghost btn-sm mb-4">
-        {{ $t('downloads.backToDownloads') }}
-      </router-link>
-    </div>
+  <div class="mb-6">
+    <router-link to="/downloads" class="btn btn-ghost btn-sm mb-4">
+      {{ $t('downloads.backToDownloads') }}
+    </router-link>
+  </div>
 
-    <div v-if="loading" class="flex items-center justify-center py-16">
-      <span class="loading loading-spinner loading-lg"></span>
-      <span class="ml-4">{{ $t('downloads.loadingSetInfo') }}</span>
-    </div>
+  <div v-if="loading" class="flex items-center justify-center py-16">
+    <span class="loading loading-spinner loading-lg"></span>
+    <span class="ml-4">{{ $t('downloads.loadingSetInfo') }}</span>
+  </div>
 
-    <div v-else-if="error" class="alert alert-error">
-      {{ error }}
-    </div>
+  <div v-else-if="error" class="alert alert-error">
+    {{ error }}
+  </div>
 
-    <div v-else class="max-w-2xl mx-auto">
-      <div class="card shadow">
-        <div class="card-body">
-          <h1>{{ metadata?.title || setName }}</h1>
-          <p class="text-base-content/60 mb-6">
-            <span class=" ">{{ language.toUpperCase() }}</span>
-          </p>
+  <div v-else class="max-w-2xl mx-auto">
+    <div class="card shadow">
+      <div class="card-body">
+        <h1>{{ metadata?.title || setName }}</h1>
+        <p class="text-base-content/60 mb-4">
+          <span class=" ">{{ language.toUpperCase() }}</span>
+        </p>
 
-          <div class="divider"></div>
+        <p v-if="metadata?.description" class="text-base-content/80 mb-6">
+          {{ metadata.description }}
+        </p>
 
-          <div v-if="isDownloaded" class="alert alert-success mb-6">
-            <CheckCircle class="w-5 h-5" />
-            <span>{{ $t('downloads.alreadyDownloaded') }}</span>
+        <div class="divider"></div>
+
+        <div v-if="isDownloaded && !downloading" class="alert alert-success mb-6">
+          <CheckCircle class="w-5 h-5" />
+          <span>{{ $t('downloads.alreadyDownloaded') }}</span>
+        </div>
+
+        <!-- Download progress -->
+        <div v-if="downloading && downloadProgress" class="flex flex-col gap-2 mb-6">
+          <div class="text-sm text-base-content/70 text-center">{{ downloadProgress.phase }}</div>
+          <div class="flex items-center gap-2">
+            <progress
+              class="progress progress-primary flex-1"
+              :value="downloadProgress.percentage"
+              max="100"
+            ></progress>
+            <span class="text-sm font-mono w-12 text-right">{{ downloadProgress.percentage }}%</span>
           </div>
+        </div>
 
-          <div class="card-actions justify-center">
-            <div v-if="metadata?.preferredMode">
-              <button 
-                @click="downloadAndStart" 
-                class="btn btn-primary btn-lg"
-                :disabled="downloading"
-              >
-                <Download v-if="!downloading" class="w-5 h-5 mr-2" />
-                <span v-if="downloading" class="loading loading-spinner loading-sm mr-2"></span>
-                {{ isDownloaded ? $t('downloads.start') : $t('downloads.downloadAndStart') }}
-              </button>
-            </div>
-            
-            <button 
-              v-else
-              @click="downloadOnly" 
-              class="btn btn-primary btn-lg"
-              :disabled="downloading"
-            >
-              <Download v-if="!downloading" class="w-5 h-5 mr-2" />
-              <span v-if="downloading" class="loading loading-spinner loading-sm mr-2"></span>
-              {{ isDownloaded ? $t('downloads.redownload') : $t('downloads.download') }}
-            </button>
-          </div>
+        <!-- Action buttons -->
+        <div v-else class="card-actions justify-center flex-col gap-3 mx-auto items-center">
+          <button @click="downloadOnly"
+            :class="metadata?.preferredMode ? 'btn btn-outline' : 'btn btn-primary'">
+            <Download class="w-5 h-5 mr-2" />
+            {{ isDownloaded ? $t('downloads.redownload') : $t('downloads.download') }}
+          </button>
+          <button v-if="metadata?.preferredMode" @click="downloadAndStart" class="btn btn-primary btn-xl">
+            <Play v-if="!isDownloaded" class="w-5 h-5 mr-2" />
+            Start Practice
+          </button>
         </div>
       </div>
     </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, inject, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { Download, CheckCircle } from 'lucide-vue-next';
-import { UnifiedRemoteSetService } from '@/pages/downloads/UnifiedRemoteSetService';
+import { Download, CheckCircle, Play } from 'lucide-vue-next';
+import { UnifiedRemoteSetService, type DownloadProgress } from '@/pages/downloads/UnifiedRemoteSetService';
 import { DownloadAndPracticeService } from '@/pages/downloads/DownloadAndPracticeService';
 import type { LocalSetRepoContract } from '@/entities/local-sets/LocalSetRepoContract';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
@@ -84,6 +89,7 @@ const setName = computed(() => route.params.setName as string);
 const metadata = ref<z.infer<typeof remoteSetMetaDataSchema> | null>(null);
 const loading = ref(true);
 const downloading = ref(false);
+const downloadProgress = ref<DownloadProgress | null>(null);
 const error = ref<string | null>(null);
 const isDownloaded = ref(false);
 
@@ -116,7 +122,7 @@ async function loadSetInfo() {
   try {
     // Load metadata
     metadata.value = await remoteSetService.getSetMetadata(language.value, setName.value);
-    
+
     // Check if downloaded
     isDownloaded.value = await remoteSetService.isSetDownloaded(setName.value);
   } catch (err) {
@@ -132,15 +138,21 @@ async function downloadAndStart() {
     setName: setName.value,
     onDownloadStart: () => {
       downloading.value = true;
+      downloadProgress.value = null;
       error.value = null;
+    },
+    onDownloadProgress: (progress) => {
+      downloadProgress.value = progress;
     },
     onDownloadComplete: () => {
       isDownloaded.value = true;
       downloading.value = false;
+      downloadProgress.value = null;
     },
     onError: (errorMessage) => {
       error.value = errorMessage;
       downloading.value = false;
+      downloadProgress.value = null;
     }
   });
 }
@@ -151,15 +163,21 @@ async function downloadOnly() {
     setName: setName.value,
     onDownloadStart: () => {
       downloading.value = true;
+      downloadProgress.value = null;
       error.value = null;
+    },
+    onDownloadProgress: (progress) => {
+      downloadProgress.value = progress;
     },
     onDownloadComplete: () => {
       isDownloaded.value = true;
       downloading.value = false;
+      downloadProgress.value = null;
     },
     onError: (errorMessage) => {
       error.value = errorMessage;
       downloading.value = false;
+      downloadProgress.value = null;
     }
   });
 }
