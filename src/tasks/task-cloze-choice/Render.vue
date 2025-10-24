@@ -3,13 +3,13 @@ import { ref, computed, onMounted } from 'vue';
 import type { Task } from '@/tasks/Task';
 import type { VocabData } from '@/entities/vocab/VocabData';
 import type { TranslationData } from '@/entities/translations/TranslationData';
-import type { NoteData } from '@/entities/notes/NoteData';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
+import type { ActionControl } from '@/tasks/ui/ActionControl';
 import { shuffleArray } from '@/shared/utils/arrayUtils';
 import { Rating } from 'ts-fsrs';
 import { generateClozeFromText, isRTLText, type ClozeData } from '@/tasks/utils/clozeUtils';
-import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
-import LinkDisplayMini from '@/shared/links/LinkDisplayMini.vue';
+import VocabRenderer from '@/features/vocab-view/VocabRenderer.vue';
+import ActionBar from '@/tasks/ui/ActionBar.vue';
 import Instruction from '@/tasks/ui/Instruction.vue';
 import { useToast } from '@/shared/toasts';
 
@@ -36,7 +36,6 @@ const props = defineProps<Props>();
 
 const vocabRepo = props.repositories.vocabRepo;
 const translationRepo = props.repositories.translationRepo;
-const noteRepo = props.repositories.noteRepo;
 
 const selectedIndex = ref<number | null>(null);
 const isAnswered = ref(false);
@@ -44,8 +43,6 @@ const firstAttemptWrong = ref(false);
 const answerOptions = ref<AnswerOption[]>([]);
 const vocab = ref<VocabData | null>(null);
 const translations = ref<TranslationData[]>([]);
-const vocabNotes = ref<NoteData[]>([]);
-const translationNotes = ref<NoteData[]>([]);
 const loading = ref(true);
 const clozeData = ref<ClozeData | null>(null);
 
@@ -85,6 +82,30 @@ const secondaryContent = computed(() => {
   }
 });
 
+// ActionBar controls
+const actionBarControls = computed<ActionControl[]>(() => {
+  const controls: ActionControl[] = [];
+
+  if (!isAnswered.value) {
+    // Show choice buttons as central elements (large buttons)
+    answerOptions.value.forEach((option, index) => {
+      const isSelected = index === selectedIndex.value;
+      const isCorrect = option.isCorrect;
+
+      controls.push({
+        type: 'button',
+        id: `option-${index}`,
+        label: option.content,
+        position: 'central',
+        disabled: !isCorrect && isSelected,
+        destructive: !isCorrect && isSelected
+      });
+    });
+  }
+
+  return controls;
+});
+
 async function loadVocabData() {
   if (!vocabId.value) {
     loading.value = false;
@@ -100,22 +121,6 @@ async function loadVocabData() {
 
     vocab.value = vocabData;
     translations.value = await translationRepo.getTranslationsByIds(vocabData.translations);
-    
-    // Load vocab notes
-    if (vocabData.notes && vocabData.notes.length > 0) {
-      vocabNotes.value = await noteRepo.getNotesByUIDs(vocabData.notes);
-    }
-    
-    // Load translation notes
-    const allTranslationNoteIds: string[] = [];
-    translations.value.forEach(translation => {
-      if (translation.notes && translation.notes.length > 0) {
-        allTranslationNoteIds.push(...translation.notes);
-      }
-    });
-    if (allTranslationNoteIds.length > 0) {
-      translationNotes.value = await noteRepo.getNotesByUIDs(allTranslationNoteIds);
-    }
 
     await generateClozeOptions();
   } catch {
@@ -165,53 +170,27 @@ async function selectOption(index: number) {
   }
 }
 
-function getButtonClass(index: number): string {
-  const isCorrect = answerOptions.value[index].isCorrect;
-  const isSelected = index === selectedIndex.value;
-
-  if (isCorrect && isSelected) {
-    return 'btn-success';
-  }
-
-  if (!isCorrect && isSelected) {
-    return 'btn-error';
-  }
-
-  if (isAnswered.value && isCorrect) {
-    return 'btn-success';
-  }
-
-  if (isAnswered.value && !isCorrect) {
-    return 'btn-outline opacity-50';
-  }
-
-  return 'btn-outline';
-}
-
-function isButtonDisabled(index: number): boolean {
-  const isCorrect = answerOptions.value[index].isCorrect;
-  const isSelected = index === selectedIndex.value;
-
-  if (isAnswered.value) return true;
-  if (!isCorrect && isSelected) return true;
-
-  return false;
-}
-
 const handleCompletion = async () => {
   if (!vocab.value) return;
-  
+
   try {
     const rating = firstAttemptWrong.value ? Rating.Again : Rating.Good;
     const immediateDue = props.modeContext?.setWrongVocabDueAgainImmediately || false;
     await vocabRepo.scoreVocab(vocab.value.id, rating, immediateDue);
     await vocabRepo.updateLastReview(vocab.value.id);
-    
+
     const correctness = firstAttemptWrong.value ? 'incorrect' : 'correct';
     setTimeout(() => emit('finished', correctness), 750);
   } catch {
     toast.error('Failed to save vocabulary progress');
     emit('finished', 'neutral');
+  }
+};
+
+const handleAction = (controlId: string) => {
+  if (controlId.startsWith('option-')) {
+    const index = parseInt(controlId.split('-')[1]);
+    selectOption(index);
   }
 };
 
@@ -229,70 +208,20 @@ onMounted(loadVocabData);
         </div>
 
         <div v-else-if="vocab && answerOptions.length > 0 && clozeData" class="text-center">
-    <!-- Cloze section with potential notes sidebar -->
-    <div class="flex gap-4 mb-8">
-      <div class="flex-1">
-        <div class="text-3xl mb-4" :dir="isRTL ? 'rtl' : 'ltr'">
-          <span v-if="clozeData.beforeWord" class="me-2">{{ clozeData.beforeWord }}</span>
-          <span class="inline-block bg-gray-300  text-transparent rounded px-2 py-1 mx-1 select-none" 
-                :style="{ width: Math.max(clozeData.hiddenWord.length * 0.6, 3) + 'em' }">
-            {{ clozeData.hiddenWord }}
-          </span>
-          <span v-if="clozeData.afterWord" class="ms-2">{{ clozeData.afterWord }}</span>
-        </div>
-        <div v-if="secondaryContent" class="text-2xl text-light" >
-          {{ secondaryContent }}
-        </div>
-      </div>
-      
-      <!-- Notes sidebar -->
-      <div v-if="vocabNotes.filter(note => note.showBeforeExercise).length > 0 || translationNotes.filter(note => note.showBeforeExercise).length > 0" class="w-64 space-y-3">
-        <!-- Vocab notes -->
-        <div v-if="vocabNotes.filter(note => note.showBeforeExercise).length > 0" class="space-y-2">
-          <NoteDisplayMini 
-            v-for="note in vocabNotes.filter(note => note.showBeforeExercise)" 
-            :key="note.id"
-            :note="note"
+          <!-- Cloze rendering via VocabRenderer -->
+          <VocabRenderer
+            :vocab="vocab"
+            :repos="repositories"
+            :cloze-data="clozeData"
+            :show-cloze-answer="isAnswered"
+            :is-r-t-l="isRTL"
+            :show-all-notes-immediately="false"
+            :hide-translations="true"
           />
-        </div>
-        
-        <!-- Translation notes -->
-        <div v-if="translationNotes.filter(note => note.showBeforeExercise).length > 0" class="space-y-2">
-          
-          <NoteDisplayMini 
-            v-for="note in translationNotes.filter(note => note.showBeforeExercise)" 
-            :key="note.id"
-            :note="note"
-          />
-        </div>
-      </div>
-    </div>
-    
-    <div v-if="!isAnswered" class="flex flex-col md:flex-row gap-2 mb-6">
-      <button v-for="(option, index) in answerOptions" :key="index" :class="getButtonClass(index)"
-        :disabled="isButtonDisabled(index)" @click="selectOption(index)" class="btn btn-lg flex-1">
-        {{ option.content }}
-      </button>
-    </div>
 
-    <div v-if="isAnswered" class="mb-6">
-      <div class="text-3xl mb-4" :dir="isRTL ? 'rtl' : 'ltr'">
-        <span v-if="clozeData.beforeWord" class="me-2">{{ clozeData.beforeWord }}</span>
-        <span class="text-green-600 font-bold mx-1">{{ clozeData.hiddenWord }}</span>
-        <span v-if="clozeData.afterWord" class="ms-2">{{ clozeData.afterWord }}</span>
-      </div>
-      <div v-if="secondaryContent" class="text-2xl text-light">
-        {{ secondaryContent }}
-      </div>
-    </div>
-    
-          <!-- Links -->
-          <div v-if="vocab?.links && vocab.links.length > 0" class="space-y-2 mt-6">
-            <LinkDisplayMini
-              v-for="(link, index) in vocab.links"
-              :key="index"
-              :link="link"
-            />
+          <!-- Secondary content (translation hint) -->
+          <div v-if="secondaryContent" class="text-2xl text-base-content/60 mt-4 mb-6">
+            {{ secondaryContent }}
           </div>
         </div>
 
@@ -301,5 +230,8 @@ onMounted(loadVocabData);
         </div>
       </div>
     </div>
+
+    <!-- ActionBar -->
+    <ActionBar v-if="vocab && answerOptions.length > 0 && clozeData" :controls="actionBarControls" @action="handleAction" />
   </div>
 </template>

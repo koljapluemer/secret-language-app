@@ -5,7 +5,6 @@ export interface ButtonControl {
   id: string;
   label: string;
   position: ActionControlPosition;
-  destructive?: boolean; // For error/warning styling
   disabled?: boolean;
 }
 

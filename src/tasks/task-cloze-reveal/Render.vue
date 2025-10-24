@@ -5,13 +5,13 @@ import type { VocabData } from '@/entities/vocab/VocabData';
 import type { TranslationData } from '@/entities/translations/TranslationData';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
 import type { Rating } from 'ts-fsrs';
-import SpacedRepetitionRating from '@/tasks/ui/SpacedRepetitionRating.vue';
+import type { ActionControl } from '@/tasks/ui/ActionControl';
 import { generateClozeFromText, isRTLText, type ClozeData } from '@/tasks/utils/clozeUtils';
-import type { NoteData } from '@/entities/notes/NoteData';
-import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
-import LinkDisplayMini from '@/shared/links/LinkDisplayMini.vue';
+import VocabRenderer from '@/features/vocab-view/VocabRenderer.vue';
+import ActionBar from '@/tasks/ui/ActionBar.vue';
 import Instruction from '@/tasks/ui/Instruction.vue';
 import { useToast } from '@/shared/toasts';
+import { useI18n } from 'vue-i18n';
 
 interface Props {
   task: Task;
@@ -26,17 +26,15 @@ const emit = defineEmits<{
 }>();
 
 const toast = useToast();
+const { t } = useI18n();
 
 const props = defineProps<Props>();
 
 const vocabRepo = props.repositories.vocabRepo;
 const translationRepo = props.repositories.translationRepo;
-const noteRepo = props.repositories.noteRepo;
 
 const vocab = ref<VocabData | null>(null);
 const translations = ref<TranslationData[]>([]);
-const vocabNotes = ref<NoteData[]>([]);
-const translationNotes = ref<NoteData[]>([]);
 const loading = ref(true);
 const clozeData = ref<ClozeData | null>(null);
 const isRevealed = ref(false);
@@ -72,6 +70,52 @@ const translationContent = computed(() => {
   }
 });
 
+// ActionBar controls
+const actionBarControls = computed<ActionControl[]>(() => {
+  const controls: ActionControl[] = [];
+
+  if (!isRevealed.value) {
+    // Show reveal button
+    controls.push({
+      type: 'button',
+      id: 'reveal',
+      label: t('practice.tasks.reveal'),
+      position: 'central',
+      disabled: false
+    });
+  } else {
+    // Show rating buttons
+    controls.push(
+      {
+        type: 'button',
+        id: 'rating-1',
+        label: t('practice.tasks.rating.again'),
+        position: 'central'
+      },
+      {
+        type: 'button',
+        id: 'rating-2',
+        label: t('practice.tasks.rating.hard'),
+        position: 'central'
+      },
+      {
+        type: 'button',
+        id: 'rating-3',
+        label: t('practice.tasks.rating.good'),
+        position: 'central'
+      },
+      {
+        type: 'button',
+        id: 'rating-4',
+        label: t('practice.tasks.rating.easy'),
+        position: 'central'
+      }
+    );
+  }
+
+  return controls;
+});
+
 async function loadVocabData() {
   if (!vocabId.value) {
     loading.value = false;
@@ -87,22 +131,6 @@ async function loadVocabData() {
 
     vocab.value = vocabData;
     translations.value = await translationRepo.getTranslationsByIds(vocabData.translations);
-    
-    // Load vocab notes
-    if (vocabData.notes && vocabData.notes.length > 0) {
-      vocabNotes.value = await noteRepo.getNotesByUIDs(vocabData.notes);
-    }
-    
-    // Load translation notes
-    const allTranslationNoteIds: string[] = [];
-    translations.value.forEach(translation => {
-      if (translation.notes && translation.notes.length > 0) {
-        allTranslationNoteIds.push(...translation.notes);
-      }
-    });
-    if (allTranslationNoteIds.length > 0) {
-      translationNotes.value = await noteRepo.getNotesByUIDs(allTranslationNoteIds);
-    }
 
     generateCloze();
   } catch {
@@ -124,7 +152,7 @@ function generateCloze() {
 
 const handleRating = async (rating: Rating) => {
   if (!vocab.value) return;
-  
+
   try {
     const immediateDue = props.modeContext?.setWrongVocabDueAgainImmediately || false;
     await vocabRepo.scoreVocab(vocab.value.id, rating, immediateDue);
@@ -134,6 +162,15 @@ const handleRating = async (rating: Rating) => {
   } catch {
     toast.error('Failed to save vocabulary progress');
     emit('finished');
+  }
+};
+
+const handleAction = (controlId: string) => {
+  if (controlId === 'reveal') {
+    isRevealed.value = true;
+  } else if (controlId.startsWith('rating-')) {
+    const rating = parseInt(controlId.split('-')[1]) as Rating;
+    handleRating(rating);
   }
 };
 
@@ -151,73 +188,20 @@ onMounted(loadVocabData);
         </div>
 
         <div v-else-if="vocab && clozeData" class="text-center">
-    <!-- Cloze section with potential notes sidebar -->
-    <div class="flex gap-4 mb-8">
-      <div class="flex-1">
-        <div class="text-3xl mb-4" :dir="isRTL ? 'rtl' : 'ltr'">
-          <span v-if="clozeData.beforeWord" class="me-2">{{ clozeData.beforeWord }}</span>
-          <span class="inline-block bg-gray-300  text-transparent rounded px-2 py-1 mx-1 select-none" 
-                :style="{ width: Math.max(clozeData.hiddenWord.length * 0.6, 3) + 'em' }">
-            {{ clozeData.hiddenWord }}
-          </span>
-          <span v-if="clozeData.afterWord" class="ms-2">{{ clozeData.afterWord }}</span>
-        </div>
-        <div v-if="translationContent" class="text-2xl text-light" >
-          {{ translationContent }}
-        </div>
-      </div>
-      
-      <!-- Notes sidebar -->
-      <div v-if="vocabNotes.filter(note => note.showBeforeExercise).length > 0 || translationNotes.filter(note => note.showBeforeExercise).length > 0" class="w-64 space-y-3">
-        <!-- Vocab notes -->
-        <div v-if="vocabNotes.filter(note => note.showBeforeExercise).length > 0" class="space-y-2">
-          <NoteDisplayMini 
-            v-for="note in vocabNotes.filter(note => note.showBeforeExercise)" 
-            :key="note.id"
-            :note="note"
+          <!-- Cloze rendering via VocabRenderer -->
+          <VocabRenderer
+            :vocab="vocab"
+            :repos="repositories"
+            :cloze-data="clozeData"
+            :show-cloze-answer="isRevealed"
+            :is-r-t-l="isRTL"
+            :show-all-notes-immediately="isRevealed"
+            :hide-translations="true"
           />
-        </div>
-        
-        <!-- Translation notes -->
-        <div v-if="translationNotes.filter(note => note.showBeforeExercise).length > 0" class="space-y-2">
-          
-          <NoteDisplayMini 
-            v-for="note in translationNotes.filter(note => note.showBeforeExercise)" 
-            :key="note.id"
-            :note="note"
-          />
-        </div>
-      </div>
-    </div>
-    
-    <div v-if="isRevealed">
-      <div class="divider mb-6">{{ $t('practice.tasks.answer') }}</div>
-      
-      <div class="mb-6">
-        <div class="text-3xl mb-4" :dir="isRTL ? 'rtl' : 'ltr'">
-          <span v-if="clozeData.beforeWord" class="me-2">{{ clozeData.beforeWord }}</span>
-          <span class="text-green-600 font-bold mx-1">{{ clozeData.hiddenWord }}</span>
-          <span v-if="clozeData.afterWord" class="ms-2">{{ clozeData.afterWord }}</span>
-        </div>
-        <div v-if="translationContent" class="text-2xl text-light">
-          {{ translationContent }}
-        </div>
-      </div>
-      
-      <SpacedRepetitionRating @rating="handleRating" />
-    </div>
-    
-    <div v-else>
-      <button @click="isRevealed = true" class="btn btn-primary">{{ $t('practice.tasks.reveal') }}</button>
-    </div>
-    
-          <!-- Links -->
-          <div v-if="vocab?.links && vocab.links.length > 0" class="space-y-2 mt-6">
-            <LinkDisplayMini
-              v-for="(link, index) in vocab.links"
-              :key="index"
-              :link="link"
-            />
+
+          <!-- Secondary content (translation hint) -->
+          <div v-if="translationContent" class="text-2xl text-base-content/60 mt-4 mb-6">
+            {{ translationContent }}
           </div>
         </div>
 
@@ -226,5 +210,8 @@ onMounted(loadVocabData);
         </div>
       </div>
     </div>
+
+    <!-- ActionBar -->
+    <ActionBar v-if="vocab && clozeData" :controls="actionBarControls" @action="handleAction" />
   </div>
 </template>

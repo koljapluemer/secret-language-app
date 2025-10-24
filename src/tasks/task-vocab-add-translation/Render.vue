@@ -4,9 +4,7 @@ import type { Task } from '@/tasks/Task';
 import type { VocabData } from '@/entities/vocab/VocabData';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
 import type { ActionControl } from '@/tasks/ui/ActionControl';
-import type { NoteData } from '@/entities/notes/NoteData';
-import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
-import LinkDisplayCompact from '@/shared/links/LinkDisplayCompact.vue';
+import VocabRenderer from '@/features/vocab-view/VocabRenderer.vue';
 import ActionBar from '@/tasks/ui/ActionBar.vue';
 import Instruction from '@/tasks/ui/Instruction.vue';
 import { useI18n } from 'vue-i18n';
@@ -22,12 +20,9 @@ const emit = defineEmits<{ finished: [correctness?: 'correct' | 'incorrect' | 'n
 const { t } = useI18n();
 const vocabRepo = props.repositories.vocabRepo;
 const translationRepo = props.repositories.translationRepo;
-const noteRepo = props.repositories.noteRepo;
 
 const vocab = ref<VocabData | null>(null);
 const translationInputValue = ref('');
-const vocabNotes = ref<NoteData[]>([]);
-const translationNotes = ref<NoteData[]>([]);
 const actionControls = ref<ActionControl[]>([]);
 
 async function loadVocab() {
@@ -35,35 +30,10 @@ async function loadVocab() {
   if (!vocabId) return;
   const data = await vocabRepo.getVocabByUID(vocabId);
   vocab.value = data || null;
-  if (vocab.value) {
-    const existing = await translationRepo.getTranslationsByIds(vocab.value.translations);
-
-    // Load vocab notes
-    if (vocab.value.notes && vocab.value.notes.length > 0) {
-      vocabNotes.value = await noteRepo.getNotesByUIDs(vocab.value.notes);
-    }
-
-    // Load translation notes
-    const allTranslationNoteIds: string[] = [];
-    existing.forEach(translation => {
-      if (translation.notes && translation.notes.length > 0) {
-        allTranslationNoteIds.push(...translation.notes);
-      }
-    });
-    if (allTranslationNoteIds.length > 0) {
-      translationNotes.value = await noteRepo.getNotesByUIDs(allTranslationNoteIds);
-    }
-  }
 }
 
 function updateActionControls() {
   const controls: ActionControl[] = [
-    {
-      type: 'button',
-      id: 'skip',
-      label: t('practice.tasks.skipDisable'),
-      position: 'secondary-left'
-    },
     {
       type: 'text-input',
       id: 'translation-input',
@@ -79,7 +49,7 @@ function updateActionControls() {
       type: 'button',
       id: 'done',
       label: t('common.done'),
-      position: 'central'
+      position: 'central-footer'
     });
   }
 
@@ -110,7 +80,7 @@ function handleTranslationInput(value?: string) {
   translationInputValue.value = value || '';
 }
 
-async function handleSkipAndDisable() {
+async function handleDisable() {
   if (!vocab.value) return;
 
   const updatedVocab: VocabData = {
@@ -124,7 +94,8 @@ async function handleSkipAndDisable() {
 function handleAction(controlId: string, data?: string) {
   if (controlId === 'translation-input') handleTranslationInput(data);
   else if (controlId === 'done') handleDone();
-  else if (controlId === 'skip') handleSkipAndDisable();
+  else if (controlId === 'disable') handleDisable();
+  else if (controlId === 'skip') emit('finished', 'neutral');
 }
 
 // Watch for input changes to update controls
@@ -147,43 +118,12 @@ onMounted(() => {
     <!-- Scrollable content area -->
     <div class="flex-1 overflow-auto min-h-0">
       <div class="container mx-auto p-4">
-        <div v-if="vocab">
-          <!-- Vocab section -->
-          <div class="flex gap-4 mb-6">
-            <div class="flex-1">
-              <h2 class="text-3xl font-bold">{{ vocab.content }}</h2>
-            </div>
-            <!-- Vocab notes sidebar -->
-            <div v-if="vocabNotes.filter(note => note.showBeforeExercise).length > 0" class="w-64 space-y-2">
-              <NoteDisplayMini
-                v-for="note in vocabNotes.filter(note => note.showBeforeExercise)"
-                :key="note.id"
-                :note="note"
-              />
-            </div>
-          </div>
-
-          <!-- Translation notes -->
-          <div v-if="translationNotes.filter(note => note.showBeforeExercise).length > 0" class="flex gap-4 mb-4">
-            <div class="flex-1"></div>
-            <div class="w-64 space-y-2">
-              <NoteDisplayMini
-                v-for="note in translationNotes.filter(note => note.showBeforeExercise)"
-                :key="note.id"
-                :note="note"
-              />
-            </div>
-          </div>
-
-          <!-- Links -->
-          <div v-if="vocab.links && vocab.links.length > 0" class="flex flex-wrap gap-2 mb-6">
-            <LinkDisplayCompact
-              v-for="(link, index) in vocab.links"
-              :key="index"
-              :link="link"
-            />
-          </div>
-        </div>
+        <VocabRenderer
+          v-if="vocab"
+          :vocab="vocab"
+          :repos="repositories"
+          :show-all-notes-immediately="true"
+        />
         <div v-else>
           <span class="loading loading-spinner loading-lg"></span>
         </div>

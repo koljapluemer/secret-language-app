@@ -30,7 +30,7 @@
         <button
           v-if="control.type === 'button'"
           @click="emit('action', control.id)"
-          :class="getButtonClass(control.position, control.destructive)"
+          :class="getButtonClass(control.position)"
           :disabled="control.disabled"
         >
           {{ control.label }}
@@ -48,7 +48,7 @@
           :value="control.value"
           @input="emit('action', control.id, ($event.target as HTMLInputElement).value)"
           :placeholder="control.placeholder"
-          class="input input-bordered input-lg"
+          class="input input-lg w-96 border-3 border-secondary bg-base-100 text-base-content placeholder-base-content/40 focus:bg-base-100 focus:border-primary focus:outline-none"
         />
         <textarea
           v-else-if="control.type === 'textarea'"
@@ -56,7 +56,7 @@
           @input="emit('action', control.id, ($event.target as HTMLTextAreaElement).value)"
           :placeholder="control.placeholder"
           :disabled="control.disabled"
-          class="textarea w-96 h-40 text-xl border-3 border-secondary bg-primary text-white placeholder-white/60 resize-none"
+          class="textarea w-96 h-40 text-xl border-3 border-secondary bg-base-100 text-base-content placeholder-base-content/40 resize-none focus:bg-base-100 focus:border-primary focus:outline-none"
         />
         <button
           v-else-if="control.type === 'icon-button'"
@@ -101,12 +101,13 @@
     </div>
 
     <!-- Central Footer - buttons below central element -->
-    <div v-if="centralFooterControls.length > 0" class="flex justify-center gap-2 px-4 pt-2 relative z-10">
+    <!-- Always reserve space to prevent layout jump -->
+    <div class="flex justify-center gap-2 px-4 pt-2 relative z-10 min-h-[48px]">
       <template v-for="control in centralFooterControls" :key="control.id">
         <button
           v-if="control.type === 'button'"
           @click="emit('action', control.id)"
-          :class="getButtonClass(control.position, control.destructive)"
+          :class="getButtonClass(control.position)"
           :disabled="control.disabled"
         >
           {{ control.label }}
@@ -159,7 +160,7 @@
             <button
               v-if="control.type === 'button'"
               @click="emit('action', control.id)"
-              :class="getButtonClass(control.position, control.destructive)"
+              :class="getButtonClass(control.position)"
             >
               {{ control.label }}
             </button>
@@ -180,7 +181,7 @@
             <button
               v-if="control.type === 'button'"
               @click="emit('action', control.id)"
-              :class="getButtonClass(control.position, control.destructive)"
+              :class="getButtonClass(control.position)"
             >
               {{ control.label }}
             </button>
@@ -281,7 +282,7 @@ onUnmounted(() => {
   }
 });
 
-function getButtonClass(position: ActionControlPosition, destructive?: boolean): string {
+function getButtonClass(position: ActionControlPosition): string {
   const classes = ['btn', 'border-3', 'border-secondary'];
 
   // Position determines size
@@ -290,12 +291,7 @@ function getButtonClass(position: ActionControlPosition, destructive?: boolean):
   }
   // secondary-left and secondary-right use default size
 
-  // Destructive overrides primary styling
-  if (destructive) {
-    classes.push('btn-error');
-  } else {
-    classes.push('btn-primary');
-  }
+  classes.push('btn-primary');
 
   return classes.join(' ');
 }

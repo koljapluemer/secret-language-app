@@ -3,14 +3,34 @@
         <div class="card card-sm shadow-sm flex-1">
             <div class="card-body">
                 <div class="flex-1 flex flex-col gap-2">
-                    <div v-if="vocab.content && !hideContent" class="font-bold text-center w-full" :class="{
+                    <!-- Cloze rendering -->
+                    <div v-if="clozeData" class="text-3xl text-center w-full" :dir="isRTL ? 'rtl' : 'ltr'">
+                        <span v-if="clozeData.beforeWord">{{ clozeData.beforeWord }} </span>
+
+                        <!-- Hidden word as blank or revealed -->
+                        <span v-if="!showClozeAnswer"
+                              class="inline-block bg-gray-300 dark:bg-gray-600 text-transparent rounded px-2 py-1 mx-1 select-none"
+                              :style="{ width: Math.max(clozeData.hiddenWord.length * 0.6, 3) + 'em' }">
+                            {{ clozeData.hiddenWord }}
+                        </span>
+                        <span v-else class="text-green-600 dark:text-green-400 font-bold mx-1">
+                            {{ clozeData.hiddenWord }}
+                        </span>
+
+                        <span v-if="clozeData.afterWord"> {{ clozeData.afterWord }}</span>
+                    </div>
+
+                    <!-- Regular content rendering -->
+                    <div v-else-if="vocab.content && !hideContent" class="font-bold text-center w-full" :class="{
                         'text-8xl': vocab.consideredCharacter,
                         'text-5xl': !vocab.consideredCharacter && !vocab.consideredSentence,
                         'text-3xl': vocab.consideredSentence
                     }">
                         {{ vocab.content }}
                     </div>
-                         <div v-if="hideContent && showQuestionMarks" class="font-bold text-center w-full" :class="{
+
+                    <!-- Question marks when content hidden -->
+                    <div v-else-if="hideContent && showQuestionMarks" class="font-bold text-center w-full" :class="{
                         'text-8xl': vocab.consideredCharacter,
                         'text-5xl': !vocab.consideredCharacter && !vocab.consideredSentence,
                         'text-3xl': vocab.consideredSentence
@@ -86,6 +106,14 @@ import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
 import VocabImage from '@/shared/ui/VocabImage.vue';
 import SoundPlayer from '@/shared/ui/SoundPlayer.vue';
 
+export interface ClozeData {
+  beforeWord: string;
+  hiddenWord: string;
+  afterWord: string;
+  hiddenWordIndex: number;
+  hiddenWords?: string[];
+}
+
 const props = defineProps<{
     vocab: VocabData
     repos: RepositoriesContext
@@ -95,6 +123,9 @@ const props = defineProps<{
     onlyShowSingleRandomTranslation?: boolean
     hideContent?: boolean
     showQuestionMarks?: boolean
+    clozeData?: ClozeData
+    showClozeAnswer?: boolean
+    isRTL?: boolean
 }>();
 
 const languageRepo = props.repos.languageRepo || undefined

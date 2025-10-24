@@ -5,12 +5,12 @@ import type { VocabData } from '@/entities/vocab/VocabData';
 import type { TranslationData } from '@/entities/translations/TranslationData';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
 import type { Rating } from 'ts-fsrs';
-import SpacedRepetitionRating from '@/tasks/ui/SpacedRepetitionRating.vue';
-import type { NoteData } from '@/entities/notes/NoteData';
-import NoteDisplayMini from '@/entities/notes/NoteDisplayMini.vue';
-import LinkDisplayCompact from '@/shared/links/LinkDisplayCompact.vue';
+import type { ActionControl } from '@/tasks/ui/ActionControl';
+import VocabRenderer from '@/features/vocab-view/VocabRenderer.vue';
+import ActionBar from '@/tasks/ui/ActionBar.vue';
 import Instruction from '@/tasks/ui/Instruction.vue';
 import { useToast } from '@/shared/toasts';
+import { useI18n } from 'vue-i18n';
 
 interface Props {
   task: Task;
@@ -26,13 +26,10 @@ const emit = defineEmits<{
 }>();
 
 const toast = useToast();
+const { t } = useI18n();
 const vocabRepo = props.repositories.vocabRepo;
-const translationRepo = props.repositories.translationRepo;
-const noteRepo = props.repositories.noteRepo;
 const vocab = ref<VocabData | null>(null);
 const translations = ref<TranslationData[]>([]);
-const vocabNotes = ref<NoteData[]>([]);
-const translationNotes = ref<NoteData[]>([]);
 const isRevealed = ref(false);
 
 const isNativeToTarget = computed(() => props.task.taskType === 'vocab-reveal-native-to-target');
@@ -41,19 +38,9 @@ const isSentence = computed(() => {
   return vocab.value?.consideredSentence === true;
 });
 
-const frontContent = computed(() => {
-  if (!vocab.value || translations.value.length === 0) return '';
-  
-  if (isNativeToTarget.value) {
-    return translations.value[0]?.content; // Show translation
-  } else {
-    return vocab.value.content; // Show vocab
-  }
-});
-
 const solution = computed(() => {
   if (!vocab.value || translations.value.length === 0) return '';
-  
+
   if (isNativeToTarget.value) {
     return vocab.value.content; // Show vocab as solution
   } else {
@@ -61,30 +48,60 @@ const solution = computed(() => {
   }
 });
 
+// ActionBar controls
+const actionBarControls = computed<ActionControl[]>(() => {
+  const controls: ActionControl[] = [];
+
+  if (!isRevealed.value) {
+    // Show reveal button
+    controls.push({
+      type: 'button',
+      id: 'reveal',
+      label: t('practice.tasks.reveal'),
+      position: 'central',
+      disabled: false
+    });
+  } else {
+    // Show rating buttons
+    controls.push(
+      {
+        type: 'button',
+        id: 'rating-1',
+        label: t('practice.tasks.rating.again'),
+        position: 'central'
+      },
+      {
+        type: 'button',
+        id: 'rating-2',
+        label: t('practice.tasks.rating.hard'),
+        position: 'central'
+      },
+      {
+        type: 'button',
+        id: 'rating-3',
+        label: t('practice.tasks.rating.good'),
+        position: 'central'
+      },
+      {
+        type: 'button',
+        id: 'rating-4',
+        label: t('practice.tasks.rating.easy'),
+        position: 'central'
+      }
+    );
+  }
+
+  return controls;
+});
+
 const loadVocab = async () => {
   const vocabId = props.task.associatedVocab?.[0];
   if (!vocabId) return;
-  
+
   const vocabData = await vocabRepo.getVocabByUID(vocabId);
   if (vocabData) {
     vocab.value = vocabData;
-    translations.value = await translationRepo.getTranslationsByIds(vocabData.translations);
-    
-    // Load vocab notes
-    if (vocabData.notes && vocabData.notes.length > 0) {
-      vocabNotes.value = await noteRepo.getNotesByUIDs(vocabData.notes);
-    }
-    
-    // Load translation notes
-    const allTranslationNoteIds: string[] = [];
-    translations.value.forEach(translation => {
-      if (translation.notes && translation.notes.length > 0) {
-        allTranslationNoteIds.push(...translation.notes);
-      }
-    });
-    if (allTranslationNoteIds.length > 0) {
-      translationNotes.value = await noteRepo.getNotesByUIDs(allTranslationNoteIds);
-    }
+    translations.value = await props.repositories.translationRepo.getTranslationsByIds(vocabData.translations);
   }
 };
 
@@ -107,6 +124,15 @@ const handleRating = async (rating: Rating) => {
   }
 };
 
+const handleAction = (controlId: string) => {
+  if (controlId === 'reveal') {
+    isRevealed.value = true;
+  } else if (controlId.startsWith('rating-')) {
+    const rating = parseInt(controlId.split('-')[1]) as Rating;
+    handleRating(rating);
+  }
+};
+
 onMounted(loadVocab);
 </script>
 
@@ -117,64 +143,33 @@ onMounted(loadVocab);
     <div class="flex-1 overflow-auto min-h-0">
       <div class="container mx-auto p-4">
         <div v-if="vocab">
-          <!-- Main content with notes sidebar -->
-    <div class="flex gap-4 mb-8">
-      <div class="flex-1 text-center">
-        <div :class="isSentence ? 'text-3xl' : 'text-6xl'" class="font-bold">{{ frontContent }}</div>
-      </div>
-      
-      <!-- Notes sidebar -->
-      <div v-if="vocabNotes.filter(note => note.showBeforeExercise).length > 0 || translationNotes.filter(note => note.showBeforeExercise).length > 0" class="w-64 space-y-3">
-        <!-- Vocab notes -->
-        <div v-if="vocabNotes.filter(note => note.showBeforeExercise).length > 0" class="space-y-2">
-          
-          <NoteDisplayMini 
-            v-for="note in vocabNotes.filter(note => note.showBeforeExercise)" 
-            :key="note.id"
-            :note="note"
+          <!-- Show vocab in native-to-target mode, hide translations initially -->
+          <VocabRenderer
+            v-if="isNativeToTarget"
+            :vocab="vocab"
+            :repos="repositories"
+            :hide-content="!isRevealed"
+            :show-question-marks="!isRevealed"
+            :show-all-notes-immediately="isRevealed"
           />
-        </div>
-        
-        <!-- Translation notes -->
-        <div v-if="translationNotes.filter(note => note.showBeforeExercise).length > 0" class="space-y-2">
-          
-          <NoteDisplayMini 
-            v-for="note in translationNotes.filter(note => note.showBeforeExercise)" 
-            :key="note.id"
-            :note="note"
-          />
-        </div>
-      </div>
-    </div>
-    
-    <div class="text-center">
-      
-      <div v-if="isRevealed">
-        <div class="divider mb-6">{{ $t('practice.tasks.answer') }}</div>
-        <div :class="isSentence ? 'text-xl' : 'text-3xl'" class="text-light mb-6">{{ solution }}</div>
-        
-        <SpacedRepetitionRating @rating="handleRating" />
-      </div>
-      
-      <!-- Links -->
-      <div v-if="vocab?.links && vocab.links.length > 0" class="flex flex-wrap gap-2 mt-6 justify-center">
-        <LinkDisplayCompact
-          v-for="(link, index) in vocab.links"
-          :key="index"
-          :link="link"
-        />
-      </div>
-      
-          <div v-else>
-            <button @click="isRevealed = true" class="btn btn-primary">{{ $t('practice.tasks.reveal') }}</button>
-          </div>
-        </div>
-      </div>
 
-      <div v-else>
-        <span class="loading loading-spinner loading-lg"></span>
-      </div>
+          <!-- Show translations in target-to-native mode, hide translations initially -->
+          <VocabRenderer
+            v-else
+            :vocab="vocab"
+            :repos="repositories"
+            :hide-translations="!isRevealed"
+            :show-all-notes-immediately="isRevealed"
+          />
+        </div>
+
+        <div v-else>
+          <span class="loading loading-spinner loading-lg"></span>
+        </div>
       </div>
     </div>
+
+    <!-- ActionBar -->
+    <ActionBar v-if="vocab" :controls="actionBarControls" @action="handleAction" />
   </div>
 </template>
