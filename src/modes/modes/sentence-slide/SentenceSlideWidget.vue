@@ -4,11 +4,13 @@ import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
 import type { VocabData } from '@/entities/vocab/VocabData';
 import { usePracticeFilters } from '@/features/filter-practice-sets-and-languages/usePracticeFilters';
+import { useUsedVocabTracker } from '@/features/track/useUsedVocabTracker';
 import PracticeModeLayout from '@/modes/utils/Layout.vue';
 import { getRandomGeneratedTaskForVocab } from '@/modes/utils/getRandomGeneratedTaskForVocab';
 import { generateGuessWhatSentenceMeans } from '@/tasks/task-guess-what-sentence-means/generate';
-import { pickRandom } from '@/shared/utils/arrayUtils';
+import { pickRandom, randomFromArray } from '@/shared/utils/arrayUtils';
 import type { QueueState } from '@/modes/utils/usePracticeMode';
+import type { Task } from '@/tasks/Task';
 
 // Inject repositories
 const vocabRepo = inject<VocabRepoContract>('vocabRepo')!;
@@ -19,6 +21,7 @@ if (!vocabRepo || !translationRepo) {
 }
 
 const { selectedLanguages, setsToAvoid } = usePracticeFilters();
+const { addUsedVocab, getLastUsedVocabId } = useUsedVocabTracker();
 
 // State management
 type Phase = 'vocab-practice' | 'sentence-meaning';
@@ -36,7 +39,7 @@ const showLoadingUI = ref(false);
 const currentSentence = ref<VocabData | null>(null);
 const vocabPool = ref<Map<string, VocabPoolItem>>(new Map());
 const phase = ref<Phase>('vocab-practice');
-const lastUsedVocabId = ref<string | null>(null);
+const sessionVocabIds = ref<Set<string>>(new Set());
 
 // Initialize vocab pool from sentence's contains array
 async function initializeVocabPool(sentence: VocabData): Promise<void> {
@@ -51,17 +54,17 @@ async function initializeVocabPool(sentence: VocabData): Promise<void> {
 
   const now = new Date();
   const pool = new Map<string, VocabPoolItem>();
-  const blockList = lastUsedVocabId.value ? [lastUsedVocabId.value] : undefined;
+  const lastUsed = getLastUsedVocabId();
 
   for (const vocab of containsVocab) {
     // Filter: only due or unseen vocab
     const isDue = vocab.progress.due && vocab.progress.due <= now;
     const isUnseen = vocab.progress.level === -1;
 
-    // Skip if not due/unseen, in blocklist, doNotPractice, or in avoided sets
+    // Skip if not due/unseen, last used, doNotPractice, or in avoided sets
     if (!isDue && !isUnseen) continue;
     if (vocab.doNotPractice) continue;
-    if (blockList?.includes(vocab.id)) continue;
+    if (lastUsed && vocab.id === lastUsed) continue;
     if (setsToAvoid.value && vocab.origins.some(origin => setsToAvoid.value.includes(origin))) continue;
 
     pool.set(vocab.id, {
@@ -73,12 +76,55 @@ async function initializeVocabPool(sentence: VocabData): Promise<void> {
   vocabPool.value = pool;
 }
 
+// Generate review task from session vocab
+async function generateReviewTask(): Promise<Task | null> {
+  // Need at least 3 items to start reviewing
+  if (sessionVocabIds.value.size < 3) {
+    return null;
+  }
+
+  // Get only the vocab that is currently due according to FSRS
+  const dueVocab = await vocabRepo.getDueVocabByIds(Array.from(sessionVocabIds.value));
+  if (dueVocab.length === 0) {
+    return null;
+  }
+
+  // Filter out the last used vocab to prevent immediate repetition
+  const lastUsed = getLastUsedVocabId();
+  const availableVocab = lastUsed ? dueVocab.filter(v => v.id !== lastUsed) : dueVocab;
+
+  if (availableVocab.length === 0) {
+    return null;
+  }
+
+  // Pick a random vocab from the due ones
+  const selectedVocab = randomFromArray(availableVocab);
+  if (!selectedVocab) {
+    return null;
+  }
+
+  // Generate task for this vocab
+  const translations = await translationRepo.getTranslationsByIds(selectedVocab.translations || []);
+  return getRandomGeneratedTaskForVocab(selectedVocab, translations, vocabRepo);
+}
+
 // Generate next task
 async function generateNextTask(): Promise<void> {
   state.value = { status: 'loading' };
   showLoadingUI.value = true;
 
   try {
+    // 20% chance to show a review task instead of normal flow
+    if (Math.random() < 0.2) {
+      const reviewTask = await generateReviewTask();
+      if (reviewTask) {
+        state.value = { status: 'task', currentTask: reviewTask, nextTask: null };
+        showLoadingUI.value = false;
+        return;
+      }
+      // If review task generation failed, continue with normal flow
+    }
+
     const languageCodes = selectedLanguages.value;
 
     if (languageCodes.length === 0) {
@@ -89,7 +135,8 @@ async function generateNextTask(): Promise<void> {
 
     // If we don't have a current sentence, pick a new one
     if (!currentSentence.value) {
-      const blockList = lastUsedVocabId.value ? [lastUsedVocabId.value] : undefined;
+      const lastUsed = getLastUsedVocabId();
+      const blockList = lastUsed ? [lastUsed] : undefined;
 
       const sentence = await vocabRepo.getRandomSentenceVocabWithContains(
         languageCodes,
@@ -114,25 +161,36 @@ async function generateNextTask(): Promise<void> {
         // Pool is empty, move to sentence meaning
         phase.value = 'sentence-meaning';
       } else {
-        // Pick random vocab from pool using proper random picker
+        // Filter out last used vocab to prevent immediate repetition
+        const lastUsed = getLastUsedVocabId();
         const poolArray = Array.from(vocabPool.value.values());
-        const selectedItem = pickRandom(poolArray, 1)[0];
+        const availablePool = lastUsed
+          ? poolArray.filter(item => item.vocab.id !== lastUsed)
+          : poolArray;
 
-        if (selectedItem) {
-          // Generate task for this vocab
-          const translations = await translationRepo.getTranslationsByIds(selectedItem.vocab.translations || []);
-          const task = await getRandomGeneratedTaskForVocab(selectedItem.vocab, translations, vocabRepo);
+        // If all pool items are the last used vocab, move to sentence meaning
+        if (availablePool.length === 0) {
+          phase.value = 'sentence-meaning';
+        } else {
+          // Pick random vocab from available pool
+          const selectedItem = pickRandom(availablePool, 1)[0];
 
-          if (!task) {
-            // Couldn't generate task, remove from pool and try again
-            vocabPool.value.delete(selectedItem.vocab.id);
-            await generateNextTask();
+          if (selectedItem) {
+            // Generate task for this vocab
+            const translations = await translationRepo.getTranslationsByIds(selectedItem.vocab.translations || []);
+            const task = await getRandomGeneratedTaskForVocab(selectedItem.vocab, translations, vocabRepo);
+
+            if (!task) {
+              // Couldn't generate task, remove from pool and try again
+              vocabPool.value.delete(selectedItem.vocab.id);
+              await generateNextTask();
+              return;
+            }
+
+            state.value = { status: 'task', currentTask: task, nextTask: null };
+            showLoadingUI.value = false;
             return;
           }
-
-          state.value = { status: 'task', currentTask: task, nextTask: null };
-          showLoadingUI.value = false;
-          return;
         }
       }
     }
@@ -203,7 +261,10 @@ async function handleTaskFinished() {
       await updatePoolAfterTask(vocabId);
 
       // Track this vocab to avoid immediate repetition
-      lastUsedVocabId.value = vocabId;
+      addUsedVocab(vocabId);
+
+      // Add to session tracking for review tasks
+      sessionVocabIds.value.add(vocabId);
     }
   }
 
@@ -217,7 +278,6 @@ async function retry() {
   currentSentence.value = null;
   vocabPool.value = new Map();
   phase.value = 'vocab-practice';
-  lastUsedVocabId.value = null;
 
   await generateNextTask();
 }
