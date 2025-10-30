@@ -1,4 +1,4 @@
-import { BookOpen, Target, RotateCcw, ImagePlus, Eye, Zap, ArrowRight, RefreshCw, Volume2, Boxes, BookText } from 'lucide-vue-next';
+import { BookOpen, Target, RotateCcw, ImagePlus, Eye, Zap, ArrowRight, RefreshCw, Volume2, Boxes, BookText, BookMarked } from 'lucide-vue-next';
 
 export const modes = [
   {
@@ -18,6 +18,12 @@ export const modes = [
     route: { name: 'practice-mode-sisyphos' },
     icon: RotateCcw,
     description: 'Endless review of seen content - roll that boulder!'
+  },
+  {
+    name: 'Cram',
+    route: { name: 'practice-mode-cram' },
+    icon: BookMarked,
+    description: 'Intensive review session for due content'
   },
   {
     name: 'Insert Images',

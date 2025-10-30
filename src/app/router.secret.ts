@@ -4,6 +4,7 @@ import PracticeHome from '@/pages/practice/PracticeHome.vue';
 import FactCardGrindWidget from '@/modes/modes/fact-card-grind/FactCardGrindWidget.vue';
 import GoalGetterWidget from '@/modes/modes/goal-getter/GoalGetterWidget.vue';
 import SisyphosWidget from '@/modes/modes/sisyphos/SisyphosWidget.vue';
+import CramWidget from '@/modes/modes/cram/CramWidget.vue';
 import InsertImagesWidget from '@/modes/modes/insert-images/InsertImagesWidget.vue';
 import EyesAndEarsWidget from '@/modes/modes/eyes-and-ears/EyesAndEarsWidget.vue';
 import IllegalImmersionWidget from '@/modes/modes/illegal-immersion/IllegalImmersionWidget.vue';
@@ -64,6 +65,11 @@ const router = createRouter({
           path: 'sisyphos',
           name: 'practice-mode-sisyphos',
           component: SisyphosWidget
+        },
+        {
+          path: 'cram',
+          name: 'practice-mode-cram',
+          component: CramWidget
         },
         {
           path: 'insert-images',
