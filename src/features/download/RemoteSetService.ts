@@ -7,16 +7,15 @@ import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoCont
 import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract';
 import type { FactCardRepoContract } from '@/entities/fact-cards/FactCardRepoContract';
 import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
-import type { LanguageData } from '@/entities/languages/LanguageData';
 import { useToast } from '@/shared/toasts';
 
-import { vocabSchema } from '@/entities/remote-sets/validation/vocabSchema';
-import { translationSchema } from '@/entities/remote-sets/validation/translationSchema';
-import { noteSchema } from '@/entities/remote-sets/validation/noteSchema';
-import { linkSchema } from '@/entities/remote-sets/validation/linkSchema';
-import { resourceSchema } from '@/entities/remote-sets/validation/resourceSchema';
-import { goalSchema } from '@/entities/remote-sets/validation/goalSchema';
-import { factCardSchema } from '@/entities/remote-sets/validation/factCardSchema';
+import { vocabSchema } from '@/features/download/validation/vocabSchema';
+import { translationSchema } from '@/features/download/validation/translationSchema';
+import { noteSchema } from '@/features/download/validation/noteSchema';
+import { linkSchema } from '@/features/download/validation/linkSchema';
+import { resourceSchema } from '@/features/download/validation/resourceSchema';
+import { goalSchema } from '@/features/download/validation/goalSchema';
+import { factCardSchema } from '@/features/download/validation/factCardSchema';
 
 import type { VocabData, VocabImage, VocabSound } from '@/entities/vocab/VocabData';
 import type { TranslationData } from '@/entities/translations/TranslationData';
@@ -27,7 +26,7 @@ import type { NoteData } from '@/entities/notes/NoteData';
 import type { Link } from '@/shared/links/Link';
 
 import { z } from 'zod';
-import { remoteSetMetaDataSchema } from '@/entities/remote-sets/remoteSetMetaData';
+import { remoteSetMetaDataSchema } from '@/features/download/remoteSetMetaData';
 import type { RemoteSetInfo, DownloadOptions } from './types';
 
 // Re-export types for convenience
@@ -136,20 +135,29 @@ export class RemoteSetService {
     const setTitle = metadata?.title || setName; // Fallback to setName if no title
     const setDescription = metadata?.description;
 
-    // Ensure language exists in the database as active (only if not already present)
-    const existingLanguage = await this.languageRepo.getByCode(languageCode);
-    if (!existingLanguage) {
-      const newLanguage = await this.languageRepo.createLanguageFromCode(languageCode);
-      await this.languageRepo.add(newLanguage as LanguageData);
-    }
+    // Ensure language exists in the database
+    await this.languageRepo.ensureLanguageExists(languageCode);
 
-    // Create or update local set entry
-    const localSet = await this.localSetRepo.saveLocalSet({
-      name: setTitle,
-      language: languageCode,
-      description: setDescription,
-      lastDownloadedAt: new Date()
-    });
+    // Check if local set already exists
+    console.log('RemoteSetService DEBUG - Checking for existing sets with language:', languageCode);
+    const existingSets = await this.localSetRepo.getLocalSetsByLanguage(languageCode);
+    console.log('RemoteSetService DEBUG - Existing sets found:', existingSets);
+    let localSet = existingSets.find(s => s.name === setTitle);
+    console.log('RemoteSetService DEBUG - Found matching set:', localSet);
+
+    // Only save if it doesn't exist yet - avoids Dexie Cloud DataError
+    if (!localSet) {
+      console.log('RemoteSetService DEBUG - No existing set, attempting to save');
+      localSet = await this.localSetRepo.saveLocalSet({
+        name: setTitle,
+        language: languageCode,
+        description: setDescription,
+        lastDownloadedAt: new Date()
+      });
+      console.log('RemoteSetService DEBUG - Save successful, got localSet:', localSet);
+    } else {
+      console.log('RemoteSetService DEBUG - Using existing localSet, skipping save');
+    }
 
     reportProgress('Setting up language and local set', 100, 100);
 

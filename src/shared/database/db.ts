@@ -1,5 +1,4 @@
 import Dexie, { type Table } from 'dexie';
-import dexieCloud from 'dexie-cloud-addon';
 import type { VocabData } from '@/entities/vocab/VocabData';
 import type { TranslationData } from '@/entities/translations/TranslationData';
 import type { GoalData } from '@/entities/goals/GoalData';
@@ -28,7 +27,7 @@ class LinguanodonDatabase extends Dexie {
   testResults!: Table<TestResultData>;
 
   constructor() {
-    super('LinguanodonDB', { addons: [dexieCloud] });
+    super('LinguanodonDB');
 
     this.version(1).stores({
       vocab: '@id, language, content, *origins, [language+content], progress.due, hasImage, hasSound',
@@ -102,15 +101,23 @@ class LinguanodonDatabase extends Dexie {
       motivationSettings: '@id',
       testResults: 'id, testMode, completedAt'
     });
+
+    // Version 6: Remove Dexie Cloud - change @id to ++id for standard auto-increment
+    this.version(6).stores({
+      vocab: '++id, language, content, *origins, [language+content], progress.due, hasImage, hasSound',
+      translations: '++id, content, *origins',
+      goals: '++id, language, *origins, taskType, title, isActive, parentGoal, lastShownAt, *subGoals, *vocab, *examples, *factCards, *notes',
+      notes: '++id',
+      factCards: '++id, language, *origins',
+      resources: '++id, language, *origins',
+      languages: null, // Remove languages table (now hardcoded)
+      localSets: '++id, &[name+language], language, lastDownloadedAt',
+      mergeQueue: '++id',
+      taskCompletions: '++id, timestamp, language_code, practice_mode, session_id',
+      motivationSettings: '++id',
+      testResults: '++id, testMode, completedAt'
+    });
   }
 }
 
 export const db = new LinguanodonDatabase();
-
-// Configure Dexie Cloud
-db.cloud.configure({
-  databaseUrl: 'https://zj86qnw9c.dexie.cloud',
-  requireAuth: false, // App works offline, sync is opt-in
-  tryUseServiceWorker: true,
-  periodicSync: { minInterval: 60000 } // 1 minute
-});

@@ -3,5 +3,4 @@ export interface LanguageData {
     code: string // standardized code
     name: string
     emoji?: string
-    isActive: boolean
 }

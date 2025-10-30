@@ -1,17 +1,13 @@
 <script setup lang="ts">
-import { inject, ref, onMounted } from 'vue';
+import { inject, ref } from 'vue';
 import { toRaw } from 'vue';
-import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract';
 import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
 import type { NoteData } from '@/entities/notes/NoteData';
 import { useToast } from '@/shared/toasts';
-import LanguageSettings from './LanguageSettings.vue';
 import AudioAnalysis from './AudioAnalysis.vue';
-import { db } from '@/shared/database/db';
 
-const languageRepo = inject<LanguageRepoContract>('languageRepo')!;
 const vocabRepo = inject<VocabRepoContract>('vocabRepo')!;
 const noteRepo = inject<NoteRepoContract>('noteRepo')!;
 const translationRepo = inject<TranslationRepoContract>('translationRepo')!;
@@ -49,39 +45,6 @@ function saveGoals() {
 }
 
 loadGoals();
-
-// Cloud Sync
-const isLoggedIn = ref(false);
-const userEmail = ref('');
-const syncState = ref('offline');
-
-onMounted(() => {
-  db.cloud.currentUser.subscribe(user => {
-    isLoggedIn.value = user?.isLoggedIn || false;
-    userEmail.value = user?.email || '';
-  });
-
-  db.cloud.syncState.subscribe(state => {
-    syncState.value = state.phase;
-  });
-});
-
-async function login() {
-  try {
-    await db.cloud.login();
-  } catch (error) {
-    toast.error(`Login failed: ${String(error)}`);
-  }
-}
-
-async function logout() {
-  try {
-    await db.cloud.logout();
-    toast.success('Logged out successfully');
-  } catch (error) {
-    toast.error(`Logout failed: ${String(error)}`);
-  }
-}
 
 async function deduplicateNotesAndTranslations() {
   isDeduplicating.value = true;
@@ -182,42 +145,7 @@ async function deduplicateNotes(notes: NoteData[]): Promise<{ keptNotes: NoteDat
 <template>
   <h1>{{ $t('navigation.settings') }}</h1>
 
-  <LanguageSettings :language-repo="languageRepo" />
-
   <AudioAnalysis :vocab-repo="vocabRepo" />
-
-  <h3>Cloud Sync</h3>
-  <p class="text-light mb-4">
-    Sync your data across devices using Dexie Cloud. Your data is private by default.
-  </p>
-
-  <div v-if="!isLoggedIn" class="mb-8">
-    <button @click="login" class="btn btn-primary btn-sm">
-      Enable Cloud Sync (Login)
-    </button>
-    <p class="text-sm text-light mt-2">
-      The app works offline without login. Sync is completely optional.
-    </p>
-  </div>
-
-  <div v-else class="mb-8 space-y-2">
-    <p class="text-sm">
-      <span class="font-semibold">Email:</span> {{ userEmail }}
-    </p>
-    <p class="text-sm">
-      <span class="font-semibold">Sync status:</span>
-      <span :class="{
-        'text-success': syncState === 'online',
-        'text-warning': syncState === 'syncing',
-        'text-error': syncState === 'offline'
-      }">
-        {{ syncState }}
-      </span>
-    </p>
-    <button @click="logout" class="btn btn-outline btn-sm">
-      Disable Cloud Sync (Logout)
-    </button>
-  </div>
 
   <h3>{{ $t('settings.practiceGoals') }}</h3>
   <p class="text-light mb-4">

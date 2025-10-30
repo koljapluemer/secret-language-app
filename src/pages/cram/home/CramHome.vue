@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { ref, inject, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { RemoteSetService, type RemoteSetInfo } from '@/entities/remote-sets/RemoteSetService';
-import { DownloadAndPracticeService } from '@/features/download-and-practice/DownloadAndPracticeService';
+import { DownloadAndPracticeService } from '@/features/download/DownloadAndPracticeService';
 import LanguageDisplay from '@/entities/languages/LanguageDisplay.vue';
 import type { LocalSetRepoContract } from '@/entities/local-sets/LocalSetRepoContract';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
@@ -13,9 +12,11 @@ import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract';
 import type { FactCardRepoContract } from '@/entities/fact-cards/FactCardRepoContract';
 import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
 import type { LanguageData } from '@/entities/languages/LanguageData';
-import { remoteSetMetaDataSchema } from '@/entities/remote-sets/remoteSetMetaData';
+import { remoteSetMetaDataSchema } from '@/features/download/remoteSetMetaData';
 import { useToast } from '@/shared/toasts';
 import type { z } from 'zod';
+import type { RemoteSetInfo } from '@/features/download/types';
+import { RemoteSetService } from '@/features/download/RemoteSetService';
 
 interface ExtendedSetInfo extends RemoteSetInfo {
   language: string;

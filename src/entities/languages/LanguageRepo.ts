@@ -1,80 +1,36 @@
 import type { LanguageRepoContract } from './LanguageRepoContract';
 import type { LanguageData } from './LanguageData';
-import { useToast } from '@/shared/toasts';
-import isoLangs from './isoLangs.json';
-import { db } from '@/shared/database/db';
+
+const HARDCODED_LANGUAGES: LanguageData[] = [
+  { id: '1', code: 'deu', name: 'German', emoji: '🇩🇪' },
+  { id: '2', code: 'arz', name: 'Egyptian Arabic', emoji: '🇪🇬' },
+  { id: '3', code: 'arb', name: 'Standard Arabic' },
+  { id: '4', code: 'apc', name: 'Levantine Arabic', emoji: '🇱🇧' },
+  { id: '5', code: 'cmn', name: 'Mandarin Chinese', emoji: '🇨🇳' },
+  { id: '6', code: 'fra', name: 'French', emoji: '🇫🇷' },
+  { id: '7', code: 'spa', name: 'Spanish', emoji: '🇪🇸' },
+  { id: '8', code: 'uzb', name: 'Uzbek', emoji: '🇺🇿' }
+];
 
 export class LanguageRepo implements LanguageRepoContract {
-  private toast = useToast();
-
   async getAll(): Promise<LanguageData[]> {
-    return await db.languages.toArray();
+    return HARDCODED_LANGUAGES;
   }
 
   async getActiveTargetLanguages(): Promise<LanguageData[]> {
-    const all = await db.languages.toArray();
-    return all.filter(lang => lang.isActive);
+    // All languages are always active
+    return HARDCODED_LANGUAGES;
   }
 
   async getByCode(code: string): Promise<LanguageData | undefined> {
-    return await db.languages.where('code').equals(code).first();
+    return HARDCODED_LANGUAGES.find(lang => lang.code === code);
   }
 
-  async add(language: LanguageData): Promise<void> {
-    // Merge emoji from isoLangs.json if available
-    const isoLang = (isoLangs as { code: string; name: string; emoji?: string }[])
-      .find(l => l.code === language.code);
-
-    const languageWithEmoji: LanguageData = {
-      ...language,
-      emoji: isoLang?.emoji || language.emoji
-    };
-
-    await db.languages.put(languageWithEmoji);
-  }
-
-  async update(language: LanguageData): Promise<void> {
-    await db.languages.put(language);
-  }
-
-  async delete(code: string): Promise<void> {
-    const language = await db.languages.where('code').equals(code).first();
-    if (language?.id) {
-      await db.languages.delete(language.id);
-    }
-  }
-
-  async setActive(code: string, isActive: boolean): Promise<void> {
+  async ensureLanguageExists(code: string): Promise<LanguageData> {
     const language = await this.getByCode(code);
-    if (language) {
-      await this.update({ ...language, isActive });
+    if (!language) {
+      throw new Error(`Unsupported language code: ${code}. Supported languages: ${HARDCODED_LANGUAGES.map(l => l.code).join(', ')}`);
     }
-  }
-
-  async isValidLanguageCode(code: string): Promise<boolean> {
-    return (isoLangs as { code: string; name: string }[])
-      .some(lang => lang.code === code);
-  }
-
-  async getCount(): Promise<number> {
-    const all = await this.getAll();
-    return all.length;
-  }
-
-  async createLanguageFromCode(code: string): Promise<Omit<LanguageData, 'id'>> {
-    const isoLang = (isoLangs as { code: string; name: string; emoji?: string }[])
-      .find(l => l.code === code);
-
-    if (!isoLang) {
-      this.toast.error(`Language code '${code}' not found in ISO language data`);
-      throw new Error(`Unknown language code: ${code}`);
-    }
-
-    return {
-      code,
-      name: isoLang.name,
-      emoji: isoLang.emoji,
-      isActive: true
-    };
+    return language;
   }
 }

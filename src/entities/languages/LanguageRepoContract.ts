@@ -5,21 +5,11 @@ export interface LanguageRepoContract {
   getAll(): Promise<LanguageData[]>;
   getActiveTargetLanguages(): Promise<LanguageData[]>;
   getByCode(code: string): Promise<LanguageData | undefined>;
-  
-  // CRUD operations
-  add(language: LanguageData): Promise<void>;
-  update(language: LanguageData): Promise<void>;
-  delete(code: string): Promise<void>;
-  
-  // Status operations
-  setActive(code: string, isActive: boolean): Promise<void>;
-  
-  // Validation
-  isValidLanguageCode(code: string): Promise<boolean>;
-  
-  // Count
-  getCount(): Promise<number>;
-  
-  // Language creation from codes
-  createLanguageFromCode(code: string): Promise<Omit<LanguageData, 'id'>>;
+
+  /**
+   * Ensures a language exists in the supported language list.
+   * Throws an error if the language code is not supported.
+   * Returns the language if it exists.
+   */
+  ensureLanguageExists(code: string): Promise<LanguageData>;
 }

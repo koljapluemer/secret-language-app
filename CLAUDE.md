@@ -46,6 +46,7 @@ The project follows **Feature-Sliced Design (FSD)** architecture with strict lay
 **Component Structure**: Components are either controller (logic) or representational (props/emits only)
 **Type Organization**: Types live in dedicated files, never duplicated in components
 **Testing**: Unit tests live alongside code, use Vitest with jsdom environment
+**Type Safety**: NEVER use `any` type. Always use proper TypeScript types or type assertions with `as Type`
 
 ## Tech Stack
 

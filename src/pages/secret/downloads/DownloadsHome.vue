@@ -159,8 +159,8 @@ import { ref, inject, onMounted, watch, computed } from 'vue';
 import { useRouter, useRoute, type LocationQueryValue } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Download, Play, RefreshCw, FileText } from 'lucide-vue-next';
-import { RemoteSetService, type RemoteSetInfo, type DownloadProgress } from '@/entities/remote-sets/RemoteSetService';
-import { DownloadAndPracticeService } from '@/features/download-and-practice/DownloadAndPracticeService';
+import { RemoteSetService, type RemoteSetInfo, type DownloadProgress } from '@/features/download/RemoteSetService';
+import { DownloadAndPracticeService } from '@/features/download/DownloadAndPracticeService';
 import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
 import type { LanguageData } from '@/entities/languages/LanguageData';
 import type { LocalSetRepoContract } from '@/entities/local-sets/LocalSetRepoContract';
@@ -313,20 +313,9 @@ async function loadLanguagesAndSets() {
     const languageCodes = await remoteSetService.getAvailableLanguages();
 
     // Convert language codes to LanguageData format by getting from languageRepo
-    const allLanguages = await languageRepo.getActiveTargetLanguages();
+    // Only show languages that are in our hardcoded supported list
+    const allLanguages = await languageRepo.getAll();
     availableLanguages.value = allLanguages.filter(lang => languageCodes.includes(lang.code));
-
-    // For missing codes, create proper LanguageData objects using the language repo
-    const missingCodes = languageCodes.filter(code =>
-      !availableLanguages.value.some(lang => lang.code === code)
-    );
-
-    if (missingCodes.length > 0) {
-      const missingLanguages = await Promise.all(
-        missingCodes.map(code => languageRepo.createLanguageFromCode(code))
-      );
-      availableLanguages.value.push(...missingLanguages);
-    }
 
     // If no URL filters are set, initialize with all languages selected
     if (selectedLanguages.value.length === 0) {

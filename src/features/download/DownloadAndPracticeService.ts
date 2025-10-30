@@ -1,8 +1,8 @@
 import type { Router } from 'vue-router';
-import { RemoteSetService } from '@/entities/remote-sets/RemoteSetService';
 import type { LocalSetRepoContract } from '@/entities/local-sets/LocalSetRepoContract';
 import { selectedLanguages, selectedSets } from '@/features/filter-practice-sets-and-languages/usePracticeFilters';
 import type { DownloadAndPracticeOptions } from './types';
+import type { RemoteSetService } from './RemoteSetService';
 
 // Re-export for convenience
 export type { DownloadAndPracticeOptions } from './types';
@@ -41,9 +41,11 @@ export class DownloadAndPracticeService {
       const localSets = await this.localSetRepo.getAllLocalSets();
       const targetSet = localSets.find(s => s.name === (metadata?.title || setName));
 
-      if (targetSet) {
+      if (targetSet && targetSet.id) {
         selectedSets.value = [targetSet.id];
         selectedLanguages.value = [language];
+      } else {
+        throw new Error(`Set "${setName}" not found in local sets after download`);
       }
 
       // Navigate to preferred practice mode or default

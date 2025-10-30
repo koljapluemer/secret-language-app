@@ -67,8 +67,8 @@
 import { ref, inject, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Download, CheckCircle, Play } from 'lucide-vue-next';
-import { RemoteSetService, type DownloadProgress } from '@/entities/remote-sets/RemoteSetService';
-import { DownloadAndPracticeService } from '@/features/download-and-practice/DownloadAndPracticeService';
+import { RemoteSetService, type DownloadProgress } from '@/features/download/RemoteSetService';
+import { DownloadAndPracticeService } from '@/features/download/DownloadAndPracticeService';
 import type { LocalSetRepoContract } from '@/entities/local-sets/LocalSetRepoContract';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
@@ -77,7 +77,7 @@ import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoCont
 import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract';
 import type { FactCardRepoContract } from '@/entities/fact-cards/FactCardRepoContract';
 import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
-import { remoteSetMetaDataSchema } from '@/entities/remote-sets/remoteSetMetaData';
+import { remoteSetMetaDataSchema } from '@/features/download/remoteSetMetaData';
 import { z } from 'zod';
 
 const route = useRoute();
