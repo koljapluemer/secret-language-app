@@ -1,11 +1,14 @@
 import { createApp } from 'vue'
 import App from '@/app/App.vue'
-import router from '@/app/router'
+import getRouter from '@/app/router'
 import i18n from '@/app/i18n'
 
-const app = createApp(App)
+// Async IIFE pattern for app initialization
+;(async () => {
+  const app = createApp(App)
+  const router = await getRouter()
 
-app.use(router)
-app.use(i18n)
-
-app.mount('#app')
+  app.use(router)
+  app.use(i18n)
+  app.mount('#app')
+})()

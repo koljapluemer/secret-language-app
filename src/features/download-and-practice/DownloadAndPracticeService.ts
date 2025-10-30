@@ -1,20 +1,15 @@
 import type { Router } from 'vue-router';
-import { UnifiedRemoteSetService, type DownloadProgress } from './UnifiedRemoteSetService';
+import { RemoteSetService } from '@/entities/remote-sets/RemoteSetService';
 import type { LocalSetRepoContract } from '@/entities/local-sets/LocalSetRepoContract';
 import { selectedLanguages, selectedSets } from '@/features/filter-practice-sets-and-languages/usePracticeFilters';
+import type { DownloadAndPracticeOptions } from './types';
 
-export interface DownloadAndPracticeOptions {
-  language: string;
-  setName: string;
-  onDownloadStart?: () => void;
-  onDownloadProgress?: (progress: DownloadProgress) => void;
-  onDownloadComplete?: () => void;
-  onError?: (error: string) => void;
-}
+// Re-export for convenience
+export type { DownloadAndPracticeOptions } from './types';
 
 export class DownloadAndPracticeService {
   constructor(
-    private remoteSetService: UnifiedRemoteSetService,
+    private remoteSetService: RemoteSetService,
     private localSetRepo: LocalSetRepoContract,
     private router: Router
   ) {}

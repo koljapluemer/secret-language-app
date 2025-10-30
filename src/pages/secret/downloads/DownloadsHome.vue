@@ -159,8 +159,8 @@ import { ref, inject, onMounted, watch, computed } from 'vue';
 import { useRouter, useRoute, type LocationQueryValue } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Download, Play, RefreshCw, FileText } from 'lucide-vue-next';
-import { UnifiedRemoteSetService, type RemoteSetInfo, type DownloadProgress } from '@/pages/downloads/UnifiedRemoteSetService';
-import { DownloadAndPracticeService } from '@/pages/downloads/DownloadAndPracticeService';
+import { RemoteSetService, type RemoteSetInfo, type DownloadProgress } from '@/entities/remote-sets/RemoteSetService';
+import { DownloadAndPracticeService } from '@/features/download-and-practice/DownloadAndPracticeService';
 import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
 import type { LanguageData } from '@/entities/languages/LanguageData';
 import type { LocalSetRepoContract } from '@/entities/local-sets/LocalSetRepoContract';
@@ -186,7 +186,7 @@ const goalRepo = inject<GoalRepoContract>('goalRepo')!;
 const factCardRepo = inject<FactCardRepoContract>('factCardRepo')!;
 const toast = useToast();
 
-const remoteSetService = new UnifiedRemoteSetService(
+const remoteSetService = new RemoteSetService(
   localSetRepo,
   vocabRepo,
   translationRepo,

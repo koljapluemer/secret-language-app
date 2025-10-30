@@ -2,12 +2,8 @@ import type { Router } from 'vue-router';
 
 const DEPLOY_FLAG = import.meta.env.VITE_DEPLOY_FLAG || 'secret';
 
-let router: Router;
-
-if (DEPLOY_FLAG === 'cram') {
-  router = (await import('./router.cram')).default;
-} else {
-  router = (await import('./router.secret')).default;
+export default function getRouter(): Promise<Router> {
+  return DEPLOY_FLAG === 'cram'
+    ? import('./router.cram').then(m => m.default)
+    : import('./router.secret').then(m => m.default);
 }
-
-export default router;

@@ -47,7 +47,7 @@ const toast = useToast();
 watch(() => props.state, (newState) => {
   if (newState.status === 'empty') {
     toast.warning(newState.message);
-    router.push({ name: 'practice-overview' });
+    router.push('/');
   }
 }, { immediate: true });
 

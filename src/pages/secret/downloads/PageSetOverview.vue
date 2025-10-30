@@ -67,8 +67,8 @@
 import { ref, inject, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Download, CheckCircle, Play } from 'lucide-vue-next';
-import { UnifiedRemoteSetService, type DownloadProgress } from '@/pages/downloads/UnifiedRemoteSetService';
-import { DownloadAndPracticeService } from '@/pages/downloads/DownloadAndPracticeService';
+import { RemoteSetService, type DownloadProgress } from '@/entities/remote-sets/RemoteSetService';
+import { DownloadAndPracticeService } from '@/features/download-and-practice/DownloadAndPracticeService';
 import type { LocalSetRepoContract } from '@/entities/local-sets/LocalSetRepoContract';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
@@ -102,7 +102,7 @@ const goalRepo = inject<GoalRepoContract>('goalRepo')!;
 const factCardRepo = inject<FactCardRepoContract>('factCardRepo')!;
 const languageRepo = inject<LanguageRepoContract>('languageRepo')!;
 
-const remoteSetService = new UnifiedRemoteSetService(
+const remoteSetService = new RemoteSetService(
   localSetRepo,
   vocabRepo,
   translationRepo,

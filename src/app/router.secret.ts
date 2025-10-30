@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import PracticeOverview from '@/pages/practice/PracticeOverview.vue';
-import PracticeHome from '@/pages/practice/PracticeHome.vue';
+import PracticeOverview from '@/pages/secret/practice/PracticeOverview.vue';
+import PracticeHome from '@/pages/secret/practice/PracticeHome.vue';
 import FactCardGrindWidget from '@/modes/modes/fact-card-grind/FactCardGrindWidget.vue';
 import GoalGetterWidget from '@/modes/modes/goal-getter/GoalGetterWidget.vue';
 import SisyphosWidget from '@/modes/modes/sisyphos/SisyphosWidget.vue';
@@ -12,26 +12,26 @@ import SentenceSlideWidget from '@/modes/modes/sentence-slide/SentenceSlideWidge
 import ResourceRotationWidget from '@/modes/modes/resource-rotation/ResourceRotationWidget.vue';
 import MinimalPairsWidget from '@/modes/modes/minimal-pairs/MinimalPairsWidget.vue';
 import ComponentClustersWidget from '@/modes/modes/component-clusters/ComponentClustersWidget.vue';
-import PageVocabList from '@/pages/vocab-list/PageVocabList.vue';
-import PageVocabEdit from '@/pages/vocab-edit/PageVocabEdit.vue';
-import PageVocabAdd from '@/pages/vocab-add/PageVocabAdd.vue';
-import PageListFactCards from '@/pages/fact-cards-list/PageListFactCards.vue';
-import PageFactCardAdd from '@/pages/fact-cards-add/PageFactCardAdd.vue';
-import PageFactCardEdit from '@/pages/fact-cards-edit/PageFactCardEdit.vue';
-import PageListResources from '@/pages/resources-list/PageListResources.vue';
-import PageResourceAdd from '@/pages/resource-add/PageResourceAdd.vue';
-import PageResourceEdit from '@/pages/resource-edit/PageResourceEdit.vue';
-import PageListGoals from '@/pages/goals-list/PageListGoals.vue';
-import PageGoalAdd from '@/pages/goal-add/PageGoalAdd.vue';
-import PageGoalEdit from '@/pages/goal-edit/PageGoalEdit.vue';
-import PageListSets from '@/pages/sets-list/PageListSets.vue';
-import PageDownloads from '@/pages/downloads/PageDownloads.vue';
-import DownloadsHome from '@/pages/downloads/DownloadsHome.vue';
-import PageStats from '@/pages/time-tracking/PageTimeTracking.vue';
-import PageMyMaterial from '@/pages/my-material/PageMyMaterial.vue';
-import PageSettings from '@/pages/settings/PageSettings.vue';
-import PageMotivation from '@/pages/motivation/PageMotivation.vue';
-import SelfTestHome from '@/pages/self-test/SelfTestHome.vue';
+import PageVocabList from '@/pages/secret/vocab-list/PageVocabList.vue';
+import PageVocabEdit from '@/pages/secret/vocab-edit/PageVocabEdit.vue';
+import PageVocabAdd from '@/pages/secret/vocab-add/PageVocabAdd.vue';
+import PageListFactCards from '@/pages/secret/fact-cards-list/PageListFactCards.vue';
+import PageFactCardAdd from '@/pages/secret/fact-cards-add/PageFactCardAdd.vue';
+import PageFactCardEdit from '@/pages/secret/fact-cards-edit/PageFactCardEdit.vue';
+import PageListResources from '@/pages/secret/resources-list/PageListResources.vue';
+import PageResourceAdd from '@/pages/secret/resource-add/PageResourceAdd.vue';
+import PageResourceEdit from '@/pages/secret/resource-edit/PageResourceEdit.vue';
+import PageListGoals from '@/pages/secret/goals-list/PageListGoals.vue';
+import PageGoalAdd from '@/pages/secret/goal-add/PageGoalAdd.vue';
+import PageGoalEdit from '@/pages/secret/goal-edit/PageGoalEdit.vue';
+import PageListSets from '@/pages/secret/sets-list/PageListSets.vue';
+import PageDownloads from '@/pages/secret/downloads/PageDownloads.vue';
+import DownloadsHome from '@/pages/secret/downloads/DownloadsHome.vue';
+import PageStats from '@/pages/secret/time-tracking/PageTimeTracking.vue';
+import PageMyMaterial from '@/pages/secret/my-material/PageMyMaterial.vue';
+import PageSettings from '@/pages/secret/settings/PageSettings.vue';
+import PageMotivation from '@/pages/secret/motivation/PageMotivation.vue';
+import SelfTestHome from '@/pages/secret/self-test/SelfTestHome.vue';
 import MinimalPairsTest from '@/modes/modes/minimal-pairs/MinimalPairsTest.vue';
 import ConsumeResourceTest from '@/modes/modes/consume-resource/ConsumeResourceTest.vue';
 
@@ -190,7 +190,7 @@ const router = createRouter({
         {
           path: ':language/:setName',
           name: 'set-overview',
-          component: () => import('@/pages/downloads/PageSetOverview.vue')
+          component: () => import('@/pages/secret/downloads/PageSetOverview.vue')
         }
       ]
     },

@@ -28,22 +28,10 @@ import type { Link } from '@/shared/links/Link';
 
 import { z } from 'zod';
 import { remoteSetMetaDataSchema } from '@/entities/remote-sets/remoteSetMetaData';
+import type { RemoteSetInfo, DownloadOptions } from './types';
 
-export interface RemoteSetInfo {
-  name: string;
-  title?: string;
-}
-
-export interface DownloadProgress {
-  phase: string;
-  current: number;
-  total: number;
-  percentage: number;
-}
-
-export interface DownloadOptions {
-  onProgress?: (progress: DownloadProgress) => void;
-}
+// Re-export types for convenience
+export type { RemoteSetInfo, DownloadProgress, DownloadOptions } from './types';
 
 interface RemoteSetFiles {
   vocab?: z.infer<typeof vocabSchema>[];
@@ -55,7 +43,7 @@ interface RemoteSetFiles {
   factCards?: z.infer<typeof factCardSchema>[];
 }
 
-export class UnifiedRemoteSetService {
+export class RemoteSetService {
   private toast = useToast();
   private readonly baseUrl: string;
 

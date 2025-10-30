@@ -10,9 +10,27 @@
 
 ## Running it
 
-```
+```bash
 npm i
 npm run dev
+```
+
+### Development Modes
+
+This codebase supports multiple deployment variants using the `VITE_DEPLOY_FLAG` environment variable:
+
+Run the dev server in different modes:
+
+```bash
+npm run dev:secret  # The Secret Language App
+npm run dev:cram    # Cram MVP
+```
+
+Build for production:
+
+```bash
+npm run build:secret 
+npm run build:cram   
 ```
 
 ## Features
