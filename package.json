@@ -5,7 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:secret": "vite --mode secret",
+    "dev:cram": "vite --mode cram",
     "build": "vue-tsc -b && vite build",
+    "build:secret": "vue-tsc -b && vite build --mode secret",
+    "build:cram": "vue-tsc -b && vite build --mode cram",
     "preview": "vite preview",
     "lint": "eslint . --ext .ts,.vue",
     "lint:fix": "eslint . --ext .ts,.vue --fix",
