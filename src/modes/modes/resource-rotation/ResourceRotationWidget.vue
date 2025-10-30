@@ -26,11 +26,6 @@ const mode = usePracticeMode({
     if (languageCodes.length === 0) return null;
 
     return await generateResourceRotationTask(resourceRepo, languageCodes);
-  },
-  messages: {
-    loading: 'Finding resources to extract knowledge from...',
-    empty: 'No resources are available for knowledge extraction. Add some resources to get started!',
-    error: 'Failed to initialize resource rotation. Please try again.'
   }
 });
 </script>
@@ -43,6 +38,5 @@ const mode = usePracticeMode({
     :retry="mode.retry"
     :initialize="mode.initialize"
     :onTaskFinished="mode.handleTaskFinished"
-    :loadingFallback="$t('practice.widgets.preparingResourceRotation')"
   />
 </template>

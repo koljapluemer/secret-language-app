@@ -36,11 +36,6 @@ const mode = usePracticeMode({
     if (vocabId) {
       lastUsedVocabId.value = vocabId;
     }
-  },
-  messages: {
-    loading: 'Finding vocabulary that needs images...',
-    empty: 'No vocabulary needs images right now. Check back later!',
-    error: 'Failed to initialize image insertion session. Please try again.'
   }
 });
 </script>
@@ -53,6 +48,5 @@ const mode = usePracticeMode({
     :retry="mode.retry"
     :initialize="mode.initialize"
     :onTaskFinished="mode.handleTaskFinished"
-    :loadingFallback="$t('practice.widgets.preparingImageInsertion')"
   />
 </template>

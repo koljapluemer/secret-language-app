@@ -44,11 +44,6 @@ const mode = usePracticeMode({
     if (vocabId) {
       lastUsedVocabId.value = vocabId;
     }
-  },
-  messages: {
-    loading: 'Finding component clusters...',
-    empty: 'No component vocab (contained in multiple other vocab) is available for practice.',
-    error: 'Failed to initialize Component Clusters mode. Please try again.'
   }
 });
 
@@ -75,6 +70,5 @@ async function handleTaskFinished() {
     :retry="mode.retry"
     :initialize="mode.initialize"
     :onTaskFinished="handleTaskFinished"
-    loadingFallback="Loading Component Clusters..."
   />
 </template>

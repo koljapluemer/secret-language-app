@@ -36,11 +36,6 @@ const mode = usePracticeMode({
     if (vocabId) {
       lastUsedVocabId.value = vocabId;
     }
-  },
-  messages: {
-    loading: 'Finding minimal pairs...',
-    empty: 'No character vocab with sound and related vocab is available for minimal pairs practice.',
-    error: 'Failed to initialize Minimal Pairs mode. Please try again.'
   }
 });
 </script>
@@ -53,6 +48,5 @@ const mode = usePracticeMode({
     :retry="mode.retry"
     :initialize="mode.initialize"
     :onTaskFinished="mode.handleTaskFinished"
-    :loadingFallback="$t('practice.widgets.loadingMinimalPairs')"
   />
 </template>

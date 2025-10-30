@@ -3,6 +3,7 @@ import type { Task } from '@/tasks/Task';
 import { taskRegistry } from '@/tasks/ui/taskRegistry';
 import { inject, onMounted, onUnmounted, ref, provide, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
@@ -30,23 +31,18 @@ interface Props {
   retry: () => Promise<void>;
   initialize: () => Promise<void>;
   onTaskFinished: () => Promise<void>;
-  loadingFallback?: string;
-  emptyTitle?: string;
-  errorTitle?: string;
-  retryLabel?: string;
-  checkAgainLabel?: string;
-  fallbackLabel?: string;
 }
 
 const props = defineProps<Props>();
 
 const router = useRouter();
 const toast = useToast();
+const { t } = useI18n();
 
 // Watch for empty state and redirect
 watch(() => props.state, (newState) => {
   if (newState.status === 'empty') {
-    toast.warning(newState.message);
+    toast.warning(t(newState.message));
     router.push('/');
   }
 }, { immediate: true });
@@ -151,8 +147,7 @@ function startTimingIfNeeded() {
         <div class="text-center">
           <span class="loading loading-spinner loading-lg"></span>
           <p class="mt-4 text-lg">
-            {{ state.status === 'loading' && state.message ? state.message : (loadingFallback ||
-              $t('practice.widgets.loading')) }}
+            {{ $t('practice.states.modeLoading') }}
           </p>
         </div>
       </div>
@@ -162,9 +157,9 @@ function startTimingIfNeeded() {
     <Transition enter-active-class="transition-opacity duration-[50ms]"
       leave-active-class="transition-opacity duration-[50ms]" enter-from-class="opacity-0" leave-to-class="opacity-0">
       <div v-if="state.status === 'error'" class="alert alert-error">
-        <span>{{ state.message }}</span>
+        <span>{{ $t(state.message) }}</span>
         <button class="btn btn-sm" @click="retry">
-          {{ retryLabel || $t('practice.widgets.tryAgain') }}
+          {{ $t('practice.widgets.tryAgain') }}
         </button>
       </div>
     </Transition>
@@ -188,7 +183,7 @@ function startTimingIfNeeded() {
         class="alert alert-warning">
         <span>{{ $t('practice.widgets.unknownQueueState') }}</span>
         <button class="btn btn-sm" @click="initialize">
-          {{ fallbackLabel || $t('practice.widgets.refresh') }}
+          {{ $t('practice.widgets.refresh') }}
         </button>
       </div>
     </Transition>

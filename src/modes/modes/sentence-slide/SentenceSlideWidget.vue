@@ -299,8 +299,5 @@ onMounted(() => {
     :retry="retry"
     :initialize="generateNextTask"
     :onTaskFinished="handleTaskFinished"
-    :loadingFallback="$t('practice.widgets.preparingSentenceSlide')"
-    emptyTitle="No sentences"
-    :checkAgainLabel="$t('practice.widgets.checkForMoreSentences')"
   />
 </template>

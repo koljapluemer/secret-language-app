@@ -53,11 +53,6 @@ const mode = usePracticeMode({
     if (contentId) {
       lastUsedContentId.value = contentId;
     }
-  },
-  messages: {
-    loading: 'Preparing immersion session...',
-    empty: 'No immersion content is currently available for practice.',
-    error: 'Failed to initialize illegal immersion session. Please try again.'
   }
 });
 </script>
@@ -70,7 +65,5 @@ const mode = usePracticeMode({
     :retry="mode.retry"
     :initialize="mode.initialize"
     :onTaskFinished="mode.handleTaskFinished"
-    :loadingFallback="$t('practice.widgets.startingIllegalImmersion')"
-    :checkAgainLabel="$t('practice.widgets.checkForMoreContent')"
   />
 </template>

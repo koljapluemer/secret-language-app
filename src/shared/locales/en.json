@@ -132,7 +132,10 @@
     "states": {
       "loading": "Loading practice session...",
       "noTasks": "No practice tasks available",
-      "error": "Failed to load practice session"
+      "error": "Failed to load practice session",
+      "modeLoading": "Loading next task...",
+      "modeEmpty": "No tasks available for practice",
+      "modeError": "Failed to initialize practice mode. Please try again."
     },
     "tasks": {
       "instructions": "Instructions",

@@ -31,11 +31,6 @@ const mode = usePracticeMode({
   },
   onTaskTransition: (newCurrentTask: Task) => {
     lastTaskType.value = newCurrentTask.taskType;
-  },
-  messages: {
-    loading: 'Preparing next goal task...',
-    empty: 'No goal tasks are currently available for practice.',
-    error: 'Failed to initialize goal task queue. Please try again.'
   }
 });
 </script>
@@ -48,6 +43,5 @@ const mode = usePracticeMode({
     :retry="mode.retry"
     :initialize="mode.initialize"
     :onTaskFinished="mode.handleTaskFinished"
-    :loadingFallback="$t('practice.widgets.loadingGoalTasks')"
   />
 </template>

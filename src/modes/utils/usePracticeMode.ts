@@ -14,11 +14,6 @@ export interface PracticeModeConfig {
   modeId: string;
   generateTask: () => Promise<Task | null>;
   onTaskTransition?: (newCurrentTask: Task) => void;
-  messages: {
-    loading: string;
-    empty: string;
-    error: string;
-  };
 }
 
 export function usePracticeMode(config: PracticeModeConfig) {
@@ -121,7 +116,7 @@ export function usePracticeMode(config: PracticeModeConfig) {
 
   // Try to transition to task state
   async function tryTransitionToTask(): Promise<boolean> {
-    setLoading(config.messages.loading);
+    setLoading();
     startDelayedLoading();
 
     try {
@@ -140,25 +135,25 @@ export function usePracticeMode(config: PracticeModeConfig) {
     }
 
     clearDelayedLoading();
-    setEmpty(config.messages.empty);
+    setEmpty('practice.states.modeEmpty');
     return false;
   }
 
   // Initialize queue
   async function initialize() {
-    setLoading(config.messages.loading);
+    setLoading();
     showLoadingUI.value = true;
 
     try {
       const success = await tryTransitionToTask();
       if (!success) {
         clearDelayedLoading();
-        setEmpty(config.messages.empty);
+        setEmpty('practice.states.modeEmpty');
       }
     } catch (error) {
       toast.error(`Initialization failed: ${String(error)}`);
       clearDelayedLoading();
-      setError(config.messages.error);
+      setError('practice.states.modeError');
     }
   }
 
@@ -173,7 +168,7 @@ export function usePracticeMode(config: PracticeModeConfig) {
       config.generateTask,
       config.onTaskTransition,
       tryTransitionToTask,
-      config.messages.empty
+      'practice.states.modeEmpty'
     );
   }
 

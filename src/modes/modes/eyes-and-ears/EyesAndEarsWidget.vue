@@ -40,11 +40,6 @@ const mode = usePracticeMode({
     if (vocabId) {
       lastUsedVocabId.value = vocabId;
     }
-  },
-  messages: {
-    loading: 'Preparing next exercise...',
-    empty: 'No vocabulary with both sound and images is currently available for practice.',
-    error: 'Failed to initialize Eyes and Ears queue. Please try again.'
   }
 });
 
@@ -92,6 +87,5 @@ function startRecallExercisesOnly() {
     :retry="mode.retry"
     :initialize="mode.initialize"
     :onTaskFinished="mode.handleTaskFinished"
-    :loadingFallback="$t('practice.widgets.loadingEyesAndEars')"
   />
 </template>

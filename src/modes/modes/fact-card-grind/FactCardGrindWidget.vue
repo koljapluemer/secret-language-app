@@ -36,11 +36,6 @@ const mode = usePracticeMode({
     if (factCardId) {
       lastUsedFactCardId.value = factCardId;
     }
-  },
-  messages: {
-    loading: 'Preparing next fact card...',
-    empty: 'No fact cards are currently available for practice.',
-    error: 'Failed to initialize fact card queue. Please try again.'
   }
 });
 </script>
@@ -53,6 +48,5 @@ const mode = usePracticeMode({
     :retry="mode.retry"
     :initialize="mode.initialize"
     :onTaskFinished="mode.handleTaskFinished"
-    :loadingFallback="$t('practice.widgets.loadingFactCards')"
   />
 </template>

@@ -53,11 +53,6 @@ const mode = usePracticeMode({
     if (contentId) {
       lastUsedContentId.value = contentId;
     }
-  },
-  messages: {
-    loading: 'Rolling the boulder...',
-    empty: 'The boulder has reached the top! No more reviews available.',
-    error: 'Failed to initialize review session. Please try again.'
   }
 });
 </script>
@@ -70,9 +65,5 @@ const mode = usePracticeMode({
     :retry="mode.retry"
     :initialize="mode.initialize"
     :onTaskFinished="mode.handleTaskFinished"
-    :loadingFallback="$t('practice.widgets.preparingEternalReview')"
-    :emptyTitle="$t('practice.widgets.boulderAtRest')"
-    :checkAgainLabel="$t('practice.widgets.rollAgain')"
-    :fallbackLabel="$t('practice.widgets.resetBoulder')"
   />
 </template>
