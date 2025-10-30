@@ -3,6 +3,7 @@ import type { TranslationData } from './TranslationData';
 import { levenshteinDistance, isLengthWithinRange } from '@/shared/utils/stringUtils';
 import { shuffleArray } from '@/shared/utils/arrayUtils';
 import { db } from '@/shared/database/db';
+import { nanoid } from 'nanoid';
 
 export class TranslationRepo implements TranslationRepoContract {
 
@@ -19,15 +20,16 @@ export class TranslationRepo implements TranslationRepoContract {
   }
 
   async saveTranslation(translation: Omit<TranslationData, 'id' | 'origins'>): Promise<TranslationData> {
-    const translationToSave: Omit<TranslationData, 'id'> = {
+    const translationToSave: TranslationData = {
+      id: nanoid(),
       content: translation.content,
       priority: translation.priority,
       notes: translation.notes,
       origins: []
     };
 
-    const id = await db.translations.add(translationToSave as TranslationData);
-    return { ...translationToSave, id: id as string };
+    await db.translations.add(translationToSave);
+    return translationToSave;
   }
 
   async saveOrGetExistingTranslation(translation: Omit<TranslationData, 'id' | 'origins'>): Promise<TranslationData> {
@@ -63,25 +65,19 @@ export class TranslationRepo implements TranslationRepoContract {
       return [];
     }
 
-    // Prepare translations with origins field
-    const translationsWithOrigins: Omit<TranslationData, 'id'>[] = translations.map(t => ({
+    // Prepare translations with generated UUIDs and origins field
+    const translationsWithIds: TranslationData[] = translations.map(t => ({
+      id: nanoid(),
       content: t.content,
       priority: t.priority,
       notes: t.notes,
       origins: []
     }));
 
-    // Bulk insert and get generated IDs
-    const generatedIds = await db.translations.bulkAdd(
-      translationsWithOrigins as TranslationData[],
-      { allKeys: true }
-    );
+    // Bulk insert
+    await db.translations.bulkAdd(translationsWithIds);
 
-    // Map generated IDs to translations
-    return translationsWithOrigins.map((t, index) => ({
-      ...t,
-      id: String(generatedIds[index])
-    }));
+    return translationsWithIds;
   }
 
   async searchTranslationsByContent(content: string): Promise<TranslationData[]> {

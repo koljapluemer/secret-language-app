@@ -138,6 +138,7 @@ export class RemoteSetService {
     // Ensure language exists in the database
     await this.languageRepo.ensureLanguageExists(languageCode);
 
+    console.log('RemoteSetService DEBUG - About to check for existing local set');
     // Check if local set already exists
     console.log('RemoteSetService DEBUG - Checking for existing sets with language:', languageCode);
     const existingSets = await this.localSetRepo.getLocalSetsByLanguage(languageCode);
@@ -224,6 +225,7 @@ export class RemoteSetService {
 
     // Process translations in batch for performance
     if (setFiles.translations) {
+      console.log('RemoteSetService DEBUG - Processing translations, count:', setFiles.translations.length);
       const translationIdMap = await this.processTranslationsInBatch(
         setFiles.translations,
         localSet.id,
@@ -231,10 +233,15 @@ export class RemoteSetService {
         (current, total) => reportProgress('Processing translations', current, total)
       );
 
+      console.log('RemoteSetService DEBUG - Translation ID map size:', translationIdMap.size);
+      console.log('RemoteSetService DEBUG - First 5 translation mappings:', Array.from(translationIdMap.entries()).slice(0, 5));
+
       // Merge the translation ID mappings
       translationIdMap.forEach((localId, remoteId) => {
         translationMap.set(remoteId, localId);
       });
+
+      console.log('RemoteSetService DEBUG - Final translationMap size:', translationMap.size);
     }
 
     // Process vocab - FAST INSERT (no merge logic, background service will handle deduplication)
@@ -251,6 +258,11 @@ export class RemoteSetService {
 
         const noteIds = this.resolveReferences(vocabData.notes || [], noteMap);
         const translationIds = this.resolveReferences(vocabData.translations || [], translationMap);
+
+        if (i === 0) {
+          console.log('RemoteSetService DEBUG - First vocab remote translation IDs:', vocabData.translations);
+          console.log('RemoteSetService DEBUG - First vocab resolved translation IDs:', translationIds);
+        }
         const links = this.resolveLinks(vocabData.links || [], linkMap);
 
         const localVocab: Omit<VocabData, "id" | 'progress'> = {

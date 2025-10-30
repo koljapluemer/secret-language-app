@@ -2,6 +2,7 @@ import type { LocalSetRepoContract } from './LocalSetRepoContract';
 import type { LocalSetData } from './LocalSetData';
 import { useToast } from '@/shared/toasts';
 import { db } from '@/shared/database/db';
+import { nanoid } from 'nanoid';
 
 export class LocalSetRepo implements LocalSetRepoContract {
   private toast = useToast();
@@ -24,17 +25,31 @@ export class LocalSetRepo implements LocalSetRepoContract {
 
   async saveLocalSet(localSet: Omit<LocalSetData, 'id'>): Promise<LocalSetData> {
     // Simple add - no duplicate checking (handled by RemoteSetService)
-    const newLocalSet: Omit<LocalSetData, 'id'> = {
+    const newLocalSet: LocalSetData = {
+      id: nanoid(),
       name: localSet.name,
       language: localSet.language,
       description: localSet.description,
       lastDownloadedAt: localSet.lastDownloadedAt
     };
 
+    console.log('LocalSetRepo - About to add:', newLocalSet);
+    console.log('LocalSetRepo - ID:', newLocalSet.id, 'type:', typeof newLocalSet.id);
+    console.log('LocalSetRepo - name:', newLocalSet.name, 'type:', typeof newLocalSet.name);
+    console.log('LocalSetRepo - language:', newLocalSet.language, 'type:', typeof newLocalSet.language);
+    console.log('LocalSetRepo - description:', newLocalSet.description, 'type:', typeof newLocalSet.description);
+    console.log('LocalSetRepo - lastDownloadedAt:', newLocalSet.lastDownloadedAt, 'type:', typeof newLocalSet.lastDownloadedAt, 'instanceof Date:', newLocalSet.lastDownloadedAt instanceof Date);
+
     try {
-      const id = await db.localSets.add(newLocalSet as LocalSetData);
-      return { ...newLocalSet, id: id as string };
+      console.log('LocalSetRepo - Calling db.localSets.add()');
+      await db.localSets.add(newLocalSet);
+      console.log('LocalSetRepo - Add succeeded');
+      return newLocalSet;
     } catch (error) {
+      console.error('LocalSetRepo - Add failed with error:', error);
+      console.error('LocalSetRepo - Error name:', (error as Error).name);
+      console.error('LocalSetRepo - Error message:', (error as Error).message);
+      console.error('LocalSetRepo - Full error object:', JSON.stringify(error, null, 2));
       this.toast.error(`LocalSetRepo: Failed to save local set: ${String(error)}`);
       throw error;
     }

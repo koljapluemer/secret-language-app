@@ -117,6 +117,22 @@ class LinguanodonDatabase extends Dexie {
       motivationSettings: '++id',
       testResults: '++id, testMode, completedAt'
     });
+
+    // Version 7: Use string UUIDs instead of auto-increment numbers
+    this.version(7).stores({
+      vocab: 'id, language, content, *origins, [language+content], progress.due, hasImage, hasSound',
+      translations: 'id, content, *origins',
+      goals: 'id, language, *origins, taskType, title, isActive, parentGoal, lastShownAt, *subGoals, *vocab, *examples, *factCards, *notes',
+      notes: 'id',
+      factCards: 'id, language, *origins',
+      resources: 'id, language, *origins',
+      languages: null,
+      localSets: 'id, &[name+language], language, lastDownloadedAt',
+      mergeQueue: 'id',
+      taskCompletions: 'id, timestamp, language_code, practice_mode, session_id',
+      motivationSettings: 'id',
+      testResults: 'id, testMode, completedAt'
+    });
   }
 }
 

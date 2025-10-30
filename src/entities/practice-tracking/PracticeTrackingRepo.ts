@@ -3,6 +3,7 @@ import type { TaskCompletionData } from './TaskCompletionData';
 import type { MotivationSettingsData } from './MotivationSettingsData';
 import { db } from '@/shared/database/db';
 import { useToast } from '@/shared/toasts';
+import { nanoid } from 'nanoid';
 
 export class PracticeTrackingRepo implements PracticeTrackingRepoContract {
   private toast = useToast();
@@ -11,9 +12,13 @@ export class PracticeTrackingRepo implements PracticeTrackingRepoContract {
   async saveCompletionEvent(event: Omit<TaskCompletionData, 'id'>): Promise<TaskCompletionData> {
     try {
       console.log('[PracticeTrackingRepo] Saving event:', event);
-      const id = await db.taskCompletions.add(event as TaskCompletionData);
-      console.log('[PracticeTrackingRepo] Event saved with ID:', id);
-      return { ...event, id } as TaskCompletionData;
+      const eventWithId: TaskCompletionData = {
+        id: nanoid(),
+        ...event
+      };
+      await db.taskCompletions.add(eventWithId);
+      console.log('[PracticeTrackingRepo] Event saved with ID:', eventWithId.id);
+      return eventWithId;
     } catch (error) {
       console.error('[PracticeTrackingRepo] Save failed:', error);
       this.toast.error(`PracticeTrackingRepo: Failed to save completion event: ${String(error)}`);
@@ -84,14 +89,15 @@ export class PracticeTrackingRepo implements PracticeTrackingRepoContract {
     const allSettings = await db.motivationSettings.toArray();
 
     if (allSettings.length === 0) {
-      // Create default settings and let Dexie generate the ID
-      const defaultSettings: Omit<MotivationSettingsData, 'id'> = {
+      // Create default settings with generated ID
+      const defaultSettings: MotivationSettingsData = {
+        id: nanoid(),
         dailyGoalMinutes: 30,
         weeklyGoalMinutes: 180
       };
 
-      const id = await db.motivationSettings.add(defaultSettings as MotivationSettingsData);
-      return { ...defaultSettings, id } as MotivationSettingsData;
+      await db.motivationSettings.add(defaultSettings);
+      return defaultSettings;
     }
 
     return allSettings[0];

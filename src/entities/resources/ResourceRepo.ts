@@ -2,6 +2,7 @@ import type { ResourceRepoContract, ResourceListFilters } from './ResourceRepoCo
 import type { ResourceData } from './ResourceData';
 import { useToast } from '@/shared/toasts';
 import { db } from '@/shared/database/db';
+import { nanoid } from 'nanoid';
 
 export class ResourceRepo implements ResourceRepoContract {
   private toast = useToast();
@@ -68,7 +69,8 @@ export class ResourceRepo implements ResourceRepoContract {
   }
 
   async saveResource(resource: Omit<ResourceData, 'id' | 'lastShownAt'>): Promise<ResourceData> {
-    const resourceData: Omit<ResourceData, 'id'> = {
+    const resourceData: ResourceData = {
+      id: nanoid(),
       language: resource.language,
       isImmersionContent: resource.isImmersionContent,
       title: resource.title,
@@ -84,8 +86,8 @@ export class ResourceRepo implements ResourceRepoContract {
 
 
     try {
-      const id = await db.resources.add(resourceData as ResourceData);
-      return { ...resourceData, id } as ResourceData;
+      await db.resources.add(resourceData);
+      return resourceData;
     } catch (error) {
       this.toast.error(`ResourceRepo: Failed to save resource: ${String(error)}`);
       throw error;

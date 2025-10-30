@@ -1,6 +1,7 @@
 import type { NoteRepoContract } from './NoteRepoContract';
 import type { NoteData } from './NoteData';
 import { db } from '@/shared/database/db';
+import { nanoid } from 'nanoid';
 
 export class NoteRepo implements NoteRepoContract {
 
@@ -24,14 +25,15 @@ export class NoteRepo implements NoteRepoContract {
   }
 
   async saveNote(note: Omit<NoteData, 'id'>): Promise<NoteData> {
-    const newNote: Omit<NoteData, 'id'> = {
+    const newNote: NoteData = {
+      id: nanoid(),
       content: note.content,
       showBeforeExercise: note.showBeforeExercise ?? false,
       noteType: note.noteType
     };
 
-    const id = await db.notes.add(newNote as NoteData);
-    return { ...newNote, id: id as string };
+    await db.notes.add(newNote);
+    return newNote;
   }
 
   async updateNote(note: NoteData): Promise<void> {
@@ -51,16 +53,17 @@ export class NoteRepo implements NoteRepoContract {
       return [];
     }
 
-    // Insert all notes and get back their auto-generated IDs
-    const generatedIds = await db.notes.bulkAdd(
-      notes as NoteData[],
-      { allKeys: true }
-    );
-
-    // Combine the input data with the generated IDs
-    return notes.map((note, index) => ({
-      ...note,
-      id: String(generatedIds[index])
+    // Prepare notes with generated UUIDs
+    const notesWithIds: NoteData[] = notes.map(note => ({
+      id: nanoid(),
+      content: note.content,
+      showBeforeExercise: note.showBeforeExercise ?? false,
+      noteType: note.noteType
     }));
+
+    // Bulk insert
+    await db.notes.bulkAdd(notesWithIds);
+
+    return notesWithIds;
   }
 }

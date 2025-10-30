@@ -2,6 +2,7 @@ import type { FactCardRepoContract, FactCardListFilters } from './FactCardRepoCo
 import type { FactCardData } from './FactCardData';
 import { createEmptyCard, fsrs, Rating } from 'ts-fsrs';
 import { db } from '@/shared/database/db';
+import { nanoid } from 'nanoid';
 
 export class FactCardRepo implements FactCardRepoContract {
 
@@ -32,7 +33,8 @@ export class FactCardRepo implements FactCardRepoContract {
   }
 
   async saveFactCard(factCard: Omit<FactCardData, 'id' | 'progress'>): Promise<FactCardData> {
-    const newFactCard: Omit<FactCardData, 'id'> = {
+    const newFactCard: FactCardData = {
+      id: nanoid(),
       language: factCard.language,
       front: factCard.front,
       back: factCard.back,
@@ -48,8 +50,8 @@ export class FactCardRepo implements FactCardRepoContract {
       origins: factCard.origins
     };
 
-    const id = await db.factCards.add(newFactCard as FactCardData);
-    return { ...newFactCard, id: id as string };
+    await db.factCards.add(newFactCard);
+    return newFactCard;
   }
 
   async updateFactCard(factCard: FactCardData): Promise<void> {

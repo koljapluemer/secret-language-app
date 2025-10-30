@@ -1,6 +1,7 @@
 import type { GoalData } from './GoalData';
 import type { GoalRepoContract, GoalListFilters } from './GoalRepoContract';
 import { db } from '@/shared/database/db';
+import { nanoid } from 'nanoid';
 
 export class GoalRepo implements GoalRepoContract {
 
@@ -13,7 +14,8 @@ export class GoalRepo implements GoalRepoContract {
   }
 
   async create(goalData: Omit<GoalData, 'id'>): Promise<GoalData> {
-    const goal: Omit<GoalData, 'id'> = {
+    const goal: GoalData = {
+      id: nanoid(),
       ...goalData,
       finishedAddingSubGoals: goalData.finishedAddingSubGoals ?? false,
       finishedAddingMilestones: goalData.finishedAddingMilestones ?? false,
@@ -21,8 +23,8 @@ export class GoalRepo implements GoalRepoContract {
       milestones: goalData.milestones ?? {}
     };
 
-    const id = await db.goals.add(goal as GoalData);
-    return { ...goal, id: id as string };
+    await db.goals.add(goal);
+    return goal;
   }
 
   async update(id: string, updates: Omit<Partial<GoalData>, 'id'>): Promise<GoalData> {

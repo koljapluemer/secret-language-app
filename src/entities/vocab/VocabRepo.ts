@@ -8,6 +8,7 @@ import { validateAudioFile, getAudioDuration, fetchAudioAsBlob } from '@/shared/
 import { useToast } from '@/shared/toasts';
 import { toRaw } from 'vue';
 import { db } from '@/shared/database/db';
+import { nanoid } from 'nanoid';
 
 // Utility functions
 function isUnseen(vocab: VocabData): boolean {
@@ -381,7 +382,8 @@ export class VocabRepo implements VocabRepoContract {
 
   async saveVocab(vocab: Omit<VocabData, 'id' | 'progress'>): Promise<VocabData> {
 
-    const newVocab: Omit<VocabData, 'id'> = {
+    const newVocab: VocabData = {
+      id: nanoid(),
       language: vocab.language,
       content: vocab.content,
       consideredCharacter: vocab.consideredCharacter,
@@ -408,8 +410,8 @@ export class VocabRepo implements VocabRepoContract {
       }
     };
 
-    const id = await db.vocab.add(newVocab as VocabData);
-    return { ...newVocab, id: id as string };
+    await db.vocab.add(newVocab);
+    return newVocab;
   }
 
   async updateVocab(vocab: VocabData): Promise<void> {
@@ -442,8 +444,9 @@ export class VocabRepo implements VocabRepoContract {
       return [];
     }
 
-    // Prepare vocab with progress field
-    const vocabWithProgress: Omit<VocabData, 'id'>[] = vocab.map(v => ({
+    // Prepare vocab with generated IDs and progress field
+    const vocabWithIds: VocabData[] = vocab.map(v => ({
+      id: nanoid(),
       language: v.language,
       content: v.content,
       consideredCharacter: v.consideredCharacter,
@@ -471,17 +474,9 @@ export class VocabRepo implements VocabRepoContract {
       }
     }));
 
-    // Bulk insert and get generated IDs
-    const generatedIds = await db.vocab.bulkAdd(
-      vocabWithProgress as VocabData[],
-      { allKeys: true }
-    );
+    await db.vocab.bulkAdd(vocabWithIds);
 
-    // Map generated IDs to vocab
-    return vocabWithProgress.map((v, index) => ({
-      ...v,
-      id: String(generatedIds[index])
-    }));
+    return vocabWithIds;
   }
 
   async getDueVocabInLanguage(language: string, vocabBlockList?: string[]): Promise<VocabData[]> {

@@ -1,14 +1,12 @@
 import type { TestResultRepoContract } from './TestResultRepoContract';
 import type { TestResultData } from './TestResultData';
 import { db } from '@/shared/database/db';
+import { nanoid } from 'nanoid';
 
 export class TestResultRepo implements TestResultRepoContract {
   async saveTestResult(result: Omit<TestResultData, 'id'>): Promise<TestResultData> {
-    // Generate a globally unique ID with "tst" prefix for Dexie Cloud compatibility
-    const id = `tst${crypto.randomUUID()}`;
-
     const testResult: TestResultData = {
-      id,
+      id: nanoid(),
       testMode: result.testMode,
       completedAt: result.completedAt,
       durationMs: result.durationMs,
