@@ -251,7 +251,7 @@ const handleDone = async () => {
 
       // Attach note to the goal
       const updatedGoal = {
-        ...goal.value,
+        ...toRaw(goal.value),
         notes: [...(goal.value.notes || []), savedNote.id]
       };
       await goalRepo.update(goal.value.id, updatedGoal);
@@ -267,7 +267,7 @@ const handleDone = async () => {
 
       // Attach note to the goal
       const updatedGoal = {
-        ...goal.value,
+        ...toRaw(goal.value),
         notes: [...(goal.value.notes || []), savedNote.id]
       };
       await goalRepo.update(goal.value.id, updatedGoal);

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { inject, ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
 import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract';
@@ -26,6 +27,7 @@ if (!vocabRepo || !translationRepo || !goalRepo) {
 const { selectedSets, loadOptions } = usePracticeFilters();
 const { addUsedVocab } = useUsedVocabTracker();
 const toast = useToast();
+const router = useRouter();
 
 // Queue state for Layout.vue
 const state = ref<QueueState>({ status: 'initializing' });
@@ -221,9 +223,11 @@ async function handleTaskFinished() {
 
   // Check if this was a goal-attempt task
   if (task.taskType === 'goal-attempt') {
-    // Lesson complete, start a new one
+    // Lesson complete, navigate back to home
+    const goalTitle = currentLesson.value?.goal.title || 'the goal';
+    toast.success(`Lesson complete! You practiced: ${goalTitle}`);
     currentLesson.value = null;
-    await generateNextTask();
+    router.push({ name: 'cram-home' });
     return;
   }
 
