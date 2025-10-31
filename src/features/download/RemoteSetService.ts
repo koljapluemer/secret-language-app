@@ -157,7 +157,10 @@ export class RemoteSetService {
       });
       console.log('RemoteSetService DEBUG - Save successful, got localSet:', localSet);
     } else {
-      console.log('RemoteSetService DEBUG - Using existing localSet, skipping save');
+      console.log('RemoteSetService DEBUG - Using existing localSet, skipping entire download');
+      // Set already exists, don't re-download anything
+      reportProgress('Set already downloaded', 100, 100);
+      return;
     }
 
     reportProgress('Setting up language and local set', 100, 100);

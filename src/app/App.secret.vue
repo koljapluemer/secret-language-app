@@ -28,7 +28,8 @@ onMounted(() => {
       repos.translationRepo,
       repos.noteRepo,
       repos.factCardRepo,
-      repos.resourceRepo
+      repos.resourceRepo,
+      repos.goalRepo
     );
   }
 });

@@ -1,28 +1,17 @@
 <script setup lang="ts">
-import { getCurrentInstance, onMounted } from 'vue';
+import { getCurrentInstance } from 'vue';
 import { provideRepositories } from './injectRepositories';
-import { startMergeService } from '../features/merge/startMergeService';
 import ToastContainer from '@/shared/toasts/ToastContainer.vue';
 
 // Setup and provide repositories
 const app = getCurrentInstance()?.appContext.app;
-let repos: ReturnType<typeof provideRepositories> | undefined;
 if (app) {
-  repos = provideRepositories(app);
+  provideRepositories(app);
 }
 
-// Start background merge service on mount
-onMounted(() => {
-  if (repos) {
-    startMergeService(
-      repos.vocabRepo,
-      repos.translationRepo,
-      repos.noteRepo,
-      repos.factCardRepo,
-      repos.resourceRepo
-    );
-  }
-});
+// NOTE: Merge service is DISABLED in cram mode to prevent vocab deletion between lessons
+// The merge service runs in the background and can delete "duplicate" vocab,
+// causing goals to reference non-existent vocab IDs between lessons
 </script>
 
 <template>

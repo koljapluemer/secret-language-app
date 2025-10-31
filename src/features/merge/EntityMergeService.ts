@@ -15,6 +15,7 @@ import type { TranslationRepoContract } from '@/entities/translations/Translatio
 import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract'
 import type { FactCardRepoContract } from '@/entities/fact-cards/FactCardRepoContract'
 import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoContract'
+import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract'
 
 // Entity data types
 import type { VocabData } from '@/entities/vocab/VocabData'
@@ -44,6 +45,7 @@ export class EntityMergeService {
     private noteRepo: NoteRepoContract,
     private factCardRepo: FactCardRepoContract,
     private resourceRepo: ResourceRepoContract,
+    private goalRepo: GoalRepoContract,
     private tickInterval: number = 2000 // Check every 2 seconds
   ) {}
 
@@ -153,6 +155,7 @@ export class EntityMergeService {
 
     const toUpdate: VocabData[] = []
     const toDelete: string[] = []
+    const vocabIdRemapping = new Map<string, string>() // Map of deleted ID -> surviving ID
 
     for (const vocab of unchecked) {
       const duplicate = await findDuplicateVocab(vocab, this.vocabRepo)
@@ -166,6 +169,7 @@ export class EntityMergeService {
 
         toUpdate.push(merged)
         toDelete.push(vocab.id)
+        vocabIdRemapping.set(vocab.id, duplicate.id) // Track ID remapping
       } else {
         // No duplicate - just mark as checked and deduplicate notes
         const deduplicatedNotes = await deduplicateNoteIds(vocab.notes, this.noteRepo)
@@ -182,6 +186,25 @@ export class EntityMergeService {
     if (toUpdate.length > 0) {
       for (const vocab of toUpdate) {
         await this.vocabRepo.updateVocab(vocab)
+      }
+    }
+
+    // Update goals that reference deleted vocab before deletion
+    if (vocabIdRemapping.size > 0) {
+      const allGoals = await this.goalRepo.getAll()
+      for (const goal of allGoals) {
+        let updated = false
+        const newVocabIds = goal.vocab.map(vocabId => {
+          if (vocabIdRemapping.has(vocabId)) {
+            updated = true
+            return vocabIdRemapping.get(vocabId)!
+          }
+          return vocabId
+        })
+
+        if (updated) {
+          await this.goalRepo.update(goal.id, { vocab: newVocabIds })
+        }
       }
     }
 

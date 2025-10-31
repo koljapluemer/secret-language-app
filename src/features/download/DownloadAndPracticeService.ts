@@ -23,17 +23,21 @@ export class DownloadAndPracticeService {
     try {
       onDownloadStart?.();
 
-      // Check if already downloaded
-      const isAlreadyDownloaded = await this.remoteSetService.isSetDownloaded(setName);
+      // Load metadata to get preferred practice mode and check if downloaded
+      const metadata = await this.remoteSetService.getSetMetadata(language, setName);
+      const setTitle = metadata?.title || setName;
+      const isAlreadyDownloaded = await this.remoteSetService.isSetDownloaded(setTitle);
+      console.log(`[DownloadService] Set "${setName}" (title: "${setTitle}") already downloaded: ${isAlreadyDownloaded}`);
 
       if (!isAlreadyDownloaded) {
+        console.log(`[DownloadService] Downloading set "${setName}"...`);
         await this.remoteSetService.downloadSet(language, setName, {
           onProgress: onDownloadProgress
         });
+        console.log(`[DownloadService] Download complete for "${setName}"`);
+      } else {
+        console.log(`[DownloadService] Skipping download for "${setName}" - already exists`);
       }
-
-      // Load metadata to get preferred practice mode
-      const metadata = await this.remoteSetService.getSetMetadata(language, setName);
 
       onDownloadComplete?.();
 

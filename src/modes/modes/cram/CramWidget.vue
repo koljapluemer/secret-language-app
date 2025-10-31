@@ -42,6 +42,40 @@ interface LessonState {
 
 const currentLesson = ref<LessonState | null>(null);
 
+// Recursively build vocab queue with depth-first traversal
+// This ensures dependencies are practiced before their dependents
+async function buildVocabQueueRecursive(
+  vocabId: string,
+  visited: Set<string>,
+  queue: VocabData[]
+): Promise<void> {
+  // Prevent circular dependencies and duplicate processing
+  if (visited.has(vocabId)) {
+    return;
+  }
+  visited.add(vocabId);
+
+  // Fetch the vocab
+  const vocab = await vocabRepo.getVocabByUID(vocabId);
+  if (!vocab || vocab.doNotPractice) {
+    return;
+  }
+
+  // First, recursively process all component vocab (depth-first)
+  if (vocab.contains && vocab.contains.length > 0) {
+    const componentIds = vocab.contains.filter(
+      id => id && typeof id === 'string' && id.trim().length > 0
+    );
+
+    for (const componentId of componentIds) {
+      await buildVocabQueueRecursive(componentId, visited, queue);
+    }
+  }
+
+  // After all dependencies are processed, add this vocab to the queue
+  queue.push(vocab);
+}
+
 // Start a new lesson by selecting a goal and building vocab queue
 async function startNewLesson(): Promise<void> {
   // Ensure only one set is selected
@@ -87,35 +121,22 @@ async function startNewLesson(): Promise<void> {
 
   const selectedVocab = await vocabRepo.getVocabByUID(selectedVocabId);
   if (!selectedVocab) {
-    throw new Error('Selected vocabulary not found');
+    throw new Error(`Selected vocabulary not found: ${selectedVocabId}`);
   }
 
-  // Build the vocab queue: component vocab first, then main vocab
+  // Build the vocab queue recursively with depth-first traversal
+  // This ensures all dependencies at any depth are practiced first
   const vocabQueue: VocabData[] = [];
+  const visited = new Set<string>();
 
-  // Get component vocab if exists
-  if (selectedVocab.contains && selectedVocab.contains.length > 0) {
-    const componentIds = selectedVocab.contains.filter(
-      id => id && typeof id === 'string' && id.trim().length > 0
-    );
-
-    for (const componentId of componentIds) {
-      const componentVocab = await vocabRepo.getVocabByUID(componentId);
-      if (componentVocab && !componentVocab.doNotPractice) {
-        vocabQueue.push(componentVocab);
-      }
-    }
-  }
-
-  // Add the main vocab itself
-  vocabQueue.push(selectedVocab);
+  await buildVocabQueueRecursive(selectedVocabId, visited, vocabQueue);
 
   // Initialize lesson state
   currentLesson.value = {
     goal: selectedGoal,
     vocabQueue,
     currentVocabIndex: 0,
-    tasksPerVocab: 2, // Show 2 tasks per vocab item
+    tasksPerVocab: 1, // Show 2 tasks per vocab item
     tasksShownForCurrentVocab: 0
   };
 }
