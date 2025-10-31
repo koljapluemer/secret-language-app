@@ -137,8 +137,6 @@ onMounted(() => {
 
 <template>
   <div class="container mx-auto p-4">
-    <h1 class="text-4xl font-bold mb-6">Cram Practice</h1>
-
     <!-- Loading state -->
     <div v-if="loading" class="flex justify-center items-center min-h-[200px]">
       <span class="loading loading-spinner loading-lg"></span>
