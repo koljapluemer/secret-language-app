@@ -44,9 +44,18 @@ export function usePracticeFilters() {
           localSetRepo!.getAllLocalSets()
         ]);
 
-        // Initialize with all selected
-        selectedLanguages.value = availableLanguages.value.map(l => l.code);
-        selectedSets.value = ['user-added', ...availableSets.value.map(s => s.id)];
+        // Only initialize selections if they haven't been set yet (e.g., by DownloadAndPracticeService)
+        // Check if filters are already pre-configured (not empty)
+        const hasPreConfiguredLanguages = selectedLanguages.value.length > 0;
+        const hasPreConfiguredSets = selectedSets.value.length > 0;
+
+        if (!hasPreConfiguredLanguages) {
+          selectedLanguages.value = availableLanguages.value.map(l => l.code);
+        }
+        if (!hasPreConfiguredSets) {
+          selectedSets.value = ['user-added', ...availableSets.value.map(s => s.id)];
+        }
+
         initialized.value = true;
       } finally {
         loading.value = false;

@@ -3,7 +3,6 @@ import { ref, computed, onMounted, onUnmounted, toRaw } from 'vue';
 import type { Task } from '@/tasks/Task';
 import type { GoalData } from '@/entities/goals/GoalData';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
-import type { NoteData } from '@/entities/notes/NoteData';
 import type { ActionControl } from '@/tasks/ui/ActionControl';
 import { useToast } from '@/shared/toasts';
 import Instruction from '@/tasks/ui/Instruction.vue';
