@@ -18,6 +18,7 @@ import TaskVocabChooseImageBySound from "@/tasks/task-vocab-choose-image-by-soun
 import TaskVocabChooseFromSound from "@/tasks/task-vocab-choose-from-sound/Render.vue";
 import TaskConsumeImmersionContent from "@/tasks/task-consume-immersion-content/Render.vue";
 import TaskCreateNewGoal from "@/tasks/task-goal-create-new/Render.vue";
+import TaskGoalAttempt from "@/tasks/task-goal-attempt/Render.vue";
 
 export interface TaskInfo {
   component: Component
@@ -51,6 +52,7 @@ export const taskRegistry: Record<string, TaskInfo> = {
   "vocab-choose-from-sound": { component: TaskVocabChooseFromSound, size: 'medium' },
   "consume-immersion-content": { component: TaskConsumeImmersionContent, size: 'big' },
   "create-new-goal": { component: TaskCreateNewGoal, size: 'medium' },
+  "goal-attempt": { component: TaskGoalAttempt, size: 'medium' },
 };
 
 export const TASK_REGISTRY_INJECTION_KEY = Symbol("taskRegistry");
