@@ -1,6 +1,5 @@
 import { openAIService } from './OpenAIService';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import { ChatPromptTemplate } from '@langchain/core/prompts';
 
 export interface TaskConfig {
   taskType: string;

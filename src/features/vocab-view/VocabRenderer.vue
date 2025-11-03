@@ -71,12 +71,61 @@
                     <div v-if="vocabOnlyNotes.length > 0" class="flex flex-row gap-1 flex-wrap">
                         <NoteDisplayMini v-for="note in vocabOnlyNotes" :key="note.id" :note="note" />
                     </div>
+                    <!-- Transcriptions (always shown) -->
+                    <div v-if="transcriptionNotes.length > 0" class="flex flex-col gap-1">
+                        <div class="text-sm font-medium text-base-content/70">Transcription:</div>
+                        <div class="flex flex-row gap-1 flex-wrap">
+                            <NoteDisplayMini v-for="note in transcriptionNotes" :key="note.id" :note="note" />
+                        </div>
+                    </div>
+                    <!-- Deep data metadata badges -->
+                    <div v-if="showDeepData" class="flex flex-row gap-1 flex-wrap">
+                        <span v-if="vocab.priority" class="badge badge-sm" :class="{
+                            'badge-error': vocab.priority >= 4,
+                            'badge-warning': vocab.priority === 3,
+                            'badge-info': vocab.priority <= 2
+                        }">Priority {{ vocab.priority }}</span>
+                        <span v-for="type in vocabTypeBadges" :key="type" class="badge badge-sm badge-outline">{{ type }}</span>
+                        <span v-if="vocab.doNotPractice" class="badge badge-sm badge-warning">Do Not Practice</span>
+                        <span v-if="vocab.isPicturable" class="badge badge-sm badge-ghost">Picturable</span>
+                    </div>
                 </div>
                 <div v-if="vocab.links && vocab.links.length > 0" class="flex flex-wrap gap-2 w-full">
                     <LinkDisplayCompact v-for="(link, index) in vocab.links" :key="index" :link="link" class="w-full" />
                 </div>
+                <!-- Origins (showDeepData) -->
+                <div v-if="showDeepData && vocab.origins && vocab.origins.length > 0" class="flex flex-col gap-1 w-full">
+                    <div class="text-sm font-medium text-base-content/70">Origins:</div>
+                    <div class="flex flex-row gap-1 flex-wrap">
+                        <span v-for="origin in vocab.origins" :key="origin" class="badge badge-sm badge-ghost">{{ origin }}</span>
+                    </div>
+                </div>
+                <!-- Similar Sounding (showDeepData) -->
+                <div v-if="showDeepData && similarSoundingVocabItems.length > 0" class="flex flex-col gap-1 w-full">
+                    <div class="text-sm font-medium text-base-content/70">Similar Sounding:</div>
+                    <div class="flex flex-row gap-1 flex-wrap">
+                        <span v-for="item in similarSoundingVocabItems" :key="item.id" class="badge badge-sm badge-outline">{{ item.content }}</span>
+                    </div>
+                </div>
             </div>
 
+            </div>
+            <!-- Relations sections (showRelations) -->
+            <div v-if="showRelations" class="flex flex-col gap-2 w-full">
+                <!-- Related Vocab -->
+                <div v-if="relatedVocabItems.length > 0" class="flex flex-col gap-1">
+                    <div class="text-sm font-medium text-base-content/70">Related:</div>
+                    <div class="flex flex-row gap-1 flex-wrap">
+                        <span v-for="item in relatedVocabItems" :key="item.id" class="badge badge-sm badge-outline">{{ item.content }}</span>
+                    </div>
+                </div>
+                <!-- Contains -->
+                <div v-if="containsVocabItems.length > 0" class="flex flex-col gap-1">
+                    <div class="text-sm font-medium text-base-content/70">Contains:</div>
+                    <div class="flex flex-row gap-1 flex-wrap">
+                        <span v-for="item in containsVocabItems" :key="item.id" class="badge badge-sm badge-outline">{{ item.content }}</span>
+                    </div>
+                </div>
             </div>
             <div class="flex flex-col gap-2 flex-1" v-if="!hideTranslations">
                 <!-- Translation-shared notes (above all translation cards) -->
@@ -137,16 +186,23 @@ const props = defineProps<{
     clozeData?: ClozeData
     showClozeAnswer?: boolean
     isRTL?: boolean
+    showDeepData?: boolean
+    showRelations?: boolean
 }>();
 
 const languageRepo = props.repos.languageRepo || undefined
 const translationRepo = props.repos.translationRepo || undefined
 const noteRepo = props.repos.noteRepo || undefined
+const vocabRepo = props.repos.vocabRepo || undefined
 
 const languageData = ref<LanguageData | null>(null);
 const translations = ref<TranslationData[]>([]);
 const vocabNotes = ref<NoteData[]>([]);
 const translationNotes = ref<NoteData[]>([]);
+const transcriptionNotes = ref<NoteData[]>([]);
+const relatedVocabItems = ref<VocabData[]>([]);
+const containsVocabItems = ref<VocabData[]>([]);
+const similarSoundingVocabItems = ref<VocabData[]>([]);
 
 // Compute displayed translations based on onlyShowSingleRandomTranslation prop
 const displayedTranslations = computed(() => {
@@ -155,6 +211,15 @@ const displayedTranslations = computed(() => {
         return [translations.value[randomIndex]];
     }
     return translations.value;
+});
+
+// Compute vocab type badges (can have multiple)
+const vocabTypeBadges = computed(() => {
+    const badges: string[] = [];
+    if (props.vocab.consideredCharacter) badges.push('Character');
+    if (props.vocab.consideredWord !== false) badges.push('Word'); // default to Word if undefined
+    if (props.vocab.consideredSentence) badges.push('Sentence');
+    return badges;
 });
 
 // Helper: Create unique key for note deduplication
@@ -257,6 +322,11 @@ onMounted(async () => {
         vocabNotes.value = await noteRepo?.getNotesByUIDs(props.vocab.notes) || [];
     }
 
+    // Load transcriptions (always load)
+    if (props.vocab.transcriptions && props.vocab.transcriptions.length > 0) {
+        transcriptionNotes.value = await noteRepo?.getNotesByUIDs(props.vocab.transcriptions) || [];
+    }
+
     // Load translation notes
     const allTranslationNoteIds: string[] = [];
     translations.value.forEach(translation => {
@@ -266,6 +336,21 @@ onMounted(async () => {
     });
     if (allTranslationNoteIds.length > 0) {
         translationNotes.value = await noteRepo?.getNotesByUIDs(allTranslationNoteIds) || [];
+    }
+
+    // Load related vocab data if showRelations is true
+    if (props.showRelations && vocabRepo) {
+        if (props.vocab.relatedVocab && props.vocab.relatedVocab.length > 0) {
+            relatedVocabItems.value = await vocabRepo.getVocabByUIDs(props.vocab.relatedVocab) || [];
+        }
+        if (props.vocab.contains && props.vocab.contains.length > 0) {
+            containsVocabItems.value = await vocabRepo.getVocabByUIDs(props.vocab.contains) || [];
+        }
+    }
+
+    // Load similar sounding vocab if showDeepData is true
+    if (props.showDeepData && vocabRepo && props.vocab.similarSoundingButNotTheSame && props.vocab.similarSoundingButNotTheSame.length > 0) {
+        similarSoundingVocabItems.value = await vocabRepo.getVocabByUIDs(props.vocab.similarSoundingButNotTheSame) || [];
     }
 });
 </script>

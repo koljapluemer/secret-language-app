@@ -166,8 +166,10 @@
       <Display
         v-if="selectedVocab"
         :vocab="selectedVocab"
-        :repos="{ languageRepo, translationRepo, noteRepo }"
+        :repos="{ languageRepo, translationRepo, noteRepo, vocabRepo }"
         showLanguage
+        showDeepData
+        showRelations
       />
     </div>
     <form method="dialog" class="modal-backdrop">
