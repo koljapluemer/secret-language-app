@@ -26,6 +26,63 @@ interface MotivationSettings {
 const dailyGoal = ref(30);
 const weeklyGoal = ref(180);
 
+// OpenAI API Key
+const OPENAI_API_KEY_STORAGE_KEY = 'openai-api-key';
+const openaiApiKey = ref('');
+const isTestingKey = ref(false);
+
+function loadApiKey() {
+  const stored = localStorage.getItem(OPENAI_API_KEY_STORAGE_KEY);
+  if (stored) {
+    openaiApiKey.value = stored;
+  }
+}
+
+function saveApiKey() {
+  if (openaiApiKey.value.trim()) {
+    localStorage.setItem(OPENAI_API_KEY_STORAGE_KEY, openaiApiKey.value.trim());
+    toast.success('API key saved successfully');
+  } else {
+    localStorage.removeItem(OPENAI_API_KEY_STORAGE_KEY);
+    toast.success('API key removed');
+  }
+}
+
+async function testApiKey() {
+  if (!openaiApiKey.value.trim()) {
+    toast.error('Please enter an API key first');
+    return;
+  }
+
+  // Save the key first before testing
+  saveApiKey();
+
+  isTestingKey.value = true;
+  try {
+    // Use the OpenAIService to test - single source of truth
+    const { openAIService } = await import('@/features/goal-driven-learning/OpenAIService');
+
+    if (!openAIService.hasApiKey()) {
+      toast.error('Failed to save API key');
+      return;
+    }
+
+    const model = openAIService.createChatModel({
+      modelName: 'gpt-3.5-turbo',
+      temperature: 0
+    });
+
+    await model.invoke('test');
+    toast.success('API key is valid!');
+  } catch (error) {
+    toast.error(`API key test failed: ${String(error)}`);
+  } finally {
+    isTestingKey.value = false;
+  }
+}
+
+loadApiKey();
+
 function loadGoals() {
   const stored = localStorage.getItem(MOTIVATION_SETTINGS_KEY);
   if (stored) {
@@ -146,6 +203,39 @@ async function deduplicateNotes(notes: NoteData[]): Promise<{ keptNotes: NoteDat
   <h1>{{ $t('navigation.settings') }}</h1>
 
   <AudioAnalysis :vocab-repo="vocabRepo" />
+
+  <h3>OpenAI API Key</h3>
+  <p class="text-light mb-4">
+    Enter your OpenAI API key to enable AI-powered learning features like Goal-Driven Learning mode. Get your key at <a href="https://platform.openai.com/api-keys" target="_blank" class="link">platform.openai.com</a>.
+  </p>
+
+  <div class="space-y-4 mb-8">
+    <div class="form-control w-full max-w-md">
+      <label class="label">
+        <span class="label-text">OpenAI API Key</span>
+      </label>
+      <div class="flex gap-2">
+        <input
+          v-model="openaiApiKey"
+          type="password"
+          placeholder="sk-..."
+          class="input input-bordered flex-1"
+          @change="saveApiKey"
+        />
+        <button
+          @click="testApiKey"
+          :disabled="isTestingKey || !openaiApiKey.trim()"
+          class="btn btn-outline"
+        >
+          <span v-if="isTestingKey" class="loading loading-spinner loading-xs mr-2"></span>
+          {{ isTestingKey ? 'Testing...' : 'Test' }}
+        </button>
+      </div>
+      <label class="label">
+        <span class="label-text-alt">Your API key is stored locally in your browser and never sent to our servers</span>
+      </label>
+    </div>
+  </div>
 
   <h3>{{ $t('settings.practiceGoals') }}</h3>
   <p class="text-light mb-4">
