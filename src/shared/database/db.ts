@@ -1,6 +1,8 @@
 import Dexie, { type Table } from 'dexie';
 import type { VocabData } from '@/entities/vocab/VocabData';
 import type { TranslationData } from '@/entities/translations/TranslationData';
+import type { GlossData } from '@/entities/gloss/GlossData';
+import type { SituationData } from '@/entities/situation/SituationData';
 import type { GoalData } from '@/entities/goals/GoalData';
 import type { NoteData } from '@/entities/notes/NoteData';
 import type { FactCardData } from '@/entities/fact-cards/FactCardData';
@@ -15,6 +17,8 @@ import type { TestResultData } from '@/entities/test-results/TestResultData';
 class LinguanodonDatabase extends Dexie {
   vocab!: Table<VocabData>;
   translations!: Table<TranslationData>;
+  glosses!: Table<GlossData>;
+  situations!: Table<SituationData>;
   goals!: Table<GoalData>;
   notes!: Table<NoteData>;
   factCards!: Table<FactCardData>;
@@ -122,6 +126,8 @@ class LinguanodonDatabase extends Dexie {
     this.version(7).stores({
       vocab: 'id, language, content, *origins, [language+content], progress.due, hasImage, hasSound',
       translations: 'id, content, *origins',
+      glosses: 'id, description, *origins',
+      situations: 'id, description, *vocabs, *glosses, *translations',
       goals: 'id, language, *origins, taskType, title, isActive, parentGoal, lastShownAt, *subGoals, *vocab, *examples, *factCards, *notes',
       notes: 'id',
       factCards: 'id, language, *origins',

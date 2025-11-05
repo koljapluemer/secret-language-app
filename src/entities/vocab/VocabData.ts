@@ -41,6 +41,7 @@ export interface VocabData {
   notes: string[]; // ids of NoteData repo
   transcriptions?: string[]; // ids of NoteData repo (yes, just notes, only semantically marked as transcriptions)
   translations: string[]; // ids of Translation repo
+  glosses: string[]; // ids of Gloss repo
   links: Link[]
   progress: LearningProgress // warning: this contain a Date. Make sure to hydrate correctly when persisting. warning: ts-fsrs Card must be created with createEmptyCard()
 

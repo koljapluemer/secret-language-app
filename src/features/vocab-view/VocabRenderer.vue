@@ -110,6 +110,24 @@
             </div>
 
             </div>
+
+            <!-- Glosses Section -->
+            <div class="flex flex-col gap-2 flex-1" v-if="!hideTranslations && glosses.length > 0">
+                <h4 class="text-sm font-medium text-base-content/70">Glosses:</h4>
+                <!-- Individual gloss cards -->
+                <div class="card card-sm shadow-sm bg-base-100" v-for="gloss in glosses" :key="gloss.id">
+                    <div class="card-body">
+                        <div class="text-base">{{ gloss.description }}</div>
+                        <div v-if="gloss.descriptions.length > 0" class="text-sm text-base-content/60 mt-1">
+                            <div v-for="(desc, idx) in gloss.descriptions" :key="idx" class="flex gap-2">
+                                <span class="badge badge-sm">{{ desc.languageCode }}</span>
+                                <span>{{ desc.description }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Relations sections (showRelations) -->
             <div v-if="showRelations" class="flex flex-col gap-2 w-full">
                 <!-- Related Vocab -->
@@ -158,6 +176,7 @@ import { ref, computed, onMounted } from 'vue';
 import type { VocabData } from '../../entities/vocab/VocabData';
 import type { LanguageData } from '@/entities/languages/LanguageData';
 import type { TranslationData } from '@/entities/translations/TranslationData';
+import type { GlossData } from '@/entities/gloss/GlossData';
 import { renderLanguage } from '@/entities/languages/renderLanguage';
 import type { RepositoriesContext } from '@/shared/types/RepositoriesContext';
 import LinkDisplayCompact from '@/shared/links/LinkDisplayCompact.vue';
@@ -192,11 +211,13 @@ const props = defineProps<{
 
 const languageRepo = props.repos.languageRepo || undefined
 const translationRepo = props.repos.translationRepo || undefined
+const glossRepo = props.repos.glossRepo || undefined
 const noteRepo = props.repos.noteRepo || undefined
 const vocabRepo = props.repos.vocabRepo || undefined
 
 const languageData = ref<LanguageData | null>(null);
 const translations = ref<TranslationData[]>([]);
+const glosses = ref<GlossData[]>([]);
 const vocabNotes = ref<NoteData[]>([]);
 const translationNotes = ref<NoteData[]>([]);
 const transcriptionNotes = ref<NoteData[]>([]);
@@ -315,6 +336,11 @@ onMounted(async () => {
     // Load translations
     if (props.vocab.translations && props.vocab.translations.length > 0) {
         translations.value = await translationRepo?.getTranslationsByIds(props.vocab.translations) || [];
+    }
+
+    // Load glosses
+    if (props.vocab.glosses && props.vocab.glosses.length > 0) {
+        glosses.value = await glossRepo?.getGlossesByIds(props.vocab.glosses) || [];
     }
 
     // Load vocab notes

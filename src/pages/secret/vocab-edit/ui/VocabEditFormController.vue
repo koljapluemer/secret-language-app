@@ -21,6 +21,9 @@
       @add-translation="addTranslation"
       @update-translation="updateTranslation"
       @remove-translation="(index) => removeTranslation(index)"
+      @add-gloss="addGloss"
+      @update-gloss="updateGloss"
+      @remove-gloss="(index) => removeGloss(index)"
       @update-related-vocab="updateRelatedVocab"
       @update-contains="updateContains"
       @update-similar-sounding-vocab="updateSimilarSoundingVocab"
@@ -37,10 +40,12 @@ import { toRaw } from 'vue';
 import VocabFormMetaRenderer from './VocabFormMetaRenderer.vue';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
+import type { GlossRepoContract } from '@/entities/gloss/GlossRepoContract';
 import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract';
 import type { VocabData, VocabImage, VocabSound } from '@/entities/vocab/VocabData';
 import type { NoteData } from '@/entities/notes/NoteData';
 import type { TranslationData } from '@/entities/translations/TranslationData';
+import type { GlossData } from '@/entities/gloss/GlossData';
 import type { Link } from '@/shared/links/Link';
 import { useToast } from '@/shared/toasts';
 
@@ -52,6 +57,7 @@ interface VocabFormData {
   consideredSentence?: boolean;
   consideredWord?: boolean;
   translations: (TranslationData | Omit<TranslationData, 'id'>)[];
+  glosses: (GlossData | Omit<GlossData, 'id'>)[];
   priority?: number;
   doNotPractice?: boolean;
   notes: (NoteData | Omit<NoteData, 'id'>)[];
@@ -73,7 +79,7 @@ interface VocabFormState {
   isEditing: boolean;
 }
 
-function vocabDataToFormData(vocab: VocabData, notes: NoteData[] = [], transcriptions: NoteData[] = [], translations: TranslationData[] = []): VocabFormData {
+function vocabDataToFormData(vocab: VocabData, notes: NoteData[] = [], transcriptions: NoteData[] = [], translations: TranslationData[] = [], glosses: GlossData[] = []): VocabFormData {
   return {
     id: vocab.id,
     language: vocab.language,
@@ -82,6 +88,7 @@ function vocabDataToFormData(vocab: VocabData, notes: NoteData[] = [], transcrip
     consideredSentence: vocab.consideredSentence ?? false,
     consideredWord: vocab.consideredWord ?? true,
     translations: translations,
+    glosses: glosses,
     priority: vocab.priority,
     doNotPractice: vocab.doNotPractice,
     notes: notes,
@@ -106,6 +113,7 @@ function formDataToVocabData(formData: VocabFormData, existingVocab?: VocabData)
     consideredSentence: formData.consideredSentence,
     consideredWord: formData.consideredWord,
     translations: formData.translations.filter((t): t is TranslationData => 'id' in t).map(t => t.id),
+    glosses: formData.glosses.filter((g): g is GlossData => 'id' in g).map(g => g.id),
     priority: formData.priority,
     doNotPractice: formData.doNotPractice,
     notes: formData.notes.filter((n): n is NoteData => 'id' in n).map(n => n.id),
@@ -128,6 +136,7 @@ function formDataToVocabData(formData: VocabFormData, existingVocab?: VocabData)
     consideredSentence: formData.consideredSentence,
     consideredWord: formData.consideredWord,
     translations: formData.translations.filter((t): t is TranslationData => 'id' in t).map(t => t.id),
+    glosses: formData.glosses.filter((g): g is GlossData => 'id' in g).map(g => g.id),
     priority: formData.priority,
     doNotPractice: formData.doNotPractice,
     notes: formData.notes.filter((n): n is NoteData => 'id' in n).map(n => n.id),
@@ -158,12 +167,16 @@ const toast = useToast();
 
 const vocabRepo = inject<VocabRepoContract>('vocabRepo');
 const translationRepo = inject<TranslationRepoContract>('translationRepo');
+const glossRepo = inject<GlossRepoContract>('glossRepo');
 const noteRepo = inject<NoteRepoContract>('noteRepo');
 if (!vocabRepo) {
   throw new Error('VocabRepo not provided');
 }
 if (!translationRepo) {
   throw new Error('TranslationRepo not provided');
+}
+if (!glossRepo) {
+  throw new Error('GlossRepo not provided');
 }
 if (!noteRepo) {
   throw new Error('NoteRepo not provided');
@@ -177,6 +190,7 @@ const state = ref<VocabFormState>({
     consideredSentence: false,
     consideredWord: true,
     translations: [],
+    glosses: [],
     priority: undefined,
     doNotPractice: undefined,
     notes: [],
@@ -196,6 +210,7 @@ const loadedVocabData = ref<VocabData | null>(null);
 const loadedNotes = ref<NoteData[]>([]);
 const loadedTranscriptions = ref<NoteData[]>([]);
 const loadedTranslations = ref<TranslationData[]>([]);
+const loadedGlosses = ref<GlossData[]>([]);
 const containedInVocabIds = ref<string[]>([]);
 
 const isValid = computed(() => {
@@ -255,6 +270,18 @@ async function loadVocab() {
         loadedTranslations.value = [];
       }
 
+      if (vocab.glosses && vocab.glosses.length > 0 && glossRepo) {
+        try {
+          const glosses = await glossRepo.getGlossesByIds(vocab.glosses);
+          loadedGlosses.value = glosses;
+        } catch {
+          toast.error('Failed to load glosses');
+          loadedGlosses.value = [];
+        }
+      } else {
+        loadedGlosses.value = [];
+      }
+
       // Load vocab that contains this vocab
       try {
         const containingVocab = await vocabRepo.getVocabContainingVocabId(props.vocabId);
@@ -264,7 +291,7 @@ async function loadVocab() {
         containedInVocabIds.value = [];
       }
 
-      state.value.formData = vocabDataToFormData(vocab, loadedNotes.value, loadedTranscriptions.value, loadedTranslations.value);
+      state.value.formData = vocabDataToFormData(vocab, loadedNotes.value, loadedTranscriptions.value, loadedTranslations.value, loadedGlosses.value);
     } else {
       state.value.error = 'Vocab not found';
     }
@@ -346,6 +373,25 @@ async function saveInternal(): Promise<void> {
   const translationsToDelete = loadedTranslations.value.filter(t => !currentTranslationUIDs.includes(t.id));
   if (translationsToDelete.length > 0) {
     await translationRepo.deleteTranslations(translationsToDelete.map(t => t.id));
+  }
+
+  // Save or update glosses
+  for (let i = 0; i < serializedFormData.glosses.length; i++) {
+    const gloss = serializedFormData.glosses[i];
+    if ('id' in gloss && gloss.id && loadedGlosses.value.find(g => g.id === gloss.id)) {
+      // Existing gloss - update it
+      await glossRepo.updateGloss(toRaw(gloss as GlossData));
+    } else {
+      // New gloss (no id) - save it and get the real ID back
+      const savedGloss = await glossRepo.saveGloss(toRaw(gloss));
+      serializedFormData.glosses[i] = savedGloss;
+    }
+  }
+
+  const currentGlossUIDs = serializedFormData.glosses.filter((g): g is GlossData => 'id' in g).map(g => g.id);
+  const glossesToDelete = loadedGlosses.value.filter(g => !currentGlossUIDs.includes(g.id));
+  if (glossesToDelete.length > 0) {
+    await glossRepo.deleteGlosses(glossesToDelete.map(g => g.id));
   }
 
   let finalVocabId = props.vocabId;
@@ -492,6 +538,27 @@ function updateTranslation(updatedTranslation: TranslationData | Omit<Translatio
 
 async function removeTranslation(index: number) {
   state.value.formData.translations.splice(index, 1);
+  await handleFieldChange();
+}
+
+function addGloss(gloss: GlossData | Omit<GlossData, 'id'>) {
+  state.value.formData.glosses.push(gloss);
+  handleFieldChange();
+}
+
+function updateGloss(updatedGloss: GlossData | Omit<GlossData, 'id'>) {
+  // Find by id if it exists
+  if ('id' in updatedGloss && updatedGloss.id) {
+    const index = state.value.formData.glosses.findIndex(g => 'id' in g && g.id === updatedGloss.id);
+    if (index >= 0) {
+      state.value.formData.glosses[index] = updatedGloss;
+      handleFieldChange();
+    }
+  }
+}
+
+async function removeGloss(index: number) {
+  state.value.formData.glosses.splice(index, 1);
   await handleFieldChange();
 }
 

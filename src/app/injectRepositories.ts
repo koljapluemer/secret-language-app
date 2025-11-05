@@ -1,5 +1,7 @@
 import { VocabRepo } from '@/entities/vocab/VocabRepo';
 import { TranslationRepo } from '@/entities/translations/TranslationRepo';
+import { GlossRepo } from '@/entities/gloss/GlossRepo';
+import { SituationRepo } from '@/entities/situation/SituationRepo';
 import { GoalRepo } from '@/entities/goals/GoalRepo';
 import { NoteRepo } from '@/entities/notes/NoteRepo';
 import { FactCardRepo } from '@/entities/fact-cards/FactCardRepo';
@@ -14,6 +16,8 @@ export function setupRepositories() {
   // Create repository instances
   const vocabRepo = new VocabRepo();
   const translationRepo = new TranslationRepo();
+  const glossRepo = new GlossRepo();
+  const situationRepo = new SituationRepo();
   const goalRepo = new GoalRepo();
   const noteRepo = new NoteRepo();
   const factCardRepo = new FactCardRepo();
@@ -27,6 +31,8 @@ export function setupRepositories() {
   return {
     vocabRepo,
     translationRepo,
+    glossRepo,
+    situationRepo,
     goalRepo,
     noteRepo,
     factCardRepo,
@@ -40,10 +46,12 @@ export function setupRepositories() {
 }
 
 export function provideRepositories(app: { provide: (key: string | symbol, value: unknown) => void }) {
-  const { vocabRepo, translationRepo, goalRepo, noteRepo, factCardRepo, resourceRepo, languageRepo, localSetRepo, mergeQueueRepo, practiceTrackingRepo, testResultRepo } = setupRepositories();
+  const { vocabRepo, translationRepo, glossRepo, situationRepo, goalRepo, noteRepo, factCardRepo, resourceRepo, languageRepo, localSetRepo, mergeQueueRepo, practiceTrackingRepo, testResultRepo } = setupRepositories();
 
   app.provide('vocabRepo', vocabRepo);
   app.provide('translationRepo', translationRepo);
+  app.provide('glossRepo', glossRepo);
+  app.provide('situationRepo', situationRepo);
   app.provide('goalRepo', goalRepo);
   app.provide('noteRepo', noteRepo);
   app.provide('factCardRepo', factCardRepo);
@@ -54,5 +62,5 @@ export function provideRepositories(app: { provide: (key: string | symbol, value
   app.provide('practiceTrackingRepo', practiceTrackingRepo);
   app.provide('testResultRepo', testResultRepo);
 
-  return { vocabRepo, translationRepo, goalRepo, noteRepo, factCardRepo, resourceRepo, languageRepo, localSetRepo, mergeQueueRepo, practiceTrackingRepo, testResultRepo };
+  return { vocabRepo, translationRepo, glossRepo, situationRepo, goalRepo, noteRepo, factCardRepo, resourceRepo, languageRepo, localSetRepo, mergeQueueRepo, practiceTrackingRepo, testResultRepo };
 }

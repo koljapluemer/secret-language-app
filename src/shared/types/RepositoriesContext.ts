@@ -1,5 +1,7 @@
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
+import type { GlossRepoContract } from '@/entities/gloss/GlossRepoContract';
+import type { SituationRepoContract } from '@/entities/situation/SituationRepoContract';
 import type { FactCardRepoContract } from '@/entities/fact-cards/FactCardRepoContract';
 import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoContract';
 import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract';
@@ -9,6 +11,8 @@ import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoCont
 export interface RepositoriesContext {
   vocabRepo?: VocabRepoContract;
   translationRepo?: TranslationRepoContract;
+  glossRepo?: GlossRepoContract;
+  situationRepo?: SituationRepoContract;
   factCardRepo?: FactCardRepoContract;
   resourceRepo?: ResourceRepoContract;
   goalRepo?: GoalRepoContract;
@@ -19,6 +23,8 @@ export interface RepositoriesContext {
 export interface RepositoriesContextStrict {
   vocabRepo: VocabRepoContract;
   translationRepo: TranslationRepoContract;
+  glossRepo: GlossRepoContract;
+  situationRepo: SituationRepoContract;
   factCardRepo: FactCardRepoContract;
   resourceRepo: ResourceRepoContract;
   goalRepo: GoalRepoContract;
