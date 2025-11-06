@@ -73,6 +73,11 @@ export const vocabMergeStrategy: MergeStrategyMap<VocabData> = {
     description: 'Merge all translations from both sources'
   },
 
+  glosses: {
+    strategy: 'array-union',
+    description: 'Merge all glosses from both sources'
+  },
+
   links: {
     strategy: 'custom',
     customMerge: (target: Link[], source: Link[]) => {

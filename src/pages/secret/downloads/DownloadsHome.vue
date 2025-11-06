@@ -166,6 +166,7 @@ import type { LanguageData } from '@/entities/languages/LanguageData';
 import type { LocalSetRepoContract } from '@/entities/local-sets/LocalSetRepoContract';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
+import type { GlossRepoContract } from '@/entities/gloss/GlossRepoContract';
 import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract';
 import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoContract';
 import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract';
@@ -180,6 +181,7 @@ const languageRepo = inject<LanguageRepoContract>('languageRepo')!;
 const localSetRepo = inject<LocalSetRepoContract>('localSetRepo')!;
 const vocabRepo = inject<VocabRepoContract>('vocabRepo')!;
 const translationRepo = inject<TranslationRepoContract>('translationRepo')!;
+const glossRepo = inject<GlossRepoContract>('glossRepo')!;
 const noteRepo = inject<NoteRepoContract>('noteRepo')!;
 const resourceRepo = inject<ResourceRepoContract>('resourceRepo')!;
 const goalRepo = inject<GoalRepoContract>('goalRepo')!;
@@ -190,6 +192,7 @@ const remoteSetService = new RemoteSetService(
   localSetRepo,
   vocabRepo,
   translationRepo,
+  glossRepo,
   noteRepo,
   resourceRepo,
   goalRepo,

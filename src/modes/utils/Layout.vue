@@ -7,6 +7,8 @@ import { useI18n } from 'vue-i18n';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
+import type { GlossRepoContract } from '@/entities/gloss/GlossRepoContract';
+import type { SituationRepoContract } from '@/entities/situation/SituationRepoContract';
 import type { FactCardRepoContract } from '@/entities/fact-cards/FactCardRepoContract';
 import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
 import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoContract';
@@ -50,19 +52,23 @@ watch(() => props.state, (newState) => {
 // Inject all repositories
 const vocabRepo = inject<VocabRepoContract>('vocabRepo');
 const translationRepo = inject<TranslationRepoContract>('translationRepo');
+const glossRepo = inject<GlossRepoContract>('glossRepo');
+const situationRepo = inject<SituationRepoContract>('situationRepo');
 const factCardRepo = inject<FactCardRepoContract>('factCardRepo');
 const languageRepo = inject<LanguageRepoContract>('languageRepo');
 const resourceRepo = inject<ResourceRepoContract>('resourceRepo');
 const goalRepo = inject<GoalRepoContract>('goalRepo');
 const noteRepo = inject<NoteRepoContract>('noteRepo');
 
-if (!vocabRepo || !translationRepo || !factCardRepo || !languageRepo || !resourceRepo || !goalRepo || !noteRepo) {
+if (!vocabRepo || !translationRepo || !glossRepo || !situationRepo || !factCardRepo || !languageRepo || !resourceRepo || !goalRepo || !noteRepo) {
   throw new Error('Required repositories not available');
 }
 
 const repositories: RepositoriesContextStrict = {
   vocabRepo,
   translationRepo,
+  glossRepo,
+  situationRepo,
   factCardRepo,
   languageRepo,
   resourceRepo,

@@ -3,7 +3,8 @@ import {
   FileText,
   Archive,
   Target,
-  Package2
+  Package2,
+  MessageSquare
 } from 'lucide-vue-next';
 import type { Component } from 'vue';
 
@@ -44,5 +45,11 @@ export const materialCategories: MaterialCategory[] = [
     description: 'Downloaded content sets and collections',
     icon: Package2,
     route: { name: 'sets-list' },
+  },
+  {
+    name: 'Situations',
+    description: 'Conversation situations and context examples',
+    icon: MessageSquare,
+    route: { name: 'situations-list' },
   }
 ];

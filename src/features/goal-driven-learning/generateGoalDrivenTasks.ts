@@ -179,14 +179,21 @@ async function createOrFindVocab(
     priority: 2,
     doNotPractice: false,
     notes: [],
+    transcriptions: [],
     translations: translationIds,
+    glosses: [],
     links: [],
     origins: ['goal-driven-ai'],
     relatedVocab: [],
     notRelatedVocab: [],
     contains: [],
+    isPicturable: false,
     images: [],
-    sounds: []
+    hasImage: false,
+    sounds: [],
+    hasSound: false,
+    notInterestedInPronunciationOrAlreadyAdded: false,
+    notInterestedInAddingTranslations: false
   });
 
   return newVocab;

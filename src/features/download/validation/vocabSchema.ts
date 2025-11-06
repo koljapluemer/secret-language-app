@@ -20,6 +20,7 @@ export const vocabSchema = z.object({
     notes: z.array(z.string()).optional(),
     transcriptions: z.array(z.string()).optional(),
     translations: z.array(z.string()).optional(),
+    glosses: z.array(z.string()).optional(),
     links: z.array(z.string()).optional(),
     relatedVocab: z.array(z.string()).optional(),
     notRelatedVocab: z.array(z.string()).optional(),

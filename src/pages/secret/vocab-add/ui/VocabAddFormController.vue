@@ -65,6 +65,8 @@ function formDataToVocabData(formData: VocabFormData): Omit<VocabData, 'id' | 'p
     consideredSentence: formData.consideredSentence,
     consideredWord: formData.consideredWord,
     translations: formData.translations.filter((t): t is TranslationData => 'id' in t).map(t => t.id),
+    glosses: [],
+    transcriptions: [],
     priority: formData.priority,
     doNotPractice: formData.doNotPractice,
     notes: formData.notes.filter((n): n is NoteData => 'id' in n).map(n => n.id),
@@ -76,7 +78,11 @@ function formDataToVocabData(formData: VocabFormData): Omit<VocabData, 'id' | 'p
     similarSoundingButNotTheSame: [],
     isPicturable: formData.isPicturable,
     images: formData.images || [],
-    sounds: formData.sounds || []
+    hasImage: (formData.images?.length || 0) > 0,
+    sounds: formData.sounds || [],
+    hasSound: (formData.sounds?.length || 0) > 0,
+    notInterestedInPronunciationOrAlreadyAdded: false,
+    notInterestedInAddingTranslations: false
   };
 }
 

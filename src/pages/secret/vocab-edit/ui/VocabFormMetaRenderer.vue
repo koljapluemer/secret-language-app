@@ -64,6 +64,7 @@ import { ref, watch } from 'vue';
 import VocabFormCoreRenderer from './VocabFormCoreRenderer.vue';
 import VocabFormAdvancedPropsRenderer from './VocabFormAdvancedPropsRenderer.vue';
 import type { TranslationData } from '@/entities/translations/TranslationData';
+import type { GlossData } from '@/entities/gloss/GlossData';
 import type { Link } from '@/shared/links/Link';
 import type { VocabImage, VocabSound } from '@/entities/vocab/VocabData';
 
@@ -75,6 +76,7 @@ interface VocabFormData {
   consideredSentence?: boolean;
   consideredWord?: boolean;
   translations: (TranslationData | Omit<TranslationData, 'id'>)[];
+  glosses: (GlossData | Omit<GlossData, 'id'>)[];
   priority?: number;
   doNotPractice?: boolean;
   notes: (NoteData | Omit<NoteData, 'id'>)[];

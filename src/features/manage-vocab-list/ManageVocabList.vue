@@ -428,12 +428,21 @@ async function createNewVocab() {
       content: creationMode.value === 'translation-only' ? undefined : newVocabContent.value.trim(),
       length: 'unspecified',
       translations: translationIds,
+      glosses: [],
       notes: [],
+      transcriptions: [],
       links: [],
       origins: ['user-added'],
       relatedVocab: [],
       notRelatedVocab: [],
-      contains: []
+      contains: [],
+      isPicturable: false,
+      images: [],
+      hasImage: false,
+      sounds: [],
+      hasSound: false,
+      notInterestedInPronunciationOrAlreadyAdded: false,
+      notInterestedInAddingTranslations: false
     }));
 
     // Add the new vocab to the local state

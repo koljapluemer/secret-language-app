@@ -23,7 +23,7 @@
       @remove-translation="(index) => removeTranslation(index)"
       @add-gloss="addGloss"
       @update-gloss="updateGloss"
-      @remove-gloss="(index) => removeGloss(index)"
+      @remove-gloss="(index: number) => removeGloss(index)"
       @update-related-vocab="updateRelatedVocab"
       @update-contains="updateContains"
       @update-similar-sounding-vocab="updateSimilarSoundingVocab"
@@ -167,7 +167,7 @@ const toast = useToast();
 
 const vocabRepo = inject<VocabRepoContract>('vocabRepo');
 const translationRepo = inject<TranslationRepoContract>('translationRepo');
-const glossRepo = inject<GlossRepoContract>('glossRepo');
+const glossRepo = inject<GlossRepoContract>('glossRepo')!;
 const noteRepo = inject<NoteRepoContract>('noteRepo');
 if (!vocabRepo) {
   throw new Error('VocabRepo not provided');

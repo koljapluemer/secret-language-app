@@ -2,6 +2,7 @@ import type { LocalSetRepoContract } from '@/entities/local-sets/LocalSetRepoCon
 import type { LocalSetData } from '@/entities/local-sets/LocalSetData';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
+import type { GlossRepoContract } from '@/entities/gloss/GlossRepoContract';
 import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract';
 import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoContract';
 import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract';
@@ -11,6 +12,7 @@ import { useToast } from '@/shared/toasts';
 
 import { vocabSchema } from '@/features/download/validation/vocabSchema';
 import { translationSchema } from '@/features/download/validation/translationSchema';
+import { glossSchema } from '@/features/download/validation/glossSchema';
 import { noteSchema } from '@/features/download/validation/noteSchema';
 import { linkSchema } from '@/features/download/validation/linkSchema';
 import { resourceSchema } from '@/features/download/validation/resourceSchema';
@@ -19,6 +21,7 @@ import { factCardSchema } from '@/features/download/validation/factCardSchema';
 
 import type { VocabData, VocabImage, VocabSound } from '@/entities/vocab/VocabData';
 import type { TranslationData } from '@/entities/translations/TranslationData';
+import type { GlossData } from '@/entities/gloss/GlossData';
 import type { ResourceData } from '@/entities/resources/ResourceData';
 import type { GoalData } from '@/entities/goals/GoalData';
 import type { FactCardData } from '@/entities/fact-cards/FactCardData';
@@ -35,6 +38,7 @@ export type { RemoteSetInfo, DownloadProgress, DownloadOptions } from './types';
 interface RemoteSetFiles {
   vocab?: z.infer<typeof vocabSchema>[];
   translations?: z.infer<typeof translationSchema>[];
+  glosses?: z.infer<typeof glossSchema>[];
   notes?: z.infer<typeof noteSchema>[];
   links?: z.infer<typeof linkSchema>[];
   resources?: z.infer<typeof resourceSchema>[];
@@ -50,6 +54,7 @@ export class RemoteSetService {
     private localSetRepo: LocalSetRepoContract,
     private vocabRepo: VocabRepoContract,
     private translationRepo: TranslationRepoContract,
+    private glossRepo: GlossRepoContract,
     private noteRepo: NoteRepoContract,
     private resourceRepo: ResourceRepoContract,
     private goalRepo: GoalRepoContract,
@@ -195,6 +200,7 @@ export class RemoteSetService {
     // Create lookup maps for resolving references
     const linkMap = new Map<string, Link>();
     const translationMap = new Map<string, string>(); // remote ID -> local UID
+    const glossMap = new Map<string, string>(); // remote ID -> local UID
     const vocabMap = new Map<string, string>(); // remote ID -> local UID
     const resourceMap = new Map<string, string>(); // remote ID -> local UID
     const goalMap = new Map<string, string>(); // remote ID -> local UID
@@ -247,6 +253,26 @@ export class RemoteSetService {
       console.log('RemoteSetService DEBUG - Final translationMap size:', translationMap.size);
     }
 
+    // Process glosses in batch for performance
+    if (setFiles.glosses) {
+      console.log('RemoteSetService DEBUG - Processing glosses, count:', setFiles.glosses.length);
+      const glossIdMap = await this.processGlossesInBatch(
+        setFiles.glosses,
+        localSet.id,
+        (current, total) => reportProgress('Processing glosses', current, total)
+      );
+
+      console.log('RemoteSetService DEBUG - Gloss ID map size:', glossIdMap.size);
+      console.log('RemoteSetService DEBUG - First 5 gloss mappings:', Array.from(glossIdMap.entries()).slice(0, 5));
+
+      // Merge the gloss ID mappings
+      glossIdMap.forEach((localId, remoteId) => {
+        glossMap.set(remoteId, localId);
+      });
+
+      console.log('RemoteSetService DEBUG - Final glossMap size:', glossMap.size);
+    }
+
     // Process vocab - FAST INSERT (no merge logic, background service will handle deduplication)
     if (setFiles.vocab) {
       reportProgress('Processing vocabulary', 0, setFiles.vocab.length);
@@ -260,7 +286,9 @@ export class RemoteSetService {
         if (!vocabData.language) continue;
 
         const noteIds = this.resolveReferences(vocabData.notes || [], noteMap);
+        const transcriptionIds = this.resolveReferences(vocabData.transcriptions || [], noteMap);
         const translationIds = this.resolveReferences(vocabData.translations || [], translationMap);
+        const glossIds = this.resolveReferences(vocabData.glosses || [], glossMap);
 
         if (i === 0) {
           console.log('RemoteSetService DEBUG - First vocab remote translation IDs:', vocabData.translations);
@@ -277,7 +305,9 @@ export class RemoteSetService {
           priority: vocabData.priority || 1,
           doNotPractice: false,
           notes: noteIds,
+          transcriptions: transcriptionIds,
           translations: translationIds,
+          glosses: glossIds,
           links: links,
           relatedVocab: [], // Will resolve in second pass
           notRelatedVocab: [], // Will resolve in second pass
@@ -285,7 +315,12 @@ export class RemoteSetService {
           similarSoundingButNotTheSame: [], // Will resolve in second pass
           origins: [localSet.id],
           isPicturable: vocabData.isPicturable,
+          images: [],
+          hasImage: false,
+          sounds: [],
+          hasSound: false,
           notInterestedInPronunciationOrAlreadyAdded: vocabData.notInterestedInPronunciationOrAlreadyAdded,
+          notInterestedInAddingTranslations: false,
           _mergeChecked: false // Mark for background merge
         };
 
@@ -764,6 +799,53 @@ export class RemoteSetService {
       for (let j = 0; j < validTranslations.length; j++) {
         if (validTranslations[j].id && savedTranslations[j]) {
           remoteIdToLocalId.set(validTranslations[j].id!, savedTranslations[j].id);
+        }
+      }
+
+      // Update progress
+      completed += batch.length;
+      onProgress?.(completed, total);
+    }
+
+    return remoteIdToLocalId;
+  }
+
+  private async processGlossesInBatch(
+    remoteGlosses: z.infer<typeof glossSchema>[],
+    _localSetId: string,
+    onProgress?: (current: number, total: number) => void
+  ): Promise<Map<string, string>> {
+    if (remoteGlosses.length === 0) {
+      onProgress?.(0, 0);
+      return new Map();
+    }
+
+    const BATCH_SIZE = 50;
+    const total = remoteGlosses.length;
+    let completed = 0;
+    const remoteIdToLocalId = new Map<string, string>();
+
+    onProgress?.(0, total);
+
+    for (let i = 0; i < remoteGlosses.length; i += BATCH_SIZE) {
+      const batch = remoteGlosses.slice(i, i + BATCH_SIZE);
+
+      // Filter out glosses without description
+      const validGlosses = batch.filter(g => g.description);
+
+      // Prepare glosses for bulk insert
+      const glossesToCreate: Omit<GlossData, 'id' | 'origins'>[] = validGlosses.map(g => ({
+        description: g.description,
+        descriptions: g.descriptions || []
+      }));
+
+      // Bulk insert all glosses in this batch
+      const savedGlosses = await this.glossRepo.bulkCreateGlosses(glossesToCreate);
+
+      // Map remote IDs to saved IDs
+      for (let j = 0; j < validGlosses.length; j++) {
+        if (validGlosses[j].id && savedGlosses[j]) {
+          remoteIdToLocalId.set(validGlosses[j].id!, savedGlosses[j].id);
         }
       }
 

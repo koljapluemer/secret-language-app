@@ -253,6 +253,8 @@
     "language": "Language",
     "translations": "Translations",
     "translation": "Translation",
+    "glosses": "Glosses",
+    "gloss": "Gloss",
     "set": "Set",
     "actions": "Actions",
     "noTranslations": "No translations",
@@ -293,6 +295,9 @@
       "addTranslation": "Add Translation",
       "noTranslationsAttached": "No translations attached.",
       "translationContent": "Translation Content",
+      "addGloss": "Add Gloss",
+      "noGlossesAttached": "No glosses attached.",
+      "glossDescription": "Gloss Description",
       "loadingVocab": "Loading vocab...",
       "percent": "%"
     },
@@ -577,6 +582,12 @@
     "add": "Add Translation",
     "edit": "Edit Translation",
     "content": "Translation Content"
+  },
+  "glosses": {
+    "title": "Glosses",
+    "add": "Add Gloss",
+    "edit": "Edit Gloss",
+    "description": "Gloss Description"
   },
   "notes": {
     "title": "Notes",
