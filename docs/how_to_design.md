@@ -17,4 +17,18 @@
 - User color sparingly, and only for primary/important elements or those that must use color to communicate (e.g. a warning)
 - Make sure any given layout works well on mobile and desktop!
 
+- Use this pattern for form inputs:
+
+```
+<fieldset class="fieldset">
+  <label for="page-title" class="label">Page title</label>
+  <input
+    type="text"
+    name="page-title"
+    class="input"
+    placeholder="My awesome page"
+  />
+</fieldset>
+```
+
 - KEEP. IT. SIMPLE.

@@ -11,17 +11,17 @@
         <span>{{ error }}</span>
       </div>
 
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Description *</span>
-        </label>
+      <fieldset class="fieldset">
+        <label for="situation-description" class="label">Description *</label>
         <textarea
+          id="situation-description"
+          name="situation-description"
           v-model="description"
-          class="textarea textarea-bordered h-24"
+          class="input h-24"
           placeholder="Describe the situation..."
           :disabled="saving"
         ></textarea>
-      </div>
+      </fieldset>
 
       <div class="modal-action">
         <button @click="close" class="btn" :disabled="saving">Cancel</button>
