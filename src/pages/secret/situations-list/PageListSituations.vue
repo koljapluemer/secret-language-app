@@ -2,6 +2,7 @@
   <div>
     <div class="flex justify-between items-center mb-6">
       <h1>Situations</h1>
+      <button @click="showAddModal = true" class="btn btn-primary">Add New Situation</button>
     </div>
 
     <div v-if="loading" class="text-center py-8">
@@ -51,6 +52,12 @@
         <p class="text-light">No situations found</p>
       </div>
     </div>
+
+    <AddSituationModal
+      :show="showAddModal"
+      @close="showAddModal = false"
+      @situation-added="handleSituationAdded"
+    />
   </div>
 </template>
 
@@ -60,6 +67,7 @@ import type { SituationRepoContract } from '@/entities/situation/SituationRepoCo
 import type { SituationData } from '@/entities/situation/SituationData';
 import { useToast } from '@/shared/toasts';
 import { Trash2 } from 'lucide-vue-next';
+import AddSituationModal from '@/features/situation-add/AddSituationModal.vue';
 
 const situationRepo = inject<SituationRepoContract>('situationRepo')!;
 const toast = useToast();
@@ -69,6 +77,7 @@ const situationItems = ref<SituationData[]>([]);
 const totalCount = ref(0);
 const loading = ref(true);
 const error = ref<string | null>(null);
+const showAddModal = ref(false);
 
 // Main load function
 async function loadSituations() {
@@ -100,6 +109,11 @@ async function deleteSituation(id: string) {
     toast.error('Failed to delete situation');
     error.value = 'Failed to delete situation';
   }
+}
+
+async function handleSituationAdded() {
+  showAddModal.value = false;
+  await loadSituations();
 }
 
 onMounted(async () => {
