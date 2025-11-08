@@ -2,6 +2,7 @@ import type { SituationRepoContract } from './SituationRepoContract';
 import type { SituationData } from './SituationData';
 import { db } from '@/shared/database/db';
 import { nanoid } from 'nanoid';
+import { toRaw } from 'vue';
 
 export class SituationRepo implements SituationRepoContract {
 
@@ -30,7 +31,7 @@ export class SituationRepo implements SituationRepoContract {
   }
 
   async updateSituation(situation: SituationData): Promise<void> {
-    await db.situations.put(situation);
+    await db.situations.put(toRaw(situation));
   }
 
   async deleteSituations(ids: string[]): Promise<void> {

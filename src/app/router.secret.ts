@@ -26,6 +26,7 @@ import PageGoalAdd from '@/pages/secret/goal-add/PageGoalAdd.vue';
 import PageGoalEdit from '@/pages/secret/goal-edit/PageGoalEdit.vue';
 import PageListSets from '@/pages/secret/sets-list/PageListSets.vue';
 import PageListSituations from '@/pages/secret/situations-list/PageListSituations.vue';
+import PageSituationEdit from '@/pages/secret/situation-edit/PageSituationEdit.vue';
 import PageDownloads from '@/pages/secret/downloads/PageDownloads.vue';
 import DownloadsHome from '@/pages/secret/downloads/DownloadsHome.vue';
 import PageStats from '@/pages/secret/time-tracking/PageTimeTracking.vue';
@@ -183,6 +184,11 @@ const router = createRouter({
       path: '/situations',
       name: 'situations-list',
       component: PageListSituations
+    },
+    {
+      path: '/situations/:id/edit',
+      name: 'situation-edit',
+      component: PageSituationEdit
     },
     {
       path: '/downloads',

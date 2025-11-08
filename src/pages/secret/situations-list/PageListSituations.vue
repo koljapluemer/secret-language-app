@@ -33,9 +33,11 @@
           <tbody>
             <tr v-for="situation in situationItems" :key="situation.id">
               <td class="max-w-md">
-                <div class="truncate" :title="situation.description">
-                  {{ situation.description }}
-                </div>
+                <router-link :to="`/situations/${situation.id}/edit`" class="link link-hover">
+                  <div class="truncate" :title="situation.description">
+                    {{ situation.description }}
+                  </div>
+                </router-link>
               </td>
               <td>{{ situation.goals.length }}</td>
               <td>
