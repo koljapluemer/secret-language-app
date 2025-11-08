@@ -108,7 +108,7 @@ async function handleSubmit() {
       language: formData.value.language,
       vocab: [],
       glosses: [],
-      translations: '',
+      translations: [],
       notes: [],
       factCards: [],
       origins: ['user-added'],

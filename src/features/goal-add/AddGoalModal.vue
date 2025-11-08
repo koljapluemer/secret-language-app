@@ -98,19 +98,16 @@ async function handleSave() {
       language: formData.value.language,
       vocab: [],
       glosses: [],
-      translations: '',
+      translations: [],
       notes: [],
       factCards: [],
       origins: ['user-added'],
       isAchieved: false
     });
 
-    console.log('AddGoalModal: About to create goal with data:', goalData);
     const newGoal = await goalRepo.create(goalData);
-    console.log('AddGoalModal: Goal created successfully, ID:', newGoal.id);
 
     toast.success('Goal created successfully');
-    console.log('AddGoalModal: Emitting goal-added with ID:', newGoal.id);
     emit('goal-added', newGoal.id);
     emit('close');
 
@@ -118,7 +115,6 @@ async function handleSave() {
     formData.value.language = '';
     formData.value.title = '';
   } catch (err) {
-    console.error('AddGoalModal: Error during goal creation:', err);
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
     error.value = `Failed to create goal: ${errorMessage}`;
     toast.error(`Failed to create goal: ${errorMessage}`);

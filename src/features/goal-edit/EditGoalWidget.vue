@@ -77,7 +77,7 @@ async function saveGoal() {
         language: selectedLanguage.value,
         vocab: [],
         glosses: [],
-        translations: '',
+        translations: [],
         notes: [],
         factCards: [],
         origins: ['user-added'],

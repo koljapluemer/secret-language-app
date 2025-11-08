@@ -481,12 +481,12 @@ export class RemoteSetService {
         const factCardIds = this.resolveReferences(goalData.factCards || [], factCardMap);
         const glossIds = this.resolveReferences(goalData.glosses || [], new Map());
 
-        // Handle translations - convert array to string if needed
-        let translationId = '';
+        // Handle translations - ensure it's an array
+        let translationIds: string[] = [];
         if (goalData.translations) {
-          translationId = Array.isArray(goalData.translations)
-            ? goalData.translations[0] || ''
-            : goalData.translations;
+          translationIds = Array.isArray(goalData.translations)
+            ? goalData.translations
+            : [goalData.translations];
         }
 
         const localGoal: Omit<GoalData, "id"> = {
@@ -495,7 +495,7 @@ export class RemoteSetService {
           notes: noteIds,
           vocab: vocabIds,
           glosses: glossIds,
-          translations: translationId,
+          translations: translationIds,
           factCards: factCardIds,
           origins: [localSet.id],
           isAchieved: false

@@ -75,7 +75,7 @@ async function handleSave(action: 'edit' | 'add-another') {
       language: formData.value.language,
       vocab: [],
       glosses: [],
-      translations: '',
+      translations: [],
       notes: [],
       factCards: [],
       origins: ['user-added'],
