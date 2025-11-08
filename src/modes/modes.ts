@@ -1,12 +1,6 @@
-import { BookOpen, Target, RotateCcw, ImagePlus, Eye, Zap, ArrowRight, RefreshCw, Volume2, Boxes, BookText, BookMarked, Sparkles } from 'lucide-vue-next';
+import { BookOpen, Target, RotateCcw, ImagePlus, Eye, Zap, ArrowRight, RefreshCw, Volume2, Boxes, BookText, BookMarked } from 'lucide-vue-next';
 
 export const modes = [
-  {
-    name: 'Goal-Driven Learning',
-    route: { name: 'practice-mode-goal-driven-learning' },
-    icon: Sparkles,
-    description: 'AI designs personalized exercises based on your learning goal'
-  },
   {
     name: 'Fact Card Grind',
     route: { name: 'practice-mode-fact-card-grind' },
