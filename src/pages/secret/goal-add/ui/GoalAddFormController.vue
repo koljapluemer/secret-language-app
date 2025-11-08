@@ -73,15 +73,12 @@ async function handleSave(action: 'edit' | 'add-another') {
     const newGoal = await goalRepo.create({
       title: formData.value.title.trim(),
       language: formData.value.language,
-      subGoals: [],
       vocab: [],
+      glosses: [],
+      translations: '',
       notes: [],
       factCards: [],
       origins: ['user-added'],
-      finishedAddingSubGoals: false,
-      finishedAddingMilestones: false,
-      finishedAddingKnowledge: false,
-      milestones: {},
       isAchieved: false
     });
     

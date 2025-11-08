@@ -14,9 +14,4 @@ export interface SituationRepoContract {
 
   // Query operations
   searchSituationsByDescription(description: string): Promise<SituationData[]>;
-
-  // Reference queries
-  getSituationsByVocabId(vocabId: string): Promise<SituationData[]>;
-  getSituationsByGlossId(glossId: string): Promise<SituationData[]>;
-  getSituationsByTranslationId(translationId: string): Promise<SituationData[]>;
 }

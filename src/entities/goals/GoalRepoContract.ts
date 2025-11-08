@@ -18,10 +18,6 @@ export interface GoalRepoContract {
   getIncompleteGoals(): Promise<GoalData[]>;
   getGoalsByLanguages(languages: string[]): Promise<GoalData[]>;
   getGoalsNeedingVocab(languages: string[]): Promise<GoalData[]>;
-  getGoalsNeedingSubGoals(languages: string[]): Promise<GoalData[]>;
-  getSubGoals(parentId: string): Promise<GoalData[]>;
-  getRootGoals(): Promise<GoalData[]>; // goals without parent
-  getParentGoal(goalId: string): Promise<GoalData | undefined>;
   getGoalsPaginated(offset: number, limit: number, filters?: GoalListFilters): Promise<GoalData[]>;
   getTotalGoalsCount(filters?: GoalListFilters): Promise<number>;
   getGoalsByOrigins(setIds: string[]): Promise<GoalData[]>;

@@ -479,20 +479,25 @@ export class RemoteSetService {
         const noteIds = this.resolveReferences(goalData.notes || [], noteMap);
         const vocabIds = this.resolveReferences(goalData.vocab || [], vocabMap);
         const factCardIds = this.resolveReferences(goalData.factCards || [], factCardMap);
-        const subGoalIds = this.resolveReferences(goalData.subGoals || [], goalMap);
+        const glossIds = this.resolveReferences(goalData.glosses || [], new Map());
+
+        // Handle translations - convert array to string if needed
+        let translationId = '';
+        if (goalData.translations) {
+          translationId = Array.isArray(goalData.translations)
+            ? goalData.translations[0] || ''
+            : goalData.translations;
+        }
 
         const localGoal: Omit<GoalData, "id"> = {
           language: goalData.language,
           title: goalData.title,
           notes: noteIds,
           vocab: vocabIds,
+          glosses: glossIds,
+          translations: translationId,
           factCards: factCardIds,
-          subGoals: subGoalIds,
           origins: [localSet.id],
-          finishedAddingSubGoals: false,
-          finishedAddingMilestones: false,
-          finishedAddingKnowledge: false,
-          milestones: {},
           isAchieved: false
         };
 

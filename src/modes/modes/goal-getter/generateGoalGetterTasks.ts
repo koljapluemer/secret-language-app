@@ -2,7 +2,6 @@ import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract';
 
 import type { Task } from '@/tasks/Task';
 import { generateAddVocabToGoal } from '@/tasks/task-goal-add-vocab/generate';
-import { generateAddSubGoals } from '@/tasks/task-goal-add-sub-goals/generate';
 import { generateCreateNewGoal } from '@/tasks/task-goal-create-new/generate';
 import { randomFromArray } from '@/shared/utils/arrayUtils';
 import { useToast } from '@/shared/toasts';
@@ -12,14 +11,8 @@ const goalTaskGenerators = [
   {
     name: 'add-vocab-to-goal',
     generator: generateAddVocabToGoal,
-    getGoals: (goalRepo: GoalRepoContract, languageCodes: string[]) => 
+    getGoals: (goalRepo: GoalRepoContract, languageCodes: string[]) =>
       goalRepo.getGoalsNeedingVocab(languageCodes)
-  },
-  {
-    name: 'add-sub-goals',
-    generator: generateAddSubGoals,
-    getGoals: (goalRepo: GoalRepoContract, languageCodes: string[]) => 
-      goalRepo.getGoalsNeedingSubGoals(languageCodes)
   }
 ];
 

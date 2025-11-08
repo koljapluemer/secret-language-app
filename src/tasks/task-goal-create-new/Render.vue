@@ -106,15 +106,12 @@ async function handleSubmit() {
     await goalRepo.create({
       title: formData.value.title.trim(),
       language: formData.value.language,
-      subGoals: [],
       vocab: [],
+      glosses: [],
+      translations: '',
       notes: [],
       factCards: [],
       origins: ['user-added'],
-      finishedAddingSubGoals: false,
-      finishedAddingMilestones: false,
-      finishedAddingKnowledge: false,
-      milestones: {},
       isAchieved: false
     });
 

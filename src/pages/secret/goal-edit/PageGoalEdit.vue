@@ -17,36 +17,10 @@
       <GoalEditFormRenderer :goal="goal" @goal-updated="handleGoalUpdate" />
     </section>
 
-    <!-- Sub-goals Section -->
-    <section>
-      <h2>{{ $t('goals.subGoals') }}</h2>
-      <ManageSubGoalsWidget :goal="goal" @goal-updated="handleGoalUpdate" />
-      <div class="mt-4">
-        <InlineCheckbox
-          :model-value="goal.finishedAddingSubGoals"
-          label="Finished adding sub-goals"
-          @update:model-value="updateFinishedAddingSubGoals"
-        />
-      </div>
-    </section>
-
-    <!-- Milestones Section -->
-    <section>
-      <h2>{{ $t('goals.milestones') }}</h2>
-      <ManageMilestonesWidget :goal="goal" @goal-updated="handleGoalUpdate" />
-    </section>
-
     <!-- Knowledge Section -->
     <section>
       <h2>{{ $t('goals.knowledgeAndVocab') }}</h2>
       <ManageGoalVocab :goal="goal" @goal-updated="handleGoalUpdate" />
-      <div class="mt-4">
-        <InlineCheckbox
-          :model-value="goal.finishedAddingKnowledge"
-          label="Finished adding knowledge"
-          @update:model-value="updateFinishedAddingKnowledge"
-        />
-      </div>
     </section>
   </div>
 </template>
@@ -57,10 +31,7 @@ import { useRoute, useRouter } from 'vue-router';
 import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract';
 import type { GoalData } from '@/entities/goals/GoalData';
 import GoalEditFormRenderer from './ui/GoalEditFormRenderer.vue';
-import ManageSubGoalsWidget from '@/features/goal-manage-its-sub-goals/ManageSubGoalsWidget.vue';
 import ManageGoalVocab from '@/widgets/manage-goal-vocab/ManageGoalVocab.vue';
-import ManageMilestonesWidget from '@/features/goal-manage-its-milestones/ManageMilestonesWidget.vue';
-import InlineCheckbox from '@/shared/ui/InlineCheckbox.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -87,25 +58,6 @@ async function handleGoalUpdate(updatedGoal: GoalData) {
   goal.value = updatedGoal;
 }
 
-async function updateFinishedAddingSubGoals(value: boolean | undefined) {
-  if (!goal.value) return;
-  
-  const updatedGoal = await goalRepo.update(goal.value.id, {
-    finishedAddingSubGoals: value
-  });
-  
-  goal.value = updatedGoal;
-}
-
-async function updateFinishedAddingKnowledge(value: boolean | undefined) {
-  if (!goal.value) return;
-  
-  const updatedGoal = await goalRepo.update(goal.value.id, {
-    finishedAddingKnowledge: value
-  });
-  
-  goal.value = updatedGoal;
-}
 
 onMounted(loadGoal);
 </script>

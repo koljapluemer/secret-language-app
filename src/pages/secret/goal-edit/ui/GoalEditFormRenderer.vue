@@ -18,22 +18,6 @@
       @update:model-value="updateField('title', $event)"
     />
 
-    <InlineInput
-      :model-value="goal.prio"
-      label="Priority"
-      placeholder="1-10 (higher = more important)"
-      type="number"
-      :min="1"
-      :max="10"
-      @update:model-value="updateField('prio', $event ? Number($event) : undefined)"
-    />
-
-    <InlineCheckbox
-      :model-value="goal.doNotPractice"
-      label="Do not practice"
-      @update:model-value="updateField('doNotPractice', $event)"
-    />
-
     <InlineCheckbox
       :model-value="goal.isAchieved"
       label="Goal achieved"

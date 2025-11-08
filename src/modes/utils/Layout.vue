@@ -3,7 +3,6 @@ import type { Task } from '@/tasks/Task';
 import { taskRegistry } from '@/tasks/ui/taskRegistry';
 import { inject, onMounted, onUnmounted, ref, provide, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { useI18n } from 'vue-i18n';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
@@ -39,12 +38,11 @@ const props = defineProps<Props>();
 
 const router = useRouter();
 const toast = useToast();
-const { t } = useI18n();
 
 // Watch for empty state and redirect
 watch(() => props.state, (newState) => {
   if (newState.status === 'empty') {
-    toast.warning(t(newState.message));
+    toast.warning(newState.message);
     router.push('/');
   }
 }, { immediate: true });
@@ -163,7 +161,7 @@ function startTimingIfNeeded() {
     <Transition enter-active-class="transition-opacity duration-[50ms]"
       leave-active-class="transition-opacity duration-[50ms]" enter-from-class="opacity-0" leave-to-class="opacity-0">
       <div v-if="state.status === 'error'" class="alert alert-error">
-        <span>{{ $t(state.message) }}</span>
+        <span>{{ state.message }}</span>
         <button class="btn btn-sm" @click="retry">
           {{ $t('practice.widgets.tryAgain') }}
         </button>

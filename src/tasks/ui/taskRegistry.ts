@@ -2,7 +2,6 @@ import type { Component } from "vue";
 
 import RenderTaskForAddingTranslation from "@/tasks/task-vocab-add-translation/Render.vue";
 import RenderExtractKnowledgeFromResource from "@/tasks/task-resource-extract-knowledge/Render.vue";
-import TaskAddSubGoals from "@/tasks/task-goal-add-sub-goals/Render.vue";
 import TaskAddVocabToGoal from "@/tasks/task-goal-add-vocab/Render.vue";
 import TaskVocabTryToRemember from "@/tasks/task-vocab-try-to-remember/Render.vue";
 import TaskGuessWhatSentenceMeans from "@/tasks/task-guess-what-sentence-means/Render.vue";
@@ -28,7 +27,6 @@ export interface TaskInfo {
 export const taskRegistry: Record<string, TaskInfo> = {
   "add-translation": { component: RenderTaskForAddingTranslation, size: 'medium' },
   "extract-knowledge-from-resource": { component: RenderExtractKnowledgeFromResource, size: 'big' },
-  "add-sub-goals": { component: TaskAddSubGoals, size: 'medium' },
   "add-vocab-to-goal": { component: TaskAddVocabToGoal, size: 'medium' },
   "vocab-try-to-remember": { component: TaskVocabTryToRemember, size: 'small' },
   "guess-what-sentence-means": { component: TaskGuessWhatSentenceMeans, size: 'medium' },

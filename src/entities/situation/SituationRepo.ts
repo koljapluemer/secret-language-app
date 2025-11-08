@@ -21,9 +21,7 @@ export class SituationRepo implements SituationRepoContract {
     const situationToSave: SituationData = {
       id: nanoid(),
       description: situation.description,
-      vocabs: situation.vocabs,
-      glosses: situation.glosses,
-      translations: situation.translations
+      goals: situation.goals
     };
 
     await db.situations.add(situationToSave);
@@ -47,9 +45,7 @@ export class SituationRepo implements SituationRepoContract {
     const situationsWithIds: SituationData[] = situations.map(s => ({
       id: nanoid(),
       description: s.description,
-      vocabs: s.vocabs,
-      glosses: s.glosses,
-      translations: s.translations
+      goals: s.goals
     }));
 
     // Bulk insert
@@ -63,20 +59,5 @@ export class SituationRepo implements SituationRepoContract {
     return allSituations.filter(situation =>
       situation.description.toLowerCase().includes(description.toLowerCase())
     );
-  }
-
-  async getSituationsByVocabId(vocabId: string): Promise<SituationData[]> {
-    const all = await this.getAllSituations();
-    return all.filter(s => s.vocabs.includes(vocabId));
-  }
-
-  async getSituationsByGlossId(glossId: string): Promise<SituationData[]> {
-    const all = await this.getAllSituations();
-    return all.filter(s => s.glosses.includes(glossId));
-  }
-
-  async getSituationsByTranslationId(translationId: string): Promise<SituationData[]> {
-    const all = await this.getAllSituations();
-    return all.filter(s => s.translations.includes(translationId));
   }
 }

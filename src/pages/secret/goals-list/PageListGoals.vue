@@ -102,23 +102,10 @@
               </span>
             </td>
             <td>
-              <div class="flex flex-wrap gap-1">
-                <span
-                  v-for="milestone in Object.keys(goal.milestones || {})"
-                  :key="milestone"
-                >
-                  {{ milestone }}
-                </span>
-                <span 
-                  v-if="!goal.milestones || Object.keys(goal.milestones).length === 0"
-                  class="text-light"
-                >
-                  {{ $t('goals.noMilestones') }}
-                </span>
-              </div>
+              <span class="text-base-content/60">{{ $t('goals.featureRemoved') }}</span>
             </td>
             <td>
-              <span class=" ">{{ goal.subGoals.length }}</span>
+              <span class="text-base-content/60">{{ $t('goals.featureRemoved') }}</span>
             </td>
             <td>
               <div class="flex items-center gap-2">

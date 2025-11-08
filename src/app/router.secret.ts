@@ -12,7 +12,6 @@ import SentenceSlideWidget from '@/modes/modes/sentence-slide/SentenceSlideWidge
 import ResourceRotationWidget from '@/modes/modes/resource-rotation/ResourceRotationWidget.vue';
 import MinimalPairsWidget from '@/modes/modes/minimal-pairs/MinimalPairsWidget.vue';
 import ComponentClustersWidget from '@/modes/modes/component-clusters/ComponentClustersWidget.vue';
-import GoalDrivenLearningWidget from '@/modes/modes/goal-driven-learning/GoalDrivenLearningWidget.vue';
 import PageVocabList from '@/pages/secret/vocab-list/PageVocabList.vue';
 import PageVocabEdit from '@/pages/secret/vocab-edit/PageVocabEdit.vue';
 import PageVocabAdd from '@/pages/secret/vocab-add/PageVocabAdd.vue';
@@ -107,11 +106,6 @@ const router = createRouter({
           path: 'component-clusters',
           name: 'practice-mode-component-clusters',
           component: ComponentClustersWidget
-        },
-        {
-          path: 'goal-driven-learning',
-          name: 'practice-mode-goal-driven-learning',
-          component: GoalDrivenLearningWidget
         }
       ]
     },

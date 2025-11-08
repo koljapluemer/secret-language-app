@@ -16,11 +16,7 @@ export class GoalRepo implements GoalRepoContract {
   async create(goalData: Omit<GoalData, 'id'>): Promise<GoalData> {
     const goal: GoalData = {
       id: nanoid(),
-      ...goalData,
-      finishedAddingSubGoals: goalData.finishedAddingSubGoals ?? false,
-      finishedAddingMilestones: goalData.finishedAddingMilestones ?? false,
-      finishedAddingKnowledge: goalData.finishedAddingKnowledge ?? false,
-      milestones: goalData.milestones ?? {}
+      ...goalData
     };
 
     await db.goals.add(goal);
@@ -62,44 +58,8 @@ export class GoalRepo implements GoalRepoContract {
     const allGoals = await db.goals.toArray();
     return allGoals.filter(goal =>
       languages.includes(goal.language) &&
-      !goal.isAchieved &&
-      !goal.doNotPractice &&
-      !goal.finishedAddingKnowledge
+      !goal.isAchieved
     );
-  }
-
-  async getGoalsNeedingSubGoals(languages: string[]): Promise<GoalData[]> {
-    const allGoals = await db.goals.toArray();
-    return allGoals.filter(goal =>
-      languages.includes(goal.language) &&
-      !goal.isAchieved &&
-      !goal.doNotPractice &&
-      !goal.finishedAddingSubGoals
-    );
-  }
-
-  async getSubGoals(parentId: string): Promise<GoalData[]> {
-    const parentGoal = await this.getById(parentId);
-    if (!parentGoal) return [];
-
-    const subGoalPromises = parentGoal.subGoals.map(id => this.getById(id));
-    const subGoals = await Promise.all(subGoalPromises);
-
-    return subGoals.filter((goal): goal is GoalData => goal !== undefined);
-  }
-
-  async getRootGoals(): Promise<GoalData[]> {
-    return await db.goals
-      .where('subGoals')
-      .equals([])
-      .toArray();
-  }
-
-  async getParentGoal(goalId: string): Promise<GoalData | undefined> {
-    return await db.goals
-      .where('subGoals')
-      .anyOf([goalId])
-      .first();
   }
 
   private applyFilters(goals: GoalData[], filters?: GoalListFilters): GoalData[] {
@@ -113,13 +73,7 @@ export class GoalRepo implements GoalRepoContract {
       filtered = filtered.filter(goal => {
         // Search in title
         if (goal.title.toLowerCase().includes(query)) return true;
-        
-        // Search in milestones
-        if (goal.milestones) {
-          const milestoneKeys = Object.keys(goal.milestones);
-          if (milestoneKeys.some(milestone => milestone.toLowerCase().includes(query))) return true;
-        }
-        
+
         return false;
       });
     }

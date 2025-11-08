@@ -25,9 +25,7 @@
           <thead>
             <tr>
               <th>Description</th>
-              <th>Vocab Count</th>
-              <th>Gloss Count</th>
-              <th>Translation Count</th>
+              <th>Goals Count</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -38,9 +36,7 @@
                   {{ situation.description }}
                 </div>
               </td>
-              <td>{{ situation.vocabs.length }}</td>
-              <td>{{ situation.glosses.length }}</td>
-              <td>{{ situation.translations.length }}</td>
+              <td>{{ situation.goals.length }}</td>
               <td>
                 <button @click="deleteSituation(situation.id)" class="btn btn-sm btn-ghost" aria-label="Delete situation">
                   <Trash2 :size="16" />

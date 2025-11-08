@@ -75,15 +75,12 @@ async function saveGoal() {
       updatedGoal = await goalRepo.create({
         title: goalTitle.value.trim(),
         language: selectedLanguage.value,
-        subGoals: [],
         vocab: [],
+        glosses: [],
+        translations: '',
         notes: [],
         factCards: [],
         origins: ['user-added'],
-        finishedAddingSubGoals: false,
-        finishedAddingMilestones: false,
-        finishedAddingKnowledge: false,
-        milestones: {},
         isAchieved: false
       });
     }

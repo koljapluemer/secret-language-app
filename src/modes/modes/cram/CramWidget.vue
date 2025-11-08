@@ -95,8 +95,8 @@ async function startNewLesson(): Promise<void> {
     throw new Error('No goals found in the selected set');
   }
 
-  // Filter out achieved and doNotPractice goals
-  const practiceableGoals = goals.filter(g => !g.isAchieved && !g.doNotPractice);
+  // Filter out achieved goals
+  const practiceableGoals = goals.filter(g => !g.isAchieved);
 
   if (practiceableGoals.length === 0) {
     toast.error('No practiceable goals found in the selected set');

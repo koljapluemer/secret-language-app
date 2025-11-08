@@ -59,21 +59,8 @@ async function testApiKey() {
 
   isTestingKey.value = true;
   try {
-    // Use the OpenAIService to test - single source of truth
-    const { openAIService } = await import('@/features/goal-driven-learning/OpenAIService');
-
-    if (!openAIService.hasApiKey()) {
-      toast.error('Failed to save API key');
-      return;
-    }
-
-    const model = openAIService.createChatModel({
-      modelName: 'gpt-3.5-turbo',
-      temperature: 0
-    });
-
-    await model.invoke('test');
-    toast.success('API key is valid!');
+    // Goal-driven learning feature has been removed
+    toast.info('API key saved (testing feature removed)');
   } catch (error) {
     toast.error(`API key test failed: ${String(error)}`);
   } finally {
