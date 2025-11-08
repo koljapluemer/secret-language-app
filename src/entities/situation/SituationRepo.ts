@@ -21,7 +21,8 @@ export class SituationRepo implements SituationRepoContract {
     const situationToSave: SituationData = {
       id: nanoid(),
       description: situation.description,
-      goals: situation.goals
+      goals: situation.goals,
+      relevantForLanguages: situation.relevantForLanguages
     };
 
     await db.situations.add(situationToSave);
@@ -45,7 +46,8 @@ export class SituationRepo implements SituationRepoContract {
     const situationsWithIds: SituationData[] = situations.map(s => ({
       id: nanoid(),
       description: s.description,
-      goals: s.goals
+      goals: s.goals,
+      relevantForLanguages: s.relevantForLanguages
     }));
 
     // Bulk insert
@@ -58,6 +60,13 @@ export class SituationRepo implements SituationRepoContract {
     const allSituations = await db.situations.toArray();
     return allSituations.filter(situation =>
       situation.description.toLowerCase().includes(description.toLowerCase())
+    );
+  }
+
+  async getSituationsByLanguages(languages: string[]): Promise<SituationData[]> {
+    const allSituations = await db.situations.toArray();
+    return allSituations.filter(situation =>
+      situation.relevantForLanguages.some(lang => languages.includes(lang))
     );
   }
 }

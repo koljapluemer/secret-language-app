@@ -14,4 +14,5 @@ export interface SituationRepoContract {
 
   // Query operations
   searchSituationsByDescription(description: string): Promise<SituationData[]>;
+  getSituationsByLanguages(languages: string[]): Promise<SituationData[]>;
 }
