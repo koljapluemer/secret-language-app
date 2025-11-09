@@ -75,11 +75,19 @@ export class GlossRepo implements GlossRepoContract {
     return glossesWithIds;
   }
 
-  async searchGlossesByDescription(description: string): Promise<GlossData[]> {
-    const allGlosses = await db.glosses.toArray();
-    return allGlosses.filter(gloss =>
-      gloss.description.toLowerCase().includes(description.toLowerCase())
-    );
+  async searchGlossesByDescription(description: string, excludeIds: string[] = [], limit: number = 10): Promise<GlossData[]> {
+    const lowerSearch = description.toLowerCase().trim();
+
+    const glosses = await db.glosses
+      .filter(g => {
+        if (!g.description) return false;
+        if (excludeIds.includes(g.id)) return false;
+        return g.description.toLowerCase().includes(lowerSearch);
+      })
+      .limit(limit)
+      .toArray();
+
+    return glosses;
   }
 
   async getUncheckedGlosses(limit: number): Promise<GlossData[]> {

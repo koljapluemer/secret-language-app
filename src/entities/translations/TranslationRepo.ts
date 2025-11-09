@@ -80,11 +80,19 @@ export class TranslationRepo implements TranslationRepoContract {
     return translationsWithIds;
   }
 
-  async searchTranslationsByContent(content: string): Promise<TranslationData[]> {
-    const allTranslations = await db.translations.toArray();
-    return allTranslations.filter(translation => 
-      translation.content.toLowerCase().includes(content.toLowerCase())
-    );
+  async searchTranslationsByContent(content: string, excludeIds: string[] = [], limit: number = 10): Promise<TranslationData[]> {
+    const lowerSearch = content.toLowerCase().trim();
+
+    const translations = await db.translations
+      .filter(t => {
+        if (!t.content) return false;
+        if (excludeIds.includes(t.id)) return false;
+        return t.content.toLowerCase().includes(lowerSearch);
+      })
+      .limit(limit)
+      .toArray();
+
+    return translations;
   }
 
   private async findIdealWrongTranslation(correctTranslationContent: string): Promise<string | null> {

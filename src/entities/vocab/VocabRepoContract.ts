@@ -35,6 +35,9 @@ export interface VocabRepoContract {
   updateVocab(vocab: VocabData): Promise<void>;
   deleteVocab(id: string): Promise<void>;
 
+  // Search operations
+  searchVocabByContent(language: string, searchTerm: string, excludeIds?: string[], limit?: number): Promise<VocabData[]>;
+
   // Batch operations
   bulkCreateVocab(vocab: Omit<VocabData, 'id' | 'progress'>[]): Promise<VocabData[]>;
   bulkUpdateVocab(vocabs: VocabData[]): Promise<void>;

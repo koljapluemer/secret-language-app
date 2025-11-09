@@ -14,7 +14,7 @@ export interface TranslationRepoContract {
   bulkCreateTranslations(translations: Omit<TranslationData, 'id' | 'origins'>[]): Promise<TranslationData[]>;
   
   // Query operations
-  searchTranslationsByContent(content: string): Promise<TranslationData[]>;
+  searchTranslationsByContent(content: string, excludeIds?: string[], limit?: number): Promise<TranslationData[]>;
   
   // Distractor generation operations
   generateWrongTranslations(correctTranslationContent: string, count: number): Promise<string[]>;

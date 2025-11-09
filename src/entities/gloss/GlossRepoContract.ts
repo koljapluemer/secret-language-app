@@ -14,7 +14,7 @@ export interface GlossRepoContract {
   bulkCreateGlosses(glosses: Omit<GlossData, 'id' | 'origins'>[]): Promise<GlossData[]>;
 
   // Query operations
-  searchGlossesByDescription(description: string): Promise<GlossData[]>;
+  searchGlossesByDescription(description: string, excludeIds?: string[], limit?: number): Promise<GlossData[]>;
 
   // Merge operations
   getUncheckedGlosses(limit: number): Promise<GlossData[]>;

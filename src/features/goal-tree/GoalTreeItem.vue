@@ -24,10 +24,7 @@
             <ChevronDown :size="14" class="hidden group-open/vocab:block" />
             <span>Vocab</span>
             <span class="text-light">({{ vocabItems.length }})</span>
-            <button @click.stop="showSelectVocabModal = true" class="btn btn-xs btn-ghost ml-auto" aria-label="Add existing vocab">
-              <ListPlus :size="14" />
-            </button>
-            <button @click.stop="showAddVocabModal = true" class="btn btn-xs btn-ghost" aria-label="Create new vocab">
+            <button @click.stop="showVocabModalDialog = true" class="btn btn-xs btn-ghost ml-auto" aria-label="Add vocab">
               <Plus :size="14" />
             </button>
           </summary>
@@ -130,10 +127,7 @@
             <ChevronDown :size="14" class="hidden group-open/translations:block" />
             <span>Translations</span>
             <span class="text-light">({{ translationItems.length }})</span>
-            <button @click.stop="showSelectTranslationModal = true" class="btn btn-xs btn-ghost ml-auto" aria-label="Add existing translation">
-              <ListPlus :size="14" />
-            </button>
-            <button @click.stop="showAddTranslationModal = true" class="btn btn-xs btn-ghost" aria-label="Create new translation">
+            <button @click.stop="showTranslationModalDialog = true" class="btn btn-xs btn-ghost ml-auto" aria-label="Add translation">
               <Plus :size="14" />
             </button>
           </summary>
@@ -166,10 +160,7 @@
             <ChevronDown :size="14" class="hidden group-open/glosses:block" />
             <span>Glosses</span>
             <span class="text-light">({{ glossItems.length }})</span>
-            <button @click.stop="showSelectGlossModal = true" class="btn btn-xs btn-ghost ml-auto" aria-label="Add existing gloss">
-              <ListPlus :size="14" />
-            </button>
-            <button @click.stop="showAddGlossModal = true" class="btn btn-xs btn-ghost" aria-label="Create new gloss">
+            <button @click.stop="showGlossModalDialog = true" class="btn btn-xs btn-ghost ml-auto" aria-label="Add gloss">
               <Plus :size="14" />
             </button>
           </summary>
@@ -195,44 +186,25 @@
     </details>
   </div>
 
-  <SelectVocabModal
-    :show="showSelectVocabModal"
+  <VocabModal
+    :show="showVocabModalDialog"
     :exclude-vocab-ids="goal.vocab"
     :language="goal.language"
-    @close="showSelectVocabModal = false"
-    @vocab-selected="handleVocabSelected"
-  />
-
-  <AddVocabModal
-    :show="showAddVocabModal"
-    :language="goal.language"
-    @close="showAddVocabModal = false"
+    @close="showVocabModalDialog = false"
     @vocab-added="handleVocabAdded"
   />
 
-  <SelectTranslationModal
-    :show="showSelectTranslationModal"
+  <TranslationModal
+    :show="showTranslationModalDialog"
     :exclude-translation-ids="goal.translations"
-    @close="showSelectTranslationModal = false"
-    @translation-selected="handleTranslationSelected"
-  />
-
-  <AddTranslationModal
-    :show="showAddTranslationModal"
-    @close="showAddTranslationModal = false"
+    @close="showTranslationModalDialog = false"
     @translation-added="handleTranslationAdded"
   />
 
-  <SelectGlossModal
-    :show="showSelectGlossModal"
+  <GlossModal
+    :show="showGlossModalDialog"
     :exclude-gloss-ids="goal.glosses"
-    @close="showSelectGlossModal = false"
-    @gloss-selected="handleGlossSelected"
-  />
-
-  <AddGlossModal
-    :show="showAddGlossModal"
-    @close="showAddGlossModal = false"
+    @close="showGlossModalDialog = false"
     @gloss-added="handleGlossAdded"
   />
 
@@ -286,13 +258,10 @@ import type { VocabData } from '@/entities/vocab/VocabData';
 import type { TranslationData } from '@/entities/translations/TranslationData';
 import type { GlossData } from '@/entities/gloss/GlossData';
 import type { LanguageData } from '@/entities/languages/LanguageData';
-import { ChevronRight, ChevronDown, Trash2, X, Plus, ListPlus, Eye } from 'lucide-vue-next';
-import SelectVocabModal from '@/features/vocab-select/SelectVocabModal.vue';
-import AddVocabModal from '@/features/vocab-add/AddVocabModal.vue';
-import SelectTranslationModal from '@/features/translation-select/SelectTranslationModal.vue';
-import AddTranslationModal from '@/features/translation-add/AddTranslationModal.vue';
-import SelectGlossModal from '@/features/gloss-select/SelectGlossModal.vue';
-import AddGlossModal from '@/features/gloss-add/AddGlossModal.vue';
+import { ChevronRight, ChevronDown, Trash2, X, Plus, Eye } from 'lucide-vue-next';
+import VocabModal from '@/features/vocab-modal/VocabModal.vue';
+import TranslationModal from '@/features/translation-modal/TranslationModal.vue';
+import GlossModal from '@/features/gloss-modal/GlossModal.vue';
 import VocabRenderer from '@/features/vocab-view/VocabRenderer.vue';
 import TranslationRenderer from '@/features/translation-view/TranslationRenderer.vue';
 import { setTreeState, setVocabState, getVocabState, getDefaultTreeState } from './treeState';
@@ -338,12 +307,9 @@ const allLanguages = ref<LanguageData[]>([]);
 const vocabTranslationsMap = ref<Map<string, TranslationData[]>>(new Map());
 const vocabGlossesMap = ref<Map<string, GlossData[]>>(new Map());
 
-const showSelectVocabModal = ref(false);
-const showAddVocabModal = ref(false);
-const showSelectTranslationModal = ref(false);
-const showAddTranslationModal = ref(false);
-const showSelectGlossModal = ref(false);
-const showAddGlossModal = ref(false);
+const showVocabModalDialog = ref(false);
+const showTranslationModalDialog = ref(false);
+const showGlossModalDialog = ref(false);
 
 // Vocab viewer modal state
 const showVocabModal = ref(false);
@@ -393,10 +359,6 @@ function getLanguageName(code: string): string {
 }
 
 // Event handlers
-function handleVocabSelected(vocabId: string) {
-  emit('vocab-selected', props.goal.id, vocabId);
-}
-
 function handleVocabAdded(vocabId: string) {
   emit('vocab-added', props.goal.id, vocabId);
 }
@@ -405,20 +367,12 @@ function disconnectVocab(vocabId: string) {
   emit('vocab-disconnected', props.goal.id, vocabId);
 }
 
-function handleTranslationSelected(translationId: string) {
-  emit('translation-selected', props.goal.id, translationId);
-}
-
 function handleTranslationAdded(translationId: string) {
   emit('translation-added', props.goal.id, translationId);
 }
 
 function disconnectTranslation(translationId: string) {
   emit('translation-disconnected', props.goal.id, translationId);
-}
-
-function handleGlossSelected(glossId: string) {
-  emit('gloss-selected', props.goal.id, glossId);
 }
 
 function handleGlossAdded(glossId: string) {

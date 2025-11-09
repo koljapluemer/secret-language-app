@@ -61,6 +61,23 @@ export class VocabRepo implements VocabRepoContract {
     return vocab ? this.ensureVocabFields(vocab) : undefined;
   }
 
+  async searchVocabByContent(language: string, searchTerm: string, excludeIds: string[] = [], limit: number = 10): Promise<VocabData[]> {
+    const lowerSearch = searchTerm.toLowerCase().trim();
+
+    const vocab = await db.vocab
+      .where('language')
+      .equals(language)
+      .filter(v => {
+        if (!v.content) return false;
+        if (excludeIds.includes(v.id)) return false;
+        return v.content.toLowerCase().includes(lowerSearch);
+      })
+      .limit(limit)
+      .toArray();
+
+    return vocab.map(v => this.ensureVocabFields(v));
+  }
+
   async getRandomAlreadySeenDueVocab(count: number, languages: string[], vocabBlockList?: string[], setsToAvoid?: string[]): Promise<VocabData[]> {
     const vocab = await db.vocab
       .where('language')
