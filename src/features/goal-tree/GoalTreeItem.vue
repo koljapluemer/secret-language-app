@@ -42,6 +42,9 @@
                 class="flex items-center gap-2 py-1 px-3 text-sm hover:bg-base-200"
               >
                 <span class="flex-1">{{ vocab.content }}</span>
+                <button @click="openVocabModal(vocab)" class="btn btn-xs btn-ghost" aria-label="View vocab">
+                  <Eye :size="12" />
+                </button>
                 <button @click="disconnectVocab(vocab.id)" class="btn btn-xs btn-ghost" aria-label="Remove vocab">
                   <X :size="12" />
                 </button>
@@ -159,6 +162,26 @@
     @close="showAddGlossModal = false"
     @gloss-added="handleGlossAdded"
   />
+
+  <!-- Vocab Viewer Modal -->
+  <dialog :class="['modal', { 'modal-open': showVocabModal }]">
+    <div class="modal-box">
+      <form method="dialog">
+        <button @click="closeVocabModal" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+      </form>
+      <VocabRenderer
+        v-if="selectedVocab"
+        :vocab="selectedVocab"
+        :repos="{ languageRepo, translationRepo, glossRepo, noteRepo, vocabRepo }"
+        showLanguage
+        showDeepData
+        showRelations
+      />
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button @click="closeVocabModal">close</button>
+    </form>
+  </dialog>
 </template>
 
 <script setup lang="ts">
@@ -172,14 +195,16 @@ import type { VocabData } from '@/entities/vocab/VocabData';
 import type { TranslationData } from '@/entities/translations/TranslationData';
 import type { GlossData } from '@/entities/gloss/GlossData';
 import type { LanguageData } from '@/entities/languages/LanguageData';
-import { ChevronRight, ChevronDown, Trash2, X, Plus, ListPlus } from 'lucide-vue-next';
+import { ChevronRight, ChevronDown, Trash2, X, Plus, ListPlus, Eye } from 'lucide-vue-next';
 import SelectVocabModal from '@/features/vocab-select/SelectVocabModal.vue';
 import AddVocabModal from '@/features/vocab-add/AddVocabModal.vue';
 import SelectTranslationModal from '@/features/translation-select/SelectTranslationModal.vue';
 import AddTranslationModal from '@/features/translation-add/AddTranslationModal.vue';
 import SelectGlossModal from '@/features/gloss-select/SelectGlossModal.vue';
 import AddGlossModal from '@/features/gloss-add/AddGlossModal.vue';
+import VocabRenderer from '@/features/vocab-view/VocabRenderer.vue';
 import { setTreeState, getDefaultTreeState } from './treeState';
+import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract';
 
 const props = defineProps<{
   goal: GoalData;
@@ -209,6 +234,7 @@ const vocabRepo = inject<VocabRepoContract>('vocabRepo')!;
 const translationRepo = inject<TranslationRepoContract>('translationRepo')!;
 const glossRepo = inject<GlossRepoContract>('glossRepo')!;
 const languageRepo = inject<LanguageRepoContract>('languageRepo')!;
+const noteRepo = inject<NoteRepoContract>('noteRepo')!;
 
 const vocabItems = ref<VocabData[]>([]);
 const translationItems = ref<TranslationData[]>([]);
@@ -221,6 +247,10 @@ const showSelectTranslationModal = ref(false);
 const showAddTranslationModal = ref(false);
 const showSelectGlossModal = ref(false);
 const showAddGlossModal = ref(false);
+
+// Vocab viewer modal state
+const showVocabModal = ref(false);
+const selectedVocab = ref<VocabData | null>(null);
 
 // Open/closed states with initial values from props or defaults
 const openStates = ref(props.initialOpenStates || getDefaultTreeState());
@@ -291,6 +321,17 @@ function handleToggle(path: keyof typeof openStates.value, event: Event) {
   const target = event.target as HTMLDetailsElement;
   openStates.value[path] = target.open;
   setTreeState(props.situationId, props.goal.id, path, target.open);
+}
+
+// Vocab viewer modal functions
+function openVocabModal(vocab: VocabData) {
+  selectedVocab.value = vocab;
+  showVocabModal.value = true;
+}
+
+function closeVocabModal() {
+  showVocabModal.value = false;
+  selectedVocab.value = null;
 }
 
 onMounted(async () => {
