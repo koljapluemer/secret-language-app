@@ -5,34 +5,34 @@
         <button @click="closeModal" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
       </form>
 
-      <h3 class="font-bold text-lg mb-4">Add Gloss</h3>
+      <h3>Add Gloss</h3>
 
       <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
         <!-- Gloss Description Input -->
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Gloss Description *</span>
-          </label>
+        <fieldset class="fieldset">
+          <label for="gloss-description" class="label">Gloss Description *</label>
           <input
+            id="gloss-description"
             v-model="formData.description"
             type="text"
-            class="input input-bordered"
+            name="gloss-description"
+            class="input"
             placeholder="Enter gloss..."
             @input="handleDescriptionInput"
             required
           />
-        </div>
+        </fieldset>
 
         <!-- Suggestions List -->
         <div v-if="suggestions.length > 0" class="flex flex-col gap-2">
-          <div class="text-sm font-medium text-base-content/70">Similar glosses:</div>
+          <div class="text-light">Similar glosses:</div>
           <div class="flex flex-col gap-1 max-h-48 overflow-y-auto">
             <button
               v-for="gloss in suggestions"
               :key="gloss.id"
               type="button"
               @click="attachExisting(gloss.id)"
-              class="btn btn-sm btn-ghost justify-start"
+              class="btn btn-ghost justify-start"
             >
               {{ gloss.description }}
             </button>
@@ -52,7 +52,7 @@
             class="btn btn-primary"
             :disabled="loading || !formData.description.trim()"
           >
-            <span v-if="loading" class="loading loading-spinner loading-sm"></span>
+            <span v-if="loading" class="loading loading-spinner"></span>
             {{ buttonText }}
           </button>
         </div>

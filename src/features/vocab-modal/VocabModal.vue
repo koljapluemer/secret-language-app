@@ -5,47 +5,47 @@
         <button @click="closeModal" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
       </form>
 
-      <h3 class="font-bold text-lg mb-4">Add Vocab</h3>
+      <h3>Add Vocab</h3>
 
       <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
         <!-- Vocab Content Input -->
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Vocab Content *</span>
-          </label>
+        <fieldset class="fieldset">
+          <label for="vocab-content" class="label">Vocab Content *</label>
           <input
+            id="vocab-content"
             v-model="formData.content"
             type="text"
-            class="input input-bordered"
+            name="vocab-content"
+            class="input"
             placeholder="Enter vocab..."
             @input="handleContentInput"
             required
           />
-        </div>
+        </fieldset>
 
         <!-- Translation Input (Optional) -->
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Translation (optional)</span>
-          </label>
+        <fieldset class="fieldset">
+          <label for="vocab-translation" class="label">Translation (optional)</label>
           <input
+            id="vocab-translation"
             v-model="formData.translation"
             type="text"
-            class="input input-bordered"
+            name="vocab-translation"
+            class="input"
             placeholder="Enter translation..."
           />
-        </div>
+        </fieldset>
 
         <!-- Suggestions List -->
         <div v-if="suggestions.length > 0" class="flex flex-col gap-2">
-          <div class="text-sm font-medium text-base-content/70">Similar vocab:</div>
+          <div class="text-light">Similar vocab:</div>
           <div class="flex flex-col gap-1 max-h-48 overflow-y-auto">
             <button
               v-for="vocab in suggestions"
               :key="vocab.id"
               type="button"
               @click="attachExisting(vocab.id)"
-              class="btn btn-sm btn-ghost justify-start"
+              class="btn btn-ghost justify-start"
             >
               {{ vocab.content }}
             </button>
@@ -65,7 +65,7 @@
             class="btn btn-primary"
             :disabled="loading || !formData.content.trim()"
           >
-            <span v-if="loading" class="loading loading-spinner loading-sm"></span>
+            <span v-if="loading" class="loading loading-spinner"></span>
             {{ buttonText }}
           </button>
         </div>

@@ -5,34 +5,34 @@
         <button @click="closeModal" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
       </form>
 
-      <h3 class="font-bold text-lg mb-4">Add Translation</h3>
+      <h3>Add Translation</h3>
 
       <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
         <!-- Translation Content Input -->
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Translation Content *</span>
-          </label>
+        <fieldset class="fieldset">
+          <label for="translation-content" class="label">Translation Content *</label>
           <input
+            id="translation-content"
             v-model="formData.content"
             type="text"
-            class="input input-bordered"
+            name="translation-content"
+            class="input"
             placeholder="Enter translation..."
             @input="handleContentInput"
             required
           />
-        </div>
+        </fieldset>
 
         <!-- Suggestions List -->
         <div v-if="suggestions.length > 0" class="flex flex-col gap-2">
-          <div class="text-sm font-medium text-base-content/70">Similar translations:</div>
+          <div class="text-light">Similar translations:</div>
           <div class="flex flex-col gap-1 max-h-48 overflow-y-auto">
             <button
               v-for="translation in suggestions"
               :key="translation.id"
               type="button"
               @click="attachExisting(translation.id)"
-              class="btn btn-sm btn-ghost justify-start"
+              class="btn btn-ghost justify-start"
             >
               {{ translation.content }}
             </button>
@@ -52,7 +52,7 @@
             class="btn btn-primary"
             :disabled="loading || !formData.content.trim()"
           >
-            <span v-if="loading" class="loading loading-spinner loading-sm"></span>
+            <span v-if="loading" class="loading loading-spinner"></span>
             {{ buttonText }}
           </button>
         </div>
