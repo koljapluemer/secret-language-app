@@ -82,6 +82,9 @@
                           class="flex items-center gap-2 py-1 px-3 text-xs font-normal hover:bg-base-200"
                         >
                           <span class="flex-1">{{ translation.content }}</span>
+                          <button @click.stop="openTranslationModal(translation)" class="btn btn-xs btn-ghost" aria-label="View translation">
+                            <Eye :size="10" />
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -145,6 +148,9 @@
                 class="flex items-center gap-2 py-1 px-3 text-sm hover:bg-base-200"
               >
                 <span class="flex-1">{{ translation.content }}</span>
+                <button @click="openTranslationModal(translation)" class="btn btn-xs btn-ghost" aria-label="View translation">
+                  <Eye :size="12" />
+                </button>
                 <button @click="disconnectTranslation(translation.id)" class="btn btn-xs btn-ghost" aria-label="Remove translation">
                   <X :size="12" />
                 </button>
@@ -249,6 +255,24 @@
       <button @click="closeVocabModal">close</button>
     </form>
   </dialog>
+
+  <!-- Translation Viewer Modal -->
+  <dialog :class="['modal', { 'modal-open': showTranslationModal }]">
+    <div class="modal-box">
+      <form method="dialog">
+        <button @click="closeTranslationModal" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+      </form>
+      <TranslationRenderer
+        v-if="selectedTranslation"
+        :translation="selectedTranslation"
+        :repos="{ languageRepo, translationRepo, glossRepo, noteRepo, vocabRepo }"
+        showDeepData
+      />
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button @click="closeTranslationModal">close</button>
+    </form>
+  </dialog>
 </template>
 
 <script setup lang="ts">
@@ -270,6 +294,7 @@ import AddTranslationModal from '@/features/translation-add/AddTranslationModal.
 import SelectGlossModal from '@/features/gloss-select/SelectGlossModal.vue';
 import AddGlossModal from '@/features/gloss-add/AddGlossModal.vue';
 import VocabRenderer from '@/features/vocab-view/VocabRenderer.vue';
+import TranslationRenderer from '@/features/translation-view/TranslationRenderer.vue';
 import { setTreeState, setVocabState, getVocabState, getDefaultTreeState } from './treeState';
 import type { VocabItemState } from './treeState';
 import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract';
@@ -323,6 +348,10 @@ const showAddGlossModal = ref(false);
 // Vocab viewer modal state
 const showVocabModal = ref(false);
 const selectedVocab = ref<VocabData | null>(null);
+
+// Translation viewer modal state
+const showTranslationModal = ref(false);
+const selectedTranslation = ref<TranslationData | null>(null);
 
 // Open/closed states with initial values from props or defaults
 const openStates = ref(props.initialOpenStates || getDefaultTreeState());
@@ -431,6 +460,17 @@ function openVocabModal(vocab: VocabData) {
 function closeVocabModal() {
   showVocabModal.value = false;
   selectedVocab.value = null;
+}
+
+// Translation viewer modal functions
+function openTranslationModal(translation: TranslationData) {
+  selectedTranslation.value = translation;
+  showTranslationModal.value = true;
+}
+
+function closeTranslationModal() {
+  showTranslationModal.value = false;
+  selectedTranslation.value = null;
 }
 
 onMounted(async () => {
