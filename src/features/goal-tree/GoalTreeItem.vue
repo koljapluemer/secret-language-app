@@ -1,7 +1,7 @@
 <template>
   <div class="border-l border-base-300">
     <!-- Goal Level -->
-    <details class="group">
+    <details class="group" :open="openStates.goal" @toggle="handleToggle('goal', $event)">
       <summary class="flex items-center gap-2 py-2 px-3 cursor-pointer hover:bg-base-200 list-none">
         <ChevronRight :size="16" class="group-open:hidden" />
         <ChevronDown :size="16" class="hidden group-open:block" />
@@ -18,7 +18,7 @@
 
       <div class="ml-4">
         <!-- Vocab Category -->
-        <details class="group/vocab">
+        <details class="group/vocab" :open="openStates.vocab" @toggle="handleToggle('vocab', $event)">
           <summary class="flex items-center gap-2 py-1 px-3 cursor-pointer hover:bg-base-200 list-none text-sm">
             <ChevronRight :size="14" class="group-open/vocab:hidden" />
             <ChevronDown :size="14" class="hidden group-open/vocab:block" />
@@ -51,7 +51,7 @@
         </details>
 
         <!-- Translations Category -->
-        <details class="group/translations">
+        <details class="group/translations" :open="openStates.translations" @toggle="handleToggle('translations', $event)">
           <summary class="flex items-center gap-2 py-1 px-3 cursor-pointer hover:bg-base-200 list-none text-sm">
             <ChevronRight :size="14" class="group-open/translations:hidden" />
             <ChevronDown :size="14" class="hidden group-open/translations:block" />
@@ -84,7 +84,7 @@
         </details>
 
         <!-- Glosses Category -->
-        <details class="group/glosses">
+        <details class="group/glosses" :open="openStates.glosses" @toggle="handleToggle('glosses', $event)">
           <summary class="flex items-center gap-2 py-1 px-3 cursor-pointer hover:bg-base-200 list-none text-sm">
             <ChevronRight :size="14" class="group-open/glosses:hidden" />
             <ChevronDown :size="14" class="hidden group-open/glosses:block" />
@@ -179,9 +179,17 @@ import SelectTranslationModal from '@/features/translation-select/SelectTranslat
 import AddTranslationModal from '@/features/translation-add/AddTranslationModal.vue';
 import SelectGlossModal from '@/features/gloss-select/SelectGlossModal.vue';
 import AddGlossModal from '@/features/gloss-add/AddGlossModal.vue';
+import { setTreeState, getDefaultTreeState } from './treeState';
 
 const props = defineProps<{
   goal: GoalData;
+  situationId: string;
+  initialOpenStates?: {
+    goal: boolean;
+    vocab: boolean;
+    translations: boolean;
+    glosses: boolean;
+  };
 }>();
 
 const emit = defineEmits<{
@@ -213,6 +221,9 @@ const showSelectTranslationModal = ref(false);
 const showAddTranslationModal = ref(false);
 const showSelectGlossModal = ref(false);
 const showAddGlossModal = ref(false);
+
+// Open/closed states with initial values from props or defaults
+const openStates = ref(props.initialOpenStates || getDefaultTreeState());
 
 async function loadData() {
   allLanguages.value = await languageRepo.getAll();
@@ -273,6 +284,13 @@ function handleGlossAdded(glossId: string) {
 
 function disconnectGloss(glossId: string) {
   emit('gloss-disconnected', props.goal.id, glossId);
+}
+
+// Handle toggle events to persist state
+function handleToggle(path: keyof typeof openStates.value, event: Event) {
+  const target = event.target as HTMLDetailsElement;
+  openStates.value[path] = target.open;
+  setTreeState(props.situationId, props.goal.id, path, target.open);
 }
 
 onMounted(async () => {

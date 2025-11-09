@@ -30,6 +30,8 @@
           v-for="goal in goalsList"
           :key="goal.id"
           :goal="goal"
+          :situation-id="situationId"
+          :initial-open-states="getTreeState(situationId, goal.id) || getDefaultTreeState()"
           @remove="removeGoal(goal.id)"
           @vocab-selected="handleVocabSelected"
           @vocab-added="handleVocabAdded"
@@ -70,12 +72,14 @@ import { useToast } from '@/shared/toasts';
 import SelectGoalModal from '@/features/goal-select/SelectGoalModal.vue';
 import AddGoalModal from '@/features/goal-add/AddGoalModal.vue';
 import GoalTreeItem from '@/features/goal-tree/GoalTreeItem.vue';
+import { getTreeState, getDefaultTreeState } from '@/features/goal-tree/treeState';
 
 const route = useRoute();
 const situationRepo = inject<SituationRepoContract>('situationRepo')!;
 const goalRepo = inject<GoalRepoContract>('goalRepo')!;
 const toast = useToast();
 
+const situationId = route.params.id as string;
 const situation = ref<SituationData | null>(null);
 const goalsList = ref<GoalData[]>([]);
 const loading = ref(true);
