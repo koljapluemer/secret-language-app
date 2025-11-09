@@ -31,6 +31,15 @@
           :key="goal.id"
           :goal="goal"
           @remove="removeGoal(goal.id)"
+          @vocab-selected="handleVocabSelected"
+          @vocab-added="handleVocabAdded"
+          @vocab-disconnected="handleVocabDisconnected"
+          @translation-selected="handleTranslationSelected"
+          @translation-added="handleTranslationAdded"
+          @translation-disconnected="handleTranslationDisconnected"
+          @gloss-selected="handleGlossSelected"
+          @gloss-added="handleGlossAdded"
+          @gloss-disconnected="handleGlossDisconnected"
         />
       </div>
     </div>
@@ -132,6 +141,85 @@ async function handleGoalSelected(goalId: string) {
 
 async function handleGoalAdded(goalId: string) {
   await handleGoalSelected(goalId);
+}
+
+// Vocab handlers
+async function handleVocabSelected(goalId: string, vocabId: string) {
+  await updateGoalArray(goalId, 'vocab', vocabId, 'add');
+}
+
+async function handleVocabAdded(goalId: string, vocabId: string) {
+  await updateGoalArray(goalId, 'vocab', vocabId, 'add');
+}
+
+async function handleVocabDisconnected(goalId: string, vocabId: string) {
+  await updateGoalArray(goalId, 'vocab', vocabId, 'remove');
+}
+
+// Translation handlers
+async function handleTranslationSelected(goalId: string, translationId: string) {
+  await updateGoalArray(goalId, 'translations', translationId, 'add');
+}
+
+async function handleTranslationAdded(goalId: string, translationId: string) {
+  await updateGoalArray(goalId, 'translations', translationId, 'add');
+}
+
+async function handleTranslationDisconnected(goalId: string, translationId: string) {
+  await updateGoalArray(goalId, 'translations', translationId, 'remove');
+}
+
+// Gloss handlers
+async function handleGlossSelected(goalId: string, glossId: string) {
+  await updateGoalArray(goalId, 'glosses', glossId, 'add');
+}
+
+async function handleGlossAdded(goalId: string, glossId: string) {
+  await updateGoalArray(goalId, 'glosses', glossId, 'add');
+}
+
+async function handleGlossDisconnected(goalId: string, glossId: string) {
+  await updateGoalArray(goalId, 'glosses', glossId, 'remove');
+}
+
+// Generic update function
+async function updateGoalArray(
+  goalId: string,
+  arrayName: 'vocab' | 'translations' | 'glosses',
+  itemId: string,
+  action: 'add' | 'remove'
+) {
+  const goal = goalsList.value.find(g => g.id === goalId);
+  if (!goal) return;
+
+  try {
+    const currentArray = toRaw(goal[arrayName]);
+    const updatedArray = action === 'add'
+      ? [...currentArray, itemId]
+      : currentArray.filter(id => id !== itemId);
+
+    const updates = {
+      language: goal.language,
+      title: goal.title,
+      vocab: arrayName === 'vocab' ? updatedArray : [...toRaw(goal.vocab)],
+      glosses: arrayName === 'glosses' ? updatedArray : [...toRaw(goal.glosses)],
+      translations: arrayName === 'translations' ? updatedArray : [...toRaw(goal.translations)],
+      notes: [...toRaw(goal.notes)],
+      factCards: [...toRaw(goal.factCards)],
+      origins: [...toRaw(goal.origins)],
+      isAchieved: goal.isAchieved
+    };
+
+    await goalRepo.update(goal.id, updates);
+    await loadGoals();
+
+    const actionText = action === 'add' ? 'added to' : 'removed from';
+    const itemType = arrayName === 'vocab' ? 'Vocab' : arrayName === 'translations' ? 'Translation' : 'Gloss';
+    toast.success(`${itemType} ${actionText} goal`);
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    toast.error(`Failed to update goal: ${errorMessage}`);
+  }
 }
 
 async function removeGoal(goalId: string) {
