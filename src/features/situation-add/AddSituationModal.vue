@@ -82,6 +82,7 @@ async function handleSave() {
     const situationData = toRaw({
       description: description.value.trim(),
       goals: [],
+      immersionResources: [],
       relevantForLanguages: []
     });
 

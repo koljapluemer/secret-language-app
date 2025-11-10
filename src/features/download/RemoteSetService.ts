@@ -450,7 +450,6 @@ export class RemoteSetService {
         reportProgress('Processing goals', i, setFiles.goals.length);
 
         const noteIds = this.resolveReferences(goalData.notes || [], noteMap);
-        const vocabIds = this.resolveReferences(goalData.vocab || [], vocabMap);
         const factCardIds = this.resolveReferences(goalData.factCards || [], factCardMap);
 
         // Handle translations - ensure it's an array
@@ -465,9 +464,7 @@ export class RemoteSetService {
           language: goalData.language,
           title: goalData.title,
           notes: noteIds,
-          vocab: vocabIds,
           translations: translationIds,
-          glosses: [],
           factCards: factCardIds,
           origins: [localSet.id],
           isAchieved: false

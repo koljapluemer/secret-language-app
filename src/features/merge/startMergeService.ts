@@ -11,7 +11,6 @@ import type { TranslationRepoContract } from '@/entities/translations/Translatio
 import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract'
 import type { FactCardRepoContract } from '@/entities/fact-cards/FactCardRepoContract'
 import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoContract'
-import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract'
 
 let mergeServiceInstance: EntityMergeService | null = null
 
@@ -20,8 +19,7 @@ export function startMergeService(
   translationRepo: TranslationRepoContract,
   noteRepo: NoteRepoContract,
   factCardRepo: FactCardRepoContract,
-  resourceRepo: ResourceRepoContract,
-  goalRepo: GoalRepoContract
+  resourceRepo: ResourceRepoContract
 ): EntityMergeService {
   if (mergeServiceInstance) {
     console.warn('Merge service already started')
@@ -33,8 +31,7 @@ export function startMergeService(
     translationRepo,
     noteRepo,
     factCardRepo,
-    resourceRepo,
-    goalRepo
+    resourceRepo
   )
 
   mergeServiceInstance.start()

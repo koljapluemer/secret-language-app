@@ -75,8 +75,6 @@ async function saveGoal() {
       updatedGoal = await goalRepo.create({
         title: goalTitle.value.trim(),
         language: selectedLanguage.value,
-        vocab: [],
-        glosses: [],
         translations: [],
         notes: [],
         factCards: [],

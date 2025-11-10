@@ -106,8 +106,6 @@ async function handleSubmit() {
     await goalRepo.create({
       title: formData.value.title.trim(),
       language: formData.value.language,
-      vocab: [],
-      glosses: [],
       translations: [],
       notes: [],
       factCards: [],

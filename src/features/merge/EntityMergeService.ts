@@ -15,7 +15,6 @@ import type { TranslationRepoContract } from '@/entities/translations/Translatio
 import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract'
 import type { FactCardRepoContract } from '@/entities/fact-cards/FactCardRepoContract'
 import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoContract'
-import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract'
 
 // Entity data types
 import type { VocabData } from '@/entities/vocab/VocabData'
@@ -45,7 +44,6 @@ export class EntityMergeService {
     private noteRepo: NoteRepoContract,
     private factCardRepo: FactCardRepoContract,
     private resourceRepo: ResourceRepoContract,
-    private goalRepo: GoalRepoContract,
     private tickInterval: number = 2000 // Check every 2 seconds
   ) {}
 
@@ -190,24 +188,7 @@ export class EntityMergeService {
       }
     }
 
-    // Update goals that reference deleted vocab before deletion
-    if (vocabIdRemapping.size > 0) {
-      const allGoals = await this.goalRepo.getAll()
-      for (const goal of allGoals) {
-        let updated = false
-        const newVocabIds = goal.vocab.map(vocabId => {
-          if (vocabIdRemapping.has(vocabId)) {
-            updated = true
-            return vocabIdRemapping.get(vocabId)!
-          }
-          return vocabId
-        })
-
-        if (updated) {
-          await this.goalRepo.update(goal.id, { vocab: newVocabIds })
-        }
-      }
-    }
+    // Goals no longer track vocab, so no need to update them
 
     // Bulk delete duplicates
     for (const id of toDelete) {

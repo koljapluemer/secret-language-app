@@ -8,26 +8,34 @@ export interface VocabItemState {
 
 export interface GoalTreeState {
   goal: boolean;
-  vocab: boolean;
-  translations: boolean;
-  glosses: boolean;
+}
+
+export interface ResourceTreeState {
+  resource: boolean;
   expandedVocabItems?: {
     [vocabId: string]: VocabItemState;
   };
 }
 
 interface TreeStateData {
-  [situationId: string]: {
-    [goalId: string]: GoalTreeState;
+  goals: {
+    [situationId: string]: {
+      [goalId: string]: GoalTreeState;
+    };
+  };
+  resources: {
+    [situationId: string]: {
+      [resourceId: string]: ResourceTreeState;
+    };
   };
 }
 
 function getStorageData(): TreeStateData {
   try {
     const data = sessionStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : {};
+    return data ? JSON.parse(data) : { goals: {}, resources: {} };
   } catch {
-    return {};
+    return { goals: {}, resources: {} };
   }
 }
 
@@ -39,87 +47,113 @@ function setStorageData(data: TreeStateData): void {
   }
 }
 
+// Goal tree state functions
 export function getTreeState(situationId: string, goalId: string): GoalTreeState | null {
   const data = getStorageData();
-  return data[situationId]?.[goalId] || null;
+  return data.goals[situationId]?.[goalId] || null;
 }
 
 export function setTreeState(
   situationId: string,
   goalId: string,
-  path: 'goal' | 'vocab' | 'translations' | 'glosses',
+  path: 'goal',
   isOpen: boolean
 ): void {
   const data = getStorageData();
 
-  if (!data[situationId]) {
-    data[situationId] = {};
+  if (!data.goals[situationId]) {
+    data.goals[situationId] = {};
   }
 
-  if (!data[situationId][goalId]) {
-    data[situationId][goalId] = {
-      goal: false,
-      vocab: false,
-      translations: false,
-      glosses: false,
-      expandedVocabItems: {}
+  if (!data.goals[situationId][goalId]) {
+    data.goals[situationId][goalId] = {
+      goal: false
     };
   }
 
-  data[situationId][goalId][path] = isOpen;
+  data.goals[situationId][goalId][path] = isOpen;
   setStorageData(data);
 }
 
 export function getDefaultTreeState(): GoalTreeState {
   return {
-    goal: false,
-    vocab: false,
-    translations: false,
-    glosses: false,
+    goal: false
+  };
+}
+
+// Resource tree state functions
+export function getResourceTreeState(situationId: string, resourceId: string): ResourceTreeState | null {
+  const data = getStorageData();
+  return data.resources[situationId]?.[resourceId] || null;
+}
+
+export function setResourceTreeState(
+  situationId: string,
+  resourceId: string,
+  path: 'resource',
+  isOpen: boolean
+): void {
+  const data = getStorageData();
+
+  if (!data.resources[situationId]) {
+    data.resources[situationId] = {};
+  }
+
+  if (!data.resources[situationId][resourceId]) {
+    data.resources[situationId][resourceId] = {
+      resource: false,
+      expandedVocabItems: {}
+    };
+  }
+
+  data.resources[situationId][resourceId][path] = isOpen;
+  setStorageData(data);
+}
+
+export function getDefaultResourceTreeState(): ResourceTreeState {
+  return {
+    resource: false,
     expandedVocabItems: {}
   };
 }
 
-export function getVocabState(situationId: string, goalId: string, vocabId: string): VocabItemState | null {
+export function getResourceVocabState(situationId: string, resourceId: string, vocabId: string): VocabItemState | null {
   const data = getStorageData();
-  return data[situationId]?.[goalId]?.expandedVocabItems?.[vocabId] || null;
+  return data.resources[situationId]?.[resourceId]?.expandedVocabItems?.[vocabId] || null;
 }
 
-export function setVocabState(
+export function setResourceVocabState(
   situationId: string,
-  goalId: string,
+  resourceId: string,
   vocabId: string,
   path: keyof VocabItemState,
   isOpen: boolean
 ): void {
   const data = getStorageData();
 
-  if (!data[situationId]) {
-    data[situationId] = {};
+  if (!data.resources[situationId]) {
+    data.resources[situationId] = {};
   }
 
-  if (!data[situationId][goalId]) {
-    data[situationId][goalId] = {
-      goal: false,
-      vocab: false,
-      translations: false,
-      glosses: false,
+  if (!data.resources[situationId][resourceId]) {
+    data.resources[situationId][resourceId] = {
+      resource: false,
       expandedVocabItems: {}
     };
   }
 
-  if (!data[situationId][goalId].expandedVocabItems) {
-    data[situationId][goalId].expandedVocabItems = {};
+  if (!data.resources[situationId][resourceId].expandedVocabItems) {
+    data.resources[situationId][resourceId].expandedVocabItems = {};
   }
 
-  if (!data[situationId][goalId].expandedVocabItems![vocabId]) {
-    data[situationId][goalId].expandedVocabItems![vocabId] = {
+  if (!data.resources[situationId][resourceId].expandedVocabItems![vocabId]) {
+    data.resources[situationId][resourceId].expandedVocabItems![vocabId] = {
       expanded: false,
       translations: false,
       glosses: false
     };
   }
 
-  data[situationId][goalId].expandedVocabItems![vocabId][path] = isOpen;
+  data.resources[situationId][resourceId].expandedVocabItems![vocabId][path] = isOpen;
   setStorageData(data);
 }

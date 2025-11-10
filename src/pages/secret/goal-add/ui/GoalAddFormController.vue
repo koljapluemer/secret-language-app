@@ -73,8 +73,6 @@ async function handleSave(action: 'edit' | 'add-another') {
     const newGoal = await goalRepo.create({
       title: formData.value.title.trim(),
       language: formData.value.language,
-      vocab: [],
-      glosses: [],
       translations: [],
       notes: [],
       factCards: [],

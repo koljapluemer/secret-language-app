@@ -108,12 +108,7 @@
               <span class="text-base-content/60">{{ $t('goals.featureRemoved') }}</span>
             </td>
             <td>
-              <div class="flex items-center gap-2">
-                <span class=" ">{{ goal.vocab.length }}</span>
-                <span v-if="vocabStats[goal.id]">
-                  {{ Math.round(vocabStats[goal.id].topOfMindPercentage) }}{{ $t('goals.stats.vocabMastered') }}
-                </span>
-              </div>
+              <span class="text-base-content/60">{{ $t('goals.featureRemoved') }}</span>
             </td>
             <td>
               <div class="flex flex-wrap gap-1">
@@ -163,13 +158,10 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter, type LocationQueryValue } from 'vue-router';
 import type { GoalRepoContract, GoalListFilters } from '@/entities/goals/GoalRepoContract';
 import type { GoalData } from '@/entities/goals/GoalData';
-import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
-import type { VocabData } from '@/entities/vocab/VocabData';
 import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
 import type { LanguageData } from '@/entities/languages/LanguageData';
 import type { LocalSetRepoContract } from '@/entities/local-sets/LocalSetRepoContract';
 import type { LocalSetData } from '@/entities/local-sets/LocalSetData';
-import { isCurrentlyTopOfMind } from '@/entities/vocab/isCurrentlyTopOfMind';
 import { useToast } from '@/shared/toasts';
 import Pagination from '@/shared/ui/Pagination.vue';
 
@@ -179,7 +171,6 @@ const router = useRouter();
 const toast = useToast();
 
 const goalRepo = inject<GoalRepoContract>('goalRepo')!;
-const vocabRepo = inject<VocabRepoContract>('vocabRepo')!;
 const languageRepo = inject<LanguageRepoContract>('languageRepo')!;
 const localSetRepo = inject<LocalSetRepoContract>('localSetRepo')!;
 
@@ -348,29 +339,8 @@ async function loadGoals() {
 
 async function loadVocabStatsForCurrentPage() {
   try {
-    const stats: Record<string, { topOfMindPercentage: number }> = {};
-    
-    // Calculate vocab stats for each goal on current page
-    for (const goal of goalItems.value) {
-      if (goal.vocab.length > 0) {
-        const vocabItems = await Promise.all(
-          goal.vocab.map(id => vocabRepo.getVocabByUID(id))
-        );
-
-        const validVocab = vocabItems.filter((v): v is VocabData => v !== undefined);
-        const topOfMindCount = validVocab.filter(vocab =>
-          vocab && isCurrentlyTopOfMind(vocab)
-        ).length;
-
-        stats[goal.id] = {
-          topOfMindPercentage: validVocab.length > 0
-            ? (topOfMindCount / validVocab.length) * 100
-            : 0
-        };
-      }
-    }
-    
-    vocabStats.value = stats;
+    // Goals no longer track vocab directly
+    vocabStats.value = {};
   } catch (err) {
     toast.error(`Failed to load vocab stats: ${String(err)}`);
   }

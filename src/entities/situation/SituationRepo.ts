@@ -23,6 +23,7 @@ export class SituationRepo implements SituationRepoContract {
       id: nanoid(),
       description: situation.description,
       goals: situation.goals,
+      immersionResources: situation.immersionResources,
       relevantForLanguages: situation.relevantForLanguages
     };
 
@@ -48,6 +49,7 @@ export class SituationRepo implements SituationRepoContract {
       id: nanoid(),
       description: s.description,
       goals: s.goals,
+      immersionResources: s.immersionResources,
       relevantForLanguages: s.relevantForLanguages
     }));
 

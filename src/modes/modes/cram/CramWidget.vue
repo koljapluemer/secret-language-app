@@ -109,14 +109,29 @@ async function startNewLesson(): Promise<void> {
     throw new Error('Failed to select a goal');
   }
 
-  // Get vocab from the goal
-  if (!selectedGoal.vocab || selectedGoal.vocab.length === 0) {
-    toast.error('Selected goal has no vocabulary');
-    throw new Error('Selected goal has no vocabulary');
+  // Goals no longer track vocab directly - this cram mode is deprecated
+  // For now, fetch vocab from all translations to find related vocab
+  const vocabIds = new Set<string>();
+
+  // Get all vocab and filter by those that reference these translations
+  const allVocab = await vocabRepo.getVocab();
+  for (const vocab of allVocab) {
+    for (const translationId of vocab.translations) {
+      if (selectedGoal.translations.includes(translationId)) {
+        vocabIds.add(vocab.id);
+        break;
+      }
+    }
   }
 
-  // Pick a random vocab from the goal
-  const selectedVocabId = randomFromArray(selectedGoal.vocab);
+  const vocabArray = Array.from(vocabIds);
+  if (vocabArray.length === 0) {
+    toast.error('Selected goal has no associated vocabulary');
+    throw new Error('Selected goal has no associated vocabulary');
+  }
+
+  // Pick a random vocab from available vocab
+  const selectedVocabId = randomFromArray(vocabArray);
   if (!selectedVocabId) {
     throw new Error('Failed to select vocabulary from goal');
   }
