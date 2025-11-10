@@ -50,7 +50,7 @@ function setStorageData(data: TreeStateData): void {
 // Goal tree state functions
 export function getTreeState(situationId: string, goalId: string): GoalTreeState | null {
   const data = getStorageData();
-  return data.goals[situationId]?.[goalId] || null;
+  return data.goals?.[situationId]?.[goalId] || null;
 }
 
 export function setTreeState(
@@ -84,7 +84,7 @@ export function getDefaultTreeState(): GoalTreeState {
 // Resource tree state functions
 export function getResourceTreeState(situationId: string, resourceId: string): ResourceTreeState | null {
   const data = getStorageData();
-  return data.resources[situationId]?.[resourceId] || null;
+  return data.resources?.[situationId]?.[resourceId] || null;
 }
 
 export function setResourceTreeState(
@@ -119,7 +119,7 @@ export function getDefaultResourceTreeState(): ResourceTreeState {
 
 export function getResourceVocabState(situationId: string, resourceId: string, vocabId: string): VocabItemState | null {
   const data = getStorageData();
-  return data.resources[situationId]?.[resourceId]?.expandedVocabItems?.[vocabId] || null;
+  return data.resources?.[situationId]?.[resourceId]?.expandedVocabItems?.[vocabId] || null;
 }
 
 export function setResourceVocabState(
