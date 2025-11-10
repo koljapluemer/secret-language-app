@@ -11,7 +11,6 @@ import { provide } from 'vue';
 import type { RepositoriesContextStrict } from '@/shared/types/RepositoriesContext';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
-import type { GlossRepoContract } from '@/entities/gloss/GlossRepoContract';
 import type { SituationRepoContract } from '@/entities/situation/SituationRepoContract';
 import type { FactCardRepoContract } from '@/entities/fact-cards/FactCardRepoContract';
 import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
@@ -28,17 +27,15 @@ const factCardRepo = inject<FactCardRepoContract>('factCardRepo');
 const languageRepo = inject<LanguageRepoContract>('languageRepo');
 const goalRepo = inject<GoalRepoContract>('goalRepo');
 const noteRepo = inject<NoteRepoContract>('noteRepo');
-const glossRepo = inject<GlossRepoContract>('glossRepo');
 const situationRepo = inject<SituationRepoContract>('situationRepo');
 
-if (!resourceRepo || !testResultRepo || !vocabRepo || !translationRepo || !factCardRepo || !languageRepo || !goalRepo || !noteRepo || !glossRepo || !situationRepo) {
+if (!resourceRepo || !testResultRepo || !vocabRepo || !translationRepo || !factCardRepo || !languageRepo || !goalRepo || !noteRepo || !situationRepo) {
   throw new Error('Required repositories not available');
 }
 
 const repositories: RepositoriesContextStrict = {
   vocabRepo,
   translationRepo,
-  glossRepo,
   situationRepo,
   factCardRepo,
   languageRepo,

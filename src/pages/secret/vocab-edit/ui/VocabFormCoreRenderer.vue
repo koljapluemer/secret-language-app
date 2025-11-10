@@ -128,118 +128,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Glosses Section -->
-    <div class="py-4">
-      <div class="flex justify-between items-center mb-3">
-        <div class="font-medium">
-          {{ $t('vocabulary.glosses') }}
-        </div>
-        <button
-          type="button"
-          @click="addNewGloss"
-          class="btn btn-sm btn-outline"
-        >
-          <Plus class="w-4 h-4 mr-1" />
-          {{ $t('vocabulary.form.addGloss') }}
-        </button>
-      </div>
-
-      <div v-if="formData.glosses.length === 0" class="text-center py-4">
-        {{ $t('vocabulary.form.noGlossesAttached') }}
-      </div>
-
-      <div v-else class="space-y-4">
-        <div
-          v-for="(gloss, index) in formData.glosses"
-          :key="'id' in gloss ? gloss.id : `temp-${index}`"
-        >
-          <!-- Edit mode -->
-          <div v-if="editingGlossIndex === index" class="space-y-4">
-            <div class="flex flex-col space-y-1">
-              <label class="font-medium">{{ $t('vocabulary.form.glossDescription') }}</label>
-              <input
-                v-model="tempGloss.description"
-                type="text"
-                placeholder="Enter gloss description..."
-                class="input input-bordered input-lg w-full"
-              />
-            </div>
-
-            <div class="flex gap-2 justify-end">
-              <button
-                @click="cancelGlossEdit"
-                class="btn btn-sm btn-ghost"
-              >
-                <X class="w-4 h-4" />
-                {{ $t('common.cancel') }}
-              </button>
-              <button
-                @click="saveGlossEdit"
-                class="btn btn-sm btn-success"
-              >
-                <Check class="w-4 h-4" />
-                {{ $t('common.save') }}
-              </button>
-            </div>
-          </div>
-
-          <!-- Display mode -->
-          <div v-else class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
-            <div class="flex-1">
-              <div class="text-lg">{{ gloss.description || '(Empty gloss)' }}</div>
-            </div>
-            <div class="flex items-center gap-2">
-              <button
-                type="button"
-                @click="editingGlossIndex = index; tempGloss = { ...gloss }"
-                class="btn btn-sm btn-ghost"
-              >
-                <Edit class="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                @click="deleteGloss(index)"
-                class="btn btn-ghost btn-circle text-error flex-shrink-0"
-              >
-                <X class="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- New gloss creation form -->
-      <div v-if="isCreatingNewGloss" class="space-y-4 mt-4">
-        <div class="flex flex-col space-y-1">
-          <label class="font-medium">{{ $t('vocabulary.form.glossDescription') }}</label>
-          <input
-            v-model="tempGloss.description"
-            type="text"
-            placeholder="Enter gloss description..."
-            class="input input-bordered input-lg w-full"
-          />
-        </div>
-
-        <div class="flex gap-2 justify-end">
-          <button
-            @click="isCreatingNewGloss = false"
-            class="btn btn-sm btn-ghost"
-          >
-            <X class="w-4 h-4" />
-            {{ $t('common.cancel') }}
-          </button>
-          <button
-            @click="saveNewGloss"
-            class="btn btn-sm btn-success"
-            :disabled="!tempGloss.description?.trim()"
-          >
-            <Check class="w-4 h-4" />
-            {{ $t('common.save') }}
-          </button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -248,7 +136,6 @@ import { ref } from 'vue';
 import { Plus, Edit, X, Check } from 'lucide-vue-next';
 import InlineInput from '@/shared/ui/InlineInput.vue';
 import type { TranslationData } from '@/entities/translations/TranslationData';
-import type { GlossData } from '@/entities/gloss/GlossData';
 import type { NoteData } from '@/entities/notes/NoteData';
 import type { Link } from '@/shared/links/Link';
 import LanguageDropdown from '@/entities/languages/LanguageDropdown.vue';
@@ -261,7 +148,6 @@ interface VocabFormData {
   consideredSentence?: boolean;
   consideredWord?: boolean;
   translations: (TranslationData | Omit<TranslationData, 'id'>)[];
-  glosses: (GlossData | Omit<GlossData, 'id'>)[];
   priority?: number;
   doNotPractice?: boolean;
   notes: (NoteData | Omit<NoteData, 'id'>)[];
@@ -277,9 +163,6 @@ const emit = defineEmits<{
   'add-translation': [translation: TranslationData | Omit<TranslationData, 'id'>];
   'update-translation': [translation: TranslationData | Omit<TranslationData, 'id'>];
   'remove-translation': [index: number];
-  'add-gloss': [gloss: GlossData | Omit<GlossData, 'id'>];
-  'update-gloss': [gloss: GlossData | Omit<GlossData, 'id'>];
-  'remove-gloss': [index: number];
 }>();
 
 // Translation management state
@@ -339,60 +222,5 @@ function cancelEdit() {
 
 function deleteTranslation(index: number) {
   emit('remove-translation', index);
-}
-
-// Gloss management state
-const editingGlossIndex = ref<number | null>(null);
-const isCreatingNewGloss = ref(false);
-const tempGloss = ref<GlossData | Omit<GlossData, 'id'>>({
-  description: '',
-  descriptions: [],
-  origins: []
-});
-
-function addNewGloss() {
-  tempGloss.value = {
-    description: '',
-    descriptions: [],
-    origins: []
-  };
-  isCreatingNewGloss.value = true;
-}
-
-function saveNewGloss() {
-  if (!tempGloss.value.description?.trim()) return;
-
-  const newGloss: Omit<GlossData, 'id'> = {
-    description: tempGloss.value.description.trim(),
-    descriptions: tempGloss.value.descriptions || [],
-    origins: tempGloss.value.origins || []
-  };
-
-  emit('add-gloss', newGloss);
-  isCreatingNewGloss.value = false;
-}
-
-function saveGlossEdit() {
-  if (!tempGloss.value.description?.trim()) {
-    alert('Gloss description is required');
-    return;
-  }
-
-  const glossToSave: GlossData | Omit<GlossData, 'id'> = {
-    ...tempGloss.value,
-    description: tempGloss.value.description.trim()
-  };
-
-  emit('update-gloss', glossToSave);
-  editingGlossIndex.value = null;
-}
-
-function cancelGlossEdit() {
-  editingGlossIndex.value = null;
-  isCreatingNewGloss.value = false;
-}
-
-function deleteGloss(index: number) {
-  emit('remove-gloss', index);
 }
 </script>

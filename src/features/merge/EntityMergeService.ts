@@ -12,7 +12,6 @@ import { toRaw } from 'vue'
 // Entity repos
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract'
 import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract'
-import type { GlossRepoContract } from '@/entities/gloss/GlossRepoContract'
 import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract'
 import type { FactCardRepoContract } from '@/entities/fact-cards/FactCardRepoContract'
 import type { ResourceRepoContract } from '@/entities/resources/ResourceRepoContract'
@@ -21,21 +20,18 @@ import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract'
 // Entity data types
 import type { VocabData } from '@/entities/vocab/VocabData'
 import type { TranslationData } from '@/entities/translations/TranslationData'
-import type { GlossData } from '@/entities/gloss/GlossData'
 import type { FactCardData } from '@/entities/fact-cards/FactCardData'
 import type { ResourceData } from '@/entities/resources/ResourceData'
 
 // Duplicate detection
 import { findDuplicateVocab } from '@/entities/vocab/vocabDuplicateDetection'
 import { findDuplicateTranslation } from '@/entities/translations/translationDuplicateDetection'
-import { findDuplicateGloss } from '@/entities/gloss/glossDuplicateDetection'
 import { findDuplicateFactCard } from '@/entities/fact-cards/factCardDuplicateDetection'
 import { findDuplicateResource } from '@/entities/resources/resourceDuplicateDetection'
 
 // Merge strategies
 import { vocabMergeStrategy } from '@/entities/vocab/vocabMergeStrategy'
 import { translationMergeStrategy } from '@/entities/translations/translationMergeStrategy'
-import { glossMergeStrategy } from '@/entities/gloss/glossMergeStrategy'
 import { factCardMergeStrategy } from '@/entities/fact-cards/factCardMergeStrategy'
 import { resourceMergeStrategy } from '@/entities/resources/resourceMergeStrategy'
 
@@ -46,7 +42,6 @@ export class EntityMergeService {
   constructor(
     private vocabRepo: VocabRepoContract,
     private translationRepo: TranslationRepoContract,
-    private glossRepo: GlossRepoContract,
     private noteRepo: NoteRepoContract,
     private factCardRepo: FactCardRepoContract,
     private resourceRepo: ResourceRepoContract,
@@ -85,37 +80,6 @@ export class EntityMergeService {
     }
   }
 
-  /**
-   * Remap gloss references in vocab before deleting a gloss
-   * This prevents broken references when merging duplicate glosses
-   */
-  private async remapGlossReferences(
-    oldGlossId: string,
-    newGlossId: string
-  ): Promise<void> {
-    // Find all vocab that might reference the old gloss
-    const allVocab = await this.vocabRepo.getVocab();
-    const affectedVocab = allVocab.filter(v => v.glosses && v.glosses.includes(oldGlossId));
-
-    if (affectedVocab.length === 0) {
-      return;
-    }
-
-    // Update each vocab to point to the new gloss
-    for (const vocab of affectedVocab) {
-      const updatedGlosses = vocab.glosses.map(id =>
-        id === oldGlossId ? newGlossId : id
-      );
-
-      // Remove duplicates
-      const uniqueGlosses = [...new Set(updatedGlosses)];
-
-      await this.vocabRepo.updateVocab({
-        ...vocab,
-        glosses: uniqueGlosses
-      });
-    }
-  }
 
   /**
    * Start the background merge service
@@ -165,10 +129,6 @@ export class EntityMergeService {
 
       // Then translations
       processed = await this.processTranslationChunk()
-      if (processed) return
-
-      // Then glosses
-      processed = await this.processGlossChunk()
       if (processed) return
 
       // Then resources
@@ -327,65 +287,6 @@ export class EntityMergeService {
     return true // Processed something
   }
 
-  /**
-   * Process a chunk of glosses
-   * @returns true if processed something, false if no work
-   */
-  private async processGlossChunk(): Promise<boolean> {
-    const CHUNK_SIZE = 50
-    const unchecked = await this.glossRepo.getUncheckedGlosses(CHUNK_SIZE)
-
-    if (unchecked.length === 0) {
-      return false // No more work
-    }
-
-    const toUpdate: GlossData[] = []
-    const toDelete: string[] = []
-    const remapOperations: Array<{ oldId: string; newId: string }> = []
-
-    for (const gloss of unchecked) {
-      const duplicate = await findDuplicateGloss(gloss, this.glossRepo)
-
-      if (duplicate && duplicate.id !== gloss.id) {
-        // Found a duplicate - merge them
-        const merged = mergeEntities(duplicate, gloss, glossMergeStrategy)
-
-        toUpdate.push(merged)
-        toDelete.push(gloss.id)
-
-        // Track that we need to remap vocab references
-        remapOperations.push({
-          oldId: gloss.id,
-          newId: duplicate.id
-        })
-      } else {
-        // No duplicate - just mark as checked
-        toUpdate.push({
-          ...gloss,
-          _mergeChecked: true
-        })
-      }
-    }
-
-    // Bulk update
-    if (toUpdate.length > 0) {
-      for (const gloss of toUpdate) {
-        await this.glossRepo.updateGloss(gloss)
-      }
-    }
-
-    // Remap gloss references in vocab BEFORE deleting glosses
-    for (const { oldId, newId } of remapOperations) {
-      await this.remapGlossReferences(oldId, newId)
-    }
-
-    // Bulk delete duplicates (now safe because references are remapped)
-    for (const id of toDelete) {
-      await this.glossRepo.deleteGlosses([id])
-    }
-
-    return true // Processed something
-  }
 
   /**
    * Process a chunk of fact cards

@@ -45,7 +45,7 @@
                   <ChevronDown :size="12" class="hidden group-open/vocab-item:block" />
                   <span class="flex-1">{{ vocab.content }}</span>
                   <span class="text-xs text-light">
-                    ({{ (vocabTranslationsMap.get(vocab.id)?.length || 0) + (vocabGlossesMap.get(vocab.id)?.length || 0) }})
+                    ({{ vocabTranslationsMap.get(vocab.id)?.length || 0 }})
                   </span>
                   <button @click.stop="openVocabModal(vocab)" class="btn btn-xs btn-ghost" aria-label="View vocab">
                     <Eye :size="12" />
@@ -87,33 +87,6 @@
                     </div>
                   </details>
 
-                  <!-- Vocab Glosses -->
-                  <details
-                    class="group/vocab-glosses"
-                    :open="getVocabItemState(vocab.id).glosses"
-                    @toggle="handleVocabItemToggle(vocab.id, 'glosses', $event)"
-                  >
-                    <summary class="flex items-center gap-2 py-1 px-3 cursor-pointer hover:bg-base-200 list-none text-xs font-medium">
-                      <ChevronRight :size="10" class="group-open/vocab-glosses:hidden" />
-                      <ChevronDown :size="10" class="hidden group-open/vocab-glosses:block" />
-                      <span>Glosses</span>
-                      <span class="text-light">({{ vocabGlossesMap.get(vocab.id)?.length || 0 }})</span>
-                    </summary>
-                    <div class="ml-4">
-                      <div v-if="!vocabGlossesMap.get(vocab.id) || vocabGlossesMap.get(vocab.id)!.length === 0" class="py-1 px-3 text-xs text-light italic">
-                        (empty)
-                      </div>
-                      <div v-else>
-                        <div
-                          v-for="gloss in vocabGlossesMap.get(vocab.id)"
-                          :key="gloss.id"
-                          class="flex items-center gap-2 py-1 px-3 text-xs font-normal hover:bg-base-200"
-                        >
-                          <span class="flex-1">{{ gloss.description }}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </details>
                 </div>
               </details>
             </div>
@@ -153,35 +126,6 @@
           </div>
         </details>
 
-        <!-- Glosses Category -->
-        <details class="group/glosses" :open="openStates.glosses" @toggle="handleToggle('glosses', $event)">
-          <summary class="flex items-center gap-2 py-1 px-3 cursor-pointer hover:bg-base-200 list-none text-sm">
-            <ChevronRight :size="14" class="group-open/glosses:hidden" />
-            <ChevronDown :size="14" class="hidden group-open/glosses:block" />
-            <span>Glosses</span>
-            <span class="text-light">({{ glossItems.length }})</span>
-            <button @click.stop="showGlossModalDialog = true" class="btn btn-xs btn-ghost ml-auto" aria-label="Add gloss">
-              <Plus :size="14" />
-            </button>
-          </summary>
-          <div class="ml-4">
-            <div v-if="glossItems.length === 0" class="py-1 px-3 text-sm text-light italic">
-              (empty)
-            </div>
-            <div v-else>
-              <div
-                v-for="gloss in glossItems"
-                :key="gloss.id"
-                class="flex items-center gap-2 py-1 px-3 text-sm hover:bg-base-200"
-              >
-                <span class="flex-1">{{ gloss.description }}</span>
-                <button @click="disconnectGloss(gloss.id)" class="btn btn-xs btn-ghost" aria-label="Remove gloss">
-                  <X :size="12" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </details>
       </div>
     </details>
   </div>
@@ -217,7 +161,7 @@
       <VocabRenderer
         v-if="selectedVocab"
         :vocab="selectedVocab"
-        :repos="{ languageRepo, translationRepo, glossRepo, noteRepo, vocabRepo }"
+        :repos="{ languageRepo, translationRepo, noteRepo, vocabRepo }"
         showLanguage
         showDeepData
         showRelations
@@ -237,7 +181,7 @@
       <TranslationRenderer
         v-if="selectedTranslation"
         :translation="selectedTranslation"
-        :repos="{ languageRepo, translationRepo, glossRepo, noteRepo, vocabRepo }"
+        :repos="{ languageRepo, translationRepo, noteRepo, vocabRepo }"
         showDeepData
       />
     </div>
@@ -252,11 +196,9 @@ import { ref, inject, onMounted, watch } from 'vue';
 import type { GoalData } from '@/entities/goals/GoalData';
 import type { VocabRepoContract } from '@/entities/vocab/VocabRepoContract';
 import type { TranslationRepoContract } from '@/entities/translations/TranslationRepoContract';
-import type { GlossRepoContract } from '@/entities/gloss/GlossRepoContract';
 import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoContract';
 import type { VocabData } from '@/entities/vocab/VocabData';
 import type { TranslationData } from '@/entities/translations/TranslationData';
-import type { GlossData } from '@/entities/gloss/GlossData';
 import type { LanguageData } from '@/entities/languages/LanguageData';
 import { ChevronRight, ChevronDown, Trash2, X, Plus, Eye } from 'lucide-vue-next';
 import VocabModal from '@/features/vocab-modal/VocabModal.vue';
@@ -294,18 +236,15 @@ const emit = defineEmits<{
 
 const vocabRepo = inject<VocabRepoContract>('vocabRepo')!;
 const translationRepo = inject<TranslationRepoContract>('translationRepo')!;
-const glossRepo = inject<GlossRepoContract>('glossRepo')!;
 const languageRepo = inject<LanguageRepoContract>('languageRepo')!;
 const noteRepo = inject<NoteRepoContract>('noteRepo')!;
 
 const vocabItems = ref<VocabData[]>([]);
 const translationItems = ref<TranslationData[]>([]);
-const glossItems = ref<GlossData[]>([]);
 const allLanguages = ref<LanguageData[]>([]);
 
-// Vocab-level translations and glosses
+// Vocab-level translations
 const vocabTranslationsMap = ref<Map<string, TranslationData[]>>(new Map());
-const vocabGlossesMap = ref<Map<string, GlossData[]>>(new Map());
 
 const showVocabModalDialog = ref(false);
 const showTranslationModalDialog = ref(false);
@@ -329,15 +268,11 @@ async function loadData() {
   if (props.goal.vocab.length > 0) {
     vocabItems.value = await vocabRepo.getVocabByUIDs(props.goal.vocab);
 
-    // Pre-load translations and glosses for each vocab item
+    // Pre-load translations for each vocab item
     for (const vocab of vocabItems.value) {
       if (vocab.translations && vocab.translations.length > 0) {
         const translations = await translationRepo.getTranslationsByIds(vocab.translations);
         vocabTranslationsMap.value.set(vocab.id, translations);
-      }
-      if (vocab.glosses && vocab.glosses.length > 0) {
-        const glosses = await glossRepo.getGlossesByIds(vocab.glosses);
-        vocabGlossesMap.value.set(vocab.id, glosses);
       }
     }
   }
@@ -345,11 +280,6 @@ async function loadData() {
   // Load translations
   if (props.goal.translations.length > 0) {
     translationItems.value = await translationRepo.getTranslationsByIds(props.goal.translations);
-  }
-
-  // Load glosses
-  if (props.goal.glosses.length > 0) {
-    glossItems.value = await glossRepo.getGlossesByIds(props.goal.glosses);
   }
 }
 
@@ -377,10 +307,6 @@ function disconnectTranslation(translationId: string) {
 
 function handleGlossAdded(glossId: string) {
   emit('gloss-added', props.goal.id, glossId);
-}
-
-function disconnectGloss(glossId: string) {
-  emit('gloss-disconnected', props.goal.id, glossId);
 }
 
 // Handle toggle events to persist state

@@ -26,7 +26,6 @@ onMounted(() => {
     startMergeService(
       repos.vocabRepo,
       repos.translationRepo,
-      repos.glossRepo,
       repos.noteRepo,
       repos.factCardRepo,
       repos.resourceRepo,
