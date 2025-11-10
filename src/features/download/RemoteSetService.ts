@@ -416,7 +416,6 @@ export class RemoteSetService {
         const localResource: Omit<ResourceData, "id" | 'lastShownAt'> = {
           language: resourceData.language,
           isImmersionContent: resourceData.isImmersionContent,
-          title: resourceData.title,
           content: resourceData.content,
           priority: resourceData.priority || 1,
           link: link,

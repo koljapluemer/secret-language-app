@@ -1,8 +1,5 @@
 <template>
   <div class="space-y-4">
-    <InlineInput :model-value="resource.title" label="Title" placeholder="Resource title"
-      @update:model-value="updateField('title', $event)" />
-
     <LanguageDropdown :model-value="resource.language" label="Language" inline
       @update:model-value="updateField('language', $event)" />
 

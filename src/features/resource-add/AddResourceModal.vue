@@ -21,20 +21,7 @@
       </fieldset>
 
       <fieldset class="fieldset">
-        <label for="resource-title" class="label">Resource Title *</label>
-        <input
-          id="resource-title"
-          name="resource-title"
-          type="text"
-          v-model="formData.title"
-          class="input"
-          placeholder="Enter resource title..."
-          :disabled="saving"
-        />
-      </fieldset>
-
-      <fieldset class="fieldset">
-        <label for="resource-url" class="label">URL (optional)</label>
+        <label for="resource-url" class="label">URL</label>
         <input
           id="resource-url"
           name="resource-url"
@@ -59,7 +46,7 @@
         />
       </fieldset>
 
-      <p class="text-sm text-light mb-4">* Either URL or content is required</p>
+      <p class="text-sm text-light mb-4">Either URL or content is required</p>
 
       <div class="modal-action">
         <button @click="close" class="btn" :disabled="saving">Cancel</button>
@@ -100,7 +87,6 @@ const toast = useToast();
 
 const formData = ref({
   language: '',
-  title: '',
   url: '',
   content: ''
 });
@@ -109,7 +95,6 @@ const error = ref('');
 
 const isValid = computed(() => {
   return formData.value.language.trim() !== '' &&
-    formData.value.title.trim() !== '' &&
     (formData.value.url.trim() !== '' || formData.value.content.trim() !== '');
 });
 
@@ -126,12 +111,11 @@ async function handleSave() {
 
   try {
     const resourceData = toRaw({
-      title: formData.value.title.trim(),
       language: formData.value.language,
       isImmersionContent: true,
       content: formData.value.content.trim() || undefined,
       link: formData.value.url.trim() ? {
-        label: formData.value.title.trim(),
+        label: formData.value.url.trim(),
         url: formData.value.url.trim()
       } : undefined,
       finishedExtracting: false,
@@ -150,7 +134,6 @@ async function handleSave() {
 
     // Reset form
     formData.value.language = '';
-    formData.value.title = '';
     formData.value.url = '';
     formData.value.content = '';
   } catch (err) {
@@ -166,7 +149,6 @@ async function handleSave() {
 watch(() => props.show, (newShow) => {
   if (!newShow) {
     formData.value.language = '';
-    formData.value.title = '';
     formData.value.url = '';
     formData.value.content = '';
     error.value = '';

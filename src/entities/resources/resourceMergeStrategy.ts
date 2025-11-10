@@ -20,11 +20,6 @@ export const resourceMergeStrategy: MergeStrategyMap<ResourceData> = {
     description: 'Language should match between duplicates'
   },
 
-  title: {
-    strategy: 'keep-target',
-    description: 'Title should match between duplicates'
-  },
-
   // Content type
   isImmersionContent: {
     strategy: 'keep-target',

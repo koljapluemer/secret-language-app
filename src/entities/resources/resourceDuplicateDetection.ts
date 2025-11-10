@@ -11,7 +11,8 @@ import type { ResourceRepoContract } from './ResourceRepoContract'
  * Find an existing resource that is a duplicate of the given resource
  *
  * Duplicate criteria:
- * - Same title + same language
+ * - Same link URL + same language (for link-based resources)
+ * - Same content + same language (for content-based resources)
  *
  * @param resource - The resource to check for duplicates
  * @param resourceRepo - Repository for querying existing resources
@@ -21,15 +22,20 @@ export async function findDuplicateResource(
   resource: ResourceData,
   resourceRepo: ResourceRepoContract
 ): Promise<ResourceData | null> {
-  // Match by title + language
-  const existing = await resourceRepo.getResourceByTitleAndLanguage(
-    resource.title,
-    resource.language
-  )
+  // Get all resources for same language
+  const allResources = await resourceRepo.getAllResources();
+  const sameLanguage = allResources.filter(r => r.language === resource.language && r.id !== resource.id);
 
-  // Make sure we don't match against ourselves
-  if (existing && existing.id !== resource.id) {
-    return existing
+  // Match by link URL if both have links
+  if (resource.link) {
+    const existing = sameLanguage.find(r => r.link?.url === resource.link?.url);
+    if (existing) return existing;
+  }
+
+  // Match by content if both have content (exact match)
+  if (resource.content) {
+    const existing = sameLanguage.find(r => r.content === resource.content);
+    if (existing) return existing;
   }
 
   // No duplicate found

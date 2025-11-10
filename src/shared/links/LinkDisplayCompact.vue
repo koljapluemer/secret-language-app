@@ -18,6 +18,7 @@
       <template v-if="!showBigLink">
         <ExternalLink class="w-3 h-3 text-primary flex-shrink-0" />
         <a
+          v-if="!deactivateLink"
           :href="link.url"
           target="_blank"
           rel="noopener noreferrer"
@@ -26,6 +27,13 @@
         >
           {{ link.label || link.url }}
         </a>
+        <span
+          v-else
+          class="font-medium break-words"
+          :title="link.label || link.url"
+        >
+          {{ link.label || link.url }}
+        </span>
       </template>
 
       <!-- Owner and license info (always shown if present) -->
@@ -61,9 +69,11 @@ const { t } = useI18n();
 interface Props {
   link: Link | null | undefined;
   showBigLink?: boolean;
+  deactivateLink?: boolean;
 }
 
 withDefaults(defineProps<Props>(), {
-  showBigLink: false
+  showBigLink: false,
+  deactivateLink: false
 });
 </script>

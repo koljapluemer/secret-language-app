@@ -17,6 +17,7 @@ import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoCont
 import type { GoalRepoContract } from '@/entities/goals/GoalRepoContract';
 import type { NoteRepoContract } from '@/entities/notes/NoteRepoContract';
 import { useToast } from '@/shared/toasts';
+import ResourceReference from '@/entities/resources/ResourceReference.vue';
 
 // Inject repositories
 const resourceRepo = inject<ResourceRepoContract>('resourceRepo');
@@ -192,7 +193,9 @@ function returnToSelfTest() {
   <!-- Task -->
   <div v-else-if="task">
     <div class="mb-4">
-      <h2 class="text-2xl font-bold">{{ resource?.title }}</h2>
+      <h2 class="text-2xl font-bold">
+        <ResourceReference v-if="resource" :resource="resource" />
+      </h2>
       <p class="text-sm text-base-content/70">{{ $t('selfTest.consumeResourceInstructions') }}</p>
     </div>
     <component

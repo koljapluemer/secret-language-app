@@ -91,7 +91,7 @@
           <tr v-for="resource in resourceItems" :key="resource.id">
             <td>
               <router-link :to="`/resources/${resource.id}/edit`" class="font-bold link link-hover">
-                {{ resource.title }}
+                <ResourceReference :resource="resource" />
               </router-link>
             </td>
             <td>
@@ -168,6 +168,7 @@ import type { LocalSetRepoContract } from '@/entities/local-sets/LocalSetRepoCon
 import type { LocalSetData } from '@/entities/local-sets/LocalSetData';
 import Pagination from '@/shared/ui/Pagination.vue';
 import { useToast } from '@/shared/toasts';
+import ResourceReference from '@/entities/resources/ResourceReference.vue';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -339,7 +340,8 @@ async function loadResources() {
 
 async function deleteResource(id: string) {
   const resourceToDelete = resourceItems.value.find(r => r.id === id);
-  if (!resourceToDelete || !confirm(`Are you sure you want to delete "${resourceToDelete.title}"?`)) {
+  const displayName = resourceToDelete?.link?.label || resourceToDelete?.content || 'this resource';
+  if (!resourceToDelete || !confirm(`Are you sure you want to delete "${displayName}"?`)) {
     return;
   }
 

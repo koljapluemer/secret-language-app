@@ -147,7 +147,6 @@ async function saveResource(): Promise<ResourceData | null> {
 
   try {
     const resourceData: Omit<ResourceData, "id" | 'lastShownAt'> = {
-      title: formData.value.title.trim(),
       language: formData.value.language.trim(),
       isImmersionContent: formData.value.isImmersionContent,
       priority: 1,

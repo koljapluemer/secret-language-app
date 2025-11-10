@@ -15,13 +15,6 @@ export class ResourceRepo implements ResourceRepoContract {
     return await db.resources.get(id);
   }
 
-  async getResourceByTitleAndLanguage(title: string, language: string): Promise<ResourceData | undefined> {
-    const allResources = await db.resources.toArray();
-    return allResources.find(resource =>
-      resource.title === title && resource.language === language
-    );
-  }
-
   async getRandomDueResource(languages?: string[], setsToAvoid?: string[]): Promise<ResourceData | null> {
     const allResources = await db.resources.toArray();
     
@@ -73,7 +66,6 @@ export class ResourceRepo implements ResourceRepoContract {
       id: nanoid(),
       language: resource.language,
       isImmersionContent: resource.isImmersionContent,
-      title: resource.title,
       content: resource.content,
       link: resource.link,
       priority: resource.priority,
@@ -131,9 +123,6 @@ export class ResourceRepo implements ResourceRepoContract {
     if (filters.searchQuery?.trim()) {
       const query = filters.searchQuery.trim().toLowerCase();
       filtered = filtered.filter(resource => {
-        // Search in title
-        if (resource.title.toLowerCase().includes(query)) return true;
-        
         // Search in content
         if (resource.content?.toLowerCase().includes(query)) return true;
         
@@ -179,7 +168,8 @@ export class ResourceRepo implements ResourceRepoContract {
       }
       if (a.lastShownAt && !b.lastShownAt) return -1;
       if (!a.lastShownAt && b.lastShownAt) return 1;
-      return a.title.localeCompare(b.title);
+      // Fallback sort by ID
+      return a.id.localeCompare(b.id);
     });
 
     return filtered.slice(offset, offset + limit);

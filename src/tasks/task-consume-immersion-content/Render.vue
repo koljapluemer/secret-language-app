@@ -10,6 +10,7 @@ import TaskSkipDisableDone from '@/tasks/ui/TaskSkipDisableDone.vue';
 import type { NoteData } from '@/entities/notes/NoteData';
 import Instruction from '@/tasks/ui/Instruction.vue';
 import { useToast } from '@/shared/toasts';
+import ResourceReference from '@/entities/resources/ResourceReference.vue';
 
 interface Props {
   task: Task;
@@ -125,7 +126,7 @@ onMounted(() => {
       <div class="container mx-auto p-4">
         <div v-if="resource">
           <div class="flex items-center justify-between mb-6">
-      <h2>{{ resource.title }}</h2>
+      <h2><ResourceReference :resource="resource" /></h2>
       <LinkDisplayCompact v-if="resource.link" :link="resource.link" :show-big-link="true" />
     </div>
 

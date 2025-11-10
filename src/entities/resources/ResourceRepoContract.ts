@@ -9,7 +9,6 @@ export interface ResourceListFilters {
 export interface ResourceRepoContract {
   getAllResources(): Promise<ResourceData[]>;
   getResourceById(id: string): Promise<ResourceData | undefined>;
-  getResourceByTitleAndLanguage(title: string, language: string): Promise<ResourceData | undefined>;
   getRandomDueResource(languages?: string[], setsToAvoid?: string[]): Promise<ResourceData | null>;
   getValidImmersionResources(languages: string[]): Promise<ResourceData[]>;
   getResourcesPaginated(offset: number, limit: number, filters?: ResourceListFilters): Promise<ResourceData[]>;

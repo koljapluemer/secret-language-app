@@ -8,6 +8,7 @@ import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoCont
 import type { LanguageData } from '@/entities/languages/LanguageData';
 import type { LocalSetRepoContract } from '@/entities/local-sets/LocalSetRepoContract';
 import type { LocalSetData } from '@/entities/local-sets/LocalSetData';
+import ResourceReference from '@/entities/resources/ResourceReference.vue';
 
 interface Props {
   show: boolean;
@@ -59,8 +60,8 @@ const filteredResources = computed(() => {
     // Search filter
     if (searchQuery.value.trim()) {
       const query = searchQuery.value.trim().toLowerCase();
-      return resource.title.toLowerCase().includes(query) ||
-             (resource.content && resource.content.toLowerCase().includes(query));
+      return (resource.content && resource.content.toLowerCase().includes(query)) ||
+             (resource.link && (resource.link.url.toLowerCase().includes(query) || resource.link.label.toLowerCase().includes(query)));
     }
 
     return true;
@@ -250,7 +251,9 @@ watch(() => props.show, (isShown) => {
                 @click="selectResource(resource.id)"
               >
                 <div class="flex flex-col items-start w-full">
-                  <div class="font-semibold">{{ resource.title }}</div>
+                  <div class="font-semibold">
+                    <ResourceReference :resource="resource" />
+                  </div>
                   <div class="text-xs opacity-70">{{ resource.language }}</div>
                   <div v-if="resource.content" class="text-sm mt-1 line-clamp-2">
                     {{ resource.content }}

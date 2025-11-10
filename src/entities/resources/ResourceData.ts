@@ -6,7 +6,6 @@ export interface ResourceData {
   isImmersionContent: boolean;
 
 
-  title: string;
   // either content of link should exist
   content?: string;
   link?: Link

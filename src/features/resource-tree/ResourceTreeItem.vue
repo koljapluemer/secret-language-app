@@ -5,11 +5,13 @@
       <summary class="flex items-center gap-2 py-2 px-3 cursor-pointer hover:bg-base-200 list-none">
         <ChevronRight :size="16" class="group-open:hidden" />
         <ChevronDown :size="16" class="hidden group-open:block" />
-        <span class="font-medium">{{ resource.title }}</span>
-        <span class="text-sm text-light">{{ getLanguageName(resource.language) }}</span>
+        <div class="flex-1 min-w-0 font-medium">
+          <ResourceReference :resource="resource" />
+        </div>
+        <span class="text-sm text-light flex-shrink-0">{{ getLanguageName(resource.language) }}</span>
         <button
           @click.stop="$emit('remove')"
-          class="btn btn-sm btn-ghost ml-auto"
+          class="btn btn-sm btn-ghost flex-shrink-0"
           aria-label="Remove resource"
         >
           <Trash2 :size="16" />
@@ -17,13 +19,6 @@
       </summary>
 
       <div class="ml-4">
-        <!-- Link or Content Display -->
-        <div class="py-2 px-3">
-          <LinkDisplayCompact v-if="resource.link" :link="resource.link" :showBigLink="false" />
-          <div v-else-if="resource.content" class="text-sm text-base-content/80 line-clamp-3">
-            {{ resource.content }}
-          </div>
-        </div>
 
         <!-- Vocab Items (no category wrapper) -->
         <div v-if="vocabItems.length === 0" class="py-1 px-3 text-sm text-light italic flex items-center gap-2">
@@ -138,7 +133,7 @@ import type { VocabData } from '@/entities/vocab/VocabData';
 import type { TranslationData } from '@/entities/translations/TranslationData';
 import type { LanguageData } from '@/entities/languages/LanguageData';
 import { ChevronRight, ChevronDown, Trash2, X, Plus, Eye } from 'lucide-vue-next';
-import LinkDisplayCompact from '@/shared/links/LinkDisplayCompact.vue';
+import ResourceReference from '@/entities/resources/ResourceReference.vue';
 import VocabModal from '@/features/vocab-modal/VocabModal.vue';
 import VocabRenderer from '@/features/vocab-view/VocabRenderer.vue';
 import TranslationRenderer from '@/features/translation-view/TranslationRenderer.vue';

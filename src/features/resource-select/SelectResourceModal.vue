@@ -48,9 +48,8 @@
           class="btn btn-outline justify-start text-left h-auto py-2 px-4"
         >
           <div class="flex-1">
-            <div class="font-bold">{{ resource.title }}</div>
+            <div class="font-bold"><ResourceReference :resource="resource" :deactivateLink="true" /></div>
             <div class="text-sm text-light">{{ getLanguageName(resource.language) }}</div>
-            <div v-if="resource.link" class="text-xs text-light mt-1">{{ resource.link.url }}</div>
           </div>
         </button>
       </div>
@@ -69,6 +68,7 @@ import type { LanguageRepoContract } from '@/entities/languages/LanguageRepoCont
 import type { ResourceData } from '@/entities/resources/ResourceData';
 import type { LanguageData } from '@/entities/languages/LanguageData';
 import LanguageFilter from '@/shared/ui/LanguageFilter.vue';
+import ResourceReference from '@/entities/resources/ResourceReference.vue';
 
 const props = defineProps<{
   show: boolean;
@@ -106,9 +106,8 @@ const filteredResources = computed(() => {
     // Search filter
     if (searchQuery.value.trim()) {
       const query = searchQuery.value.trim().toLowerCase();
-      return resource.title.toLowerCase().includes(query) ||
-        (resource.content && resource.content.toLowerCase().includes(query)) ||
-        (resource.link && resource.link.url.toLowerCase().includes(query));
+      return (resource.content && resource.content.toLowerCase().includes(query)) ||
+        (resource.link && (resource.link.url.toLowerCase().includes(query) || resource.link.label.toLowerCase().includes(query)));
     }
 
     return true;
