@@ -1,6 +1,7 @@
 # The ~~Secret~~ Language App
 
-![demo screenshot](screenshot.png)
+![demo screenshot](docs/img/demo.png)
+![home page screenshot](docs/img/screenshot.png)
 
 
 ## Running it
