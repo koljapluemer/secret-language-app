@@ -1,12 +1,7 @@
 # The ~~Secret~~ Language App
 
+![demo screenshot](screenshot.png)
 
-![demo screenshot](/docs/img/demo.png)
-
-## [Check out live website here](https://secret-language-app.netlify.app/)
-
-
-***goal*: building a language learning app that I actually enjoy using**
 
 ## Running it
 
